@@ -1277,7 +1277,7 @@ export default function ExitClearancePage() {
       {/* ========================================================================= */}
       {showUnifiedExitModal && selectedVehForExit && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-lg w-full p-4 sm:p-5 shadow-2xl space-y-3.5 my-auto border border-slate-300">
+          <div className="bg-white rounded-lg max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-3.5 my-auto border border-slate-300">
             {/* HEADER GỘP THÔNG TIN XE CÔNG THÁI HỌC CAO */}
             <div className="flex items-start justify-between border-b border-slate-200 pb-2.5">
               <div>

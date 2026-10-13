@@ -23,7 +23,8 @@ import {
   VehicleDuplicateCheckResult,
   PaymentRecord,
   YardZoneInfo,
-  ReeferTemperatureLog
+  ReeferTemperatureLog,
+  Customer
 } from '@/types/domain.types';
 
 export interface CreateVehicleParams {
@@ -403,6 +404,16 @@ export interface IYardRepository {
     operatorId: string;
     notes?: string;
   }): Promise<{ success: boolean; error?: string }>;
+
+  /** Lấy danh mục khách hàng / chủ hàng chuẩn */
+  getCustomers(): Promise<Customer[]>;
+
+  /** Tạo khách hàng / chủ hàng mới nhanh (hỗ trợ nhập 1 chạm chuẩn AppSheet) */
+  createCustomer(customer: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }>;
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;

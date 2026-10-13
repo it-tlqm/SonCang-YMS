@@ -160,6 +160,15 @@ export interface YardZoneInfo {
   color_badge: string;
 }
 
+export interface Customer {
+  id: string;
+  name: string;
+  phone?: string | null;
+  tax_code?: string | null;
+  notes?: string | null;
+  created_at?: string;
+}
+
 export interface ReeferTemperatureLog {
   id: string;
   session_id?: string;
@@ -339,4 +348,15 @@ export interface TariffItem {
   amount: number;
   is_active: boolean;
 }
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone?: string | null;
+  tax_code?: string | null;
+  notes?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+}
+
 

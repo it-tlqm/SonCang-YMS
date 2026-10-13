@@ -22,7 +22,8 @@ import {
   VehicleDuplicateCheckResult,
   PaymentRecord,
   YardZoneInfo,
-  ReeferTemperatureLog
+  ReeferTemperatureLog,
+  Customer
 } from '@/types/domain.types';
 import { 
   IYardRepository, 
@@ -334,6 +335,17 @@ const INITIAL_DEMO_TEMP_LOGS: ReeferTemperatureLog[] = [
   }
 ];
 
+export const INITIAL_DEMO_CUSTOMERS: Customer[] = [
+  { id: 'cust-1', name: 'Công ty Cổ phần Tà Lùng Quang Minh', phone: '0206.3852.888', tax_code: '4800123456', notes: 'Đối tác chiến lược / Doanh nghiệp cảng' },
+  { id: 'cust-2', name: 'Cty TNHH XNK Nông sản Tà Lùng', phone: '0912.888.999', tax_code: '4800234567', notes: 'Chuyên cont hoa quả sầu riêng, thanh long xuất khẩu' },
+  { id: 'cust-3', name: 'Công ty Logistics Quốc tế Hưng Phát', phone: '0988.666.777', tax_code: '0100345678', notes: 'Đội xe cont lạnh Lạng Sơn - Cao Bằng' },
+  { id: 'cust-4', name: 'Công ty Vận tải & Thương mại Quảng Tây', phone: '+86 138 0013 8000', notes: 'Chủ hàng xe cont Trung Quốc' },
+  { id: 'cust-5', name: 'Chủ hàng Nguyễn Văn An', phone: '0912.345.678', notes: 'Khách hàng thân thiết tuyến Hải Phòng - Tà Lùng' },
+  { id: 'cust-6', name: 'Chủ hàng Trần Văn Bình', phone: '0988.765.432', notes: 'Hàng đông lạnh thịt trâu/bò' },
+  { id: 'cust-7', name: 'Hợp tác xã Vận tải Cao Bằng', phone: '0206.3822.333', notes: 'Xe bo và đầu kéo địa phương' },
+  { id: 'cust-8', name: 'Khách hàng vãng lai', phone: '', notes: 'Thu tiền trực tiếp từng lượt' }
+];
+
 export class DemoRepository implements IYardRepository {
   readonly mode = 'DEMO' as const;
 
@@ -344,6 +356,7 @@ export class DemoRepository implements IYardRepository {
   private reeferRequests: ReeferRequest[] = [];
   private payments: PaymentRecord[] = [...INITIAL_DEMO_PAYMENTS];
   private temperatureLogs: ReeferTemperatureLog[] = [...INITIAL_DEMO_TEMP_LOGS];
+  private customers: Customer[] = [...INITIAL_DEMO_CUSTOMERS];
   private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
@@ -375,6 +388,7 @@ export class DemoRepository implements IYardRepository {
       const savedDP = localStorage.getItem('soncang_v5_demo_duplicate_policy');
       const savedPAY = localStorage.getItem('soncang_v5_demo_payments');
       const savedTL = localStorage.getItem('soncang_v5_demo_temperature_logs');
+      const savedCust = localStorage.getItem('soncang_v5_customers');
       if (savedV) {
         try { this.vehicles = JSON.parse(savedV); } catch {}
       }
@@ -399,6 +413,9 @@ export class DemoRepository implements IYardRepository {
       if (savedTL) {
         try { this.temperatureLogs = JSON.parse(savedTL); } catch {}
       }
+      if (savedCust) {
+        try { this.customers = JSON.parse(savedCust); } catch {}
+      }
       const savedTF = localStorage.getItem('soncang_v5_demo_tariffs');
       if (savedTF) {
         try { this.tariffs = JSON.parse(savedTF); } catch {}
@@ -420,6 +437,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_demo_duplicate_policy', JSON.stringify(this.duplicatePolicy));
       localStorage.setItem('soncang_v5_demo_payments', JSON.stringify(this.payments));
       localStorage.setItem('soncang_v5_demo_temperature_logs', JSON.stringify(this.temperatureLogs));
+      localStorage.setItem('soncang_v5_customers', JSON.stringify(this.customers));
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
     }
@@ -1959,6 +1977,37 @@ export class DemoRepository implements IYardRepository {
     return { success: true };
   }
 
+  async getCustomers(): Promise<Customer[]> {
+    return [...this.customers];
+  }
+
+  async createCustomer(params: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }> {
+    const trimmedName = params.name.trim();
+    if (!trimmedName) {
+      return { success: false, error: 'Tên khách hàng không được để trống' };
+    }
+    const existing = this.customers.find(c => c.name.toLowerCase() === trimmedName.toLowerCase());
+    if (existing) {
+      return { success: true, customer: existing };
+    }
+    const newCust: Customer = {
+      id: `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: trimmedName,
+      phone: params.phone?.trim() || null,
+      tax_code: params.tax_code?.trim() || null,
+      notes: params.notes?.trim() || null,
+      is_active: true,
+      created_at: new Date().toISOString()
+    };
+    this.customers.unshift(newCust);
+    this.persist();
+    return { success: true, customer: newCust };
+  }
+
   resetDemoData() {
     this.vehicles = [...INITIAL_DEMO_VEHICLES];
     this.containers = [...INITIAL_DEMO_CONTAINERS];
@@ -1966,6 +2015,7 @@ export class DemoRepository implements IYardRepository {
     this.plateChanges = [];
     this.reeferRequests = [];
     this.temperatureLogs = [...INITIAL_DEMO_TEMP_LOGS];
+    this.customers = [...INITIAL_DEMO_CUSTOMERS];
     this.persist();
   }
 }

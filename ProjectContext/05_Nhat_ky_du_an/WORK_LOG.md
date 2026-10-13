@@ -1,5 +1,31 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 17:55 — Chuẩn Hóa Khách Hàng AppSheet (Quick Add), Tìm Kiếm Container, Validation Giờ Rút & Mở Rộng Modal (/reefer, /exit)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *Quản lý Khách hàng / Chủ hàng chuẩn hóa:* Bỏ ô input text tự do dễ sai lệch. Xây dựng danh mục khách hàng chuẩn Sơn Cảng và component Searchable Combobox kiểu AppSheet hỗ trợ tìm kiếm và thêm nhanh khách mới 1-chạm (`+ Thêm mới khách hàng "[Tên]"`) tại chỗ.
+  2. *Tìm kiếm / Lọc Container khi lập yêu cầu cắm điện (`/reefer`):* Bổ sung ô tìm kiếm trực tiếp (số cont hoặc biển số xe chở vào) để nhân viên lọc nhanh thay vì phải cuộn dropdown dài.
+  3. *Validation Giờ rút điện thực tế:* Chặn triệt để 2 lỗi logic: giờ rút trước giờ cắm và giờ rút vượt quá hiện tại (không cho phép nhập giờ tương lai).
+  4. *Bảng Container sẵn sàng cắm điện (`/reefer`):* Dòng container nào đã có yêu cầu thì đổi sang nút `⚡ Cắm điện ngay` hoặc `Sửa yêu cầu`, ẩn nút tạo yêu cầu thừa.
+  5. *Kích thước Modal:* Mở rộng tất cả các modal lên `max-w-2xl` thoáng đãng, tận dụng khoảng trống màn hình desktop.
+- **Tập tin sửa đổi:**
+  - `src/types/domain.types.ts`: Định nghĩa interface `Customer` (id, name, phone, tax_code, notes, is_active, created_at).
+  - `src/lib/services/repository-interface.ts`: Thêm `getCustomers(): Promise<Customer[]>` và `createCustomer(customer): Promise<{ success: boolean; customer?: Customer; error?: string }>`.
+  - `src/lib/services/demo-repository.ts`: Thêm `INITIAL_DEMO_CUSTOMERS`, quản lý `customers` trong LocalStorage `soncang_v5_customers`, cài đặt `getCustomers` và `createCustomer`.
+  - `src/lib/services/supabase-repository.ts`: Triển khai `getCustomers` và `createCustomer` (truy vấn bảng `app_customers` + fallback LocalStorage an toàn 100%).
+  - `src/components/customer-combobox.tsx`: Tạo component Searchable Combobox chuẩn AppSheet với tìm kiếm realtime và nút Quick Add 1-chạm tạo mới khách hàng.
+  - `src/app/reefer/page.tsx`:
+    * Tích hợp `CustomerCombobox` vào Modal Tạo yêu cầu và Modal Sửa yêu cầu cắm điện.
+    * Thêm ô tìm kiếm / lọc nhanh container trong Modal Tạo yêu cầu (`reqContFilterQuery`).
+    * Bảng Cont sẵn sàng cắm điện: dòng cont đã có `matchedReq` đổi thành nút `⚡ Cắm điện ngay` và `Sửa yêu cầu`, ẩn nút tạo yêu cầu thừa.
+    * Validation giờ rút thực tế chặn `< giờ cắm` và `> hiện tại` trong cả 3 luồng: Rút điện, Đối chiếu Zalo, và Nhập phiên hoàn tất.
+    * Mở rộng kích thước toàn bộ các Modal (`showPlugModal`, `showUnplugModal`, `showCompletedModal`, `showVerifyModal`, `showEditReqModal`, `showCreateReqModal`, `showTempModal`) lên `max-w-2xl`.
+  - `src/app/exit/page.tsx`: Mở rộng kích thước Modal xuất bãi `showUnifiedExitModal` lên `max-w-2xl`.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, hoàn tất 17/17 static routes, TypeScript pass 100% không lỗi.
+  - Server local production `npm start` đã khởi động lại trên cổng 3000 (task-13811).
+- **Trạng thái:** Hoàn tất, sẵn sàng commit và push lên nhánh `main`.
+
 ## 2026-10-13 17:35 — Ẩn Bộ Chọn Kích Cỡ/Vỏ Container Cổng Vào (/entry) & Tinh Gọn Toàn Diện Modal Cổng Ra (/exit)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

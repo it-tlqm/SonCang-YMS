@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { exportReeferSessionsToExcel } from '@/lib/export-excel';
 import { formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
+import { CustomerCombobox } from '@/components/customer-combobox';
 
 export default function ReeferMonitoringPage() {
   const { yardId, can, repository, user, role } = useAuth();
@@ -127,6 +128,7 @@ export default function ReeferMonitoringPage() {
   const [showCreateReqModal, setShowCreateReqModal] = useState<boolean>(false);
   const [reqSourceType, setReqSourceType] = useState<'YARD' | 'PRE_ARRIVAL'>('YARD');
   const [reqSelectedYardContId, setReqSelectedYardContId] = useState<string>('');
+  const [reqContFilterQuery, setReqContFilterQuery] = useState<string>('');
   const [reqContainerNo, setReqContainerNo] = useState<string>('');
   const [reqPlate, setReqPlate] = useState<string>('');
   const [reqCustomer, setReqCustomer] = useState<string>('');
@@ -412,6 +414,18 @@ export default function ReeferMonitoringPage() {
     if (!plug || !unplug) return;
     const pD = new Date(plug);
     const uD = new Date(unplug);
+    const now = new Date();
+    if (uD.getTime() <= pD.getTime()) {
+      setCompError('Thời gian rút điện phải sau thời gian cắm điện.');
+      setCompPreview(null);
+      return;
+    }
+    if (uD.getTime() > now.getTime() + 60 * 1000) {
+      setCompError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
+      setCompPreview(null);
+      return;
+    }
+    setCompError('');
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
     const mins = Math.ceil(sec / 900) * 15;
     const amount = Math.round((mins / 60) * reeferHourlyRate);
@@ -427,8 +441,20 @@ export default function ReeferMonitoringPage() {
     const cont = containers.find(c => c.id === compContId);
     if (!cont) return;
 
-    if (new Date(compUnplugTime) <= new Date(compPlugTime)) {
+    const pD = new Date(compPlugTime);
+    const uD = new Date(compUnplugTime);
+    const now = new Date();
+
+    if (isNaN(pD.getTime()) || isNaN(uD.getTime())) {
+      setCompError('Vui lòng chọn đầy đủ thời gian cắm và rút điện.');
+      return;
+    }
+    if (uD.getTime() <= pD.getTime()) {
       setCompError('Thời gian rút điện phải sau thời gian cắm điện.');
+      return;
+    }
+    if (uD.getTime() > now.getTime() + 60 * 1000) {
+      setCompError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
       return;
     }
 
@@ -488,10 +514,18 @@ export default function ReeferMonitoringPage() {
     }
     const pD = new Date(plug);
     const uD = new Date(unplug);
+    const now = new Date();
     if (uD.getTime() <= pD.getTime()) {
+      setVerifyError('Thời gian rút điện phải sau thời gian cắm điện.');
       setVerifyPreview(null);
       return;
     }
+    if (uD.getTime() > now.getTime() + 60 * 1000) {
+      setVerifyError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
+      setVerifyPreview(null);
+      return;
+    }
+    setVerifyError('');
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
     const mins = Math.ceil(sec / 900) * 15;
     const rate = verifySession?.applied_hourly_rate || reeferHourlyRate;
@@ -523,9 +557,28 @@ export default function ReeferMonitoringPage() {
     e.preventDefault();
     if (!verifySession) return;
 
-    if (verifyUnplugTime && new Date(verifyUnplugTime).getTime() <= new Date(verifyPlugTime).getTime()) {
-      setVerifyError('Thời gian rút điện phải sau thời gian cắm điện.');
+    const pD = new Date(verifyPlugTime);
+    const now = new Date();
+
+    if (isNaN(pD.getTime())) {
+      setVerifyError('Vui lòng chọn thời gian cắm điện hợp lệ.');
       return;
+    }
+
+    if (verifyUnplugTime) {
+      const uD = new Date(verifyUnplugTime);
+      if (isNaN(uD.getTime())) {
+        setVerifyError('Vui lòng chọn thời gian rút điện hợp lệ.');
+        return;
+      }
+      if (uD.getTime() <= pD.getTime()) {
+        setVerifyError('Thời gian rút điện phải sau thời gian cắm điện.');
+        return;
+      }
+      if (uD.getTime() > now.getTime() + 60 * 1000) {
+        setVerifyError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
+        return;
+      }
     }
 
     const res = await repository.verifyReeferSessionZalo({
@@ -766,10 +819,28 @@ export default function ReeferMonitoringPage() {
   const handleUnplugTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setUnplugTime(val);
-    if (!selectedSession) return;
+    setUnplugError('');
+    if (!val || !selectedSession) return;
 
     const plugDate = new Date(selectedSession.plugged_in_at);
     const unplugDate = new Date(val);
+    const now = new Date();
+
+    if (isNaN(unplugDate.getTime())) {
+      setCalculatedPreview(null);
+      return;
+    }
+    if (unplugDate.getTime() <= plugDate.getTime()) {
+      setUnplugError('Thời gian rút điện phải sau thời gian cắm điện (' + plugDate.toLocaleTimeString('vi-VN') + ' ' + plugDate.toLocaleDateString('vi-VN') + ').');
+      setCalculatedPreview(null);
+      return;
+    }
+    if (unplugDate.getTime() > now.getTime() + 60 * 1000) {
+      setUnplugError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
+      setCalculatedPreview(null);
+      return;
+    }
+
     const durationSec = Math.max(0, Math.floor((unplugDate.getTime() - plugDate.getTime()) / 1000));
     const billableMins = Math.ceil(durationSec / 900) * 15;
     const rawAmount = (billableMins / 60) * selectedSession.applied_hourly_rate;
@@ -781,6 +852,23 @@ export default function ReeferMonitoringPage() {
   const handleConfirmUnplug = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSession) return;
+
+    const plugDate = new Date(selectedSession.plugged_in_at);
+    const unplugDate = new Date(unplugTime);
+    const now = new Date();
+
+    if (isNaN(unplugDate.getTime())) {
+      setUnplugError('Vui lòng chọn thời gian rút điện hợp lệ.');
+      return;
+    }
+    if (unplugDate.getTime() <= plugDate.getTime()) {
+      setUnplugError('Thời gian rút điện phải sau thời gian cắm điện (' + plugDate.toLocaleTimeString('vi-VN') + ' ' + plugDate.toLocaleDateString('vi-VN') + ').');
+      return;
+    }
+    if (unplugDate.getTime() > now.getTime() + 60 * 1000) {
+      setUnplugError('Thời gian rút thực tế không được vượt quá thời điểm hiện tại.');
+      return;
+    }
 
     const res = await repository.unplugReefer({
       sessionId: selectedSession.id,
@@ -823,6 +911,7 @@ export default function ReeferMonitoringPage() {
     setReqMode('HOURLY');
     setReqExpectedHours('');
     setReqNotes('');
+    setReqContFilterQuery('');
     setShowCreateReqModal(true);
   };
 
@@ -1165,19 +1254,45 @@ export default function ReeferMonitoringPage() {
                       </td>
                       <td className="px-3.5 py-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {canCreateRequest && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenCreateReqModal(c.id)}
-                              className="px-2.5 py-1 text-xs font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors cursor-pointer flex items-center gap-1"
-                              title="Tạo yêu cầu cắm điện cho container này"
-                            >
-                              <Layers className="w-3.5 h-3.5 text-[#223873]" />
-                              <span>Tạo yêu cầu cắm điện</span>
-                            </button>
-                          )}
-                          {!canCreateRequest && (
-                            <span className="text-[11px] text-slate-400 italic">Chỉ xem hiện trường</span>
+                          {matchedReq ? (
+                            <>
+                              {canPlugIn && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPlugModal(c.id, matchedReq.id)}
+                                  className="px-2.5 py-1 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                                  title="Cắm điện container theo yêu cầu đã lập"
+                                >
+                                  <Zap className="w-3.5 h-3.5 fill-current" />
+                                  <span>⚡ Cắm điện ngay</span>
+                                </button>
+                              )}
+                              {canUpdateRequest && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditReqModal(matchedReq)}
+                                  className="px-2 py-1 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded transition-colors cursor-pointer flex items-center gap-1"
+                                  title="Chỉnh sửa thông tin yêu cầu cắm điện"
+                                >
+                                  <Pencil className="w-3 h-3 text-slate-500" />
+                                  <span>Sửa yêu cầu</span>
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            canCreateRequest ? (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenCreateReqModal(c.id)}
+                                className="px-2.5 py-1 text-xs font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors cursor-pointer flex items-center gap-1"
+                                title="Tạo yêu cầu cắm điện cho container này"
+                              >
+                                <Layers className="w-3.5 h-3.5 text-[#223873]" />
+                                <span>Tạo yêu cầu cắm điện</span>
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic">Chỉ xem hiện trường</span>
+                            )
                           )}
                         </div>
                       </td>
@@ -1438,7 +1553,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL CẮM ĐIỆN */}
       {showPlugModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-md w-full p-5 shadow-xl space-y-4">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-amber-500" />
@@ -1725,7 +1840,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL RÚT ĐIỆN */}
       {showUnplugModal && selectedSession && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-md w-full p-5 shadow-xl space-y-4">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-amber-500" />
@@ -1854,7 +1969,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL NHẬP PHIÊN HOÀN TẤT HỒI TỐ (E04 - BẰNG CHỨNG ZALO) */}
       {showCompletedModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-lg w-full p-5 shadow-xl space-y-4">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider">Hồi tố ngoài bãi — Zalo Timestamp</span>
@@ -2108,7 +2223,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL CCKB CHỈNH SỬA PHIÊN CẮM / RÚT THỰC TẾ & ĐỐI CHIẾU ZALO */}
       {showVerifyModal && verifySession && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-lg w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">Thương vụ CCKB Bến bãi</span>
@@ -2361,7 +2476,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL CCKB CHỈNH SỬA YÊU CẦU CẮM ĐIỆN CONTAINER (TAB REQUESTS) */}
       {showEditReqModal && editingReq && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-lg w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">CCKB Bến bãi</span>
@@ -2413,10 +2528,9 @@ export default function ReeferMonitoringPage() {
                       }`}
                     />
                     {editReqContValidation.level === 'SUCCESS' && (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-1/2 -translate-y-1/2" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-2.5 top-1/2 -translate-y-1/2" />
                     )}
                   </div>
-
                   {editReqContNo.trim().length > 0 && (
                     <div className={`mt-1.5 p-2 rounded text-[11px] flex items-start gap-1.5 ${
                       editReqContValidation.level === 'SUCCESS'
@@ -2450,15 +2564,11 @@ export default function ReeferMonitoringPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Chủ hàng */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Tên chủ hàng
-                  </label>
-                  <input
-                    type="text"
+                  <CustomerCombobox
+                    label="Tên chủ hàng"
                     value={editReqCustomer}
-                    onChange={(e) => setEditReqCustomer(e.target.value)}
+                    onChange={(name) => setEditReqCustomer(name)}
                     placeholder="VD: Công ty XNK Tà Lùng..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:border-[#223873]"
                   />
                 </div>
 
@@ -2594,7 +2704,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL TẠO YÊU CẦU CẮM ĐIỆN (CCKB) */}
       {showCreateReqModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-lg w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">Thương vụ CCKB Bến bãi</span>
@@ -2632,25 +2742,57 @@ export default function ReeferMonitoringPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <select
-                      value={reqSelectedYardContId}
-                      onChange={(e) => {
-                        const id = e.target.value;
-                        setReqSelectedYardContId(id);
-                        const cont = unpluggedContainersInYard.find((c) => c.id === id);
-                        if (cont) {
-                          setReqContainerNo(cont.container_no_current);
-                          setReqPlate(cont.inbound_license_plate || '');
-                        }
-                      }}
-                      className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#223873]"
-                    >
-                      {unpluggedContainersInYard.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.container_no_current}{c.inbound_license_plate ? ` (Xe: ${c.inbound_license_plate})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    {/* Ô tìm kiếm / lọc nhanh Container trong bãi */}
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Tìm theo số container hoặc biển số xe chở vào..."
+                        value={reqContFilterQuery}
+                        onChange={(e) => setReqContFilterQuery(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded text-xs bg-slate-50 font-mono focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                      />
+                    </div>
+
+                    {(() => {
+                      const filteredList = unpluggedContainersInYard.filter((c) => {
+                        const q = reqContFilterQuery.toLowerCase().trim();
+                        if (!q) return true;
+                        const matchCont = c.container_no_current.toLowerCase().includes(q);
+                        const matchPlate = c.inbound_license_plate ? c.inbound_license_plate.toLowerCase().includes(q) : false;
+                        return matchCont || matchPlate;
+                      });
+
+                      if (filteredList.length === 0) {
+                        return (
+                          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                            Không tìm thấy container nào khớp với từ khóa &quot;{reqContFilterQuery}&quot;.
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <select
+                          value={reqSelectedYardContId}
+                          onChange={(e) => {
+                            const id = e.target.value;
+                            setReqSelectedYardContId(id);
+                            const cont = unpluggedContainersInYard.find((c) => c.id === id);
+                            if (cont) {
+                              setReqContainerNo(cont.container_no_current);
+                              setReqPlate(cont.inbound_license_plate || '');
+                            }
+                          }}
+                          className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                        >
+                          {filteredList.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.container_no_current}{c.inbound_license_plate ? ` (Xe: ${c.inbound_license_plate})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      );
+                    })()}
 
                     {/* Hộp tóm tắt thông tin cont đang chọn */}
                     {(() => {
@@ -2679,15 +2821,11 @@ export default function ReeferMonitoringPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Tên chủ hàng
-                  </label>
-                  <input
-                    type="text"
+                  <CustomerCombobox
+                    label="Tên chủ hàng"
                     value={reqCustomer}
-                    onChange={(e) => setReqCustomer(e.target.value)}
+                    onChange={(name) => setReqCustomer(name)}
                     placeholder="VD: Công ty XNK Tà Lùng..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:border-[#223873]"
                   />
                 </div>
 
@@ -2819,7 +2957,7 @@ export default function ReeferMonitoringPage() {
       {/* MODAL GHI NHẬN NHIỆT ĐỘ CONTAINER LẠNH ĐỊNH KỲ */}
       {showTempModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-md w-full p-5 shadow-xl space-y-4">
+          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider">Kỹ thuật & Giám sát Reefer</span>

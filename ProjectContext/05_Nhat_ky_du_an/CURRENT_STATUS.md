@@ -40,6 +40,27 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 17:55 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHUẨN HÓA KHÁCH HÀNG APPSHEET, TÌM KIẾM CONT, VALIDATION GIỜ RÚT VÀ MỞ RỘNG MODAL (/reefer, /exit)**:
+  * **1. Danh mục Khách hàng & Component CustomerCombobox (chuẩn AppSheet):**
+    - Bỏ ô input text tự do dễ sai lệch. Xây dựng danh mục khách hàng chuẩn Sơn Cảng (`Customer`) và component Searchable Combobox (`CustomerCombobox`).
+    - Tìm kiếm nhanh theo tên, SĐT, mã số thuế.
+    - Hỗ trợ **Quick Add 1-chạm**: Khi gõ tên khách hàng mới chưa có trong hệ thống, tự động hiển thị nút `➕ Thêm mới khách hàng: "{tên vừa gõ}"`, tự động lưu vào danh mục chuẩn và chọn ngay tức thì.
+    - Tích hợp đồng bộ trên cả Modal Tạo yêu cầu cắm điện và Modal Sửa yêu cầu cắm điện.
+  * **2. Tìm kiếm / Lọc nhanh Container khi Lập yêu cầu CCKB (`/reefer`):**
+    - Thêm ô tìm kiếm trực tiếp trong Modal Tạo yêu cầu cắm điện: Gõ nhanh số container hoặc biển số xe chở vào để lọc danh sách cont tức thì, nhân viên không phải cuộn tìm trong danh sách dài.
+  * **3. Validation Giờ rút điện thực tế triệt để:**
+    - Chặn triệt để 2 lỗi logic thời gian:
+      + Giờ rút không được trước giờ cắm (`unplugTime <= plugTime`).
+      + Giờ rút thực tế không được vượt quá thời điểm hiện tại (`unplugTime > Date.now()` - không cho phép nhập giờ tương lai).
+    - Áp dụng chặt chẽ và nhất quán trong cả 3 luồng: Xác nhận Rút điện (`handleConfirmUnplug`), Hiệu chỉnh & Đối chiếu Zalo (`handleConfirmVerifyZalo`), và Nhập phiên hoàn tất hồi tố (`handleConfirmCompletedSession`).
+  * **4. Bảng Container sẵn sàng cắm điện (`/reefer`):**
+    - Container nào đã có yêu cầu (`matchedReq`): Đổi cột Thao tác thành nút `⚡ Cắm điện ngay` và nút `Sửa yêu cầu`, ẩn hoàn toàn nút thừa `+ Tạo yêu cầu cắm điện`.
+  * **5. Mở rộng kích thước toàn bộ các Modal:**
+    - Nâng cấp độ rộng tất cả các Modal từ `max-w-md` / `max-w-lg` lên `max-w-2xl` thoáng đãng, tận dụng tối đa khoảng trống màn hình máy tính laptop/desktop.
+  * **6. Đã xác minh:** Lệnh `npm run build` kết thúc thành công mã 0 (17/17 routes, 0 lỗi TypeScript). Server production local `npm start` đã khởi động lại trên cổng 3000.
+  * **7. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel tự động triển khai production.
+
 - **Cập nhật lúc:** 13/10/2026 17:35 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **ẨN BỘ CHỌN KÍCH CỠ/VỎ CONT CỔNG VÀO (/entry) & TINH GỌN TOÀN DIỆN MODAL CỔNG RA (/exit)**:
   * **1. Cổng vào (`/entry`):** Ẩn hoàn toàn bộ chọn Kích cỡ (20/40/45ft) và Loại vỏ container (RF/DC/OT/FR) theo đúng thực tế bến bãi hiện chưa kiểm soát và nhân sự chưa phân biệt được. An ninh chỉ ghi nhận Số container (trạng thái HÀNG/RỖNG do Điều phối viên kiểm tra sau). Ngầm định nội bộ `container_size: '40'`, `container_type: 'RF'` bảo đảm tương thích 100% với database schema và RPC tiếp nhận xe.

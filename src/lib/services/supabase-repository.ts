@@ -35,9 +35,11 @@ import {
   VehicleDuplicateCheckResult,
   PaymentRecord,
   YardZoneInfo,
-  ReeferTemperatureLog
+  ReeferTemperatureLog,
+  Customer
 } from '@/types/domain.types';
-import { SEED_YARD_ZONES_SON_CANG } from './demo-repository';
+import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS } from './demo-repository';
+
 import { Database } from '@/types/database.types';
 import { 
   IYardRepository, 
@@ -2466,6 +2468,101 @@ export class SupabaseRepository implements IYardRepository {
       const msg = err instanceof Error ? err.message : String(err);
       return { success: false, error: 'Lỗi thu vé cổng tại cổng ra: ' + msg };
     }
+  }
+
+  /** Lấy danh mục khách hàng / chủ hàng chuẩn (hỗ trợ Supabase table + fallback LocalStorage/Seed) */
+  async getCustomers(): Promise<Customer[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('app_customers' as any)
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_customers');
+          if (saved) {
+            try { return JSON.parse(saved); } catch {}
+          }
+        }
+        return [...INITIAL_DEMO_CUSTOMERS];
+      }
+      return data as unknown as Customer[];
+    } catch {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('soncang_v5_customers');
+        if (saved) {
+          try { return JSON.parse(saved); } catch {}
+        }
+      }
+      return [...INITIAL_DEMO_CUSTOMERS];
+    }
+  }
+
+  /** Tạo khách hàng / chủ hàng mới nhanh (chuẩn AppSheet 1 chạm) */
+  async createCustomer(params: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }> {
+    const trimmedName = params.name.trim();
+    if (!trimmedName) {
+      return { success: false, error: 'Tên khách hàng không được để trống' };
+    }
+
+    try {
+      const supabase = createClient();
+      const newCustRecord = {
+        name: trimmedName,
+        phone: params.phone?.trim() || null,
+        tax_code: params.tax_code?.trim() || null,
+        notes: params.notes?.trim() || null,
+        is_active: true,
+      };
+
+      const { data, error } = await supabase
+        .from('app_customers' as any)
+        .insert(newCustRecord)
+        .select()
+        .single();
+
+      if (!error && data) {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_customers');
+          const list: Customer[] = saved ? JSON.parse(saved) : [...INITIAL_DEMO_CUSTOMERS];
+          list.unshift(data as unknown as Customer);
+          localStorage.setItem('soncang_v5_customers', JSON.stringify(list));
+        }
+        return { success: true, customer: data as unknown as Customer };
+      }
+    } catch {
+      // Bỏ qua lỗi table app_customers chưa có trên DB
+    }
+
+    // Fallback lưu LocalStorage để không gián đoạn thao tác người dùng
+    const fallbackCust: Customer = {
+      id: `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: trimmedName,
+      phone: params.phone?.trim() || null,
+      tax_code: params.tax_code?.trim() || null,
+      notes: params.notes?.trim() || null,
+      is_active: true,
+      created_at: new Date().toISOString()
+    };
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_customers');
+      const list: Customer[] = saved ? JSON.parse(saved) : [...INITIAL_DEMO_CUSTOMERS];
+      const existing = list.find(c => c.name.toLowerCase() === trimmedName.toLowerCase());
+      if (existing) {
+        return { success: true, customer: existing };
+      }
+      list.unshift(fallbackCust);
+      localStorage.setItem('soncang_v5_customers', JSON.stringify(list));
+    }
+
+    return { success: true, customer: fallbackCust };
   }
 }
 
