@@ -40,6 +40,18 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 17:35 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ẨN BỘ CHỌN KÍCH CỠ/VỎ CONT CỔNG VÀO (/entry) & TINH GỌN TOÀN DIỆN MODAL CỔNG RA (/exit)**:
+  * **1. Cổng vào (`/entry`):** Ẩn hoàn toàn bộ chọn Kích cỡ (20/40/45ft) và Loại vỏ container (RF/DC/OT/FR) theo đúng thực tế bến bãi hiện chưa kiểm soát và nhân sự chưa phân biệt được. An ninh chỉ ghi nhận Số container (trạng thái HÀNG/RỖNG do Điều phối viên kiểm tra sau). Ngầm định nội bộ `container_size: '40'`, `container_type: 'RF'` bảo đảm tương thích 100% với database schema và RPC tiếp nhận xe.
+  * **2. Modal Cổng ra (`/exit`):** Thiết kế lại giao diện theo phong cách công thái học cao (High-Density Ergonomics), loại bỏ hoàn toàn các banner cảnh báo vàng dài dòng và các thẻ card to chiếm diện tích:
+    - Gom thông tin xe vào Header bar ngang tích hợp Badge biển số nổi bật font mono `[Biển số]` kèm loại xe, giờ vào và trạng thái vé cổng.
+    - Checklist 4 điều kiện rút gọn thành 1 hàng 4 mini-pills trực quan: `[1. Vé cổng]` `[2. Điện lạnh]` `[3. CCKB]` `[4. Lưu bãi]` (nhìn lướt 0.5s là biết xe đạt điều kiện hay bị vướng).
+    - Quy cách phương tiện chuyển thành 2 nút tabs ngang nhỏ gọn: `[Xe có kéo Container]` | `[Xe không cont (Xe lẻ)]`.
+    - Tự động nhận diện và chọn sẵn container lúc vào bãi (`attachedInboundCont`) khi mở modal, tự động tính phí lưu bãi ngay lập tức; không bắt nhân viên phải đọc cảnh báo dài dòng hay bấm nút chọn thủ công.
+    - Trạng thái cắm điện, phê duyệt CCKB và Phí lưu bãi container chỉ hiển thị cảnh báo nổi bật khi có vi phạm; tích hợp thanh toán cổng ra gọn gàng.
+  * **3. Đã xác minh:** Lệnh `npm run build` kết thúc thành công mã 0 (17/17 routes, 0 lỗi TypeScript). Server local `npm start` đã khởi động lại trên cổng 3000.
+  * **4. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel tự động triển khai.
+
 - **Cập nhật lúc:** 13/10/2026 17:15 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **CHUẨN HÓA TOÀN DIỆN NGHIỆP VỤ THU PHÍ & SỔ CÁI (/billing): ĐỊNH DANH ĐỐI TƯỢNG, THU GỘP 1-N VÀ PHÂN QUYỀN TRIỆT ĐỂ**:
   * **1. Định danh đối tượng rõ ràng trên Sổ cái:** Truy vấn liên kết đa tầng giữa `app_charges`, `app_reefer_power_sessions`, `app_container_visits`, `app_vehicle_visits`, và `app_reefer_requests`. Hiển thị đầy đủ badges: Số container (`📦 Cont: {container_no}`), Tên & SĐT khách hàng/chủ hàng (`👤 Khách: {customer_name}`), và Xe chở vào (`🚛 Xe: {license_plate}`).

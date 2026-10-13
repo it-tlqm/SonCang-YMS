@@ -258,10 +258,18 @@ export default function ExitClearancePage() {
     setEntryTicketReceiptCode('');
 
     // Quy cách phương tiện qua cổng ra:
-    // Theo nghiệp vụ bến bãi: Chỗ container kéo ra PHẢI ĐỂ TRỐNG BAN ĐẦU để An ninh bắt buộc tìm và đối soát đúng số cont thực tế!
-    setHasTrailingContainer(veh.vehicle_type === 'CONT_LANH');
-    setSelectedTrailingContId('');
+    const isContVeh = veh.vehicle_type === 'CONT_LANH';
+    setHasTrailingContainer(isContVeh);
     setTrailingContSearch('');
+
+    // Tự động tìm container đi kèm lúc vào bãi (nếu còn trong bãi) để không bắt An ninh thao tác thủ công thừa
+    const matchedInboundCont = inYardContainers.find(c => c.inbound_vehicle_visit_id === veh.id);
+    if (isContVeh && matchedInboundCont) {
+      setSelectedTrailingContId(matchedInboundCont.id);
+      calculateFeeForContainer(matchedInboundCont.inbound_at);
+    } else {
+      setSelectedTrailingContId('');
+    }
 
     setShowUnifiedExitModal(true);
   };
@@ -1268,19 +1276,44 @@ export default function ExitClearancePage() {
       {/* MODAL HỢP NHẤT: AN NINH KIỂM SOÁT XUẤT BÃI PHƯƠNG TIỆN & CONTAINER       */}
       {/* ========================================================================= */}
       {showUnifiedExitModal && selectedVehForExit && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-xl w-full p-5 shadow-xl space-y-4 my-6 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-300 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-lg w-full p-4 sm:p-5 shadow-2xl space-y-3.5 my-auto border border-slate-300">
+            {/* HEADER GỘP THÔNG TIN XE CÔNG THÁI HỌC CAO */}
+            <div className="flex items-start justify-between border-b border-slate-200 pb-2.5">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0A9444]">An ninh Bốt cổng ra</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
-                  <LogOut className="w-5 h-5 text-[#0A9444]" />
-                  Kiểm soát Phương tiện & Container Xuất bãi
-                </h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                    <LogOut className="w-4 h-4 text-[#0A9444]" />
+                    Xuất bãi phương tiện
+                  </span>
+                  <span className="font-mono font-bold text-base bg-[#223873] text-white px-2 py-0.5 rounded shadow-2xs">
+                    {selectedVehForExit.license_plate || 'Không biển'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1 flex-wrap">
+                  <span className="font-medium text-slate-700">
+                    {getVehicleTypeName(selectedVehForExit.vehicle_type_name || selectedVehForExit.vehicle_type)}
+                  </span>
+                  <span>•</span>
+                  <span className="font-mono">
+                    Vào: {new Date(selectedVehForExit.entry_at).toLocaleTimeString('vi-VN')} {new Date(selectedVehForExit.entry_at).toLocaleDateString('vi-VN')}
+                  </span>
+                  <span>•</span>
+                  <span className={`px-1.5 py-0.2 rounded font-bold text-[10px] border ${
+                    selectedVehForExit.ticket_payment_status === 'PAID' 
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                      : selectedVehForExit.ticket_payment_status === 'EXEMPT' 
+                      ? 'bg-blue-50 text-blue-800 border-blue-300' 
+                      : 'bg-amber-50 text-amber-800 border-amber-300'
+                  }`}>
+                    Vé cổng: {selectedVehForExit.ticket_payment_status === 'PAID' ? 'Đã thu' : selectedVehForExit.ticket_payment_status === 'EXEMPT' ? 'Miễn phí' : 'Chưa thu'}
+                  </span>
+                </div>
               </div>
               <button 
+                type="button"
                 onClick={() => setShowUnifiedExitModal(false)} 
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer p-0.5"
               >
                 ✕
               </button>
@@ -1293,338 +1326,175 @@ export default function ExitClearancePage() {
               </div>
             )}
 
-            <form onSubmit={handleConfirmUnifiedExit} className="space-y-3.5">
-              {/* 1. THÔNG TIN PHƯƠNG TIỆN */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-1.5 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500 font-medium">Biển số xe:</span>
-                  <span className="font-mono font-bold text-base text-slate-900">{selectedVehForExit.license_plate || 'Không biển'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Loại phương tiện:</span>
-                  <span className="font-semibold text-slate-800">{getVehicleTypeName(selectedVehForExit.vehicle_type_name || selectedVehForExit.vehicle_type)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Thời gian vào cổng:</span>
-                  <span className="text-slate-700 font-mono">{new Date(selectedVehForExit.entry_at).toLocaleString('vi-VN')}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Vé vào cổng:</span>
-                  <span className={`px-2 py-0.5 rounded font-bold text-[10px] border ${
-                    selectedVehForExit.ticket_payment_status === 'PAID' 
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
-                      : selectedVehForExit.ticket_payment_status === 'EXEMPT' 
-                      ? 'bg-blue-50 text-blue-800 border-blue-300' 
-                      : 'bg-amber-50 text-amber-800 border-amber-300'
-                  }`}>
-                    {selectedVehForExit.ticket_payment_status === 'PAID' 
-                      ? `Đã thu (${selectedVehForExit.ticket_amount?.toLocaleString() || 0}đ)` 
-                      : selectedVehForExit.ticket_payment_status === 'EXEMPT' 
-                      ? 'Miễn phí hợp lệ' 
-                      : `Chưa thu (${selectedVehForExit.ticket_amount?.toLocaleString() || 0}đ)`}
-                  </span>
-                </div>
-              </div>
-
-              {/* CHECKLIST 4 ĐIỀU KIỆN XUẤT BÃI TRỰC QUAN */}
+            <form onSubmit={handleConfirmUnifiedExit} className="space-y-3">
+              {/* CHECKLIST 4 ĐIỀU KIỆN XUẤT BÃI (DẠNG 4 PILLS NGANG SIÊU GỌN) */}
               {(() => {
                 const modalTicketOk = selectedVehForExit.ticket_payment_status === 'PAID' || selectedVehForExit.ticket_payment_status === 'EXEMPT' || (collectEntryTicketAtExit && selectedVehForExit.ticket_payment_status === 'UNPAID');
                 const modalPowerOk = !hasTrailingContainer || !isTrailingContPlugged;
                 const modalClearanceOk = !hasTrailingContainer || !hasTrailingContReefer || isTrailingContCleared;
                 const modalStorageOk = !hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0 || paidAtGate;
-                const modalAllOk = modalTicketOk && modalPowerOk && modalClearanceOk && modalStorageOk;
 
                 return (
-                  <div className={`p-3 rounded border ${modalAllOk ? 'bg-emerald-50/50 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wide">
-                        <CheckCircle2 className={`w-4 h-4 ${modalAllOk ? 'text-[#0A9444]' : 'text-slate-400'}`} />
-                        <span>Checklist 4 điều kiện xuất bãi</span>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                        modalAllOk 
-                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
-                          : 'bg-amber-100 text-amber-900 border-amber-300'
-                      }`}>
-                        {modalAllOk ? '✓ Đủ điều kiện xuất bãi' : '⚠️ Đang xử lý điều kiện'}
-                      </span>
+                  <div className="grid grid-cols-4 gap-1.5 text-[11px]">
+                    <div className={`p-1.5 rounded border text-center ${modalTicketOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800 font-bold'}`}>
+                      <div className="text-[10px] text-slate-500">1. Vé cổng</div>
+                      <div className="font-bold truncate mt-0.5">{modalTicketOk ? '✓ Đã thu' : '⚠️ Chưa thu'}</div>
                     </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                      {/* 1. Vé cổng */}
-                      <div className={`p-2 rounded border flex flex-col justify-between ${
-                        modalTicketOk ? 'bg-white border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
-                      }`}>
-                        <div className="font-semibold text-slate-600 text-[10px]">1. Vé vào cổng</div>
-                        <div className="font-bold mt-1">
-                          {selectedVehForExit.ticket_payment_status === 'PAID'
-                            ? '✓ Đã thanh toán'
-                            : selectedVehForExit.ticket_payment_status === 'EXEMPT'
-                            ? '✓ Miễn phí'
-                            : collectEntryTicketAtExit
-                            ? '⚡ Thu tại cổng'
-                            : '⚠️ Chưa thanh toán'}
-                        </div>
-                      </div>
-
-                      {/* 2. Cắm điện */}
-                      <div className={`p-2 rounded border flex flex-col justify-between ${
-                        modalPowerOk ? 'bg-white border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900 animate-pulse'
-                      }`}>
-                        <div className="font-semibold text-slate-600 text-[10px]">2. Cắm điện Cont</div>
-                        <div className="font-bold mt-1">
-                          {!hasTrailingContainer
-                            ? '✓ Không mang cont'
-                            : !isTrailingContPlugged
-                            ? '✓ Đã ngắt điện'
-                            : '🚨 Đang cắm điện!'}
-                        </div>
-                      </div>
-
-                      {/* 3. Phê duyệt CCKB */}
-                      <div className={`p-2 rounded border flex flex-col justify-between ${
-                        modalClearanceOk ? 'bg-white border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'
-                      }`}>
-                        <div className="font-semibold text-slate-600 text-[10px]">3. Duyệt CCKB</div>
-                        <div className="font-bold mt-1">
-                          {!hasTrailingContainer || !hasTrailingContReefer
-                            ? '✓ Miễn duyệt'
-                            : isTrailingContCleared
-                            ? '✓ Đã duyệt'
-                            : '⏳ Chờ CCKB duyệt'}
-                        </div>
-                      </div>
-
-                      {/* 4. Phí lưu bãi */}
-                      <div className={`p-2 rounded border flex flex-col justify-between ${
-                        modalStorageOk ? 'bg-white border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'
-                      }`}>
-                        <div className="font-semibold text-slate-600 text-[10px]">4. Phí lưu bãi</div>
-                        <div className="font-bold mt-1">
-                          {!hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0
-                            ? '✓ 0đ (Không phát sinh)'
-                            : paidAtGate
-                            ? '⚡ Thu tại cổng'
-                            : '⚠️ Chưa thu'}
-                        </div>
-                      </div>
+                    <div className={`p-1.5 rounded border text-center ${modalPowerOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-100 border-rose-400 text-rose-900 font-bold animate-pulse'}`}>
+                      <div className="text-[10px] text-slate-500">2. Điện lạnh</div>
+                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer ? '✓ Không cont' : !isTrailingContPlugged ? '✓ Đã ngắt' : '🚨 Đang cắm'}</div>
+                    </div>
+                    <div className={`p-1.5 rounded border text-center ${modalClearanceOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-300 text-amber-900 font-bold'}`}>
+                      <div className="text-[10px] text-slate-500">3. CCKB</div>
+                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer || !hasTrailingContReefer ? '✓ Miễn duyệt' : isTrailingContCleared ? '✓ Đã duyệt' : '⏳ Chờ duyệt'}</div>
+                    </div>
+                    <div className={`p-1.5 rounded border text-center ${modalStorageOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-300 text-amber-900 font-bold'}`}>
+                      <div className="text-[10px] text-slate-500">4. Lưu bãi</div>
+                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0 ? '✓ 0đ' : paidAtGate ? '⚡ Thu cổng' : '⚠️ Chưa thu'}</div>
                     </div>
                   </div>
                 );
               })()}
 
-              {/* 1.5. THU TIỀN VÉ VÀO CỔNG TẠI CỔNG RA (NẾU XE VÀO CỔNG CHƯA TRẢ VÉ) */}
+              {/* THU VÉ CỔNG TẠI BỐT RA NẾU CHƯA THU VÉ */}
               {selectedVehForExit.ticket_payment_status === 'UNPAID' && (selectedVehForExit.ticket_amount || 0) > 0 && (
-                <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2">
+                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded text-xs space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <div>
-                        <div className="text-xs font-bold text-amber-950 font-mono">
-                          Vé vào cổng chưa thanh toán: {(selectedVehForExit.ticket_amount || 0).toLocaleString('vi-VN')} đ
-                        </div>
-                        <div className="text-[11px] text-amber-800">
-                          Phương tiện vào bãi chưa trả vé (hoặc ghi nợ vào cổng). Có thể thu trực tiếp tại bốt cổng ra.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-amber-200">
-                    <label className="flex items-center space-x-2 text-xs font-bold text-slate-800 cursor-pointer">
+                    <label className="flex items-center space-x-2 font-bold text-amber-950 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={collectEntryTicketAtExit}
                         onChange={(e) => setCollectEntryTicketAtExit(e.target.checked)}
-                        className="w-4 h-4 text-[#0A9444] rounded border-slate-300 focus:ring-[#0A9444] cursor-pointer"
+                        className="w-4 h-4 text-[#0A9444] rounded border-slate-300"
                       />
-                      <span>Thu tiền vé vào cổng trực tiếp tại Cổng ra ({(selectedVehForExit.ticket_amount || 0).toLocaleString('vi-VN')} đ)</span>
+                      <span>Thu vé vào cổng: {(selectedVehForExit.ticket_amount || 0).toLocaleString('vi-VN')} đ</span>
                     </label>
                   </div>
-
                   {collectEntryTicketAtExit && (
-                    <div className="space-y-2 pt-1 pl-6">
-                      <div className="flex items-center gap-4">
-                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="entryTicketPayMethod"
-                            value="CASH"
-                            checked={entryTicketPayMethod === 'CASH'}
-                            onChange={() => setEntryTicketPayMethod('CASH')}
-                            className="text-[#0A9444]"
-                          />
-                          <span>💵 Tiền mặt</span>
-                        </label>
-                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="entryTicketPayMethod"
-                            value="BANK_TRANSFER"
-                            checked={entryTicketPayMethod === 'BANK_TRANSFER'}
-                            onChange={() => setEntryTicketPayMethod('BANK_TRANSFER')}
-                            className="text-[#0A9444]"
-                          />
-                          <span>📱 Chuyển khoản (VietQR / CK)</span>
-                        </label>
-                      </div>
-
+                    <div className="flex items-center gap-3 pt-1 border-t border-amber-200">
+                      <label className="flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="entryTicketPayMethod"
+                          value="CASH"
+                          checked={entryTicketPayMethod === 'CASH'}
+                          onChange={() => setEntryTicketPayMethod('CASH')}
+                          className="text-[#0A9444]"
+                        />
+                        <span>Tiền mặt</span>
+                      </label>
+                      <label className="flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="entryTicketPayMethod"
+                          value="BANK_TRANSFER"
+                          checked={entryTicketPayMethod === 'BANK_TRANSFER'}
+                          onChange={() => setEntryTicketPayMethod('BANK_TRANSFER')}
+                          className="text-[#0A9444]"
+                        />
+                        <span>Chuyển khoản</span>
+                      </label>
                       {entryTicketPayMethod === 'BANK_TRANSFER' && (
-                        <div className="space-y-2 pt-1">
-                          <input
-                            type="text"
-                            value={entryTicketReceiptCode}
-                            onChange={(e) => setEntryTicketReceiptCode(e.target.value)}
-                            placeholder="Mã tham chiếu CK / Số biên lai thu vé..."
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-mono"
-                            required
-                          />
-                          <div className="p-2.5 bg-blue-50 border border-blue-200 rounded space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-blue-900">Mã VietQR thu vé cổng</span>
-                              <button
-                                type="button"
-                                onClick={() => setShowEntryTicketQr(!showEntryTicketQr)}
-                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
-                              >
-                                <QrCode className="w-3 h-3" />
-                                <span>{showEntryTicketQr ? 'Ẩn QR' : 'Mở VietQR vé cổng'}</span>
-                              </button>
-                            </div>
-                            {showEntryTicketQr && (
-                              <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-blue-300 rounded shadow-2xs">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={generateVietQrUrl({
-                                    amount: selectedVehForExit.ticket_amount || 0,
-                                    description: `VE CONG ${selectedVehForExit.license_plate || 'XE'}`
-                                  })}
-                                  alt="Mã VietQR vé cổng"
-                                  className="w-44 h-auto rounded border border-slate-200"
-                                />
-                                <span className="text-[10px] text-slate-500 mt-1 font-semibold">Tài xế quét mã bằng app ngân hàng</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        <input
+                          type="text"
+                          value={entryTicketReceiptCode}
+                          onChange={(e) => setEntryTicketReceiptCode(e.target.value)}
+                          placeholder="Mã tham chiếu CK..."
+                          className="w-36 px-2 py-0.5 border border-slate-300 rounded text-xs font-mono"
+                          required
+                        />
                       )}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* 2. XÁC NHẬN KÉO CONTAINER (CHỈ HIỂN THỊ VỚI XE ĐẦU KÉO VÀ XE CONT LẠNH) */}
+              {/* QUY CÁCH PHƯƠNG TIỆN XUẤT BÃI (DẠNG 2 NÚT TAB NGANG NHỎ GỌN) */}
               {(selectedVehForExit.vehicle_type === 'CONT_LANH' || selectedVehForExit.vehicle_type === 'DAU_KEO') && (
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded space-y-2.5">
-                  <label className="block text-[11px] font-bold text-blue-950 uppercase tracking-wider">
-                    Quy cách phương tiện qua cổng ra:
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleHasTrailingCont(false)}
-                      className={`p-2 rounded border text-xs font-bold transition-colors cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                        !hasTrailingContainer
-                          ? 'bg-[#223873] text-white border-[#223873] shadow-2xs'
-                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Truck className="w-4 h-4" />
-                      <span>Xe ra một mình</span>
-                      <span className="text-[10px] font-normal opacity-80">(Không kéo container)</span>
-                    </button>
-
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleToggleHasTrailingCont(true)}
-                      className={`p-2 rounded border text-xs font-bold transition-colors cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                      className={`flex-1 py-1.5 px-3 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                         hasTrailingContainer
                           ? 'bg-[#0A9444] text-white border-[#0A9444] shadow-2xs'
                           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                       }`}
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="w-3.5 h-3.5" />
                       <span>Xe có kéo Container</span>
-                      <span className="text-[10px] font-normal opacity-80">(Xuất bãi container)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleHasTrailingCont(false)}
+                      className={`flex-1 py-1.5 px-3 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                        !hasTrailingContainer
+                          ? 'bg-[#223873] text-white border-[#223873] shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Xe không cont (Xe lẻ)</span>
                     </button>
                   </div>
 
-                  {/* KHI CHỌN XE CÓ KÉO CONTAINER RA BÃI */}
+                  {/* KHI CHỌN XE CÓ KÉO CONTAINER */}
                   {hasTrailingContainer && (
-                    <div className="pt-2 border-t border-blue-200 space-y-2.5 animate-in fade-in">
-                      {/* Cảnh báo bắt buộc chọn cont hoặc gợi ý cont lúc vào */}
-                      {!selectedTrailingContId ? (
-                        <div className="p-2.5 bg-amber-50 border border-amber-300 rounded space-y-1.5">
-                          <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
-                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                            <span>BẮT BUỘC TÌM & CHỌN CONTAINER KÉO RA:</span>
-                          </div>
-                          <p className="text-[11px] text-amber-800 leading-relaxed">
-                            Container kéo ra bãi có thể khác với container lúc xe vào cổng. Bắt buộc nhân viên đối soát thực tế tại bốt gác và chọn đúng số container.
-                          </p>
-                          {attachedInboundCont && (
-                            <div className="pt-1 flex items-center gap-2 flex-wrap">
-                              <span className="text-[11px] text-slate-700 font-semibold">Gợi ý cont lúc vào:</span>
-                              <button
-                                type="button"
-                                onClick={() => handleTrailingContChange(attachedInboundCont.id)}
-                                className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                              >
-                                <span>📌 Chọn nhanh {attachedInboundCont.container_no_current}</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="p-2 bg-emerald-50 border border-emerald-300 rounded flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-[#0A9444]" />
-                            <span className="text-xs font-bold text-emerald-950 font-mono">
-                              Đã chọn cont: {activeTrailingCont?.container_no_current}
-                            </span>
-                          </div>
+                    <div className="p-2.5 bg-blue-50/60 border border-blue-200 rounded space-y-2 text-xs animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800">
+                          Container kéo ra:
+                        </span>
+                        {selectedTrailingContId ? (
                           <button
                             type="button"
                             onClick={() => handleTrailingContChange('')}
-                            className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                            className="text-[11px] font-bold text-blue-700 hover:underline cursor-pointer"
                           >
-                            Chọn lại cont khác
+                            Đổi cont khác
                           </button>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-[10px] text-slate-500 font-mono">({inYardContainers.length} cont trong bãi)</span>
+                        )}
+                      </div>
 
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block text-xs font-bold text-slate-800">
-                            Tìm & Chọn container phương tiện đang kéo ra: <span className="text-rose-500">*</span>
-                          </label>
-                          <span className="text-[11px] text-slate-500 font-mono">
-                            ({inYardContainers.length} cont trong bãi)
-                          </span>
+                      {/* Khi đã chọn cont: Hiển thị thanh ngắn gọn, tinh tế */}
+                      {selectedTrailingContId && activeTrailingCont ? (
+                        <div className="p-2 bg-white rounded border border-blue-300 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-[#0A9444] shrink-0" />
+                            <div>
+                              <span className="font-mono font-bold text-sm text-[#223873]">
+                                {activeTrailingCont.container_no_current}
+                              </span>
+                              <span className="text-[11px] text-slate-500 ml-2">
+                                (Vào: {new Date(activeTrailingCont.inbound_at).toLocaleTimeString('vi-VN')} {new Date(activeTrailingCont.inbound_at).toLocaleDateString('vi-VN')})
+                              </span>
+                            </div>
+                          </div>
+                          {attachedInboundCont?.id === activeTrailingCont.id && (
+                            <span className="text-[10px] bg-emerald-100 text-[#0A9444] font-bold px-1.5 py-0.5 rounded border border-emerald-300">
+                              Khớp cont lúc vào
+                            </span>
+                          )}
                         </div>
-
-                        {/* Ô tìm kiếm nhanh container */}
-                        <div className="mb-2">
+                      ) : (
+                        /* Khi chưa chọn cont: Gõ lọc hoặc chọn trực tiếp */
+                        <div className="space-y-1.5">
                           <input
                             type="text"
                             value={trailingContSearch}
                             onChange={(e) => setTrailingContSearch(e.target.value)}
-                            placeholder="🔍 Nhập số container để lọc nhanh (VD: AAAA1212...)"
-                            className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono focus:ring-1 focus:ring-slate-500"
+                            placeholder="🔍 Gõ nhanh số container để lọc..."
+                            className="w-full px-2.5 py-1 border border-slate-300 rounded text-xs font-mono"
                           />
-                        </div>
-
-                        {inYardContainers.length === 0 ? (
-                          <p className="text-xs text-rose-600 bg-rose-50 p-2 rounded">Không có container nào đang ở trong bãi.</p>
-                        ) : (
                           <select
                             value={selectedTrailingContId}
                             onChange={(e) => handleTrailingContChange(e.target.value)}
-                            className={`w-full p-2 border rounded text-xs font-mono font-bold bg-white focus:ring-1 focus:ring-slate-500 ${
-                              !selectedTrailingContId ? 'border-amber-400 ring-1 ring-amber-300' : 'border-slate-300'
-                            }`}
+                            className="w-full p-1.5 border border-amber-400 ring-1 ring-amber-300 rounded text-xs font-mono font-bold bg-white"
                           >
-                            <option value="">-- [BẮT BUỘC] Bấm vào đây để chọn Container kéo ra --</option>
+                            <option value="">-- Bấm chọn Container kéo ra --</option>
                             {inYardContainers
                               .filter(c => {
                                 if (!trailingContSearch.trim()) return true;
@@ -1633,192 +1503,107 @@ export default function ExitClearancePage() {
                               })
                               .map((c) => (
                                 <option key={c.id} value={c.id}>
-                                  {c.container_no_current} ({c.container_type || 'RF'} - Vào lúc: {new Date(c.inbound_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at).toLocaleDateString('vi-VN')})
+                                  {c.container_no_current} ({c.container_type || 'RF'} - Vào: {new Date(c.inbound_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at).toLocaleDateString('vi-VN')})
                                 </option>
                               ))}
                           </select>
-                        )}
-                      </div>
+                        </div>
+                      )}
 
-                      {/* BẢNG KIỂM TRA ĐIỀU KIỆN TÀI CHÍNH & VẬN HÀNH CONTAINER */}
+                      {/* Trạng thái & Tài chính Container */}
                       {activeTrailingCont && (
-                        <div className="space-y-2 pt-1 text-xs">
-                          {/* 1. Kiểm tra Cắm điện Container */}
-                          <div className={`p-2.5 rounded border flex items-start gap-2 ${
-                            isTrailingContPlugged 
-                              ? 'bg-rose-50 border-rose-300 text-rose-900' 
-                              : totalUnpaidPowerAmount > 0 
-                              ? 'bg-amber-50 border-amber-300 text-amber-900' 
-                              : 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                          }`}>
-                            <Zap className={`w-4 h-4 shrink-0 mt-0.5 ${
-                              isTrailingContPlugged ? 'text-rose-600 animate-bounce' : totalUnpaidPowerAmount > 0 ? 'text-amber-600' : 'text-emerald-600'
-                            }`} />
-                            <div className="flex-1">
-                              {isTrailingContPlugged ? (
-                                <div>
-                                  <strong className="font-bold text-rose-800">⚠️ CONTAINER ĐANG CẮM ĐIỆN!</strong>
-                                  <p className="text-[11px] text-rose-700 mt-0.5">Bắt buộc phải rút điện tại phân hệ Điện Container trước khi xe kéo ra khỏi bãi!</p>
-                                </div>
-                              ) : totalUnpaidPowerAmount > 0 ? (
-                                <div>
-                                  <strong className="font-bold text-amber-900 font-mono">⚡ Tiền điện container chưa thu: {totalUnpaidPowerAmount.toLocaleString()}đ</strong>
-                                  <p className="text-[11px] text-amber-800 mt-0.5">Khách hàng cần thanh toán tại Sổ cái hoặc đã được CCKB duyệt xuất bãi ghi nợ.</p>
-                                </div>
-                              ) : (
-                                <span className="font-semibold text-emerald-800">✓ Điện container: Đã ngắt điện và hoàn tất nghĩa vụ.</span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 2. Kiểm tra Phê duyệt CCKB (Clearance) */}
-                          {!hasTrailingContReefer ? (
-                            <div className="p-2.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-900 flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#0A9444]" />
-                              <div className="flex-1">
-                                <span className="font-bold text-[#0A9444]">✓ Miễn duyệt CCKB (Container không phát sinh cắm điện)</span>
-                                <p className="text-[11px] text-emerald-700 mt-0.5">An ninh được phép xác nhận xe kéo container xuất bãi trực tiếp tại cổng mà không cần CCKB phê duyệt.</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className={`p-2.5 rounded border flex items-start gap-2 ${
-                              isTrailingContCleared 
-                                ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
-                                : 'bg-amber-50 border-amber-300 text-amber-900'
-                            }`}>
-                              <FileCheck className={`w-4 h-4 shrink-0 mt-0.5 ${isTrailingContCleared ? 'text-[#0A9444]' : 'text-amber-600'}`} />
-                              <div className="flex-1">
-                                {activeTrailingCont.clearance_status === 'CLEARED' ? (
-                                  <span className="font-bold text-[#0A9444]">✓ CCKB đã duyệt đủ điều kiện xuất bãi.</span>
-                                ) : activeTrailingCont.clearance_status === 'CLEARED_WITH_DEBT' ? (
-                                  <div>
-                                    <span className="font-bold text-amber-900">⚠️ CCKB đã duyệt cho phép bảo lãnh công nợ.</span>
-                                    {activeTrailingCont.clearance_notes && <p className="text-[11px] text-amber-700 italic">Lý do: {activeTrailingCont.clearance_notes}</p>}
-                                  </div>
-                                ) : (
-                                  <div>
-                                    <span className="font-bold text-amber-800">Chờ CCKB phê duyệt điều kiện xuất bãi (Clearance).</span>
-                                    <p className="text-[11px] text-amber-700 mt-0.5">Container có phát sinh cắm điện, đề nghị liên hệ bộ phận Thương vụ CCKB kiểm tra và duyệt hồ sơ.</p>
-                                  </div>
-                                )}
-                              </div>
+                        <div className="space-y-1.5 pt-0.5">
+                          {isTrailingContPlugged && (
+                            <div className="p-2 rounded bg-rose-50 border border-rose-300 text-rose-900 flex items-center gap-2 font-bold animate-bounce">
+                              <Zap className="w-4 h-4 text-rose-600 shrink-0" />
+                              <span>⚠️ CONTAINER ĐANG CẮM ĐIỆN! Bắt buộc rút điện trước khi ra bãi!</span>
                             </div>
                           )}
 
-                          {/* 3. Phí lưu bãi Container (22h - 06h) */}
+                          {hasTrailingContReefer && !isTrailingContCleared && (
+                            <div className="p-2 rounded bg-amber-50 border border-amber-300 text-amber-900 flex items-center gap-2">
+                              <FileCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                              <span>Chờ CCKB phê duyệt điều kiện xuất bãi (Clearance).</span>
+                            </div>
+                          )}
+
+                          {/* Phí lưu bãi Container */}
                           {calculatedStorage && (
-                            <div className="p-3 bg-white border border-slate-300 rounded space-y-2 shadow-2xs">
+                            <div className="p-2 bg-white rounded border border-slate-200 space-y-1.5">
                               <div className="flex items-center justify-between">
-                                <span className="font-bold text-slate-700">Phí lưu bãi Container (Qua đêm 22h-06h):</span>
-                                <span className="text-sm font-bold font-mono text-[#0A9444]">
+                                <span className="text-slate-600">
+                                  Phí lưu bãi ({calculatedStorage.totalNights} đêm):
+                                </span>
+                                <span className="font-mono font-bold text-slate-900">
                                   {calculatedStorage.fee.toLocaleString('vi-VN')} đ
                                 </span>
                               </div>
-                              <div className="text-[11px] text-slate-500 font-mono">
-                                Đã lưu {calculatedStorage.totalNights} đêm (Miễn phí 1 đêm đầu, tính phí {calculatedStorage.chargedNights} đêm x 50.000đ/ngày).
-                              </div>
 
-                              {/* Tùy chọn phạt mất vé bến bãi */}
-                              <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
-                                <label className="flex items-center space-x-2 text-xs text-rose-700 font-semibold cursor-pointer">
+                              {/* Tùy chọn phạt mất vé */}
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                                <label className="flex items-center space-x-1.5 text-rose-700 font-semibold cursor-pointer text-[11px]">
                                   <input
                                     type="checkbox"
                                     checked={isLostTicket}
                                     onChange={(e) => setIsLostTicket(e.target.checked)}
-                                    className="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer"
+                                    className="w-3.5 h-3.5 text-rose-600 rounded border-slate-300"
                                   />
                                   <span>Phạt mất liên vé giấy bến bãi (+250.000 đ)</span>
                                 </label>
-                                {isLostTicket && (
-                                  <span className="text-xs font-bold font-mono text-rose-600">250.000 đ</span>
-                                )}
+                                {isLostTicket && <span className="font-mono font-bold text-rose-600 text-[11px]">250.000 đ</span>}
                               </div>
 
-                              {/* Tùy chọn thu tiền tại cổng */}
+                              {/* Thu tiền tại cổng */}
                               {(calculatedStorage.fee > 0 || isLostTicket) && (
-                                <div className="pt-2 border-t border-slate-200 space-y-2 bg-slate-50 p-2.5 rounded">
+                                <div className="pt-1.5 border-t border-slate-100 space-y-1.5">
                                   <div className="flex items-center justify-between">
-                                    <label className="flex items-center space-x-2 text-xs font-bold text-slate-800 cursor-pointer">
+                                    <label className="flex items-center space-x-1.5 font-bold text-[#0A9444] cursor-pointer">
                                       <input
                                         type="checkbox"
                                         checked={paidAtGate}
                                         onChange={(e) => setPaidAtGate(e.target.checked)}
-                                        className="w-4 h-4 text-[#0A9444] rounded border-slate-300 focus:ring-[#0A9444] cursor-pointer"
+                                        className="w-4 h-4 text-[#0A9444] rounded border-slate-300"
                                       />
                                       <span>Thu tiền tại Cổng ra:</span>
                                     </label>
-                                    <span className="text-sm font-bold font-mono text-[#0A9444]">
+                                    <span className="font-mono font-bold text-sm text-[#0A9444]">
                                       {(calculatedStorage.fee + (isLostTicket ? 250000 : 0)).toLocaleString('vi-VN')} đ
                                     </span>
                                   </div>
 
                                   {paidAtGate && (
-                                    <div className="space-y-2 pt-1">
-                                      <div className="flex items-center gap-3">
-                                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                                          <input
-                                            type="radio"
-                                            name="unifiedPaymentMethod"
-                                            value="CASH"
-                                            checked={paymentMethod === 'CASH'}
-                                            onChange={() => setPaymentMethod('CASH')}
-                                            className="text-[#0A9444]"
-                                          />
-                                          <span>Tiền mặt</span>
-                                        </label>
-                                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                                          <input
-                                            type="radio"
-                                            name="unifiedPaymentMethod"
-                                            value="BANK_TRANSFER"
-                                            checked={paymentMethod === 'BANK_TRANSFER'}
-                                            onChange={() => setPaymentMethod('BANK_TRANSFER')}
-                                            className="text-[#0A9444]"
-                                          />
-                                          <span>Chuyển khoản (QR / CK)</span>
-                                        </label>
-                                      </div>
-
+                                    <div className="flex items-center gap-3 pt-1">
+                                      <label className="flex items-center space-x-1 cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          name="unifiedPaymentMethod"
+                                          value="CASH"
+                                          checked={paymentMethod === 'CASH'}
+                                          onChange={() => setPaymentMethod('CASH')}
+                                          className="text-[#0A9444]"
+                                        />
+                                        <span>Tiền mặt</span>
+                                      </label>
+                                      <label className="flex items-center space-x-1 cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          name="unifiedPaymentMethod"
+                                          value="BANK_TRANSFER"
+                                          checked={paymentMethod === 'BANK_TRANSFER'}
+                                          onChange={() => setPaymentMethod('BANK_TRANSFER')}
+                                          className="text-[#0A9444]"
+                                        />
+                                        <span>Chuyển khoản</span>
+                                      </label>
                                       {paymentMethod === 'BANK_TRANSFER' && (
-                                        <div className="space-y-2 pt-1">
-                                          <input
-                                            type="text"
-                                            value={receiptCode}
-                                            onChange={(e) => setReceiptCode(e.target.value)}
-                                            placeholder="Mã tham chiếu chuyển khoản..."
-                                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-mono"
-                                            required
-                                          />
-                                          {calculatedStorage && (calculatedStorage.fee + (isLostTicket ? 250000 : 0)) > 0 && (
-                                            <div className="p-2.5 bg-blue-50 border border-blue-200 rounded space-y-2">
-                                              <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold text-blue-900">Mã VietQR Napas 247</span>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => setShowExitQr(!showExitQr)}
-                                                  className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
-                                                >
-                                                  <QrCode className="w-3 h-3" />
-                                                  <span>{showExitQr ? 'Ẩn QR' : 'Mở VietQR Quét tiền'}</span>
-                                                </button>
-                                              </div>
-                                              {showExitQr && (
-                                                <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-blue-300 rounded shadow-2xs">
-                                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                  <img
-                                                    src={generateVietQrUrl({
-                                                      amount: calculatedStorage.fee + (isLostTicket ? 250000 : 0),
-                                                      description: `XUAT BAI ${selectedVehForExit.license_plate || 'XE'}`
-                                                    })}
-                                                    alt="Mã VietQR xuất bãi"
-                                                    className="w-48 h-auto rounded border border-slate-200"
-                                                  />
-                                                  <span className="text-[10px] text-slate-500 mt-1 font-semibold">Tài xế quét mã bằng ứng dụng ngân hàng bất kỳ</span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
+                                        <input
+                                          type="text"
+                                          value={receiptCode}
+                                          onChange={(e) => setReceiptCode(e.target.value)}
+                                          placeholder="Mã tham chiếu CK..."
+                                          className="w-36 px-2 py-0.5 border border-slate-300 rounded text-xs font-mono"
+                                          required
+                                        />
                                       )}
                                     </div>
                                   )}
@@ -1833,11 +1618,11 @@ export default function ExitClearancePage() {
                 </div>
               )}
 
-              {/* TÙY CHỌN PHẠT MẤT VÉ DÀNH CHO XE RA MỘT MÌNH (KHÔNG CÕNG CONT) */}
+              {/* TÙY CHỌN PHẠT MẤT VÉ CHO XE LẺ (NẾU KHÔNG KÉO CONT) */}
               {!hasTrailingContainer && (
-                <div className="p-3 bg-amber-50/80 border border-amber-200 rounded space-y-2 text-xs">
+                <div className="p-2 bg-amber-50/80 border border-amber-200 rounded text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center space-x-2 text-xs text-rose-700 font-bold cursor-pointer">
+                    <label className="flex items-center space-x-2 text-rose-700 font-bold cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isLostTicket}
@@ -1845,103 +1630,64 @@ export default function ExitClearancePage() {
                           setIsLostTicket(e.target.checked);
                           if (e.target.checked) setPaidAtGate(true);
                         }}
-                        className="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer"
+                        className="w-4 h-4 text-rose-600 rounded border-slate-300"
                       />
-                      <span>Báo mất liên vé giấy vào cổng (Phạt 250.000 đ theo quy định)</span>
+                      <span>Báo mất liên vé giấy vào cổng (Phạt 250.000 đ)</span>
                     </label>
-                    {isLostTicket && (
-                      <span className="text-xs font-bold font-mono text-rose-600">250.000 đ</span>
-                    )}
+                    {isLostTicket && <span className="font-mono font-bold text-rose-600">250.000 đ</span>}
                   </div>
-
                   {isLostTicket && (
-                    <div className="pt-2 border-t border-amber-200 space-y-2 animate-in fade-in">
-                      <div className="flex items-center gap-3">
-                        <span className="text-slate-700 font-bold">Hình thức thu phạt:</span>
-                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="vehicleOnlyPaymentMethod"
-                            value="CASH"
-                            checked={paymentMethod === 'CASH'}
-                            onChange={() => setPaymentMethod('CASH')}
-                            className="text-[#0A9444]"
-                          />
-                          <span>💵 Tiền mặt</span>
-                        </label>
-                        <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="vehicleOnlyPaymentMethod"
-                            value="BANK_TRANSFER"
-                            checked={paymentMethod === 'BANK_TRANSFER'}
-                            onChange={() => setPaymentMethod('BANK_TRANSFER')}
-                            className="text-[#0A9444]"
-                          />
-                          <span>📱 Chuyển khoản</span>
-                        </label>
-                      </div>
-
+                    <div className="flex items-center gap-3 pt-1 border-t border-amber-200">
+                      <label className="flex items-center space-x-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="vehicleOnlyPaymentMethod"
+                          value="CASH"
+                          checked={paymentMethod === 'CASH'}
+                          onChange={() => setPaymentMethod('CASH')}
+                          className="text-[#0A9444]"
+                        />
+                        <span>Tiền mặt</span>
+                      </label>
+                      <label className="flex items-center space-x-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="vehicleOnlyPaymentMethod"
+                          value="BANK_TRANSFER"
+                          checked={paymentMethod === 'BANK_TRANSFER'}
+                          onChange={() => setPaymentMethod('BANK_TRANSFER')}
+                          className="text-[#0A9444]"
+                        />
+                        <span>Chuyển khoản</span>
+                      </label>
                       {paymentMethod === 'BANK_TRANSFER' && (
-                        <div className="space-y-2 pt-1 w-full">
-                          <input
-                            type="text"
-                            value={receiptCode}
-                            onChange={(e) => setReceiptCode(e.target.value)}
-                            placeholder="Mã tham chiếu chuyển khoản..."
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-mono"
-                            required
-                          />
-                          <div className="p-2.5 bg-blue-50 border border-blue-200 rounded space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-blue-900">Mã VietQR phạt mất vé 250.000 đ</span>
-                              <button
-                                type="button"
-                                onClick={() => setShowExitQr(!showExitQr)}
-                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
-                              >
-                                <QrCode className="w-3 h-3" />
-                                <span>{showExitQr ? 'Ẩn QR' : 'Mở VietQR'}</span>
-                              </button>
-                            </div>
-                            {showExitQr && (
-                              <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-blue-300 rounded shadow-2xs">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={generateVietQrUrl({
-                                    amount: 250000,
-                                    description: `PHAT MAT VE ${selectedVehForExit.license_plate || 'XE'}`
-                                  })}
-                                  alt="Mã VietQR phạt mất vé"
-                                  className="w-44 h-auto rounded border border-slate-200"
-                                />
-                                <span className="text-[10px] text-slate-500 mt-1 font-semibold">Tài xế quét mã bằng ứng dụng ngân hàng bất kỳ</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        <input
+                          type="text"
+                          value={receiptCode}
+                          onChange={(e) => setReceiptCode(e.target.value)}
+                          placeholder="Mã tham chiếu CK..."
+                          className="w-36 px-2 py-0.5 border border-slate-300 rounded text-xs font-mono"
+                          required
+                        />
                       )}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* 3. GHI CHÚ XÁC NHẬN */}
+              {/* GHI CHÚ XUẤT BÃI 1 DÒNG GỌN GÀNG */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Ghi chú xuất bãi (Tùy chọn)
-                </label>
-                <textarea
+                <input
+                  type="text"
                   value={exitNotes}
                   onChange={(e) => setExitNotes(e.target.value)}
-                  placeholder="Tình trạng xe khi ra cổng, ghi chú kiểm tra..."
-                  rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-slate-500 focus:outline-none"
+                  placeholder="Ghi chú xuất bãi (Tùy chọn, tình trạng xe khi ra cổng)..."
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-slate-500 focus:outline-none"
                 />
               </div>
 
-              {/* 4. NÚT XÁC NHẬN */}
-              <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200">
+              {/* NÚT THAO TÁC */}
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowUnifiedExitModal(false)}
@@ -1953,7 +1699,7 @@ export default function ExitClearancePage() {
                 <button
                   type="submit"
                   disabled={isSubmittingExit || (hasTrailingContainer && (!selectedTrailingContId || isTrailingContPlugged))}
-                  className={`px-3.5 py-1.5 text-xs font-bold text-white rounded shadow-2xs transition-colors flex items-center gap-1.5 ${
+                  className={`px-4 py-1.5 text-xs font-bold text-white rounded shadow-2xs transition-colors flex items-center gap-1.5 ${
                     isSubmittingExit || (hasTrailingContainer && (!selectedTrailingContId || isTrailingContPlugged))
                       ? 'bg-slate-400 cursor-not-allowed opacity-60'
                       : 'bg-[#0A9444] hover:bg-[#087C3C] cursor-pointer'
@@ -1962,10 +1708,10 @@ export default function ExitClearancePage() {
                   <LogOut className="w-4 h-4" />
                   <span>
                     {isSubmittingExit 
-                      ? 'Đang xử lý xuất bãi...' 
+                      ? 'Đang xử lý...' 
                       : hasTrailingContainer 
-                      ? (!selectedTrailingContId ? 'Chưa chọn Container kéo ra' : 'Xác nhận Xe & Container Xuất bãi') 
-                      : 'Xác nhận Xe rời bãi (Không cont)'}
+                      ? (!selectedTrailingContId ? 'Chưa chọn Cont kéo ra' : 'Xác nhận Xe & Cont Xuất bãi') 
+                      : 'Xác nhận Xe rời bãi'}
                   </span>
                 </button>
               </div>

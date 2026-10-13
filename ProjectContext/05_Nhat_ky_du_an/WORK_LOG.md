@@ -1,5 +1,29 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 17:35 — Ẩn Bộ Chọn Kích Cỡ/Vỏ Container Cổng Vào (/entry) & Tinh Gọn Toàn Diện Modal Cổng Ra (/exit)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *Cổng vào (`/entry`):* Chưa kiểm soát loại cont thì ẩn chức năng chọn Kích cỡ (40ft/20ft/45ft) và Loại vỏ container (RF/DC/OT/FR). An ninh hiện trường chỉ ghi nhận Số container; trạng thái HÀNG hoặc RỖNG do Điều phối viên cập nhật sau khi kiểm tra bãi.
+  2. *Modal Cổng ra (`/exit`):* Quá dài dòng lê thê, chứa nhiều khối giải thích thừa thãi ("BẮT BUỘC TÌM & CHỌN...", checklist 4 điều kiện to chiếm 1/3 màn hình, thông tin xe dàn trải 4 dòng). Cần thiết kế lại ngắn gọn, tinh tế, thao tác 1-chạm.
+- **Tập tin sửa đổi:**
+  - `src/app/entry/page.tsx`:
+    * Ẩn hoàn toàn bộ chọn Kích cỡ (20/40/45ft) và Loại vỏ container (RF/DC/OT/FR), cùng tùy chọn cấu hình cặp 20ft phức tạp.
+    * Chỉ giữ lại ô nhập `Mã số Container (4 chữ cái + 7 chữ số) *` kèm validation định dạng và cảnh báo trùng lặp tức thì trong bãi.
+    * Bổ sung ghi chú rõ ràng: `* An ninh chỉ ghi nhận số container. Trạng thái HÀNG hoặc RỖNG do Điều phối viên cập nhật sau khi kiểm tra bãi.`
+    * Giữ nguyên giá trị mặc định nội bộ (`containerSize = '40'`, `containerType = 'RF'`) để đảm bảo tính toàn vẹn 100% với schema database và RPC `sc_vehicle_entry_atomic`.
+  - `src/app/exit/page.tsx`:
+    * Tái cấu trúc Unified Exit Modal theo phong cách công thái học cao (High-Density Ergonomics), loại bỏ hoàn toàn các banner cảnh báo màu vàng dài dòng.
+    * Gộp Thông tin xe vào Header bar ngang tích hợp Badge biển số font mono nổi bật `[Biển số]` kèm loại xe, giờ vào và trạng thái vé cổng.
+    * Checklist 4 điều kiện rút gọn thành 1 dòng 4 mini-pills trực quan: `[1. Vé cổng]` `[2. Điện lạnh]` `[3. CCKB]` `[4. Lưu bãi]`.
+    * Quy cách phương tiện chuyển thành 2 nút tabs ngang nhỏ gọn: `[Xe có kéo Container]` | `[Xe không cont (Xe lẻ)]`.
+    * Tự động nhận diện và gán container lúc vào bãi (`attachedInboundCont`) vào `selectedTrailingContId` ngay khi mở modal và tự động tính cước lưu bãi; An ninh không cần phải đọc cảnh báo hay bấm "Chọn nhanh" thủ công nếu xe kéo đúng cont lúc vào.
+    * Thu gọn bảng điều kiện cắm điện, phê duyệt CCKB và phí lưu bãi: chỉ hiện cảnh báo nổi bật khi có vi phạm; tích hợp thanh toán lưu bãi tại cổng tiện lợi.
+    * Ghi chú xuất bãi chuyển thành 1 dòng input text thanh thoát.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, Turbopack hoàn tất 17/17 routes tĩnh, TypeScript pass 100% không cảnh báo lỗi.
+  - Server local `npm start` khởi động lại thành công trên cổng 3000.
+- **Trạng thái:** Hoàn tất, sẵn sàng commit và push lên nhánh `main`.
+
 ## 2026-10-13 17:15 — Chuẩn Hóa Toàn Diện Nghiệp Vụ Thu Phí & Sổ Cái (/billing): Bổ Sung Định Danh Đối Tượng, Thu Gộp 1-N Cont / 1-N Khách & Phân Quyền Triệt Để
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
