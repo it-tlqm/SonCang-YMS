@@ -1,5 +1,32 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 15:10 — Triển Khai Hệ Thống Lên Môi Trường Internet Trực Tuyến Toàn Cầu (Vercel Production)
+
+- **Yêu cầu / nguồn:** Phê duyệt từ Chủ dự án:
+  *"ok gio deploy vercel nhỉ"*
+- **Kết quả triển khai:**
+  1. **Tên miền trực tuyến chính thức:** 👉 **`https://son-cang-yms.vercel.app`**
+  2. **Thời gian build & Deploy:** 55 giây, Next.js 16 Turbopack tối ưu hóa hoàn toàn 17 routes, Status: `Ready`.
+  3. **Biến môi trường:** Đã nạp đầy đủ cấu hình Supabase Cloud DEV (`euswzyespwaxyrjkfkrq`) với `NEXT_PUBLIC_ENABLE_REAL_WRITE=true`.
+  4. **Quy trình CI/CD:** Hệ thống đã tự động liên kết với GitHub repository `it-tlqm/SonCang-YMS`. Mọi cập nhật đẩy lên nhánh `main` trong tương lai sẽ tự động được biên dịch và đưa lên máy chủ production không có gián đoạn dịch vụ.
+
+## 2026-10-13 14:32 — Khởi Tạo, Bảo Mật & Đẩy Toàn Bộ Mã Nguồn Dự Án Lên GitHub Công Ty (it-tlqm/SonCang-YMS)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"OK giờ tôi sẽ dùng tk git mới của công ty đẻ lưu trữ dự án này bạn ạ, nhưng hình như trên máy là tk cá nhan của tôi ay sao ấy" -> "Collaborators: thanhngx12-qnh Collaborator"*
+- **Giải pháp xử lý xung đột đa tài khoản Git:**
+  1. Cấu hình danh tính riêng cho repository (`local config`):
+     - `git config user.name "it-tlqm"`
+     - `git config user.email "it@talunglogistics.com"`
+     -> Đảm bảo mọi commit đứng tên công ty 100%, bảo toàn các dự án cá nhân khác trên máy tính mà không cần đổi hay xóa credential Windows.
+  2. Phân quyền Cộng tác viên GitHub:
+     - Chủ sở hữu tài khoản công ty mời tài khoản máy tính (`thanhngx12-qnh`) làm Collaborator trên repository `https://github.com/it-tlqm/SonCang-YMS`.
+  3. Xử lý GitHub Push Protection & Quét sạch Secrets:
+     - Dọn dẹp và redact các Google API key thử nghiệm trong `scripts/stitch_list.mjs` và tài liệu lịch sử `WORK_LOG.md`.
+  4. Đóng gói Initial Commit & Đẩy lên nhánh chính `main`:
+     - Tạo file `README.md` mô tả toàn diện hệ thống YMS Sơn Cảng, kiến trúc Next.js 16, Supabase, RBAC V5 và hướng dẫn vận hành.
+     - Lệnh: `git push -u origin main` thành công 100%. Nhánh cục bộ `main` đã liên kết và đồng bộ hoàn toàn với `origin/main`.
+
 ## 2026-10-13 14:05 — Nâng Cấp Toàn Bộ Báo Cáo Excel (.xlsx) Sang Thư Viện ExcelJS Với Bộ Styling Doanh Nghiệp Chuyên Nghiệp
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

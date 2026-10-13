@@ -40,6 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 15:10 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TRIỂN KHAI THÀNH CÔNG HỆ THỐNG LÊN MÔI TRƯỜNG INTERNET TOÀN CẦU QUA VERCEL**:
+  * **1. Tên miền trực tuyến chính thức:** 👉 **`https://son-cang-yms.vercel.app`**
+  * **2. Trạng thái Vercel:** `Ready` (Biên dịch Turbopack hoàn tất trong 55s, 0 lỗi).
+  * **3. Liên kết CI/CD Tự động:** Kho lưu trữ `it-tlqm/SonCang-YMS` (nhánh `main`) đã kết nối tự động với Vercel. Mọi commit trong tương lai sẽ tự động cập nhật lên môi trường production.
+  * **4. Kết nối Cơ sở dữ liệu Cloud:** Đã nạp thành công 4 biến môi trường Supabase Cloud DEV (`euswzyespwaxyrjkfkrq`) với cờ `NEXT_PUBLIC_ENABLE_REAL_WRITE=true`.
+
+- **Cập nhật lúc:** 13/10/2026 14:32 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KHỞI TẠO & ĐỒNG BỘ THÀNH CÔNG REPOSITORY GITHUB CÔNG TY (`it-tlqm/SonCang-YMS`)**:
+  * **1. Cấu hình danh tính Git chuyên biệt:** Cấu hình local `user.name = "it-tlqm"` và `user.email = "it@talunglogistics.com"` cho riêng repository dự án, bảo toàn 100% tài khoản cá nhân của lập trình viên trên máy tính.
+  * **2. Phân quyền Cộng tác viên (Collaborator Access):** Kết nối tài khoản máy tính (`thanhngx12-qnh`) với kho lưu trữ công ty `https://github.com/it-tlqm/SonCang-YMS.git`.
+  * **3. Làm sạch bảo mật & An toàn Secrets:** Loại bỏ và redact hoàn toàn các Google API key thử nghiệm khỏi commit để tuân thủ quy tắc bảo mật GitHub Push Protection.
+  * **4. Bản commit đầu tiên (Initial Commit):** Đóng gói toàn bộ mã nguồn Next.js 16, các màn hình vận hành, hệ thống Supabase migrations 001–019, bộ test pgtap, và tài liệu nghiệp vụ V5.
+  * **5. Đồng bộ thành công:** Đẩy nhánh `main` lên `origin/main` tại `https://github.com/it-tlqm/SonCang-YMS`.
+
 - **Cập nhật lúc:** 13/10/2026 14:05 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **HOÀN TẤT NÂNG CẤP TOÀN BỘ FILE EXCEL (.XLSX) VỚI STYLING CHUYÊN NGHIỆP, CĂN LỀ, MÀU SẮC THƯƠNG HIỆU & ĐỊNH DẠNG SỐ KẾ TOÁN**:
   * **1. Chuyển sang công nghệ `ExcelJS` (v4.4.0):** Hỗ trợ 100% thuộc tính styling trực tiếp trên file binary `.xlsx` chuẩn OpenXML, tương thích tuyệt đối mọi phiên bản Excel (Desktop / 365 / Web), Google Sheets, Apple Numbers, LibreOffice.
