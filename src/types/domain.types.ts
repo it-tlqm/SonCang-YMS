@@ -3,6 +3,8 @@
  * Đối chiếu: Workbook V5, Migration 002 (RBAC), Migration 004 (Domain Vehicles & Containers)
  */
 
+import { RoleCode, DepartmentCode } from './auth.types';
+
 // 7 loại phương tiện chuẩn V5 đã được khởi tạo trong app_vehicle_types (Migration 004)
 export type VehicleTypeCode =
   | 'CONT_LANH'             // Xe container lạnh/khô có hàng (allows_container: true, 250.000đ)
@@ -165,8 +167,11 @@ export interface Customer {
   name: string;
   phone?: string | null;
   tax_code?: string | null;
+  address?: string | null;
   notes?: string | null;
+  is_active?: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface ReeferTemperatureLog {
@@ -349,14 +354,22 @@ export interface TariffItem {
   is_active: boolean;
 }
 
-export interface Customer {
+export interface StaffUser {
   id: string;
-  name: string;
+  auth_user_id?: string | null;
+  full_name: string;
+  email: string;
   phone?: string | null;
-  tax_code?: string | null;
+  role_code: RoleCode;
+  role_name?: string;
+  department_code: DepartmentCode;
+  department_name?: string;
+  yard_id?: string | null;
+  yard_name?: string;
+  is_active: boolean;
   notes?: string | null;
-  is_active?: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 

@@ -24,7 +24,8 @@ import {
   PaymentRecord,
   YardZoneInfo,
   ReeferTemperatureLog,
-  Customer
+  Customer,
+  StaffUser
 } from '@/types/domain.types';
 
 export interface CreateVehicleParams {
@@ -409,11 +410,36 @@ export interface IYardRepository {
   getCustomers(): Promise<Customer[]>;
 
   /** Tạo khách hàng / chủ hàng mới nhanh (hỗ trợ nhập 1 chạm chuẩn AppSheet) */
-  createCustomer(customer: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+  createCustomer(customer: { name: string; phone?: string; tax_code?: string; address?: string; notes?: string }): Promise<{
     success: boolean;
     customer?: Customer;
     error?: string;
   }>;
+
+  /** Cập nhật thông tin khách hàng / chủ hàng (sửa nhầm tên, SĐT, MST, ghi chú, trạng thái) */
+  updateCustomer(customer: Partial<Customer> & { id: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }>;
+
+  /** Xóa hoặc vô hiệu hóa khách hàng / chủ hàng */
+  deleteCustomer(id: string): Promise<{ success: boolean; error?: string }>;
+
+  /** Lấy danh sách nhân sự / người dùng trực ca (Staff Users) */
+  getStaffUsers(): Promise<StaffUser[]>;
+
+  /** Tạo mới nhân sự / người dùng và gán vai trò V1 */
+  createStaffUser(user: Partial<StaffUser>): Promise<{ success: boolean; user?: StaffUser; error?: string }>;
+
+  /** Cập nhật thông tin nhân sự / đổi vai trò / đổi bộ phận */
+  updateStaffUser(user: Partial<StaffUser> & { id: string }): Promise<{ success: boolean; user?: StaffUser; error?: string }>;
+
+  /** Khóa hoặc Mở khóa tài khoản nhân sự */
+  toggleStaffUserStatus(id: string, isActive: boolean): Promise<{ success: boolean; error?: string }>;
+
+  /** Xóa nhân sự / tài khoản khỏi hệ thống */
+  deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }>;
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;

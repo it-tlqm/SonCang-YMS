@@ -40,6 +40,31 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 18:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ KHÁCH HÀNG (SỬA NHẦM TỨC THÌ, TRANG /admin/customers) & QUẢN TRỊ NHÂN SỰ ĐỘNG (/admin/users, MIGRATION 22)**:
+  * **1. Quản lý Khách hàng / Chủ hàng:**
+    - Khắc phục triệt để tình trạng "thêm nhầm không sửa được":
+      + Cập nhật component `CustomerCombobox`: Mỗi dòng khách hàng có nút cây bút `✏️ Sửa`, mở Modal Sửa thông tin tức thì (Tên, SĐT, MST, Ghi chú, Trạng thái, và nút Xóa). Khi lưu, tự động cập nhật ngay trên form đang nhập mà không cần tải lại trang.
+      + Xây dựng mới trang Quản trị Khách hàng chuẩn mực [`/admin/customers`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/customers/page.tsx): Bảng danh sách, Tìm kiếm realtime, Bộ lọc trạng thái, Modal Thêm mới, Modal Sửa, Đổi trạng thái 1-chạm, Xóa khách hàng, thẻ thống kê (Tổng số đối tác, Đang giao dịch, Doanh nghiệp có MST).
+      + Bổ sung vào Sidebar Navigation của `AppShell`.
+  * **2. Quản trị Nhân sự & Phân quyền Vai trò Động ([`/admin/users`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx)):**
+    - Loại bỏ hoàn toàn mảng dữ liệu tĩnh hardcode trong mã nguồn frontend.
+    - Xây dựng trung tâm quản trị nhân sự thực tế:
+      + Tải động danh sách nhân sự từ Database / Repository.
+      + Nút `➕ Thêm mới Nhân viên`: Modal tạo nhân viên (Họ tên, Email công vụ, SĐT, Phân vai trò trong 7 vai trò V1 chuẩn RBAC, Tự động gán Bộ phận tương ứng, Chọn bãi, Ghi chú trực ca).
+      + Nút `✏️ Sửa`: Modal sửa thông tin nhân viên và chuyển đổi vai trò linh hoạt.
+      + Nút `🔒 Khóa / 🔓 Kích hoạt` 1-chạm tài khoản nhân sự.
+      + Nút `🗑️ Xóa` nhân sự có hộp thoại xác nhận.
+      + Bổ sung thẻ thống kê nhân sự theo 4 bộ phận: An ninh Cổng, Thương vụ CCKB, Điều phối Bãi, Ban Quản trị.
+  * **3. Cơ sở dữ liệu & RPC An toàn:**
+    - Migration `20261013000022_customer_and_user_management.sql`:
+      + Tạo bảng `app_customers` (có RLS và seed dữ liệu thực tế).
+      + Tạo bảng `app_staff_users` (có RLS và seed 7 vai trò nhân sự V1).
+      + Các hàm RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` chạy `SECURITY DEFINER` kiểm tra quyền `admin.roles.manage` và ghi nhận nhật ký kiểm toán `app_audit_events`.
+    - Apply thành công 100% Migration 22 lên Supabase Cloud Database `son-cang-yms-dev` qua `npx supabase db push`.
+  * **4. Đã xác minh:** Lệnh `npm run build` hoàn tất với mã 0 (18/18 static routes tối ưu, 0 lỗi TypeScript). Server local `npm start` đã online trên cổng 3000.
+  * **5. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel tự động triển khai production.
+
 - **Cập nhật lúc:** 13/10/2026 18:05 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI THU VÉ CỔNG TẠI CỔNG RA (MIGRATION 20261013000021 & RPC sc_collect_vehicle_ticket)**:
   * **1. Phân tích nguyên nhân gốc rễ ("Bấm mãi không thu được"):**

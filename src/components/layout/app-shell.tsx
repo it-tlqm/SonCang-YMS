@@ -27,6 +27,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Clock,
+  Building2,
 } from 'lucide-react';
 
 interface NavItem {
@@ -155,6 +156,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     },
 
     // Nhóm 3: HỆ THỐNG & QUẢN TRỊ
+    {
+      name: 'Danh mục khách hàng',
+      href: '/admin/customers',
+      icon: Building2,
+      permissionsAny: ['reefer.request.create', 'admin.billing_settings.manage', 'admin.roles.manage'],
+      badge: 'Khách hàng',
+      section: 'ADMIN',
+    },
     {
       name: 'Biểu phí bến bãi',
       href: '/admin/tariffs',

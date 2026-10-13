@@ -36,9 +36,10 @@ import {
   PaymentRecord,
   YardZoneInfo,
   ReeferTemperatureLog,
-  Customer
+  Customer,
+  StaffUser
 } from '@/types/domain.types';
-import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS } from './demo-repository';
+import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
 
 import { Database } from '@/types/database.types';
 import { 
@@ -2479,7 +2480,7 @@ export class SupabaseRepository implements IYardRepository {
   }
 
   /** Tạo khách hàng / chủ hàng mới nhanh (chuẩn AppSheet 1 chạm) */
-  async createCustomer(params: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+  async createCustomer(params: { name: string; phone?: string; tax_code?: string; address?: string; notes?: string }): Promise<{
     success: boolean;
     customer?: Customer;
     error?: string;
@@ -2495,6 +2496,7 @@ export class SupabaseRepository implements IYardRepository {
         name: trimmedName,
         phone: params.phone?.trim() || null,
         tax_code: params.tax_code?.trim() || null,
+        address: params.address?.trim() || null,
         notes: params.notes?.trim() || null,
         is_active: true,
       };
@@ -2524,6 +2526,7 @@ export class SupabaseRepository implements IYardRepository {
       name: trimmedName,
       phone: params.phone?.trim() || null,
       tax_code: params.tax_code?.trim() || null,
+      address: params.address?.trim() || null,
       notes: params.notes?.trim() || null,
       is_active: true,
       created_at: new Date().toISOString()
@@ -2541,6 +2544,294 @@ export class SupabaseRepository implements IYardRepository {
     }
 
     return { success: true, customer: fallbackCust };
+  }
+
+  /** Cập nhật thông tin khách hàng / chủ hàng (sửa nhầm tên, SĐT, MST, ghi chú, trạng thái) */
+  async updateCustomer(customer: Partial<Customer> & { id: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }> {
+    try {
+      const supabase = createClient();
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+      if (customer.name !== undefined) updateData.name = customer.name.trim();
+      if (customer.phone !== undefined) updateData.phone = customer.phone ? customer.phone.trim() : null;
+      if (customer.tax_code !== undefined) updateData.tax_code = customer.tax_code ? customer.tax_code.trim() : null;
+      if (customer.address !== undefined) updateData.address = customer.address ? customer.address.trim() : null;
+      if (customer.notes !== undefined) updateData.notes = customer.notes ? customer.notes.trim() : null;
+      if (customer.is_active !== undefined) updateData.is_active = customer.is_active;
+
+      const { data, error } = await supabase
+        .from('app_customers' as any)
+        .update(updateData)
+        .eq('id', customer.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_customers');
+          if (saved) {
+            const list: Customer[] = JSON.parse(saved);
+            const idx = list.findIndex(c => c.id === customer.id);
+            if (idx !== -1) {
+              list[idx] = data as unknown as Customer;
+              localStorage.setItem('soncang_v5_customers', JSON.stringify(list));
+            }
+          }
+        }
+        return { success: true, customer: data as unknown as Customer };
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Fallback LocalStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_customers');
+      if (saved) {
+        const list: Customer[] = JSON.parse(saved);
+        const idx = list.findIndex(c => c.id === customer.id);
+        if (idx !== -1) {
+          list[idx] = {
+            ...list[idx],
+            name: customer.name !== undefined ? customer.name.trim() : list[idx].name,
+            phone: customer.phone !== undefined ? customer.phone : list[idx].phone,
+            tax_code: customer.tax_code !== undefined ? customer.tax_code : list[idx].tax_code,
+            address: customer.address !== undefined ? customer.address : list[idx].address,
+            notes: customer.notes !== undefined ? customer.notes : list[idx].notes,
+            is_active: customer.is_active !== undefined ? customer.is_active : list[idx].is_active,
+            updated_at: new Date().toISOString()
+          };
+          localStorage.setItem('soncang_v5_customers', JSON.stringify(list));
+          return { success: true, customer: list[idx] };
+        }
+      }
+    }
+    return { success: false, error: 'Không tìm thấy khách hàng cần sửa' };
+  }
+
+  /** Xóa hoặc vô hiệu hóa khách hàng / chủ hàng */
+  async deleteCustomer(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      await supabase
+        .from('app_customers' as any)
+        .delete()
+        .eq('id', id);
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_customers');
+      if (saved) {
+        const list: Customer[] = JSON.parse(saved);
+        const filtered = list.filter(c => c.id !== id);
+        localStorage.setItem('soncang_v5_customers', JSON.stringify(filtered));
+      }
+    }
+    return { success: true };
+  }
+
+  /** Lấy danh sách nhân sự / người dùng trực ca (Staff Users) */
+  async getStaffUsers(): Promise<StaffUser[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('app_staff_users' as any)
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data as unknown as StaffUser[];
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_staff_users');
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return [...INITIAL_DEMO_STAFF_USERS];
+  }
+
+  /** Tạo mới nhân sự / người dùng và gán vai trò V1 */
+  async createStaffUser(user: Partial<StaffUser>): Promise<{ success: boolean; user?: StaffUser; error?: string }> {
+    const fullName = user.full_name?.trim();
+    const email = user.email?.trim().toLowerCase();
+    if (!fullName) return { success: false, error: 'Họ và tên nhân viên không được để trống' };
+    if (!email) return { success: false, error: 'Email nhân viên không được để trống' };
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_upsert_staff_user', {
+        p_full_name: fullName,
+        p_email: email,
+        p_phone: user.phone?.trim() || null,
+        p_role_code: user.role_code || 'SEC_STAFF',
+        p_department_code: user.department_code || 'AN_NINH',
+        p_yard_id: user.yard_id || null,
+        p_is_active: user.is_active !== undefined ? user.is_active : true,
+        p_notes: user.notes?.trim() || null,
+      });
+
+      if (!error && data && (data as any).success) {
+        const newUser = (data as any).user as StaffUser;
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_staff_users');
+          const list: StaffUser[] = saved ? JSON.parse(saved) : [...INITIAL_DEMO_STAFF_USERS];
+          list.unshift(newUser);
+          localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+        }
+        return { success: true, user: newUser };
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Fallback LocalStorage
+    const fallbackUser: StaffUser = {
+      id: user.id || `staff-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      full_name: fullName,
+      email: email,
+      phone: user.phone?.trim() || null,
+      role_code: user.role_code || 'SEC_STAFF',
+      role_name: user.role_name || `Vai trò ${user.role_code || 'SEC_STAFF'}`,
+      department_code: user.department_code || 'AN_NINH',
+      department_name: user.department_name || 'Bộ phận An ninh & Bảo vệ',
+      yard_id: user.yard_id || '20000000-0000-0000-0000-000000000001',
+      yard_name: user.yard_name || 'Bãi Sơn Cảng',
+      is_active: user.is_active !== undefined ? user.is_active : true,
+      notes: user.notes?.trim() || null,
+      created_at: new Date().toISOString()
+    };
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_staff_users');
+      const list: StaffUser[] = saved ? JSON.parse(saved) : [...INITIAL_DEMO_STAFF_USERS];
+      list.unshift(fallbackUser);
+      localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+    }
+
+    return { success: true, user: fallbackUser };
+  }
+
+  /** Cập nhật thông tin nhân sự / đổi vai trò / đổi bộ phận */
+  async updateStaffUser(user: Partial<StaffUser> & { id: string }): Promise<{ success: boolean; user?: StaffUser; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_upsert_staff_user', {
+        p_id: user.id,
+        p_full_name: user.full_name?.trim() || '',
+        p_email: user.email?.trim().toLowerCase() || '',
+        p_phone: user.phone?.trim() || null,
+        p_role_code: user.role_code || 'SEC_STAFF',
+        p_department_code: user.department_code || 'AN_NINH',
+        p_yard_id: user.yard_id || null,
+        p_is_active: user.is_active !== undefined ? user.is_active : true,
+        p_notes: user.notes?.trim() || null,
+      });
+
+      if (!error && data && (data as any).success) {
+        const updated = (data as any).user as StaffUser;
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_staff_users');
+          if (saved) {
+            const list: StaffUser[] = JSON.parse(saved);
+            const idx = list.findIndex(u => u.id === user.id);
+            if (idx !== -1) {
+              list[idx] = updated;
+              localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+            }
+          }
+        }
+        return { success: true, user: updated };
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Fallback LocalStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_staff_users');
+      if (saved) {
+        const list: StaffUser[] = JSON.parse(saved);
+        const idx = list.findIndex(u => u.id === user.id);
+        if (idx !== -1) {
+          list[idx] = {
+            ...list[idx],
+            full_name: user.full_name !== undefined ? user.full_name.trim() : list[idx].full_name,
+            email: user.email !== undefined ? user.email.trim().toLowerCase() : list[idx].email,
+            phone: user.phone !== undefined ? user.phone : list[idx].phone,
+            role_code: user.role_code || list[idx].role_code,
+            department_code: user.department_code || list[idx].department_code,
+            yard_id: user.yard_id !== undefined ? user.yard_id : list[idx].yard_id,
+            is_active: user.is_active !== undefined ? user.is_active : list[idx].is_active,
+            notes: user.notes !== undefined ? user.notes : list[idx].notes,
+            updated_at: new Date().toISOString()
+          };
+          localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+          return { success: true, user: list[idx] };
+        }
+      }
+    }
+    return { success: false, error: 'Không tìm thấy nhân viên cần sửa' };
+  }
+
+  /** Khóa hoặc Mở khóa tài khoản nhân sự */
+  async toggleStaffUserStatus(id: string, isActive: boolean): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      await (supabase.rpc as any)('sc_toggle_staff_user', {
+        p_id: id,
+        p_is_active: isActive,
+      });
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_staff_users');
+      if (saved) {
+        const list: StaffUser[] = JSON.parse(saved);
+        const idx = list.findIndex(u => u.id === id);
+        if (idx !== -1) {
+          list[idx].is_active = isActive;
+          list[idx].updated_at = new Date().toISOString();
+          localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+        }
+      }
+    }
+    return { success: true };
+  }
+
+  /** Xóa nhân sự / tài khoản khỏi hệ thống */
+  async deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      await (supabase.rpc as any)('sc_delete_staff_user', {
+        p_id: id,
+      });
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_staff_users');
+      if (saved) {
+        const list: StaffUser[] = JSON.parse(saved);
+        const filtered = list.filter(u => u.id !== id);
+        localStorage.setItem('soncang_v5_staff_users', JSON.stringify(filtered));
+      }
+    }
+    return { success: true };
   }
 }
 

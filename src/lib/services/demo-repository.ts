@@ -23,7 +23,8 @@ import {
   PaymentRecord,
   YardZoneInfo,
   ReeferTemperatureLog,
-  Customer
+  Customer,
+  StaffUser
 } from '@/types/domain.types';
 import { 
   IYardRepository, 
@@ -346,6 +347,107 @@ export const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   { id: 'cust-8', name: 'Khách hàng vãng lai', phone: '', notes: 'Thu tiền trực tiếp từng lượt' }
 ];
 
+export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
+  {
+    id: '20000000-0000-0000-0000-000000000020',
+    full_name: 'Trần Quốc Bảo',
+    email: 'sec_gate_01@soncang.vn',
+    phone: '0981 123 456',
+    role_code: 'SEC_STAFF',
+    role_name: 'Nhân viên An ninh Cổng',
+    department_code: 'AN_NINH',
+    department_name: 'Bộ phận An ninh & Bảo vệ',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Trực ca bốt cổng vào & cổng ra'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000021',
+    full_name: 'Nguyễn Văn An',
+    email: 'sec_lead_01@soncang.vn',
+    phone: '0982 234 567',
+    role_code: 'SEC_LEAD',
+    role_name: 'Trưởng bộ phận An ninh',
+    department_code: 'AN_NINH',
+    department_name: 'Bộ phận An ninh & Bảo vệ',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Giám sát ca trực an ninh, duyệt điều chỉnh giờ xe'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000030',
+    full_name: 'Lê Thị Dung',
+    email: 'port_cckb_01@soncang.vn',
+    phone: '0983 345 678',
+    role_code: 'PORT_STAFF',
+    role_name: 'Nhân viên Thương vụ CCKB',
+    department_code: 'CCKB',
+    department_name: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Quản lý yêu cầu điện, thu tiền điện container'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000031',
+    full_name: 'Hoàng Minh Cường',
+    email: 'port_lead_01@soncang.vn',
+    phone: '0984 456 789',
+    role_code: 'PORT_LEAD',
+    role_name: 'Trưởng bộ phận CCKB',
+    department_code: 'CCKB',
+    department_name: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Trưởng ca CCKB, phê duyệt công nợ và clearance'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000040',
+    full_name: 'Vũ Văn Giang',
+    email: 'dis_yard_01@soncang.vn',
+    phone: '0985 567 890',
+    role_code: 'DIS_STAFF',
+    role_name: 'Nhân viên Điều phối Bãi',
+    department_code: 'DIEU_PHOI',
+    department_name: 'Bộ phận Điều phối & Hiện trường',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Cập nhật tình trạng HÀNG/RỖNG hiện trường'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000041',
+    full_name: 'Phạm Đình Hải',
+    email: 'dis_lead_01@soncang.vn',
+    phone: '0986 678 901',
+    role_code: 'DIS_LEAD',
+    role_name: 'Trưởng bộ phận Điều phối',
+    department_code: 'DIEU_PHOI',
+    department_name: 'Bộ phận Điều phối & Hiện trường',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Trưởng ca điều phối bến bãi'
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000010',
+    full_name: 'Ban Quản trị Hệ thống TLQM',
+    email: 'admin_01@soncang.vn',
+    phone: '0988 888 999',
+    role_code: 'SYS_ADMIN',
+    role_name: 'Quản trị viên Hệ thống',
+    department_code: 'HE_THONG',
+    department_name: 'Ban Quản trị & Công nghệ',
+    yard_id: null,
+    yard_name: 'Toàn hệ thống',
+    is_active: true,
+    notes: 'Toàn quyền cấu hình, tài khoản và audit logs'
+  }
+];
+
 export class DemoRepository implements IYardRepository {
   readonly mode = 'DEMO' as const;
 
@@ -357,6 +459,7 @@ export class DemoRepository implements IYardRepository {
   private payments: PaymentRecord[] = [...INITIAL_DEMO_PAYMENTS];
   private temperatureLogs: ReeferTemperatureLog[] = [...INITIAL_DEMO_TEMP_LOGS];
   private customers: Customer[] = [...INITIAL_DEMO_CUSTOMERS];
+  private staffUsers: StaffUser[] = [...INITIAL_DEMO_STAFF_USERS];
   private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
@@ -416,6 +519,10 @@ export class DemoRepository implements IYardRepository {
       if (savedCust) {
         try { this.customers = JSON.parse(savedCust); } catch {}
       }
+      const savedStaff = localStorage.getItem('soncang_v5_staff_users');
+      if (savedStaff) {
+        try { this.staffUsers = JSON.parse(savedStaff); } catch {}
+      }
       const savedTF = localStorage.getItem('soncang_v5_demo_tariffs');
       if (savedTF) {
         try { this.tariffs = JSON.parse(savedTF); } catch {}
@@ -438,6 +545,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_demo_payments', JSON.stringify(this.payments));
       localStorage.setItem('soncang_v5_demo_temperature_logs', JSON.stringify(this.temperatureLogs));
       localStorage.setItem('soncang_v5_customers', JSON.stringify(this.customers));
+      localStorage.setItem('soncang_v5_staff_users', JSON.stringify(this.staffUsers));
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
     }
@@ -1981,7 +2089,7 @@ export class DemoRepository implements IYardRepository {
     return [...this.customers];
   }
 
-  async createCustomer(params: { name: string; phone?: string; tax_code?: string; notes?: string }): Promise<{
+  async createCustomer(params: { name: string; phone?: string; tax_code?: string; address?: string; notes?: string }): Promise<{
     success: boolean;
     customer?: Customer;
     error?: string;
@@ -1999,6 +2107,7 @@ export class DemoRepository implements IYardRepository {
       name: trimmedName,
       phone: params.phone?.trim() || null,
       tax_code: params.tax_code?.trim() || null,
+      address: params.address?.trim() || null,
       notes: params.notes?.trim() || null,
       is_active: true,
       created_at: new Date().toISOString()
@@ -2006,6 +2115,122 @@ export class DemoRepository implements IYardRepository {
     this.customers.unshift(newCust);
     this.persist();
     return { success: true, customer: newCust };
+  }
+
+  async updateCustomer(customer: Partial<Customer> & { id: string }): Promise<{
+    success: boolean;
+    customer?: Customer;
+    error?: string;
+  }> {
+    const idx = this.customers.findIndex(c => c.id === customer.id);
+    if (idx === -1) {
+      return { success: false, error: 'Không tìm thấy khách hàng cần cập nhật' };
+    }
+    const updated: Customer = {
+      ...this.customers[idx],
+      name: customer.name !== undefined ? customer.name.trim() : this.customers[idx].name,
+      phone: customer.phone !== undefined ? (customer.phone ? customer.phone.trim() : null) : this.customers[idx].phone,
+      tax_code: customer.tax_code !== undefined ? (customer.tax_code ? customer.tax_code.trim() : null) : this.customers[idx].tax_code,
+      address: customer.address !== undefined ? (customer.address ? customer.address.trim() : null) : this.customers[idx].address,
+      notes: customer.notes !== undefined ? (customer.notes ? customer.notes.trim() : null) : this.customers[idx].notes,
+      is_active: customer.is_active !== undefined ? customer.is_active : this.customers[idx].is_active,
+      updated_at: new Date().toISOString()
+    };
+    this.customers[idx] = updated;
+    this.persist();
+    return { success: true, customer: updated };
+  }
+
+  async deleteCustomer(id: string): Promise<{ success: boolean; error?: string }> {
+    const idx = this.customers.findIndex(c => c.id === id);
+    if (idx === -1) {
+      return { success: false, error: 'Không tìm thấy khách hàng' };
+    }
+    this.customers.splice(idx, 1);
+    this.persist();
+    return { success: true };
+  }
+
+  async getStaffUsers(): Promise<StaffUser[]> {
+    return [...this.staffUsers];
+  }
+
+  async createStaffUser(user: Partial<StaffUser>): Promise<{ success: boolean; user?: StaffUser; error?: string }> {
+    const fullName = user.full_name?.trim();
+    const email = user.email?.trim().toLowerCase();
+    if (!fullName) return { success: false, error: 'Họ và tên nhân viên không được để trống' };
+    if (!email) return { success: false, error: 'Email nhân viên không được để trống' };
+
+    const existing = this.staffUsers.find(u => u.email.toLowerCase() === email);
+    if (existing) {
+      return { success: false, error: `Email "${email}" đã tồn tại trong danh sách nhân sự` };
+    }
+
+    const newUser: StaffUser = {
+      id: user.id || `staff-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      full_name: fullName,
+      email: email,
+      phone: user.phone?.trim() || null,
+      role_code: user.role_code || 'SEC_STAFF',
+      role_name: user.role_name || `Vai trò ${user.role_code || 'SEC_STAFF'}`,
+      department_code: user.department_code || 'AN_NINH',
+      department_name: user.department_name || 'Bộ phận An ninh & Bảo vệ',
+      yard_id: user.yard_id || '20000000-0000-0000-0000-000000000001',
+      yard_name: user.yard_name || 'Bãi Sơn Cảng',
+      is_active: user.is_active !== undefined ? user.is_active : true,
+      notes: user.notes?.trim() || null,
+      created_at: new Date().toISOString()
+    };
+    this.staffUsers.unshift(newUser);
+    this.persist();
+    return { success: true, user: newUser };
+  }
+
+  async updateStaffUser(user: Partial<StaffUser> & { id: string }): Promise<{ success: boolean; user?: StaffUser; error?: string }> {
+    const idx = this.staffUsers.findIndex(u => u.id === user.id);
+    if (idx === -1) {
+      return { success: false, error: 'Không tìm thấy nhân viên cần cập nhật' };
+    }
+    const current = this.staffUsers[idx];
+    const updated: StaffUser = {
+      ...current,
+      full_name: user.full_name !== undefined ? user.full_name.trim() : current.full_name,
+      email: user.email !== undefined ? user.email.trim().toLowerCase() : current.email,
+      phone: user.phone !== undefined ? (user.phone ? user.phone.trim() : null) : current.phone,
+      role_code: user.role_code || current.role_code,
+      role_name: user.role_name || current.role_name,
+      department_code: user.department_code || current.department_code,
+      department_name: user.department_name || current.department_name,
+      yard_id: user.yard_id !== undefined ? user.yard_id : current.yard_id,
+      yard_name: user.yard_name !== undefined ? user.yard_name : current.yard_name,
+      is_active: user.is_active !== undefined ? user.is_active : current.is_active,
+      notes: user.notes !== undefined ? (user.notes ? user.notes.trim() : null) : current.notes,
+      updated_at: new Date().toISOString()
+    };
+    this.staffUsers[idx] = updated;
+    this.persist();
+    return { success: true, user: updated };
+  }
+
+  async toggleStaffUserStatus(id: string, isActive: boolean): Promise<{ success: boolean; error?: string }> {
+    const idx = this.staffUsers.findIndex(u => u.id === id);
+    if (idx === -1) {
+      return { success: false, error: 'Không tìm thấy nhân viên' };
+    }
+    this.staffUsers[idx].is_active = isActive;
+    this.staffUsers[idx].updated_at = new Date().toISOString();
+    this.persist();
+    return { success: true };
+  }
+
+  async deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }> {
+    const idx = this.staffUsers.findIndex(u => u.id === id);
+    if (idx === -1) {
+      return { success: false, error: 'Không tìm thấy nhân viên' };
+    }
+    this.staffUsers.splice(idx, 1);
+    this.persist();
+    return { success: true };
   }
 
   resetDemoData() {
@@ -2016,6 +2241,7 @@ export class DemoRepository implements IYardRepository {
     this.reeferRequests = [];
     this.temperatureLogs = [...INITIAL_DEMO_TEMP_LOGS];
     this.customers = [...INITIAL_DEMO_CUSTOMERS];
+    this.staffUsers = [...INITIAL_DEMO_STAFF_USERS];
     this.persist();
   }
 }

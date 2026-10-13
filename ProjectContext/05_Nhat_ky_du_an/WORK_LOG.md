@@ -1,5 +1,46 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 18:15 — Nâng Cấp Toàn Diện Quản Trị Khách Hàng (Sửa Nhầm Tức Thì, Trang /admin/customers) & Quản Trị Nhân Sự Động (/admin/users, Migration 22)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *Thêm nhầm không sửa được khách hàng:* Khách hàng thêm qua Quick Add hoặc thêm mới nếu nhập sai tên/SĐT thì không sửa được và không xóa được.
+  2. *Không tạo mới được user hay role:* Trang `/admin/users` trước đây chỉ là danh sách fix cứng tĩnh `OFFICIAL_STAFF_ACCOUNTS` để xem, không có chức năng tạo mới nhân viên, gán vai trò V1, sửa nhân sự hay khóa tài khoản. Cần nâng cấp thành hệ thống toàn diện, lưu trữ thực tế trên database thay vì ảo.
+- **Tập tin sửa đổi & Triển khai:**
+  - `supabase/migrations/20261013000022_customer_and_user_management.sql`:
+    * Tạo bảng `public.app_customers` (id, name, phone, tax_code, address, notes, is_active, created_at, updated_at).
+    * Tạo bảng `public.app_staff_users` (id, auth_user_id, full_name, email, phone, role_code, department_code, yard_id, is_active, notes, created_at, updated_at).
+    * Thiết lập RLS policies phân quyền cho `authenticated`.
+    * Cung cấp các hàm RPC `SECURITY DEFINER`: `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` có kiểm tra phân quyền `admin.roles.manage` và ghi nhận audit log `app_audit_events`.
+    * Chạy `npx supabase db push` apply thành công 100% lên remote database Supabase Cloud `son-cang-yms-dev`.
+  - `src/types/domain.types.ts`:
+    * Chuẩn hóa duy nhất 1 interface `Customer` (name, phone, tax_code, address, notes, is_active, created_at, updated_at).
+    * Bổ sung interface `StaffUser` (full_name, email, phone, role_code, department_code, yard_id, is_active, notes...).
+  - `src/lib/services/repository-interface.ts`:
+    * Mở rộng `IYardRepository` với đầy đủ CRUD Khách hàng (`getCustomers`, `createCustomer`, `updateCustomer`, `deleteCustomer`).
+    * Mở rộng với đầy đủ CRUD Nhân sự (`getStaffUsers`, `createStaffUser`, `updateStaffUser`, `toggleStaffUserStatus`, `deleteStaffUser`).
+  - `src/lib/services/demo-repository.ts` & `src/lib/services/supabase-repository.ts`:
+    * Triển khai hoàn chỉnh toàn bộ các hàm CRUD trên cả môi trường Demo LocalStorage và Backend Supabase Cloud Postgres.
+  - `src/components/customer-combobox.tsx`:
+    * Thêm nút cây bút `✏️ Sửa` cho từng dòng khách hàng trong dropdown.
+    * Tích hợp Modal Chỉnh sửa Khách hàng tức thì (Sửa tên, SĐT, MST, Ghi chú, nút Xóa khách hàng) mà không làm mất dữ liệu form đang nhập.
+    * Thêm liên kết dưới chân dropdown chuyển nhanh sang `/admin/customers`.
+  - `src/app/admin/customers/page.tsx`:
+    * Tạo mới trang Quản trị Khách hàng chuyên nghiệp: Bảng danh sách, Tìm kiếm realtime, Lọc trạng thái, Thống kê (Tổng số đối tác, Đang giao dịch, Doanh nghiệp có MST), Modal Thêm mới, Modal Sửa, Nút Khóa/Mở khóa 1-chạm, Nút Xóa có xác nhận.
+  - `src/app/admin/users/page.tsx`:
+    * Thay thế toàn bộ mảng tĩnh hardcode bằng danh sách động kết nối qua `repository.getStaffUsers()`.
+    * Nút `➕ Thêm mới Nhân viên` mở Modal tạo nhân viên: Họ tên, Email công vụ, SĐT, Phân vai trò trong 7 vai trò V1 chuẩn RBAC, Tự động suy ra Bộ phận, Chọn bãi, Ghi chú trực ca.
+    * Nút `✏️ Sửa` trên từng thẻ nhân sự: Modal sửa thông tin & chuyển đổi vai trò.
+    * Nút `🔒 Khóa / 🔓 Kích hoạt` 1-chạm tài khoản.
+    * Nút `🗑️ Xóa` nhân sự có hộp thoại xác nhận an toàn.
+    * Thẻ thống kê nhân sự theo 4 bộ phận: An ninh Cổng, Thương vụ CCKB, Điều phối Bãi, Ban Quản trị.
+  - `src/components/layout/app-shell.tsx`:
+    * Bổ sung mục `Danh mục khách hàng` (`/admin/customers`) vào nhóm Quản trị Hệ thống trên Sidebar Navigation.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Exit code 0, áp dụng thành công Migration 22 lên Cloud.
+  - `npm run build`: Exit code 0, Turbopack tối ưu 18/18 static routes, TypeScript pass 100% không cảnh báo lỗi.
+  - Server local `npm start` đã khởi động lại trên cổng 3000 (task-14138).
+- **Trạng thái:** Hoàn tất, sẵn sàng commit và push lên nhánh `main`.
+
 ## 2026-10-13 18:05 — Khắc Phục Triệt Để Lỗi "Bấm Mãi Không Thu Được" Vé Cổng Tại Cổng Ra (/exit, Migration 21 & RPC sc_collect_vehicle_ticket)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

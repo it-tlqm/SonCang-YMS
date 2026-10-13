@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
-import { RoleCode } from '@/types/auth.types';
+import { RoleCode, DepartmentCode } from '@/types/auth.types';
+import { StaffUser } from '@/types/domain.types';
 import { ROLE_PERMISSIONS_V5 } from '@/lib/rbac-rules';
 import { 
   Users, 
@@ -13,13 +14,23 @@ import {
   CheckCircle2, 
   Search, 
   Key,
-  Building2,
-  Lock,
-  Layers,
-  Settings,
-  UserCheck,
-  Filter,
-  Check
+  Building2, 
+  Lock, 
+  Layers, 
+  Settings, 
+  UserCheck, 
+  Filter, 
+  Check, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Phone, 
+  Mail, 
+  AlertCircle, 
+  Loader2, 
+  Save, 
+  Power,
+  UserPlus
 } from 'lucide-react';
 
 interface PermissionDefinition {
@@ -119,89 +130,68 @@ const FULL_PERMISSIONS_V5: PermissionDefinition[] = [
   { code: 'accounting.invoice.prepare', module: 'Hóa đơn', action: 'Nhập dữ liệu hóa đơn từ bộ phận Kế toán', risk: 'Nhạy cảm', phase: 'GĐ sau' },
 ];
 
-// Danh sách Nhân sự chính thức chuẩn 7 vai trò V1 Sơn Cảng
-const OFFICIAL_STAFF_ACCOUNTS = [
+// Danh mục 7 vai trò hoạt động V1 theo chuẩn V5
+const ROLES_V5_METADATA = [
   {
-    id: 'user-sec-01',
-    fullName: 'Trần Quốc Bảo',
-    email: 'sec_gate_01@soncang.vn',
-    phone: '0981 123 456',
-    roleCode: 'SEC_STAFF' as RoleCode,
-    roleName: 'Nhân viên An ninh Cổng',
-    department: 'Bộ phận An ninh & Bảo vệ',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'SEC_STAFF' as RoleCode,
+    name: 'Nhân viên An ninh Cổng',
+    deptCode: 'AN_NINH' as DepartmentCode,
+    deptName: 'Bộ phận An ninh & Bảo vệ',
+    description: 'Tiếp nhận xe, kiểm tra container, thu tiền vé cổng, thu phí lưu bãi, xác nhận xe rời bãi.',
+    badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
   },
   {
-    id: 'user-sec-lead-01',
-    fullName: 'Nguyễn Văn An',
-    email: 'sec_lead_01@soncang.vn',
-    phone: '0982 234 567',
-    roleCode: 'SEC_LEAD' as RoleCode,
-    roleName: 'Trưởng bộ phận An ninh',
-    department: 'Bộ phận An ninh & Bảo vệ',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'SEC_LEAD' as RoleCode,
+    name: 'Trưởng bộ phận An ninh',
+    deptCode: 'AN_NINH' as DepartmentCode,
+    deptName: 'Bộ phận An ninh & Bảo vệ',
+    description: 'Giám sát ca trực an ninh, duyệt điều chỉnh giờ xe, đối soát doanh thu vé cổng và phí lưu.',
+    badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
   },
   {
-    id: 'user-port-01',
-    fullName: 'Lê Thị Dung',
-    email: 'port_cckb_01@soncang.vn',
-    phone: '0983 345 678',
-    roleCode: 'PORT_STAFF' as RoleCode,
-    roleName: 'Nhân viên Thương vụ CCKB',
-    department: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'PORT_STAFF' as RoleCode,
+    name: 'Nhân viên Thương vụ CCKB',
+    deptCode: 'CCKB' as DepartmentCode,
+    deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    description: 'Tiếp nhận yêu cầu cắm điện trước, ghi nhận giờ cắm/rút điện, thu tiền điện, duyệt điều kiện xuất bãi.',
+    badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
   },
   {
-    id: 'user-port-lead-01',
-    fullName: 'Hoàng Minh Cường',
-    email: 'port_lead_01@soncang.vn',
-    phone: '0984 456 789',
-    roleCode: 'PORT_LEAD' as RoleCode,
-    roleName: 'Trưởng bộ phận CCKB',
-    department: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'PORT_LEAD' as RoleCode,
+    name: 'Trưởng bộ phận CCKB',
+    deptCode: 'CCKB' as DepartmentCode,
+    deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    description: 'Duyệt điều chỉnh giờ điện đã thu, duyệt xuất bãi ngoại lệ nợ (AP07), chốt doanh thu điện cont.',
+    badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
   },
   {
-    id: 'user-dis-01',
-    fullName: 'Vũ Văn Giang',
-    email: 'dis_yard_01@soncang.vn',
-    phone: '0985 567 890',
-    roleCode: 'DIS_STAFF' as RoleCode,
-    roleName: 'Nhân viên Điều phối Bãi',
-    department: 'Bộ phận Điều phối & Hiện trường',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'DIS_STAFF' as RoleCode,
+    name: 'Nhân viên Điều phối Bãi',
+    deptCode: 'DIEU_PHOI' as DepartmentCode,
+    deptName: 'Bộ phận Điều phối & Hiện trường',
+    description: 'Kiểm tra bãi, cập nhật tình trạng HÀNG hoặc RỖNG của container, theo dõi phương tiện trong bãi.',
+    badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
   },
   {
-    id: 'user-dis-lead-01',
-    fullName: 'Phạm Đình Hải',
-    email: 'dis_lead_01@soncang.vn',
-    phone: '0986 678 901',
-    roleCode: 'DIS_LEAD' as RoleCode,
-    roleName: 'Trưởng bộ phận Điều phối',
-    department: 'Bộ phận Điều phối & Hiện trường',
-    status: 'ACTIVE',
-    yardName: 'Bãi Sơn Cảng',
+    code: 'DIS_LEAD' as RoleCode,
+    name: 'Trưởng bộ phận Điều phối',
+    deptCode: 'DIEU_PHOI' as DepartmentCode,
+    deptName: 'Bộ phận Điều phối & Hiện trường',
+    description: 'Giám sát mặt bằng lưu bãi, duyệt điều chỉnh tình trạng container sau khi đã xuất bãi.',
+    badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
   },
   {
-    id: 'user-admin-01',
-    fullName: 'Ban Quản trị Hệ thống TLQM',
-    email: 'admin_01@soncang.vn',
-    phone: '0988 888 999',
-    roleCode: 'SYS_ADMIN' as RoleCode,
-    roleName: 'Quản trị viên Hệ thống',
-    department: 'Ban Quản trị & Công nghệ',
-    status: 'ACTIVE',
-    yardName: 'Toàn hệ thống',
+    code: 'SYS_ADMIN' as RoleCode,
+    name: 'Quản trị viên Hệ thống',
+    deptCode: 'HE_THONG' as DepartmentCode,
+    deptName: 'Ban Quản trị & Công nghệ',
+    description: 'Quản trị biểu phí, cấu hình tham số, phân quyền vai trò, quản lý người dùng và audit logs.',
+    badgeColor: 'bg-purple-100 text-purple-800 border-purple-300',
   },
 ];
 
 export default function UsersAndRbacAdminPage() {
-  const { user, role, can } = useAuth();
+  const { user, role, can, repository } = useAuth();
 
   // Kiểm tra quyền quản trị RBAC
   const isAllowed = can('admin.roles.manage') || role === 'SYS_ADMIN';
@@ -210,6 +200,204 @@ export default function UsersAndRbacAdminPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('ALL');
   const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('ALL');
+
+  // Quản lý Danh sách Nhân sự Động
+  const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
+  const [isLoadingStaff, setIsLoadingStaff] = useState<boolean>(true);
+  const [successMsg, setSuccessMsg] = useState<string>('');
+
+  // Modal Tạo / Sửa Nhân sự
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
+  const [selectedStaff, setSelectedStaff] = useState<StaffUser | null>(null);
+
+  // Form Fields
+  const [formFullName, setFormFullName] = useState<string>('');
+  const [formEmail, setFormEmail] = useState<string>('');
+  const [formPhone, setFormPhone] = useState<string>('');
+  const [formRoleCode, setFormRoleCode] = useState<RoleCode>('SEC_STAFF');
+  const [formDepartmentCode, setFormDepartmentCode] = useState<DepartmentCode>('AN_NINH');
+  const [formYardName, setFormYardName] = useState<string>('Bãi Sơn Cảng');
+  const [formIsActive, setFormIsActive] = useState<boolean>(true);
+  const [formNotes, setFormNotes] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [modalError, setModalError] = useState<string>('');
+
+  // Tải danh sách nhân sự từ repository
+  const loadStaffUsers = async () => {
+    try {
+      setIsLoadingStaff(true);
+      const list = await repository.getStaffUsers();
+      setStaffUsers(list);
+    } catch (err) {
+      console.error('Lỗi tải danh sách nhân sự:', err);
+    } finally {
+      setIsLoadingStaff(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAllowed) {
+      loadStaffUsers();
+    }
+  }, [isAllowed, repository]);
+
+  // Tự động gán bộ phận chuẩn khi đổi vai trò trên form
+  const handleRoleChange = (newRole: RoleCode) => {
+    setFormRoleCode(newRole);
+    const meta = ROLES_V5_METADATA.find(r => r.code === newRole);
+    if (meta) {
+      setFormDepartmentCode(meta.deptCode);
+      if (newRole === 'SYS_ADMIN') {
+        setFormYardName('Toàn hệ thống');
+      } else {
+        setFormYardName('Bãi Sơn Cảng');
+      }
+    }
+  };
+
+  // Mở modal tạo mới nhân sự
+  const handleOpenCreateModal = () => {
+    setModalMode('CREATE');
+    setSelectedStaff(null);
+    setFormFullName('');
+    setFormEmail('');
+    setFormPhone('');
+    setFormRoleCode('SEC_STAFF');
+    setFormDepartmentCode('AN_NINH');
+    setFormYardName('Bãi Sơn Cảng');
+    setFormIsActive(true);
+    setFormNotes('');
+    setModalError('');
+    setShowModal(true);
+  };
+
+  // Mở modal chỉnh sửa nhân sự
+  const handleOpenEditModal = (staff: StaffUser) => {
+    setModalMode('EDIT');
+    setSelectedStaff(staff);
+    setFormFullName(staff.full_name);
+    setFormEmail(staff.email);
+    setFormPhone(staff.phone || '');
+    setFormRoleCode(staff.role_code);
+    setFormDepartmentCode(staff.department_code);
+    setFormYardName(staff.yard_name || (staff.role_code === 'SYS_ADMIN' ? 'Toàn hệ thống' : 'Bãi Sơn Cảng'));
+    setFormIsActive(staff.is_active);
+    setFormNotes(staff.notes || '');
+    setModalError('');
+    setShowModal(true);
+  };
+
+  // Lưu thông tin nhân sự (Tạo mới hoặc Sửa)
+  const handleSubmitStaffForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanName = formFullName.trim();
+    const cleanEmail = formEmail.trim().toLowerCase();
+
+    if (!cleanName) {
+      setModalError('Họ và tên nhân viên không được để trống.');
+      return;
+    }
+    if (!cleanEmail) {
+      setModalError('Email công vụ không được để trống.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setModalError('');
+
+      const roleMeta = ROLES_V5_METADATA.find(r => r.code === formRoleCode);
+
+      if (modalMode === 'CREATE') {
+        const res = await repository.createStaffUser({
+          full_name: cleanName,
+          email: cleanEmail,
+          phone: formPhone.trim() || undefined,
+          role_code: formRoleCode,
+          role_name: roleMeta?.name,
+          department_code: formDepartmentCode,
+          department_name: roleMeta?.deptName,
+          yard_id: formRoleCode === 'SYS_ADMIN' ? undefined : '20000000-0000-0000-0000-000000000001',
+          yard_name: formYardName,
+          is_active: formIsActive,
+          notes: formNotes.trim() || undefined,
+        });
+
+        if (!res.success || !res.user) {
+          setModalError(res.error || 'Lỗi tạo nhân viên mới.');
+          return;
+        }
+
+        setSuccessMsg(`Đã tạo thành công tài khoản nhân sự cho "${res.user.full_name}" (${res.user.role_code}).`);
+      } else if (selectedStaff) {
+        const res = await repository.updateStaffUser({
+          id: selectedStaff.id,
+          full_name: cleanName,
+          email: cleanEmail,
+          phone: formPhone.trim() || undefined,
+          role_code: formRoleCode,
+          role_name: roleMeta?.name,
+          department_code: formDepartmentCode,
+          department_name: roleMeta?.deptName,
+          yard_id: formRoleCode === 'SYS_ADMIN' ? undefined : '20000000-0000-0000-0000-000000000001',
+          yard_name: formYardName,
+          is_active: formIsActive,
+          notes: formNotes.trim() || undefined,
+        });
+
+        if (!res.success || !res.user) {
+          setModalError(res.error || 'Lỗi cập nhật nhân viên.');
+          return;
+        }
+
+        setSuccessMsg(`Đã cập nhật thành công nhân sự "${res.user.full_name}".`);
+      }
+
+      setShowModal(false);
+      await loadStaffUsers();
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err: any) {
+      setModalError('Lỗi thao tác: ' + (err?.message || String(err)));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Khóa / Mở khóa tài khoản
+  const handleToggleStatus = async (staff: StaffUser) => {
+    const nextStatus = !staff.is_active;
+    try {
+      const res = await repository.toggleStaffUserStatus(staff.id, nextStatus);
+      if (res.success) {
+        setSuccessMsg(`Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}".`);
+        await loadStaffUsers();
+        setTimeout(() => setSuccessMsg(''), 4000);
+      }
+    } catch (err) {
+      console.error('Lỗi đổi trạng thái:', err);
+    }
+  };
+
+  // Xóa nhân sự
+  const handleDeleteStaff = async (staff: StaffUser) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${staff.full_name}" (${staff.email}) khỏi hệ thống?`)) {
+      return;
+    }
+
+    try {
+      const res = await repository.deleteStaffUser(staff.id);
+      if (res.success) {
+        setSuccessMsg(`Đã xóa nhân sự "${staff.full_name}".`);
+        await loadStaffUsers();
+        setTimeout(() => setSuccessMsg(''), 4000);
+      } else {
+        alert(res.error || 'Không thể xóa nhân viên.');
+      }
+    } catch (err: any) {
+      alert('Lỗi xóa nhân viên: ' + (err?.message || String(err)));
+    }
+  };
 
   if (!isAllowed) {
     return (
@@ -230,78 +418,18 @@ export default function UsersAndRbacAdminPage() {
     );
   }
 
-  // Danh mục 7 vai trò hoạt động V1 theo chuẩn V5
-  const rolesV5 = [
-    {
-      code: 'SEC_STAFF',
-      name: 'Nhân viên An ninh Cổng',
-      dept: 'Bộ phận An ninh & Bảo vệ',
-      scope: 'Cổng vào & Cổng ra bến bãi',
-      description: 'Tiếp nhận xe, kiểm tra container, thu tiền vé cổng, thu phí lưu bãi, xác nhận xe rời bãi.',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    },
-    {
-      code: 'SEC_LEAD',
-      name: 'Trưởng bộ phận An ninh',
-      dept: 'Bộ phận An ninh & Bảo vệ',
-      scope: 'Toàn bộ ca trực An ninh',
-      description: 'Giám sát ca trực an ninh, duyệt điều chỉnh giờ xe, đối soát doanh thu vé cổng và phí lưu.',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    },
-    {
-      code: 'PORT_STAFF',
-      name: 'Nhân viên Thương vụ CCKB',
-      dept: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-      scope: 'Khu bãi & Trạm điện container',
-      description: 'Tiếp nhận yêu cầu cắm điện trước, ghi nhận giờ cắm/rút điện, thu tiền điện, duyệt điều kiện xuất bãi.',
-      badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
-    },
-    {
-      code: 'PORT_LEAD',
-      name: 'Trưởng bộ phận CCKB',
-      dept: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-      scope: 'Toàn bộ phân hệ CCKB & Điện',
-      description: 'Duyệt điều chỉnh giờ điện đã thu, duyệt xuất bãi ngoại lệ nợ (AP07), chốt doanh thu điện cont.',
-      badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
-    },
-    {
-      code: 'DIS_STAFF',
-      name: 'Nhân viên Điều phối Bãi',
-      dept: 'Bộ phận Điều phối & Hiện trường',
-      scope: 'Khu vực xếp dỡ & Lưu bãi',
-      description: 'Kiểm tra bãi, cập nhật tình trạng HÀNG hoặc RỖNG của container, theo dõi phương tiện trong bãi.',
-      badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
-    },
-    {
-      code: 'DIS_LEAD',
-      name: 'Trưởng bộ phận Điều phối',
-      dept: 'Bộ phận Điều phối & Hiện trường',
-      scope: 'Toàn bộ mặt bằng bến bãi',
-      description: 'Giám sát mặt bằng lưu bãi, duyệt điều chỉnh tình trạng container sau khi đã xuất bãi.',
-      badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
-    },
-    {
-      code: 'SYS_ADMIN',
-      name: 'Quản trị viên Hệ thống',
-      dept: 'Ban Quản trị & Công nghệ',
-      scope: 'Toàn quyền cấu hình hệ thống',
-      description: 'Quản trị biểu phí, cấu hình tham số, phân quyền vai trò, quản lý người dùng và audit logs.',
-      badgeColor: 'bg-purple-100 text-purple-800 border-purple-300',
-    },
-  ];
-
   // Danh sách các Module phân quyền
   const modulesList = Array.from(new Set(FULL_PERMISSIONS_V5.map(p => p.module)));
 
   // Lọc danh sách nhân viên
-  const filteredAccounts = OFFICIAL_STAFF_ACCOUNTS.filter((acc) => {
+  const filteredAccounts = staffUsers.filter((acc) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = 
-      acc.fullName.toLowerCase().includes(q) ||
+      acc.full_name.toLowerCase().includes(q) ||
       acc.email.toLowerCase().includes(q) ||
-      acc.roleName.toLowerCase().includes(q) ||
-      acc.phone.includes(q);
-    const matchesRole = selectedRoleFilter === 'ALL' || acc.roleCode === selectedRoleFilter;
+      (acc.role_name && acc.role_name.toLowerCase().includes(q)) ||
+      (acc.phone && acc.phone.includes(q));
+    const matchesRole = selectedRoleFilter === 'ALL' || acc.role_code === selectedRoleFilter;
     return matchesSearch && matchesRole;
   });
 
@@ -316,9 +444,16 @@ export default function UsersAndRbacAdminPage() {
     return matchesSearch && matchesModule;
   });
 
+  // Thống kê nhân sự
+  const totalStaffCount = staffUsers.length;
+  const activeStaffCount = staffUsers.filter(s => s.is_active).length;
+  const secCount = staffUsers.filter(s => s.role_code.startsWith('SEC_')).length;
+  const portCount = staffUsers.filter(s => s.role_code.startsWith('PORT_')).length;
+  const disCount = staffUsers.filter(s => s.role_code.startsWith('DIS_')).length;
+
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Header */}
+      {/* Header Bar */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E3E8EF] shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
@@ -327,7 +462,7 @@ export default function UsersAndRbacAdminPage() {
             </div>
             <div>
               <span className="text-[11px] font-bold tracking-wider uppercase text-blue-700">
-                Quản trị Nhân sự & Phân quyền
+                Quản trị Nhân sự & Phân quyền RBAC
               </span>
               <h1 className="text-lg sm:text-xl font-black text-[#223873] mt-0.5">
                 Nhân viên Trực ca & Ma trận Quyền RBAC V5
@@ -337,13 +472,31 @@ export default function UsersAndRbacAdminPage() {
 
           <div className="flex items-center gap-2">
             <Link
-              href="/admin/tariffs"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-[#0A9444] hover:bg-emerald-100 transition-colors"
+              href="/admin/customers"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 bg-blue-50 text-xs font-bold text-[#223873] hover:bg-blue-100 transition-colors"
             >
-              <span>Xem Biểu phí →</span>
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Quản lý Khách hàng</span>
             </Link>
+
+            <button
+              type="button"
+              onClick={handleOpenCreateModal}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0A9444] hover:bg-[#087C3C] text-xs font-bold text-white shadow-2xs transition-colors cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Thêm mới Nhân viên</span>
+            </button>
           </div>
         </div>
+
+        {/* Thông báo thao tác thành công */}
+        {successMsg && (
+          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
 
         {/* THÔNG BÁO QUY ĐỊNH PHÂN QUYỀN V5 */}
         <div className="mt-4 p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 text-blue-950 text-xs flex items-start space-x-2.5">
@@ -353,6 +506,30 @@ export default function UsersAndRbacAdminPage() {
             <p className="text-[11px] text-blue-900 mt-0.5">
               Phân định độc lập 3 bộ phận: <strong>An ninh</strong> (thu vé vào cổng & phí lưu bãi, kiểm soát cổng), <strong>CCKB</strong> (quản lý tiền điện container & phê duyệt tài chính xuất bãi), <strong>Điều phối</strong> (cập nhật HÀNG/RỖNG). Tuyệt đối không để An ninh thu tiền điện container.
             </p>
+          </div>
+        </div>
+
+        {/* THỐNG KÊ THẺ NHÂN SỰ */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-4 pt-4 border-t border-slate-100 text-xs">
+          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+            <span className="text-slate-500 block text-[10px]">Tổng số tài khoản</span>
+            <span className="text-base font-black text-slate-900 mt-0.5 block">{totalStaffCount}</span>
+          </div>
+          <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-100">
+            <span className="text-emerald-700 block text-[10px]">Đang hoạt động</span>
+            <span className="text-base font-black text-[#0A9444] mt-0.5 block">{activeStaffCount}</span>
+          </div>
+          <div className="p-2.5 bg-emerald-50/40 rounded-xl border border-emerald-100">
+            <span className="text-emerald-800 block text-[10px]">An ninh Cổng</span>
+            <span className="text-base font-black text-emerald-800 mt-0.5 block">{secCount}</span>
+          </div>
+          <div className="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100">
+            <span className="text-amber-800 block text-[10px]">Thương vụ CCKB</span>
+            <span className="text-base font-black text-amber-800 mt-0.5 block">{portCount}</span>
+          </div>
+          <div className="p-2.5 bg-blue-50/60 rounded-xl border border-blue-100">
+            <span className="text-blue-800 block text-[10px]">Điều phối Bãi</span>
+            <span className="text-base font-black text-blue-800 mt-0.5 block">{disCount}</span>
           </div>
         </div>
       </div>
@@ -369,7 +546,7 @@ export default function UsersAndRbacAdminPage() {
           }`}
         >
           <Users className="w-4 h-4 text-[#223873]" />
-          <span>Danh sách Nhân sự ({OFFICIAL_STAFF_ACCOUNTS.length})</span>
+          <span>Danh sách Nhân sự ({staffUsers.length})</span>
         </button>
 
         <button
@@ -407,60 +584,124 @@ export default function UsersAndRbacAdminPage() {
                 onChange={(e) => setSelectedRoleFilter(e.target.value)}
                 className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700"
               >
-                <option value="ALL">Tất cả vai trò ({OFFICIAL_STAFF_ACCOUNTS.length})</option>
-                {rolesV5.map((r) => (
-                  <option key={r.code} value={r.code}>{r.name}</option>
+                <option value="ALL">Tất cả vai trò ({staffUsers.length})</option>
+                {ROLES_V5_METADATA.map((r) => (
+                  <option key={r.code} value={r.code}>{r.name} ({r.code})</option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {filteredAccounts.map((acc) => {
-              const roleMeta = rolesV5.find((r) => r.code === acc.roleCode);
-              const grantedCount = ROLE_PERMISSIONS_V5[acc.roleCode]?.length || 0;
-              return (
-                <div
-                  key={acc.id}
-                  className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs space-y-3 hover:border-blue-300 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm">{acc.fullName}</h3>
-                      <p className="text-[11px] font-mono text-slate-500 mt-0.5">{acc.email}</p>
-                      <p className="text-[11px] text-slate-600 mt-0.5">📞 {acc.phone}</p>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${roleMeta?.badgeColor || 'bg-slate-100 text-slate-800'}`}>
-                      {acc.roleCode}
-                    </span>
-                  </div>
+          {isLoadingStaff ? (
+            <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#223873]" />
+              <span>Đang tải danh sách nhân sự...</span>
+            </div>
+          ) : filteredAccounts.length === 0 ? (
+            <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
+              Không tìm thấy nhân viên nào phù hợp với bộ lọc tìm kiếm.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {filteredAccounts.map((acc) => {
+                const roleMeta = ROLES_V5_METADATA.find((r) => r.code === acc.role_code);
+                const grantedCount = ROLE_PERMISSIONS_V5[acc.role_code]?.length || 0;
+                const isActive = acc.is_active;
 
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1.5 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Vai trò:</span>
-                      <span className="font-bold text-slate-800">{acc.roleName}</span>
+                return (
+                  <div
+                    key={acc.id}
+                    className={`bg-white rounded-2xl p-4 border transition-colors shadow-2xs space-y-3 ${
+                      isActive ? 'border-slate-200 hover:border-blue-300' : 'border-slate-200 bg-slate-50/70 opacity-80'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-slate-900 text-sm">{acc.full_name}</h3>
+                          {!isActive && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded border border-rose-200">
+                              Đã khóa
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-mono text-slate-500 mt-0.5">{acc.email}</p>
+                        {acc.phone && (
+                          <p className="text-[11px] text-slate-600 mt-0.5 font-mono">📞 {acc.phone}</p>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${roleMeta?.badgeColor || 'bg-slate-100 text-slate-800'}`}>
+                        {acc.role_code}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Bộ phận:</span>
-                      <span className="font-semibold text-slate-700">{acc.department}</span>
+
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1.5 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Vai trò:</span>
+                        <span className="font-bold text-slate-800">{roleMeta?.name || acc.role_name || acc.role_code}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Bộ phận:</span>
+                        <span className="font-semibold text-slate-700">{acc.department_name || roleMeta?.deptName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Địa bàn / Bãi:</span>
+                        <span className="font-semibold text-[#0A9444]">{acc.yard_name || 'Bãi Sơn Cảng'}</span>
+                      </div>
+                      <div className="flex justify-between pt-1 border-t border-slate-200/60">
+                        <span className="text-slate-500">Quyền thực thi:</span>
+                        <span className="font-mono font-bold text-blue-700">{grantedCount} / 67 Quyền</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Địa bàn / Bãi:</span>
-                      <span className="font-semibold text-[#0A9444]">{acc.yardName}</span>
-                    </div>
-                    <div className="flex justify-between pt-1 border-t border-slate-200/60">
-                      <span className="text-slate-500">Quyền thực thi:</span>
-                      <span className="font-mono font-bold text-blue-700">{grantedCount} / 67 Quyền</span>
+
+                    {acc.notes && (
+                      <p className="text-[11px] text-slate-500 italic line-clamp-1">
+                        &ldquo;{acc.notes}&rdquo;
+                      </p>
+                    )}
+
+                    {/* DÒNG NÚT THAO TÁC SỬA / KHÓA / XÓA */}
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(acc)}
+                        title={isActive ? 'Bấm để tạm khóa tài khoản này' : 'Bấm để kích hoạt lại tài khoản này'}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border cursor-pointer flex items-center gap-1 transition-colors ${
+                          isActive
+                            ? 'text-slate-600 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border-slate-200'
+                            : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-300'
+                        }`}
+                      >
+                        <Power className="w-3 h-3" />
+                        <span>{isActive ? 'Khóa' : 'Kích hoạt'}</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditModal(acc)}
+                          title="Sửa thông tin & đổi vai trò"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          <span>Sửa</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteStaff(acc)}
+                          title="Xóa tài khoản nhân viên"
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <p className="text-[11px] text-slate-600 line-clamp-2">
-                    {roleMeta?.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -550,85 +791,201 @@ export default function UsersAndRbacAdminPage() {
                   const hasPortLead = ROLE_PERMISSIONS_V5.PORT_LEAD.includes(item.code);
                   const hasDisStaff = ROLE_PERMISSIONS_V5.DIS_STAFF.includes(item.code);
                   const hasDisLead = ROLE_PERMISSIONS_V5.DIS_LEAD.includes(item.code);
-                  const hasAdmin = ROLE_PERMISSIONS_V5.SYS_ADMIN.includes(item.code);
+                  const hasSysAdmin = ROLE_PERMISSIONS_V5.SYS_ADMIN.includes(item.code);
 
                   return (
-                    <tr key={item.code} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-3.5 py-2">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
-                            {item.module}
-                          </span>
-                          <span className="font-bold text-slate-900 text-xs">{item.action}</span>
-                          {item.phase === 'GĐ sau' && (
-                            <span className="text-[9px] font-semibold bg-slate-100 text-slate-500 px-1 rounded">
-                              GĐ sau
-                            </span>
-                          )}
-                        </div>
-                        <div className="font-mono text-[10px] text-slate-400 mt-0.5">{item.code}</div>
+                    <tr key={item.code} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-3.5 py-2.5">
+                        <div className="font-bold text-slate-800">{item.action}</div>
+                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">{item.code}</div>
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasSecStaff ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-[#0A9444] text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasSecStaff ? <Check className="w-4 h-4 text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasSecLead ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-[#0A9444] text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasSecLead ? <Check className="w-4 h-4 text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasPortStaff ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasPortStaff ? <Check className="w-4 h-4 text-amber-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasPortLead ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasPortLead ? <Check className="w-4 h-4 text-amber-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasDisStaff ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasDisStaff ? <Check className="w-4 h-4 text-blue-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center">
-                        {hasDisLead ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center">
+                        {hasDisLead ? <Check className="w-4 h-4 text-blue-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
-
-                      <td className="px-2 py-2 text-center bg-purple-50/30">
-                        {hasAdmin ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-black">✓</span>
-                        ) : (
-                          <span className="text-slate-300">—</span>
-                        )}
+                      <td className="px-2 py-2.5 text-center bg-purple-50/30">
+                        {hasSysAdmin ? <Check className="w-4 h-4 text-purple-700 mx-auto" /> : <span className="text-slate-300">—</span>}
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL THÊM MỚI / CHỈNH SỬA & ĐỔI VAI TRÒ NHÂN SỰ                          */}
+      {/* ========================================================================= */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#223873]" />
+                <span>{modalMode === 'CREATE' ? 'Thêm mới Tài khoản Nhân sự' : 'Chỉnh sửa Thông tin & Đổi Vai trò'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {modalError && (
+              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitStaffForm} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Họ và tên Nhân viên <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formFullName}
+                  onChange={(e) => setFormFullName(e.target.value)}
+                  placeholder="VD: Hoàng Văn An..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Email công vụ <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                    placeholder="VD: an.hv@soncang.vn"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-slate-700 mb-1">Số điện thoại liên hệ</label>
+                  <input
+                    type="text"
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    placeholder="VD: 0981 123 456"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  />
+                </div>
+              </div>
+
+              {/* CHỌN VAI TRÒ CHUẨN RBAC V5 */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Phân công Vai trò (Role V1) <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={formRoleCode}
+                  onChange={(e) => handleRoleChange(e.target.value as RoleCode)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                >
+                  {ROLES_V5_METADATA.map((r) => (
+                    <option key={r.code} value={r.code}>
+                      {r.name} — [{r.code}] ({r.deptName})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Hệ thống tự động cấp đúng {ROLE_PERMISSIONS_V5[formRoleCode]?.length || 0} quyền theo ma trận RBAC V5.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-slate-700 mb-1">Bộ phận công tác</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={ROLES_V5_METADATA.find(r => r.code === formRoleCode)?.deptName || formDepartmentCode}
+                    className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-slate-600 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-slate-700 mb-1">Bãi phân công trực</label>
+                  <input
+                    type="text"
+                    value={formYardName}
+                    onChange={(e) => setFormYardName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Ghi chú phân công / Vị trí trực ca</label>
+                <input
+                  type="text"
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  placeholder="VD: Trực ca bốt gác Cổng vào ban ngày..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="chkStaffIsActive"
+                  checked={formIsActive}
+                  onChange={(e) => setFormIsActive(e.target.checked)}
+                  className="w-4 h-4 text-[#223873] rounded border-slate-300 cursor-pointer"
+                />
+                <label htmlFor="chkStaffIsActive" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                  Tài khoản đang hoạt động (Cho phép đăng nhập trực ca)
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span>{modalMode === 'CREATE' ? 'Tạo mới Tài khoản' : 'Lưu thay đổi'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

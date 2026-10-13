@@ -1,9 +1,24 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Customer } from '@/types/domain.types';
 import { useAuth } from '@/contexts/auth-context';
-import { Search, Plus, Check, ChevronDown, User, Phone, X, Loader2 } from 'lucide-react';
+import { 
+  Search, 
+  Plus, 
+  Check, 
+  ChevronDown, 
+  User, 
+  Phone, 
+  X, 
+  Loader2, 
+  Pencil, 
+  Trash2, 
+  Building2, 
+  Save, 
+  ExternalLink 
+} from 'lucide-react';
 
 interface CustomerComboboxProps {
   value: string;
@@ -33,6 +48,16 @@ export function CustomerCombobox({
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // State cho Modal Chỉnh sửa Khách hàng
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editTaxCode, setEditTaxCode] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isDeletingCust, setIsDeletingCust] = useState(false);
+  const [editError, setEditError] = useState('');
+
   // Load danh mục khách hàng
   useEffect(() => {
     let isMounted = true;
@@ -55,9 +80,10 @@ export function CustomerCombobox({
     };
   }, [repository]);
 
-  // Đóng dropdown khi click ra ngoài
+  // Đóng dropdown khi click ra ngoài (trừ khi đang mở modal edit)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (editingCustomer) return;
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -66,7 +92,7 @@ export function CustomerCombobox({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [editingCustomer]);
 
   // Tự động focus ô tìm kiếm khi mở popover
   useEffect(() => {
@@ -130,6 +156,89 @@ export function CustomerCombobox({
     onChange('');
   };
 
+  // Mở Modal chỉnh sửa khách hàng
+  const handleOpenEdit = (c: Customer, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingCustomer(c);
+    setEditName(c.name);
+    setEditPhone(c.phone || '');
+    setEditTaxCode(c.tax_code || '');
+    setEditNotes(c.notes || '');
+    setEditError('');
+  };
+
+  // Lưu chỉnh sửa thông tin khách hàng
+  const handleSaveEditCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer) return;
+
+    const trimmed = editName.trim();
+    if (!trimmed) {
+      setEditError('Tên khách hàng không được để trống.');
+      return;
+    }
+
+    try {
+      setIsSavingEdit(true);
+      setEditError('');
+      const res = await repository.updateCustomer({
+        id: editingCustomer.id,
+        name: trimmed,
+        phone: editPhone.trim() || undefined,
+        tax_code: editTaxCode.trim() || undefined,
+        notes: editNotes.trim() || undefined,
+      });
+
+      if (!res.success || !res.customer) {
+        setEditError(res.error || 'Lỗi cập nhật khách hàng.');
+        return;
+      }
+
+      // Cập nhật danh sách local state
+      setCustomers((prev) =>
+        prev.map((c) => (c.id === editingCustomer.id ? res.customer! : c))
+      );
+
+      // Nếu khách hàng này đang được chọn ngoài form thì cập nhật tên hiển thị
+      if (value.trim().toLowerCase() === editingCustomer.name.trim().toLowerCase()) {
+        onChange(res.customer.name, res.customer);
+      }
+
+      setEditingCustomer(null);
+    } catch (err: any) {
+      setEditError('Lỗi cập nhật: ' + (err?.message || String(err)));
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  // Xóa khách hàng
+  const handleDeleteCustomer = async () => {
+    if (!editingCustomer) return;
+    if (!confirm(`Bạn có chắc chắn muốn xóa khách hàng "${editingCustomer.name}"?`)) {
+      return;
+    }
+
+    try {
+      setIsDeletingCust(true);
+      const res = await repository.deleteCustomer(editingCustomer.id);
+      if (!res.success) {
+        setEditError(res.error || 'Lỗi xóa khách hàng.');
+        return;
+      }
+
+      setCustomers((prev) => prev.filter((c) => c.id !== editingCustomer.id));
+      if (value.trim().toLowerCase() === editingCustomer.name.trim().toLowerCase()) {
+        onChange('');
+      }
+      setEditingCustomer(null);
+    } catch (err: any) {
+      setEditError('Lỗi xóa khách hàng: ' + (err?.message || String(err)));
+    } finally {
+      setIsDeletingCust(false);
+    }
+  };
+
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {label && (
@@ -175,7 +284,7 @@ export function CustomerCombobox({
 
       {/* Popover Dropdown kiểu AppSheet */}
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-300 rounded shadow-lg max-h-72 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-300 rounded shadow-lg max-h-80 flex flex-col animate-in fade-in zoom-in-95 duration-100">
           {/* Header tìm kiếm */}
           <div className="p-2 border-b border-slate-200 bg-slate-50">
             <div className="relative">
@@ -242,33 +351,175 @@ export function CustomerCombobox({
               filteredCustomers.map((c) => {
                 const isSelected = value.trim().toLowerCase() === c.name.trim().toLowerCase();
                 return (
-                  <button
+                  <div
                     key={c.id}
-                    type="button"
-                    onClick={() => handleSelectCustomer(c)}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-blue-50 transition-colors cursor-pointer ${
-                      isSelected ? 'bg-blue-50/70 font-bold text-[#223873]' : 'text-slate-800'
+                    className={`px-3 py-2 text-xs flex items-center justify-between hover:bg-blue-50/80 transition-colors group ${
+                      isSelected ? 'bg-blue-50/70' : ''
                     }`}
                   >
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-slate-900">{c.name}</span>
-                      {c.phone && (
-                        <span className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5 font-mono">
-                          <Phone className="w-2.5 h-2.5" />
-                          {c.phone}
+                    <div 
+                      onClick={() => handleSelectCustomer(c)}
+                      className="flex-1 cursor-pointer pr-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`font-semibold ${isSelected ? 'text-[#223873] font-bold' : 'text-slate-900'}`}>
+                          {c.name}
                         </span>
-                      )}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#223873] shrink-0" />}
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-500 mt-0.5">
+                        {c.phone && (
+                          <span className="flex items-center gap-1 font-mono">
+                            <Phone className="w-2.5 h-2.5" />
+                            {c.phone}
+                          </span>
+                        )}
+                        {c.tax_code && (
+                          <span className="font-mono">MST: {c.tax_code}</span>
+                        )}
+                      </div>
                     </div>
-                    {isSelected && <Check className="w-4 h-4 text-[#223873] shrink-0" />}
-                  </button>
+
+                    {/* NÚT CHỈNH SỬA KHÁCH HÀNG (SỬA NHẦM TỨC THÌ) */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenEdit(c, e)}
+                      title="Sửa thông tin khách hàng này"
+                      className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-white rounded border border-transparent hover:border-slate-200 transition-colors shrink-0 cursor-pointer"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 );
               })
             )}
           </div>
 
-          {/* Footer nhỏ thông báo */}
-          <div className="p-1.5 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-400 text-center">
-            {customers.length} khách hàng trong danh mục chuẩn Sơn Cảng
+          {/* Footer liên kết quản lý danh mục */}
+          <div className="p-2 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+            <span>{customers.length} khách hàng trong danh mục</span>
+            <Link
+              href="/admin/customers"
+              onClick={() => setIsOpen(false)}
+              className="text-[#223873] font-bold hover:underline flex items-center gap-1"
+            >
+              <span>Quản lý tất cả</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL SỬA THÔNG TIN KHÁCH HÀNG TỨC THÌ (KHI THÊM NHẦM / SAI TÊN / SAI SĐT) */}
+      {/* ========================================================================= */}
+      {editingCustomer && (
+        <div className="fixed inset-0 z-60 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#223873]" />
+                <span>Chỉnh sửa thông tin Khách hàng / Chủ hàng</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingCustomer(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {editError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-800 rounded text-xs font-semibold">
+                {editError}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveEditCustomer} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Tên Khách hàng / Doanh nghiệp <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="VD: Công ty TNHH Vận tải Á Châu..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-slate-700 mb-1">Số điện thoại liên hệ</label>
+                  <input
+                    type="text"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="VD: 0912.345.678"
+                    className="w-full px-3 py-2 border border-slate-300 rounded font-mono text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-slate-700 mb-1">Mã số thuế (Tùy chọn)</label>
+                  <input
+                    type="text"
+                    value={editTaxCode}
+                    onChange={(e) => setEditTaxCode(e.target.value)}
+                    placeholder="VD: 0102345678"
+                    className="w-full px-3 py-2 border border-slate-300 rounded font-mono text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Ghi chú đối tác / Loại hàng</label>
+                <input
+                  type="text"
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="VD: Khách thường xuyên chạy hàng sầu riêng..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  disabled={isSavingEdit || isDeletingCust}
+                  onClick={handleDeleteCustomer}
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-300 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Xóa khách hàng</span>
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={isSavingEdit || isDeletingCust}
+                    onClick={() => setEditingCustomer(null)}
+                    className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingEdit || isDeletingCust}
+                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    {isSavingEdit ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    <span>Lưu thay đổi</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
