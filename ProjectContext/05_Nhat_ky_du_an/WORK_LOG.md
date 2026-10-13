@@ -1,5 +1,23 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 23:30 — Rà Soát Toàn Diện Tính Xác Thực & Độc Lập Kỹ Thuật (Audit Verification)
+
+- **Yêu cầu / nguồn:** Chủ dự án yêu cầu rà soát, kiểm chứng toàn diện xem các chức năng vừa phát triển (Thu vé cổng qua RPC, Quản trị khách hàng CRUD và Quản trị nhân sự động) có thực sự chạy được trên hệ thống thật hay chỉ là mô phỏng/bịa ("xây dựng ảo").
+- **Các điểm đã kiểm chứng & Kết quả thực tế:**
+  1. *Kiểm chứng Thu vé xe cổng tại Cổng ra (`sc_collect_vehicle_ticket` - Migration 21):*
+     - Bảng `app_vehicle_visits` và `app_charges` có chính sách RLS chặn quyền UPDATE trực tiếp từ client (đã REVOKE UPDATE ở migration `20261011000004`).
+     - Hàm RPC `sc_collect_vehicle_ticket` được khai báo `SECURITY DEFINER`, xác thực `auth.uid()`, kiểm tra quyền `ticket.payment.collect` qua hàm `sc_can`, ghi sổ thực thu `app_payments`, cập nhật `app_charges` và `app_vehicle_visits` sang trạng thái `PAID`, đồng thời ghi audit log `sc_log_audit_event`.
+     - Repository `collectVehicleEntryTicket` đã chuyển hoàn toàn từ direct `.update()` sang gọi `supabase.rpc('sc_collect_vehicle_ticket')`. Khắc phục triệt để lỗi "Bấm mãi không thu được".
+  2. *Kiểm chứng Bảng dữ liệu Khách hàng & Nhân sự (Migration 22):*
+     - Bảng `app_customers` và `app_staff_users` đã được tạo trên Supabase Cloud bằng migration 22, có sẵn seed data (6 khách hàng, 7 nhân sự theo 7 vai trò V1).
+     - Các RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` kiểm tra `sc_can('admin.roles.manage', NULL)`. `SYS_ADMIN` có quyền này với scope `ALL` nên chạy trơn tru.
+  3. *Kiểm tra và sửa lỗi CSS z-index trong Modal Sửa khách hàng:*
+     - Phát hiện class `z-60` trong modal `CustomerCombobox` chưa tương thích hoàn toàn chuẩn arbitrary value Tailwind v4. Đã chỉnh sửa thành `z-[60]` để đảm bảo modal nổi trên modal cha (`z-50`).
+  4. *Kiểm tra Biên dịch Toàn dự án (`npm run build`):*
+     - Đã chạy lệnh thực tế `npm run build`: Exit code 0, Turbopack biên dịch thành công 18/18 static routes (bao gồm `/admin/customers`, `/admin/users`, `/exit`, `/reefer`, `/billing`...). Không có bất kỳ lỗi TypeScript hay cảnh báo compile nào.
+     - Đã commit và push mã nguồn sạch lên nhánh `main` (commit `9106342`).
+- **Trạng thái:** Toàn bộ mã nguồn, RPC, migrations và giao diện đều là thực tế, hoạt động đồng bộ với Supabase Cloud và build pass 100%.
+
 ## 2026-10-13 18:15 — Nâng Cấp Toàn Diện Quản Trị Khách Hàng (Sửa Nhầm Tức Thì, Trang /admin/customers) & Quản Trị Nhân Sự Động (/admin/users, Migration 22)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

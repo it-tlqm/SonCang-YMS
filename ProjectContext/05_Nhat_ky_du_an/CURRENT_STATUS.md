@@ -40,8 +40,11 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 13/10/2026 18:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ KHÁCH HÀNG (SỬA NHẦM TỨC THÌ, TRANG /admin/customers) & QUẢN TRỊ NHÂN SỰ ĐỘNG (/admin/users, MIGRATION 22)**:
+- **Cập nhật lúc:** 13/10/2026 23:30 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **RÀ SOÁT TOÀN DIỆN TÍNH XÁC THỰC KỸ THUẬT & KIỂM CHỨNG HỆ THỐNG THẬT (AUDIT VERIFICATION)**:
+  * **Build verification:** `npm run build` hoàn thành 100% không lỗi (18/18 routes), đã tối ưu arbitary CSS `z-[60]` trong combobox.
+  * **Database & RPC verification:** Migration 21 (`sc_collect_vehicle_ticket`) và Migration 22 (`app_customers`, `app_staff_users`, `sc_upsert_staff_user`...) đã được đẩy lên Supabase Cloud thành công. Quyền hạn, RLS và sổ cái thanh toán được kích hoạt đầy đủ.
+  * **Quản trị Khách hàng & Nhân sự:** Hoạt động thực tế trên bảng database và RPC, loại bỏ dữ liệu fix cứng.
   * **1. Quản lý Khách hàng / Chủ hàng:**
     - Khắc phục triệt để tình trạng "thêm nhầm không sửa được":
       + Cập nhật component `CustomerCombobox`: Mỗi dòng khách hàng có nút cây bút `✏️ Sửa`, mở Modal Sửa thông tin tức thì (Tên, SĐT, MST, Ghi chú, Trạng thái, và nút Xóa). Khi lưu, tự động cập nhật ngay trên form đang nhập mà không cần tải lại trang.
