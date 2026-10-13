@@ -1,6 +1,22 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-13 15:26 — Sửa Lỗi Khóa Ngoại Foreign Key Department Code Trong Hàm Cắm Điện Container (Migration 020)
+## 2026-10-13 16:15 — Tinh Giản & Chuẩn Hóa Toàn Diện Nghiệp Vụ Cắm Điện Container Lạnh (`/reefer`) Theo Phản Hồi Thực Tế Bộ Phận CCKB
+
+- **Yêu cầu / nguồn:** Phản hồi trao đổi trực tiếp giữa Chủ dự án và bộ phận CCKB hiện trường Sơn Cảng:
+  1. *Bỏ hiển thị Quy cách:* Hiện trường chưa kiểm soát và nhiều công nhân chưa phân biệt được 20ft/40ft/RF.
+  2. *Bỏ các trường:* "Nhiệt độ cài đặt yêu cầu" (-18°C, -20°C...) và "Loại mặt hàng bảo quản" (Thanh long, sầu riêng...).
+  3. *Số giờ dự kiến cắm:* Để trống tùy chọn (không mặc định 8h, không bắt buộc dấu `*`), đổi nhãn thành "Số giờ dự kiến cắm (Nhập nhanh / Tùy chọn)", giữ các phím bấm nhanh `+4h`, `+8h`, `+12h`, `+24h`.
+  4. *Bỏ trường hợp:* "Đăng ký trước (Chưa vào bãi)" — modal chỉ quản lý container đang lưu bãi.
+  5. *Dọn dẹp nút Header:* Bỏ 3 nút (`+ Nhập cắm & rút hoàn tất (Zalo)`, `+ Đo nhiệt độ`, `Cắm điện Container`).
+  6. *Bảng Container trong bãi:* Bỏ nút `⚡ Cắm điện` trên từng dòng cont, chỉ để lại nút `+ Yêu cầu CCKB` và đổi tên thành `Tạo yêu cầu cắm điện`.
+  7. *Quy tắc làm tròn tiền cước:* Bảo đảm tiền điện luôn làm tròn đến bội số 5.000 VND (`Math.round(amount / 5000) * 5000`), không bao giờ có tiền lẻ 1k, 2k.
+  8. *Sửa nút:* `Sửa / Khớp Zalo` ➔ `Sửa / Khớp`.
+  9. *Thu gọn giao diện:* Tạm ẩn tab `Nhật ký Nhiệt độ` và tab `Yêu cầu cắm điện & Đăng ký trước`; hiển thị trực tiếp danh sách theo dõi cắm rút điện.
+  10. *Bổ sung cột Chủ hàng:* Hiển thị rõ tên khách hàng/chủ hàng trên từng phiên cắm điện, bỏ chữ `/ Hãng tàu`.
+- **Tập tin sửa đổi:** `src/app/reefer/page.tsx`.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, Turbopack hoàn tất 100% 17 routes tĩnh, 0 lỗi TypeScript.
+- **Trạng thái:** Sẵn sàng đẩy lên nhánh `main` để Vercel CI/CD tự động cập nhật lên Production (`https://son-cang-yms.vercel.app`).
 
 - **Yêu cầu / nguồn:** Báo cáo lỗi từ Chủ dự án khi thao tác Cắm điện Container trên web:
   *"insert or update on table 'app_audit_events' violates foreign key constraint 'app_audit_events_department_code_fkey'"*

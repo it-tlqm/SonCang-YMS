@@ -40,6 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 16:18 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TINH GIẢN & CHUẨN HÓA NGHIỆP VỤ CẮM ĐIỆN CONTAINER LẠNH (`/reefer`) THEO PHẢN HỒI CCKB**:
+  * **1. Phản hồi thực tế hiện trường:** Bộ phận Thương vụ CCKB trao đổi và yêu cầu:
+    - Bỏ hiển thị "Quy cách vỏ" (20ft/40ft/RF) vì công nhân hiện trường chưa kiểm soát và chưa phân biệt được.
+    - Bỏ các trường "Nhiệt độ cài đặt yêu cầu" và "Loại mặt hàng bảo quản".
+    - "Số giờ dự kiến cắm": Để trống tùy chọn (không ép buộc, không mặc định 8h), hỗ trợ nhập nhanh `+4h`, `+8h`, `+12h`, `+24h`.
+    - Bỏ tab/chế độ "Đăng ký trước (Chưa vào bãi)" — chỉ tập trung container đang có trong bãi.
+    - Tiền cước điện: Bảo đảm tiền điện làm tròn 15 phút luôn tròn bội số 5.000 VND (`Math.round(amount / 5000) * 5000`), không có tiền lẻ 1k, 2k.
+    - Bỏ các nút cắm điện trực tiếp trên dòng container trong bãi, chỉ để lại `Tạo yêu cầu cắm điện`.
+    - Đổi tên nút `Sửa / Khớp Zalo` ➔ `Sửa / Khớp`.
+    - Tạm ẩn tab Nhật ký Nhiệt độ và tab Yêu cầu CCKB riêng biệt; hiển thị tập trung danh sách theo dõi cắm rút điện, bổ sung cột Tên chủ hàng.
+  * **2. Đã triển khai:** Cập nhật file `src/app/reefer/page.tsx`.
+  * **3. Đã xác minh:** Lệnh `npm run build` kết thúc thành công với mã 0 (17/17 routes tĩnh, 0 lỗi TypeScript).
+  * **4. Trạng thái:** Sẵn sàng commit và push lên GitHub nhánh `main` để Vercel CI/CD cập nhật lên web `https://son-cang-yms.vercel.app`.
+
 - **Cập nhật lúc:** 13/10/2026 15:26 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI KHÓA NGOẠI AUDIT LOG KHI CẮM ĐIỆN CONTAINER (MIGRATION 020)**:
   * **1. Phân tích nguyên nhân:** Hàm RPC `sc_plug_in_reefer` và `sc_record_completed_reefer_session` trước đây hardcode chuỗi phòng ban `'AN_NINH_CCKB'`. Tuy nhiên, bảng `app_departments` chỉ có 5 mã chuẩn V5 (`AN_NINH`, `CCKB`, `DIEU_PHOI`, `HE_THONG`, `KE_TOAN`). Khi hàm audit gọi `INSERT INTO app_audit_events`, PostgreSQL báo lỗi vi phạm khóa ngoại `app_audit_events_department_code_fkey`.
