@@ -28,7 +28,11 @@ import {
   SlidersHorizontal,
   RotateCcw,
   DollarSign,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  Plus,
+  Trash2,
+  Settings
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -157,6 +161,33 @@ export default function YardMonitorPage() {
   const [adjContainerAction, setAdjContainerAction] = useState<'CANCEL' | 'DETACH' | 'KEEP'>('CANCEL');
   const [isSubmittingAdj, setIsSubmittingAdj] = useState<boolean>(false);
 
+  // Quản lý Action Dropdown popover trên từng dòng bảng
+  const [openActionDropdownId, setOpenActionDropdownId] = useState<string | null>(null);
+
+  // Quản lý Modal CRUD Phân khu bãi (YardZone)
+  const [isZoneModalOpen, setIsZoneModalOpen] = useState<boolean>(false);
+  const [editingZoneCode, setEditingZoneCode] = useState<string | null>(null);
+  const [zoneFormCode, setZoneFormCode] = useState<string>('');
+  const [zoneFormName, setZoneFormName] = useState<string>('');
+  const [zoneFormDesc, setZoneFormDesc] = useState<string>('');
+  const [zoneFormCapacity, setZoneFormCapacity] = useState<number>(50);
+  const [zoneFormHasPower, setZoneFormHasPower] = useState<boolean>(false);
+  const [zoneFormBadge, setZoneFormBadge] = useState<string>('bg-blue-100 text-blue-800 border-blue-300');
+  const [zoneError, setZoneError] = useState<string>('');
+  const [isSubmittingZone, setIsSubmittingZone] = useState<boolean>(false);
+
+  // Tự động đóng Action Dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-action-dropdown]')) {
+        setOpenActionDropdownId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     setNowMs(Date.now());
@@ -255,6 +286,97 @@ export default function YardMonitorPage() {
       setLocationError(err?.message || 'Lỗi khi lưu vị trí bãi.');
     } finally {
       setIsUpdatingLocation(false);
+    }
+  };
+
+  // --- TÁC VỤ QUẢN LÝ PHÂN KHU BÃI (YARD ZONES CRUD) ---
+  const handleOpenCreateZoneModal = () => {
+    setEditingZoneCode(null);
+    setZoneFormCode('');
+    setZoneFormName('');
+    setZoneFormDesc('');
+    setZoneFormCapacity(50);
+    setZoneFormHasPower(false);
+    setZoneFormBadge('bg-blue-100 text-blue-800 border-blue-300');
+    setZoneError('');
+    setIsZoneModalOpen(true);
+  };
+
+  const handleOpenEditZoneModal = (zone: YardZoneInfo) => {
+    setEditingZoneCode(zone.code);
+    setZoneFormCode(zone.code);
+    setZoneFormName(zone.name);
+    setZoneFormDesc(zone.description || '');
+    setZoneFormCapacity(zone.capacity);
+    setZoneFormHasPower(zone.has_power_outlets);
+    setZoneFormBadge(zone.color_badge || 'bg-blue-100 text-blue-800 border-blue-300');
+    setZoneError('');
+    setIsZoneModalOpen(true);
+  };
+
+  const handleSaveZone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!zoneFormName.trim()) {
+      setZoneError('Vui lòng nhập tên phân khu.');
+      return;
+    }
+    setIsSubmittingZone(true);
+    setZoneError('');
+    try {
+      if (editingZoneCode) {
+        const res = await repository.updateYardZone(editingZoneCode, {
+          name: zoneFormName.trim(),
+          description: zoneFormDesc.trim(),
+          capacity: Number(zoneFormCapacity) || 0,
+          has_power_outlets: zoneFormHasPower,
+          color_badge: zoneFormBadge,
+        });
+        if (!res.success) {
+          setZoneError(res.error || 'Lỗi khi cập nhật phân khu.');
+          setIsSubmittingZone(false);
+          return;
+        }
+      } else {
+        const code = zoneFormCode.trim().toUpperCase();
+        if (!code) {
+          setZoneError('Vui lòng nhập mã phân khu.');
+          setIsSubmittingZone(false);
+          return;
+        }
+        const res = await repository.createYardZone({
+          code,
+          name: zoneFormName.trim(),
+          description: zoneFormDesc.trim(),
+          capacity: Number(zoneFormCapacity) || 0,
+          has_power_outlets: zoneFormHasPower,
+          color_badge: zoneFormBadge,
+        });
+        if (!res.success) {
+          setZoneError(res.error || 'Lỗi khi tạo phân khu.');
+          setIsSubmittingZone(false);
+          return;
+        }
+      }
+      setIsZoneModalOpen(false);
+      handleReload();
+    } catch (err: any) {
+      setZoneError(err?.message || 'Lỗi khi lưu phân khu.');
+    } finally {
+      setIsSubmittingZone(false);
+    }
+  };
+
+  const handleDeleteZone = async (code: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa phân khu [${code}] khỏi sơ đồ bãi?`)) return;
+    try {
+      const res = await repository.deleteYardZone(code);
+      if (!res.success) {
+        alert(res.error || 'Không thể xóa phân khu này.');
+        return;
+      }
+      handleReload();
+    } catch (err: any) {
+      alert(err?.message || 'Lỗi khi xóa phân khu.');
     }
   };
 
@@ -1150,8 +1272,8 @@ export default function YardMonitorPage() {
                         {/* 2. Container đi kèm */}
                         <td className="px-3.5 py-2.5">
                           {c ? (
-                            <div className="space-y-0.5">
-                              <div className="flex items-center space-x-1.5">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-1.5 flex-wrap gap-1">
                                 <span className="font-mono font-bold text-blue-900 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-300 text-xs">
                                   {c.container_no_current}
                                 </span>
@@ -1172,8 +1294,18 @@ export default function YardMonitorPage() {
                                   </button>
                                 )}
                               </div>
-                              <div className="text-[11px] text-slate-600 font-medium">
-                                {formatContainerSpec(c.container_size, c.container_type)}
+                              <div className="flex items-center space-x-2 text-[11px] text-slate-600 font-medium flex-wrap">
+                                <span>{formatContainerSpec(c.container_size, c.container_type)}</span>
+                                {c.is_plugged && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                    ⚡ {c.slot_code ? `Giắc: ${c.slot_code}` : 'Đang cắm điện'}
+                                  </span>
+                                )}
+                                {!c.is_plugged && c.slot_code && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                                    Ô/Giắc: {c.slot_code}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -1239,99 +1371,190 @@ export default function YardMonitorPage() {
                         </td>
 
                         {/* 6. Tác vụ */}
-                        <td className="px-3.5 py-2.5 text-right">
-                          <div className="flex items-center justify-end flex-wrap gap-1">
-                            {v && (
-                              <>
-                                {canUpdateVehicle && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenPlateCorrectionModal(v)}
-                                    className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors font-bold text-[11px] cursor-pointer border border-amber-300"
-                                    title="Sửa biển số xe"
-                                  >
-                                    <Edit3 className="w-3 h-3 text-amber-600" />
-                                    <span>Sửa biển</span>
-                                  </button>
-                                )}
-                                {isLeadOrAdmin && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenAdjustVehicleModal(v)}
-                                    className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-indigo-50 text-indigo-800 hover:bg-indigo-100 transition-colors font-bold text-[11px] cursor-pointer border border-indigo-300"
-                                    title="Ca trưởng An ninh / Admin hiệu chỉnh lượt xe (Backdate giờ vào/ra, sửa loại xe, hủy vé hoàn tiền)"
-                                  >
-                                    <SlidersHorizontal className="w-3 h-3 text-indigo-600" />
-                                    <span>Hiệu chỉnh</span>
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenVehHistoryModal(v)}
-                                  className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors font-bold text-[11px] cursor-pointer border border-slate-300"
-                                  title="Xem nhật ký & lịch sử lượt xe"
-                                >
-                                  <History className="w-3 h-3 text-[#223873]" />
-                                  <span>Log xe</span>
-                                </button>
-                              </>
-                            )}
-                            {!v && item.inboundVehicleHistory && (
-                              <>
-                                {isLeadOrAdmin && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenAdjustVehicleModal(item.inboundVehicleHistory!)}
-                                    className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-indigo-50 text-indigo-800 hover:bg-indigo-100 transition-colors font-bold text-[11px] cursor-pointer border border-indigo-300"
-                                    title="Hiệu chỉnh lượt xe đã chở container này vào bãi"
-                                  >
-                                    <SlidersHorizontal className="w-3 h-3 text-indigo-600" />
-                                    <span>Hiệu chỉnh xe kéo</span>
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenVehHistoryModal(item.inboundVehicleHistory!)}
-                                  className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors font-bold text-[11px] cursor-pointer border border-slate-300"
-                                  title="Xem nhật ký lượt xe đã kéo container này vào bãi"
-                                >
-                                  <History className="w-3 h-3 text-[#223873]" />
-                                  <span>Log xe kéo</span>
-                                </button>
-                              </>
-                            )}
-                            {c && canUpdateCargo && (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenCargoModal(c)}
-                                className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors font-bold text-[11px] cursor-pointer border border-blue-300"
-                                title="Điều phối cập nhật HÀNG / RỖNG"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                                <span>HÀNG/RỖNG</span>
-                              </button>
-                            )}
-                            {c && canCorrectContainer && (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenCorrectionModal(c)}
-                                className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors font-bold text-[11px] cursor-pointer border border-amber-300"
-                                title="Sửa mã số container"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                                <span>Sửa cont</span>
-                              </button>
-                            )}
+                        <td className="px-3.5 py-2.5 text-right relative">
+                          <div className="flex items-center justify-end space-x-1.5">
+                            {/* Nút Thu phí nổi bật bên ngoài nếu xe chưa thu phí vé vào */}
                             {v && v.ticket_payment_status === 'UNPAID' && canCollectTicket && (
                               <Link
                                 href="/billing"
-                                className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors font-bold text-[11px] border border-emerald-300"
+                                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors shrink-0"
                                 title="Chuyển sang thu phí vé cổng"
                               >
                                 <span>Thu phí</span>
-                                <ExternalLink className="w-2.5 h-2.5" />
+                                <ExternalLink className="w-3 h-3" />
                               </Link>
                             )}
+
+                            {/* Dropdown Menu Thao tác gom gọn gàng các nút sửa đổi, nhật ký */}
+                            <div className="relative inline-block text-left" data-action-dropdown>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenActionDropdownId(openActionDropdownId === item.id ? null : item.id);
+                                }}
+                                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-colors cursor-pointer"
+                                title="Mở danh sách thao tác"
+                              >
+                                <span>Thao tác</span>
+                                <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                              </button>
+
+                              {openActionDropdownId === item.id && (
+                                <div 
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-xl border border-slate-200 py-1.5 z-40 text-left divide-y divide-slate-100 animate-in fade-in zoom-in-95"
+                                >
+                                  {/* Thao tác Phương tiện */}
+                                  {v && (
+                                    <div className="py-1">
+                                      <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Phương tiện: {v.license_plate || 'Chưa biển'}
+                                      </div>
+                                      {canUpdateVehicle && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setOpenActionDropdownId(null);
+                                            handleOpenPlateCorrectionModal(v);
+                                          }}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-900 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                                          <span>Sửa biển số xe</span>
+                                        </button>
+                                      )}
+                                      {isLeadOrAdmin && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setOpenActionDropdownId(null);
+                                            handleOpenAdjustVehicleModal(v);
+                                          }}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                        >
+                                          <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+                                          <span>Hiệu chỉnh ca trực</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenActionDropdownId(null);
+                                          handleOpenVehHistoryModal(v);
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                      >
+                                        <History className="w-3.5 h-3.5 text-blue-600" />
+                                        <span>Nhật ký & Log xe</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenActionDropdownId(null);
+                                          handleOpenLocationModal('VEHICLE', {
+                                            id: v.id,
+                                            title: v.license_plate || 'XE',
+                                            subtitle: getVehicleTypeName(v.vehicle_type_name || v.vehicle_type),
+                                            yard_zone: v.yard_zone,
+                                            slot_code: v.slot_code,
+                                          });
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                      >
+                                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                                        <span>Gán phân khu / ô đỗ</span>
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {/* Xe chở cont vào bãi trước đó */}
+                                  {!v && item.inboundVehicleHistory && (
+                                    <div className="py-1">
+                                      <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Xe kéo: {item.inboundVehicleHistory.license_plate}
+                                      </div>
+                                      {isLeadOrAdmin && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setOpenActionDropdownId(null);
+                                            handleOpenAdjustVehicleModal(item.inboundVehicleHistory!);
+                                          }}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                        >
+                                          <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+                                          <span>Hiệu chỉnh xe kéo</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenActionDropdownId(null);
+                                          handleOpenVehHistoryModal(item.inboundVehicleHistory!);
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                      >
+                                        <History className="w-3.5 h-3.5 text-blue-600" />
+                                        <span>Log xe kéo vào</span>
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {/* Thao tác Container */}
+                                  {c && (
+                                    <div className="py-1">
+                                      <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Container: {c.container_no_current}
+                                      </div>
+                                      {canUpdateCargo && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setOpenActionDropdownId(null);
+                                            handleOpenCargoModal(c);
+                                          }}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-blue-800 hover:bg-blue-50 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+                                          <span>Cập nhật HÀNG / RỖNG</span>
+                                        </button>
+                                      )}
+                                      {canCorrectContainer && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setOpenActionDropdownId(null);
+                                            handleOpenCorrectionModal(c);
+                                          }}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-amber-800 hover:bg-amber-50 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                                          <span>Sửa mã số container</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenActionDropdownId(null);
+                                          handleOpenLocationModal('CONTAINER', {
+                                            id: c.id,
+                                            title: c.container_no_current,
+                                            subtitle: formatContainerSpec(c.container_size, c.container_type),
+                                            yard_zone: c.yard_zone,
+                                            slot_code: c.slot_code,
+                                          });
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 text-xs text-emerald-800 hover:bg-emerald-50 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                      >
+                                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span>Gán phân khu / Giắc cắm</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -1551,49 +1774,97 @@ export default function YardMonitorPage() {
                           <div>{renderDwellBadge(v.entry_at)}</div>
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-right">
-                        <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-1">
-                          {canUpdateVehicle && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenPlateCorrectionModal(v)}
-                              className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors font-bold text-[11px] cursor-pointer border border-amber-300"
-                              title="Sửa biển số xe"
-                            >
-                              <Edit3 className="w-3 h-3 text-amber-600" />
-                              <span>Sửa biển</span>
-                            </button>
-                          )}
-                          {isLeadOrAdmin && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenAdjustVehicleModal(v)}
-                              className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-indigo-50 text-indigo-800 hover:bg-indigo-100 transition-colors font-bold text-[11px] cursor-pointer border border-indigo-300"
-                              title="Ca trưởng An ninh / Admin hiệu chỉnh lượt xe (Backdate giờ vào/ra, sửa loại xe, hủy vé hoàn tiền)"
-                            >
-                              <SlidersHorizontal className="w-3 h-3 text-indigo-600" />
-                              <span>Hiệu chỉnh</span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenVehHistoryModal(v)}
-                            className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors font-bold text-[11px] cursor-pointer border border-slate-300"
-                            title="Xem nhật ký & lịch sử lượt xe"
-                          >
-                            <History className="w-3 h-3 text-[#223873]" />
-                            <span>Log xe</span>
-                          </button>
+                      <td className="px-3.5 py-2.5 text-right relative">
+                        <div className="flex items-center justify-end space-x-1.5">
                           {v.ticket_payment_status === 'UNPAID' && canCollectTicket && (
                             <Link
                               href="/billing"
-                              className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors font-bold text-[11px] border border-emerald-300"
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors shrink-0"
                               title="Chuyển sang thu phí vé cổng"
                             >
                               <span>Thu phí</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
+                              <ExternalLink className="w-3 h-3" />
                             </Link>
                           )}
+
+                          <div className="relative inline-block text-left" data-action-dropdown>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenActionDropdownId(openActionDropdownId === v.id ? null : v.id);
+                              }}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-colors cursor-pointer"
+                              title="Mở menu thao tác phương tiện"
+                            >
+                              <span>Thao tác</span>
+                              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                            </button>
+
+                            {openActionDropdownId === v.id && (
+                              <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-slate-200 py-1.5 z-40 text-left divide-y divide-slate-100 animate-in fade-in zoom-in-95"
+                              >
+                                <div className="py-1">
+                                  {canUpdateVehicle && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenActionDropdownId(null);
+                                        handleOpenPlateCorrectionModal(v);
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-900 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                                      <span>Sửa biển số xe</span>
+                                    </button>
+                                  )}
+                                  {isLeadOrAdmin && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenActionDropdownId(null);
+                                        handleOpenAdjustVehicleModal(v);
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                    >
+                                      <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+                                      <span>Hiệu chỉnh ca trực</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenActionDropdownId(null);
+                                      handleOpenVehHistoryModal(v);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <History className="w-3.5 h-3.5 text-blue-600" />
+                                    <span>Nhật ký & Log xe</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenActionDropdownId(null);
+                                      handleOpenLocationModal('VEHICLE', {
+                                        id: v.id,
+                                        title: v.license_plate || 'XE',
+                                        subtitle: getVehicleTypeName(v.vehicle_type_name || v.vehicle_type),
+                                        yard_zone: v.yard_zone,
+                                        slot_code: v.slot_code,
+                                      });
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Gán phân khu / ô đỗ</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -1608,6 +1879,27 @@ export default function YardMonitorPage() {
       {/* 4B. SƠ ĐỒ PHÂN KHU BÃI SƠN CẢNG (YARD ZONES) */}
       {activeTab === 'zones' && (
         <div className="space-y-4">
+          {/* Thanh công cụ quản lý phân khu */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Grid className="w-4 h-4 text-[#223873]" />
+                Sơ đồ & Danh mục Phân khu bãi Sơn Cảng ({yardZones.length} phân khu)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Quản lý phân khu chức năng bến bãi, sức chứa xe/container và trụ điện 380V
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenCreateZoneModal}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors cursor-pointer self-start sm:self-auto"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Thêm Phân khu mới</span>
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {yardZones.map((zone) => {
               const zoneVehicles = vehicles.filter(v => v.yard_zone === zone.code);
@@ -1616,17 +1908,35 @@ export default function YardMonitorPage() {
               const percent = zone.capacity > 0 ? Math.min(100, Math.round((totalCount / zone.capacity) * 100)) : 0;
 
               return (
-                <div key={zone.code} className="bg-white rounded-lg border border-slate-300 p-3.5 shadow-2xs space-y-3 flex flex-col justify-between">
+                <div key={zone.code} className="bg-white rounded-lg border border-slate-300 p-3.5 shadow-2xs space-y-3 flex flex-col justify-between hover:border-slate-400 transition-colors">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300'}`}>
                         {zone.code}
                       </span>
-                      {zone.has_power_outlets && (
-                        <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded flex items-center space-x-1">
-                          <span>⚡ 30 Trụ 380V</span>
-                        </span>
-                      )}
+                      <div className="flex items-center space-x-1">
+                        {zone.has_power_outlets && (
+                          <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded flex items-center space-x-1">
+                            <span>⚡ Trụ 380V</span>
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditZoneModal(zone)}
+                          className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                          title="Sửa thông tin phân khu"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteZone(zone.code)}
+                          className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                          title="Xóa phân khu"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <h3 className="font-bold text-xs text-slate-900">{zone.name}</h3>
                     <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
@@ -2911,6 +3221,139 @@ export default function YardMonitorPage() {
                   className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
                 >
                   {isSubmittingAdj ? 'Đang lưu...' : 'Xác nhận Hiệu chỉnh'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL THÊM / SỬA PHÂN KHU BÃI (YARD ZONE CRUD) */}
+      {isZoneModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+              <div>
+                <span className="text-[10px] font-bold text-[#223873] uppercase tracking-wider">Cấu hình Quy hoạch Bến Bãi</span>
+                <h3 className="text-sm font-bold text-slate-900">
+                  {editingZoneCode ? `Sửa Phân khu: ${editingZoneCode}` : 'Thêm Phân khu bãi mới'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsZoneModalOpen(false)}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {zoneError && (
+              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>{zoneError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveZone} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Mã phân khu (Viết hoa không dấu, VD: KHU_E_STORAGE) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  disabled={!!editingZoneCode}
+                  value={zoneFormCode}
+                  onChange={(e) => setZoneFormCode(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
+                  placeholder="VD: KHU_E_REEFER"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold uppercase bg-white focus:outline-none focus:border-[#0A9444] disabled:bg-slate-100 disabled:text-slate-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Tên phân khu chức năng *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={zoneFormName}
+                  onChange={(e) => setZoneFormName(e.target.value)}
+                  placeholder="VD: Khu E — Bãi Container Lạnh Mở Rộng"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-medium bg-white focus:outline-none focus:border-[#0A9444]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Mô tả chức năng & quy hoạch:
+                </label>
+                <textarea
+                  rows={2}
+                  value={zoneFormDesc}
+                  onChange={(e) => setZoneFormDesc(e.target.value)}
+                  placeholder="VD: Khu vực bố trí thêm 20 trụ cắm điện cho cont lạnh hoa quả..."
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-medium bg-white focus:outline-none focus:border-[#0A9444] resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Sức chứa tối đa (xe/cont):</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={zoneFormCapacity}
+                    onChange={(e) => setZoneFormCapacity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold bg-white focus:outline-none focus:border-[#0A9444]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Màu nhãn phân khu:</label>
+                  <select
+                    value={zoneFormBadge}
+                    onChange={(e) => setZoneFormBadge(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-medium focus:outline-none focus:border-[#0A9444]"
+                  >
+                    <option value="bg-blue-100 text-blue-800 border-blue-300">Xanh dương (Blue)</option>
+                    <option value="bg-amber-100 text-amber-800 border-amber-300">Vàng hổ phách (Amber)</option>
+                    <option value="bg-emerald-100 text-emerald-800 border-emerald-300">Xanh lá (Emerald)</option>
+                    <option value="bg-purple-100 text-purple-800 border-purple-300">Tím (Purple)</option>
+                    <option value="bg-rose-100 text-rose-800 border-rose-300">Đỏ hồng (Rose)</option>
+                    <option value="bg-slate-100 text-slate-800 border-slate-300">Xám (Slate)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded bg-amber-50 border border-amber-300 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="chkHasPower"
+                  checked={zoneFormHasPower}
+                  onChange={(e) => setZoneFormHasPower(e.target.checked)}
+                  className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500 cursor-pointer"
+                />
+                <label htmlFor="chkHasPower" className="font-bold text-amber-900 cursor-pointer">
+                  Khu vực có trang bị giắc cắm / Trụ điện công nghiệp 380V (Reefer)
+                </label>
+              </div>
+
+              <div className="pt-1 flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsZoneModalOpen(false)}
+                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingZone}
+                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                >
+                  {isSubmittingZone ? 'Đang lưu...' : (editingZoneCode ? 'Lưu thay đổi' : 'Tạo phân khu')}
                 </button>
               </div>
             </form>

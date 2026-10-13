@@ -202,6 +202,16 @@ export default function ExitClearancePage() {
     e.preventDefault();
     if (!selectedCont) return;
 
+    // Kiểm tra cước điện còn nợ
+    const unpaidPowerForCont = charges
+      .filter(ch => ch.container_visit_id === selectedCont.id && ch.charge_type === 'REEFER' && (ch.status === 'UNPAID' || ch.status === 'PARTIALLY_PAID'))
+      .reduce((sum, ch) => sum + (ch.amount || 0), 0);
+
+    if (unpaidPowerForCont > 0 && !allowDebt) {
+      setClearanceError(`Container còn nợ ${unpaidPowerForCont.toLocaleString('vi-VN')} đ tiền điện! Để đủ điều kiện xuất bãi khi chưa thanh toán, CCKB bắt buộc phải tích chọn "Phê duyệt cho phép bảo lãnh công nợ" và nhập thông tin người bảo lãnh.`);
+      return;
+    }
+
     if (allowDebt && (!clearanceNotes.trim() || clearanceNotes.trim().length < 5)) {
       setClearanceError('Duyệt bảo lãnh công nợ bắt buộc phải nhập lý do bảo lãnh cụ thể (tối thiểu 5 ký tự).');
       return;
@@ -218,7 +228,7 @@ export default function ExitClearancePage() {
       setClearanceError(res.error);
     } else {
       setShowClearanceModal(false);
-      setActionSuccessMsg(`Đã duyệt điều kiện xuất bãi thành công cho container ${selectedCont.container_no_current}`);
+      setActionSuccessMsg(`Đã duyệt điều kiện xuất bãi thành công cho container ${selectedCont.container_no_current}${allowDebt ? ' (Xác nhận ghi nợ bảo lãnh)' : ''}`);
       handleManualRefresh();
     }
   };
@@ -456,11 +466,25 @@ export default function ExitClearancePage() {
         return;
       }
 
-      // Kiểm tra clearance CCKB (Chỉ bắt buộc đối với container CÓ phát sinh cắm điện)
-      if (hasTrailingContReefer && !isTrailingContCleared) {
-        setExitError('Container có phát sinh cắm điện nhưng chưa được Thương vụ CCKB phê duyệt điều kiện xuất bãi (Clearance)! Vui lòng liên hệ CCKB kiểm tra và duyệt trên hệ thống.');
-        setIsSubmittingExit(false);
-        return;
+      // Kiểm tra clearance CCKB và thanh toán tiền điện (Chỉ bắt buộc đối với container CÓ phát sinh cắm điện)
+      if (hasTrailingContReefer) {
+        const unpaidPower = charges
+          .filter(c => c.container_visit_id === activeTrailingCont.id && c.charge_type === 'REEFER' && (c.status === 'UNPAID' || c.status === 'PARTIALLY_PAID'))
+          .reduce((sum, ch) => sum + (ch.amount || 0), 0);
+
+        if (unpaidPower > 0 && activeTrailingCont.clearance_status !== 'CLEARED_WITH_DEBT') {
+          setExitError(
+            `CẢNH BÁO CỔNG RA: Container còn nợ ${unpaidPower.toLocaleString('vi-VN')} đ tiền cắm điện chưa thanh toán và CCKB chưa xác nhận duyệt ghi nợ bảo lãnh (CLEARED_WITH_DEBT)! Cổng ra từ chối cho xuất bãi.`
+          );
+          setIsSubmittingExit(false);
+          return;
+        }
+
+        if (!isTrailingContCleared) {
+          setExitError('Container có phát sinh cắm điện nhưng chưa được Thương vụ CCKB phê duyệt điều kiện xuất bãi (Clearance)! Vui lòng liên hệ CCKB kiểm tra và duyệt trên hệ thống.');
+          setIsSubmittingExit(false);
+          return;
+        }
       }
 
       // Kiểm tra tính phí lưu bãi
@@ -1978,6 +2002,53 @@ export default function ExitClearancePage() {
               <p><span className="text-slate-500">Trạng thái hàng:</span> <span className="font-semibold">{selectedCont.cargo_status === 'HANG' ? 'Có hàng' : 'Vỏ rỗng'}</span></p>
               <p><span className="text-slate-500">Thời gian vào bãi:</span> <span className="text-slate-700 font-mono">{new Date(selectedCont.inbound_at).toLocaleString('vi-VN')}</span></p>
             </div>
+
+            {/* Chi tiết cước cắm điện container */}
+            {(() => {
+              const contCharges = charges.filter(ch => ch.container_visit_id === selectedCont.id && ch.charge_type === 'REEFER');
+              const unpaidPower = contCharges.filter(ch => ch.status === 'UNPAID' || ch.status === 'PARTIALLY_PAID').reduce((sum, ch) => sum + (ch.amount || 0), 0);
+              const paidPower = contCharges.filter(ch => ch.status === 'PAID').reduce((sum, ch) => sum + (ch.amount || 0), 0);
+              const hasReefer = contCharges.length > 0 || reeferSessions.some(s => s.container_visit_id === selectedCont.id);
+
+              if (!hasReefer) {
+                return (
+                  <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                    ℹ️ Container không có phát sinh cắm điện trong bãi.
+                  </div>
+                );
+              }
+
+              if (unpaidPower === 0) {
+                return (
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded text-xs text-emerald-900 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Cước điện: Đã thanh toán đầy đủ (0 đ nợ)</span>
+                    </div>
+                    {paidPower > 0 && (
+                      <div className="text-[11px] text-emerald-800">
+                        Tổng tiền điện đã thu: <strong className="font-mono">{paidPower.toLocaleString('vi-VN')} đ</strong>. Đủ điều kiện duyệt xuất bãi bình thường.
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded text-xs text-rose-900 space-y-1.5">
+                  <div className="font-bold flex items-center gap-1.5 text-rose-800">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>Container CHƯA thanh toán tiền điện!</span>
+                  </div>
+                  <div className="text-[11px] text-rose-800">
+                    Tiền cắm điện còn nợ: <strong className="font-mono text-sm text-rose-950 font-bold">{unpaidPower.toLocaleString('vi-VN')} đ</strong>
+                  </div>
+                  <p className="text-[10px] text-rose-700 italic leading-relaxed">
+                    * Bắt buộc: Để cho xe kéo cont này ra bãi khi chưa thanh toán cước điện, CCKB phải tích chọn &quot;Phê duyệt cho phép bảo lãnh công nợ&quot; bên dưới và ghi rõ người bảo lãnh.
+                  </p>
+                </div>
+              );
+            })()}
 
             <form onSubmit={handleConfirmClearance} className="space-y-3.5">
               <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-1.5">

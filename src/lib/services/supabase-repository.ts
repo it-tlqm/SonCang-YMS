@@ -1993,7 +1993,87 @@ export class SupabaseRepository implements IYardRepository {
    * Lấy danh mục các phân khu chức năng của bến bãi
    */
   async getYardZones(): Promise<YardZoneInfo[]> {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_yard_zones');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {}
+      }
+    }
     return [...SEED_YARD_ZONES_SON_CANG];
+  }
+
+  /**
+   * Tạo phân khu bãi mới (Điều phối viên / SYS_ADMIN)
+   */
+  async createYardZone(zone: YardZoneInfo): Promise<{ success: boolean; error?: string }> {
+    const currentZones = await this.getYardZones();
+    const cleanCode = zone.code.trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, error: 'Mã phân khu không được để trống.' };
+    }
+    if (currentZones.some(z => z.code === cleanCode)) {
+      return { success: false, error: `Mã phân khu "${cleanCode}" đã tồn tại.` };
+    }
+    currentZones.push({
+      ...zone,
+      code: cleanCode,
+      name: zone.name.trim(),
+      description: zone.description.trim(),
+      capacity: Number(zone.capacity) || 0,
+      has_power_outlets: Boolean(zone.has_power_outlets),
+      color_badge: zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300',
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
+    }
+    return { success: true };
+  }
+
+  /**
+   * Cập nhật thông tin phân khu bãi (Điều phối viên / SYS_ADMIN)
+   */
+  async updateYardZone(code: string, zoneUpdate: Partial<YardZoneInfo>): Promise<{ success: boolean; error?: string }> {
+    const currentZones = await this.getYardZones();
+    const idx = currentZones.findIndex(z => z.code === code);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy phân khu "${code}".` };
+    }
+    currentZones[idx] = {
+      ...currentZones[idx],
+      ...zoneUpdate,
+      name: zoneUpdate.name !== undefined ? zoneUpdate.name.trim() : currentZones[idx].name,
+      description: zoneUpdate.description !== undefined ? zoneUpdate.description.trim() : currentZones[idx].description,
+      capacity: zoneUpdate.capacity !== undefined ? (Number(zoneUpdate.capacity) || 0) : currentZones[idx].capacity,
+      has_power_outlets: zoneUpdate.has_power_outlets !== undefined ? Boolean(zoneUpdate.has_power_outlets) : currentZones[idx].has_power_outlets,
+      color_badge: zoneUpdate.color_badge !== undefined ? zoneUpdate.color_badge : currentZones[idx].color_badge,
+    };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
+    }
+    return { success: true };
+  }
+
+  /**
+   * Xóa phân khu bãi
+   */
+  async deleteYardZone(code: string): Promise<{ success: boolean; error?: string }> {
+    const vehicles = await this.getVehicles();
+    const containers = await this.getContainers();
+    const hasVehicles = vehicles.some(v => v.yard_zone === code && v.status === 'IN_YARD');
+    const hasContainers = containers.some(c => c.yard_zone === code && c.status === 'IN_YARD');
+    if (hasVehicles || hasContainers) {
+      return { 
+        success: false, 
+        error: `Không thể xóa phân khu "${code}" vì vẫn còn ${hasVehicles ? 'xe' : ''} ${hasContainers ? 'container' : ''} đang đỗ tại phân khu này. Vui lòng chuyển vị trí trước khi xóa!` 
+      };
+    }
+    const currentZones = (await this.getYardZones()).filter(z => z.code !== code);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
+    }
+    return { success: true };
   }
 
   /**

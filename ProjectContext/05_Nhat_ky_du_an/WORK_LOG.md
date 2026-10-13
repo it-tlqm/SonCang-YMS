@@ -1,5 +1,23 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 16:50 — Nâng Cấp Giao Diện Bãi Xe, CRUD Phân Khu, Kiểm Soát Xuất Bãi Nợ Cước Điện & Toàn Diện 67 Quyền RBAC V5
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *Cột Tác vụ bãi xe (`/yard`) quá rối mắt:* 5-6 nút nhỏ chen chúc (`Sửa biển`, `Hiệu chỉnh`, `Log xe`, `HÀNG/RỖNG`, `Sửa cont`, `Thu phí`). Gom thành Dropdown menu `Thao tác ▾` gọn gàng, giữ nút `Thu phí` nổi bật nếu chưa thu vé cổng.
+  2. *Sơ đồ phân khu bãi (`/yard`):* Mở tính năng Tạo / Sửa / Xóa (CRUD) Phân khu bãi (thay vì cố định 4 khu A, B, C, D); bổ sung kiểm soát và hiển thị mã Giắc cắm điện container (`⚡ Giắc: {slot_code}`) cho container lạnh/cắm điện.
+  3. *Kiểm soát điều kiện xuất bãi CCKB (`/exit`):* Container có cắm điện chỉ đủ điều kiện ra khi: (1) Đã thanh toán đủ toàn bộ tiền điện; hoặc (2) Nếu còn nợ tiền điện, CCKB bắt buộc phải tích chọn bảo lãnh công nợ (`CLEARED_WITH_DEBT`) và nhập thông tin người bảo lãnh; Cổng ra chặn tuyệt đối nếu container còn nợ tiền điện mà chưa duyệt bảo lãnh.
+  4. *Trang Nhân sự & Phân quyền (`/admin/users`):* Bỏ các nhãn tạm thời/thử nghiệm; cập nhật danh sách nhân sự chính thức chuẩn 7 vai trò V1; hiển thị trọn vẹn toàn bộ 67 Action Permissions chuẩn V5 theo 9 module nghiệp vụ với bộ lọc module trực quan và kiểm tra 100% khớp `ROLE_PERMISSIONS_V5`.
+- **Tập tin sửa đổi:**
+  - `src/app/yard/page.tsx`: Menu dropdown `Thao tác ▾`, badge `⚡ Giắc: {slot_code}`, thanh công cụ & modal CRUD Phân khu bãi.
+  - `src/app/exit/page.tsx`: Modal CCKB kiểm tra nợ tiền điện + bắt buộc duyệt ghi nợ; cổng ra chặn xe kéo cont nợ điện chưa duyệt ghi nợ.
+  - `src/app/admin/users/page.tsx`: Danh sách 7 nhân sự chính thức, ma trận 67 permissions theo 9 module, kiểm tra dấu check tự động theo `ROLE_PERMISSIONS_V5`.
+  - `src/lib/services/repository-interface.ts`: Bổ sung `createYardZone`, `updateYardZone`, `deleteYardZone`.
+  - `src/lib/services/demo-repository.ts`: Triển khai CRUD phân khu với LocalStorage đồng bộ.
+  - `src/lib/services/supabase-repository.ts`: Triển khai CRUD phân khu với LocalStorage đồng bộ.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, Turbopack biên dịch 17/17 routes tĩnh thành công, 0 lỗi TypeScript.
+- **Trạng thái:** Sẵn sàng commit và đẩy lên GitHub `it-tlqm/SonCang-YMS` nhánh `main`.
+
 ## 2026-10-13 16:15 — Tinh Giản & Chuẩn Hóa Toàn Diện Nghiệp Vụ Cắm Điện Container Lạnh (`/reefer`) Theo Phản Hồi Thực Tế Bộ Phận CCKB
 
 - **Yêu cầu / nguồn:** Phản hồi trao đổi trực tiếp giữa Chủ dự án và bộ phận CCKB hiện trường Sơn Cảng:

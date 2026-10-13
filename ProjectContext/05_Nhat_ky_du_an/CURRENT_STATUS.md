@@ -40,6 +40,15 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 16:50 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **NÂNG CẤP GIAO DIỆN BÃI XE, CRUD PHÂN KHU, KIỂM SOÁT XUẤT BÃI NỢ ĐIỆN VÀ TOÀN DIỆN 67 QUYỀN RBAC V5**:
+  * **1. Cột Tác vụ bãi xe (`/yard`):** Gom toàn bộ 5-6 nút thao tác dàn trải (`Sửa biển`, `Hiệu chỉnh`, `Log xe`, `HÀNG/RỖNG`, `Sửa cont`, `Gán ô đỗ`) thành Dropdown Action Menu `Thao tác ▾` sạch sẽ, tự đóng khi click ngoài; chỉ giữ nút `Thu phí` (nếu chưa thu vé) hiển thị nổi bật trực tiếp.
+  * **2. Sơ đồ Phân khu bãi & Giắc cắm điện (`/yard`):** Mở tính năng Tạo / Sửa / Xóa (CRUD) Phân khu bãi chức năng (mã, tên, mô tả, sức chứa, trạng thái trụ điện 380V, màu sắc); bổ sung kiểm soát và hiển thị mã Giắc cắm điện container (`⚡ Giắc: {slot_code}`) trực tiếp trên bảng bãi xe.
+  * **3. Kiểm soát điều kiện xuất bãi CCKB (`/exit`):** Container có phát sinh cắm điện bắt buộc phải thanh toán đủ toàn bộ tiền điện; nếu chưa thanh toán, CCKB bắt buộc phải tích chọn xác nhận bảo lãnh công nợ (`CLEARED_WITH_DEBT`) và nhập người bảo lãnh; Cổng ra chặn tuyệt đối nếu container còn nợ tiền điện mà chưa được CCKB duyệt ghi nợ.
+  * **4. Chuẩn hóa Nhân sự & Phân quyền (`/admin/users`):** Bỏ nhãn tạm thời/thử nghiệm; cập nhật danh sách nhân sự chính thức chuẩn 7 vai trò V1; hoàn thiện ma trận hiển thị trọn vẹn toàn bộ 67 Action Permissions chuẩn V5 phân theo 9 module nghiệp vụ, kiểm tra đúng 100% logic `ROLE_PERMISSIONS_V5`.
+  * **5. Đã xác minh:** Lệnh `npm run build` kết thúc thành công với mã 0 (17/17 static routes, 0 lỗi TypeScript).
+  * **6. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel CI/CD tự động deploy lên production domain `https://son-cang-yms.vercel.app`.
+
 - **Cập nhật lúc:** 13/10/2026 16:18 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **TINH GIẢN & CHUẨN HÓA NGHIỆP VỤ CẮM ĐIỆN CONTAINER LẠNH (`/reefer`) THEO PHẢN HỒI CCKB**:
   * **1. Phản hồi thực tế hiện trường:** Bộ phận Thương vụ CCKB trao đổi và yêu cầu:

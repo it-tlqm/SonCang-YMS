@@ -368,6 +368,15 @@ export interface IYardRepository {
   /** Lấy danh mục các phân khu chức năng của bến bãi */
   getYardZones(): Promise<YardZoneInfo[]>;
 
+  /** Tạo phân khu bãi mới (Điều phối viên / SYS_ADMIN) */
+  createYardZone(zone: YardZoneInfo): Promise<{ success: boolean; error?: string }>;
+
+  /** Cập nhật thông tin phân khu bãi (Điều phối viên / SYS_ADMIN) */
+  updateYardZone(code: string, zone: Partial<YardZoneInfo>): Promise<{ success: boolean; error?: string }>;
+
+  /** Xóa phân khu bãi (chỉ khi không còn xe/cont đang đỗ) */
+  deleteYardZone(code: string): Promise<{ success: boolean; error?: string }>;
+
   /** Cập nhật vị trí đỗ / phân khu bãi của phương tiện (Điều phối viên / An ninh) */
   updateVehicleLocation(params: { vehicleId: string; yardZone?: string; slotCode?: string }): Promise<{ success: boolean; error?: string }>;
 

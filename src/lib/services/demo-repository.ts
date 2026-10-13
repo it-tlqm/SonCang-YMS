@@ -344,6 +344,7 @@ export class DemoRepository implements IYardRepository {
   private reeferRequests: ReeferRequest[] = [];
   private payments: PaymentRecord[] = [...INITIAL_DEMO_PAYMENTS];
   private temperatureLogs: ReeferTemperatureLog[] = [...INITIAL_DEMO_TEMP_LOGS];
+  private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
     yard_id: '20000000-0000-0000-0000-000000000001',
@@ -402,6 +403,10 @@ export class DemoRepository implements IYardRepository {
       if (savedTF) {
         try { this.tariffs = JSON.parse(savedTF); } catch {}
       }
+      const savedYZ = localStorage.getItem('soncang_v5_yard_zones');
+      if (savedYZ) {
+        try { this.yardZones = JSON.parse(savedYZ); } catch {}
+      }
     }
   }
 
@@ -416,6 +421,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_demo_payments', JSON.stringify(this.payments));
       localStorage.setItem('soncang_v5_demo_temperature_logs', JSON.stringify(this.temperatureLogs));
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
+      localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
     }
   }
 
@@ -1639,7 +1645,60 @@ export class DemoRepository implements IYardRepository {
   }
 
   async getYardZones(): Promise<YardZoneInfo[]> {
-    return [...SEED_YARD_ZONES_SON_CANG];
+    return [...this.yardZones];
+  }
+
+  async createYardZone(zone: YardZoneInfo): Promise<{ success: boolean; error?: string }> {
+    const cleanCode = zone.code.trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, error: 'Mã phân khu không được để trống.' };
+    }
+    if (this.yardZones.some(z => z.code === cleanCode)) {
+      return { success: false, error: `Mã phân khu "${cleanCode}" đã tồn tại trên hệ thống.` };
+    }
+    this.yardZones.push({
+      ...zone,
+      code: cleanCode,
+      name: zone.name.trim(),
+      description: zone.description.trim(),
+      capacity: Number(zone.capacity) || 0,
+      has_power_outlets: Boolean(zone.has_power_outlets),
+      color_badge: zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300',
+    });
+    this.persist();
+    return { success: true };
+  }
+
+  async updateYardZone(code: string, zoneUpdate: Partial<YardZoneInfo>): Promise<{ success: boolean; error?: string }> {
+    const idx = this.yardZones.findIndex(z => z.code === code);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy phân khu "${code}".` };
+    }
+    this.yardZones[idx] = {
+      ...this.yardZones[idx],
+      ...zoneUpdate,
+      name: zoneUpdate.name !== undefined ? zoneUpdate.name.trim() : this.yardZones[idx].name,
+      description: zoneUpdate.description !== undefined ? zoneUpdate.description.trim() : this.yardZones[idx].description,
+      capacity: zoneUpdate.capacity !== undefined ? (Number(zoneUpdate.capacity) || 0) : this.yardZones[idx].capacity,
+      has_power_outlets: zoneUpdate.has_power_outlets !== undefined ? Boolean(zoneUpdate.has_power_outlets) : this.yardZones[idx].has_power_outlets,
+      color_badge: zoneUpdate.color_badge !== undefined ? zoneUpdate.color_badge : this.yardZones[idx].color_badge,
+    };
+    this.persist();
+    return { success: true };
+  }
+
+  async deleteYardZone(code: string): Promise<{ success: boolean; error?: string }> {
+    const hasVehicles = this.vehicles.some(v => v.yard_zone === code && v.status === 'IN_YARD');
+    const hasContainers = this.containers.some(c => c.yard_zone === code && c.status === 'IN_YARD');
+    if (hasVehicles || hasContainers) {
+      return { 
+        success: false, 
+        error: `Không thể xóa phân khu "${code}" vì vẫn còn ${hasVehicles ? 'xe' : ''} ${hasContainers ? 'container' : ''} đang đỗ tại phân khu này. Vui lòng chuyển vị trí trước khi xóa!` 
+      };
+    }
+    this.yardZones = this.yardZones.filter(z => z.code !== code);
+    this.persist();
+    return { success: true };
   }
 
   async updateVehicleLocation(params: { vehicleId: string; yardZone?: string; slotCode?: string }): Promise<{ success: boolean; error?: string }> {
