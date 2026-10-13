@@ -2415,6 +2415,7 @@ export class SupabaseRepository implements IYardRepository {
 
   /**
    * Thu tiền vé vào cổng trực tiếp tại Cổng ra (khi xe vào cổng chưa thanh toán)
+   * Sử dụng RPC sc_collect_vehicle_ticket chuẩn RBAC V5, ghi nhận sổ cái app_payments bất biến.
    */
   async collectVehicleEntryTicket(params: {
     vehicleId: string;
@@ -2429,44 +2430,21 @@ export class SupabaseRepository implements IYardRepository {
 
     try {
       const supabase = createClient();
-      // Đọc lượt xe
-      const { data: veh, error: vErr } = await supabase
-        .from('app_vehicle_visits')
-        .select('*')
-        .eq('id', params.vehicleId)
-        .single();
+      const { data, error } = await (supabase.rpc as any)('sc_collect_vehicle_ticket', {
+        p_vehicle_id: params.vehicleId,
+        p_payment_method: params.paymentMethod === 'BANK_TRANSFER' ? 'TRANSFER' : 'CASH',
+        p_receipt_code: params.receiptCode || undefined,
+        p_notes: params.notes || undefined,
+      });
 
-      if (vErr || !veh) {
-        return { success: false, error: 'Không tìm thấy lượt xe: ' + vErr?.message };
+      if (error) {
+        return { success: false, error: 'Lỗi từ máy chủ khi thu vé cổng: ' + error.message };
       }
-
-      // Cập nhật trạng thái vé xe thành PAID
-      const audit = `Thu vé cổng tại Cổng ra (${params.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}${params.receiptCode ? ` - BL: ${params.receiptCode}` : ''})`;
-      await supabase
-        .from('app_vehicle_visits')
-        .update({
-          ticket_payment_status: 'PAID',
-          note: veh.note ? `${veh.note} | ${audit}` : audit,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', params.vehicleId);
-
-      // Cập nhật hoặc tạo bản ghi app_charges
-      await supabase
-        .from('app_charges')
-        .update({
-          status: 'PAID',
-          paid_amount: veh.ticket_amount || 250000,
-          notes: audit,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('vehicle_visit_id', params.vehicleId)
-        .eq('charge_type', 'TICKET');
 
       return { success: true };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      return { success: false, error: 'Lỗi thu vé cổng tại cổng ra: ' + msg };
+      return { success: false, error: 'Lỗi ngoại lệ khi thu vé cổng tại cổng ra: ' + msg };
     }
   }
 

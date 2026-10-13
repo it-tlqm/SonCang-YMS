@@ -40,6 +40,26 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 18:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI THU VÉ CỔNG TẠI CỔNG RA (MIGRATION 20261013000021 & RPC sc_collect_vehicle_ticket)**:
+  * **1. Phân tích nguyên nhân gốc rễ ("Bấm mãi không thu được"):**
+    - Trang Cổng ra (`/exit`) có nút "Thu vé ngay" và popup thu vé vào cổng cho các xe lúc vào chọn ghi nợ / chưa thu.
+    - Trong `SupabaseRepository.collectVehicleEntryTicket`: Code cũ thực hiện update trực tiếp bảng `app_vehicle_visits` và `app_charges`.
+    - Theo chính sách bảo mật RBAC V5 của Sơn Cảng, cả 2 bảng trên bị `REVOKE UPDATE` từ role `authenticated` (mọi thao tác ghi tài chính bắt buộc phải qua RPC `SECURITY DEFINER` kiểm tra quyền và ghi sổ cái bất biến `app_payments`).
+    - Lệnh update trực tiếp từ Supabase client bị Postgres từ chối silently (trả về 0 rows updated không exception), frontend tưởng thành công nhưng dữ liệu DB không hề đổi `PAID`, sau khi reload bảng lại hiện `Chưa thu`.
+  * **2. Giải pháp triển khai chuẩn mực:**
+    - Tạo Migration `20261013000021_collect_vehicle_ticket_rpc.sql`:
+      + Định nghĩa RPC `sc_collect_vehicle_ticket(p_vehicle_id, p_payment_method, p_receipt_code, p_notes)` với `SECURITY DEFINER`.
+      + Kiểm tra quyền `ticket.payment.collect` của nhân viên An ninh / Quản trị tại bãi.
+      + Ghi nhận phiếu thu bất biến vào sổ thực thu `app_payments` (phân hệ `AN_NINH`).
+      + Cập nhật trạng thái khoản phải thu `app_charges` sang `PAID`.
+      + Đồng bộ trạng thái vé lượt xe `app_vehicle_visits.ticket_payment_status = 'PAID'`.
+      + Ghi nhận sự kiện kiểm toán `app_audit_events`.
+    - Apply thành công 100% 2 migration `20261013000020` và `20261013000021` lên remote database Supabase Cloud qua `npx supabase db push`.
+    - Cập nhật `collectVehicleEntryTicket` trong `src/lib/services/supabase-repository.ts` gọi RPC `sc_collect_vehicle_ticket` và bắt lỗi máy chủ chính xác.
+  * **3. Đã xác minh:** Lệnh `npm run build` kết thúc thành công mã 0 (17/17 routes tối ưu, 0 lỗi TypeScript).
+  * **4. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel tự động triển khai production.
+
 - **Cập nhật lúc:** 13/10/2026 17:55 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **CHUẨN HÓA KHÁCH HÀNG APPSHEET, TÌM KIẾM CONT, VALIDATION GIỜ RÚT VÀ MỞ RỘNG MODAL (/reefer, /exit)**:
   * **1. Danh mục Khách hàng & Component CustomerCombobox (chuẩn AppSheet):**

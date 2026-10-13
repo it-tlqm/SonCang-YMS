@@ -1,5 +1,33 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 18:05 — Khắc Phục Triệt Để Lỗi "Bấm Mãi Không Thu Được" Vé Cổng Tại Cổng Ra (/exit, Migration 21 & RPC sc_collect_vehicle_ticket)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  * Trên trang Cổng ra (`/exit`), xe container `挂挂` (vào lúc 09:54:09 13/10/2026 mang cont `AAAA1221222`) có vé cổng ở trạng thái `Chưa thu (250,000đ)` và nút `Thu vé ngay`.
+  * Người dùng bấm nút "Thu vé ngay" và xác nhận nhiều lần nhưng hệ thống không đổi sang trạng thái Đã thu ("Bấm mãi không thu được").
+- **Phân tích nguyên nhân gốc rễ:**
+  1. Trong `src/lib/services/supabase-repository.ts` hàm `collectVehicleEntryTicket`: Code cũ thực hiện câu lệnh trực tiếp `.update({ ticket_payment_status: 'PAID' })` trên bảng `app_vehicle_visits` và `.update({ status: 'PAID' })` trên bảng `app_charges`.
+  2. Bảng `app_vehicle_visits` và `app_charges` trên Supabase có RLS/RBAC phân quyền theo chuẩn bảo mật V5: **REVOKE UPDATE** đối với role `authenticated` (tất cả các thao tác sửa đổi dữ liệu tài chính bắt buộc phải thông qua RPC `SECURITY DEFINER` kiểm tra quyền hạn nghiêm ngặt và ghi nhận vào sổ thực thu bất biến `app_payments`).
+  3. Khi Supabase client thực hiện `.update()`, Postgres từ chối cập nhật dòng nào (0 rows updated), nhưng không ném exception. Hàm trả về `{ success: true }`, frontend tưởng đã lưu nên fetch lại dữ liệu từ server, dẫn đến dữ liệu vẫn nguyên là `UNPAID` (silent write failure).
+- **Giải pháp & Tập tin sửa đổi:**
+  - `supabase/migrations/20261013000021_collect_vehicle_ticket_rpc.sql`:
+    * Tạo hàm RPC `public.sc_collect_vehicle_ticket(p_vehicle_id, p_payment_method, p_receipt_code, p_notes)` với cờ `SECURITY DEFINER`.
+    * Kiểm tra định danh người dùng đăng nhập `auth.uid()`.
+    * Kiểm tra phân quyền RBAC V5: `public.sc_can('ticket.payment.collect', v_veh.yard_id)`.
+    * Tự động tạo bản ghi `app_charges` loại `TICKET` nếu chưa tồn tại.
+    * Ghi nhận giao dịch thanh toán vào sổ cái thực thu bất biến `app_payments` (phòng ban `AN_NINH`, hỗ trợ tiền mặt/chuyển khoản/mã biên lai).
+    * Cập nhật `app_charges.status = 'PAID'` và `app_charges.paid_amount = v_ticket_amount`.
+    * Đồng bộ `app_vehicle_visits.ticket_payment_status = 'PAID'` và bổ sung ghi chú kiểm toán.
+    * Ghi nhận sự kiện kiểm toán `public.sc_log_audit_event`.
+  - Remote Database: Apply thành công cả migration 20 (`fix_reefer_audit_department_fkey`) và migration 21 (`collect_vehicle_ticket_rpc`) lên Supabase Cloud qua `npx supabase db push`.
+  - `src/lib/services/supabase-repository.ts`:
+    * Cập nhật hàm `collectVehicleEntryTicket` gọi RPC `sc_collect_vehicle_ticket`.
+    * Bắt và hiển thị lỗi rõ ràng nếu có sự cố máy chủ.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Apply thành công 100% migrations 20 và 21 lên remote database `son-cang-yms-dev`.
+  - `npm run build`: Exit code 0, Turbopack tối ưu 17/17 static routes, TypeScript pass 100% không cảnh báo lỗi.
+- **Trạng thái:** Hoàn tất, sẵn sàng commit và push lên nhánh `main`.
+
 ## 2026-10-13 17:55 — Chuẩn Hóa Khách Hàng AppSheet (Quick Add), Tìm Kiếm Container, Validation Giờ Rút & Mở Rộng Modal (/reefer, /exit)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
