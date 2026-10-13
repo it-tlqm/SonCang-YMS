@@ -414,7 +414,7 @@ export function CustomerCombobox({
       {/* MODAL SỬA THÔNG TIN KHÁCH HÀNG TỨC THÌ (KHI THÊM NHẦM / SAI TÊN / SAI SĐT) */}
       {/* ========================================================================= */}
       {editingCustomer && (
-        <div className="fixed inset-0 z-60 bg-black/60 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
