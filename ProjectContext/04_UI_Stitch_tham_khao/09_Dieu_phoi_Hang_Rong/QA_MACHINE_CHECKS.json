@@ -1,0 +1,40 @@
+[
+  {
+    "screen": "Desktop 1440px",
+    "source_file": "Pasted text(20261011-083531).txt",
+    "output_file": "09_Dieu_phoi_Hang_Rong_Desktop_1440.html",
+    "valid_html_root": true,
+    "main_present": true,
+    "main_nonempty": true,
+    "duplicate_ids": [],
+    "header_position": "sticky",
+    "viewport": "width=device-width, initial-scale=1.0",
+    "blocks_user_zoom": false,
+    "uses_fake_success_timeout": false,
+    "qr_scanner_present": false,
+    "fake_online_or_production_server": true,
+    "inputmode_numeric_full_container_search": false,
+    "has_cargo_update_permission": true,
+    "has_container_read_permission": true,
+    "sha256": "47b615639fc675af024f14695ed2c58b918f88b631da97e462a526ba7491ba02"
+  },
+  {
+    "screen": "Mobile 390px",
+    "source_file": "Pasted text(20261011-083531).txt",
+    "output_file": "09_Dieu_phoi_Hang_Rong_Mobile_390.html",
+    "valid_html_root": true,
+    "main_present": true,
+    "main_nonempty": true,
+    "duplicate_ids": [],
+    "header_position": "fixed",
+    "viewport": "width=device-width, initial-scale=1.0, viewport-fit=cover",
+    "blocks_user_zoom": false,
+    "uses_fake_success_timeout": true,
+    "qr_scanner_present": true,
+    "fake_online_or_production_server": false,
+    "inputmode_numeric_full_container_search": true,
+    "has_cargo_update_permission": false,
+    "has_container_read_permission": false,
+    "sha256": "74c5edbeda6fc56ae144dbe1ce9edaedf15659e6b0262508553f7e6027ec54e9"
+  }
+]

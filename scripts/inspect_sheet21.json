@@ -1,0 +1,88 @@
+[
+  {
+    "A1": "V5 — GÁN QUYỀN THEO VAI TRÒ (SEED)"
+  },
+  {
+    "A2": "Dữ liệu mẫu triển khai role_permissions. Scope: SELF = khoản mình làm, DEPARTMENT = bộ phận, YARD = bãi, ALL = toàn hệ thống."
+  },
+  {
+    "A4": "ROLE_CODE",
+    "B4": "Tên vai trò",
+    "C4": "PERMISSION_CODE",
+    "D4": "SCOPE",
+    "E4": "Đang cấp",
+    "F4": "Độ nhạy",
+    "G4": "Mã tham chiếu",
+    "H4": "Điều kiện hệ thống"
+  },
+  {
+    "A5": "SEC_STAFF",
+    "B5": "Nhân viên An ninh",
+    "C5": "vehicle.visit.read",
+    "D5": "YARD",
+    "E5": "Có",
+    "F5": "Thông thường",
+    "G5": "Q01,Q03,Q25",
+    "H5": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A6": "SEC_LEAD",
+    "B6": "Trưởng bộ phận An ninh",
+    "C6": "vehicle.visit.read",
+    "D6": "YARD",
+    "E6": "Có",
+    "F6": "Thông thường",
+    "G6": "Q01,Q03,Q25",
+    "H6": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A7": "PORT_STAFF",
+    "B7": "Nhân viên Cổng cảng kho bãi",
+    "C7": "vehicle.visit.read",
+    "D7": "YARD",
+    "E7": "Có",
+    "F7": "Thông thường",
+    "G7": "Q01,Q03,Q25",
+    "H7": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A8": "PORT_LEAD",
+    "B8": "Trưởng bộ phận Cổng cảng kho bãi",
+    "C8": "vehicle.visit.read",
+    "D8": "YARD",
+    "E8": "Có",
+    "F8": "Thông thường",
+    "G8": "Q01,Q03,Q25",
+    "H8": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A9": "DIS_STAFF",
+    "B9": "Nhân viên Điều phối",
+    "C9": "vehicle.visit.read",
+    "D9": "YARD",
+    "E9": "Có",
+    "F9": "Thông thường",
+    "G9": "Q01,Q03,Q25",
+    "H9": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A10": "DIS_LEAD",
+    "B10": "Trưởng bộ phận Điều phối",
+    "C10": "vehicle.visit.read",
+    "D10": "YARD",
+    "E10": "Có",
+    "F10": "Thông thường",
+    "G10": "Q01,Q03,Q25",
+    "H10": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  },
+  {
+    "A11": "SYS_ADMIN",
+    "B11": "Quản trị hệ thống",
+    "C11": "vehicle.visit.read",
+    "D11": "ALL",
+    "E11": "Có",
+    "F11": "Thông thường",
+    "G11": "Q01,Q03,Q25",
+    "H11": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+  }
+]

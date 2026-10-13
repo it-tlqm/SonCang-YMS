@@ -1,0 +1,89 @@
+[
+  {
+    "A1": "V5 — DANH SÁCH VAI TRÒ (ROLE)"
+  },
+  {
+    "A2": "7 vai trò V1 đang hoạt động + Kế toán dự phòng. Không dùng chuỗi tên vai trò trong code để cho phép thao tác."
+  },
+  {
+    "A4": "ROLE_CODE",
+    "B4": "Tên hiển thị",
+    "C4": "Bộ phận",
+    "D4": "Cấp",
+    "E4": "Kích hoạt V1",
+    "F4": "Giai đoạn",
+    "G4": "Mô tả / phạm vi"
+  },
+  {
+    "A5": "SEC_STAFF",
+    "B5": "Nhân viên An ninh",
+    "C5": "AN_NINH",
+    "D5": "Nhân viên",
+    "E5": "Có",
+    "F5": "V1",
+    "G5": "Kiểm soát cổng, thu vé/phí lưu, ghi xe/cont ra, sửa mã cont có nhật ký."
+  },
+  {
+    "A6": "SEC_LEAD",
+    "B6": "Trưởng bộ phận An ninh",
+    "C6": "AN_NINH",
+    "D6": "Trưởng bộ phận",
+    "E6": "Có",
+    "F6": "V1",
+    "G6": "Toàn quyền nghiệp vụ An ninh, xem thu ca/bộ phận, xử lý ngoại lệ."
+  },
+  {
+    "A7": "PORT_STAFF",
+    "B7": "Nhân viên Cổng cảng kho bãi",
+    "C7": "CCKB",
+    "D7": "Nhân viên",
+    "E7": "Có",
+    "F7": "V1",
+    "G7": "Điện dự kiến, nhập/sửa giờ, thu điện, xác nhận tài chính/ngoại lệ có lý do."
+  },
+  {
+    "A8": "PORT_LEAD",
+    "B8": "Trưởng bộ phận Cổng cảng kho bãi",
+    "C8": "CCKB",
+    "D8": "Trưởng bộ phận",
+    "E8": "Có",
+    "F8": "V1",
+    "G8": "Duyệt điều chỉnh tiền sau thu, xem đối soát, hỗ trợ nhân viên CCKB."
+  },
+  {
+    "A9": "DIS_STAFF",
+    "B9": "Nhân viên Điều phối",
+    "C9": "DIEU_PHOI",
+    "D9": "Nhân viên",
+    "E9": "Có",
+    "F9": "V1",
+    "G9": "Cập nhật tình trạng container HÀNG/RỖNG trong bãi."
+  },
+  {
+    "A10": "DIS_LEAD",
+    "B10": "Trưởng bộ phận Điều phối",
+    "C10": "DIEU_PHOI",
+    "D10": "Trưởng bộ phận",
+    "E10": "Có",
+    "F10": "V1",
+    "G10": "Xử lý thay đổi HÀNG/RỖNG sau khi cont đã ra; xem audit BP."
+  },
+  {
+    "A11": "SYS_ADMIN",
+    "B11": "Quản trị hệ thống",
+    "C11": "HE_THONG",
+    "D11": "Quản trị",
+    "E11": "Có",
+    "F11": "V1",
+    "G11": "Quản trị tài khoản, gán quyền, bảng giá, bảo trì và ngoại lệ có audit."
+  },
+  {
+    "A12": "ACCOUNTING_FUTURE",
+    "B12": "Kế toán (dự phòng)",
+    "C12": "KE_TOAN",
+    "D12": "Chuyên môn",
+    "E12": "Không",
+    "F12": "GĐ sau",
+    "G12": "Chưa bật trong V1; lưu thông tin hóa đơn, mở rộng khi có nghiệp vụ Kế toán."
+  }
+]

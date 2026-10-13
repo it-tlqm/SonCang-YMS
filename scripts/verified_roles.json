@@ -1,0 +1,74 @@
+[
+  {
+    "code": "SEC_STAFF",
+    "name": "Nhân viên An ninh",
+    "dept": "AN_NINH",
+    "seniority": "Nhân viên",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Kiểm soát cổng, thu vé/phí lưu, ghi xe/cont ra, sửa mã cont có nhật ký."
+  },
+  {
+    "code": "SEC_LEAD",
+    "name": "Trưởng bộ phận An ninh",
+    "dept": "AN_NINH",
+    "seniority": "Trưởng bộ phận",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Toàn quyền nghiệp vụ An ninh, xem thu ca/bộ phận, xử lý ngoại lệ."
+  },
+  {
+    "code": "PORT_STAFF",
+    "name": "Nhân viên Cổng cảng kho bãi",
+    "dept": "CCKB",
+    "seniority": "Nhân viên",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Điện dự kiến, nhập/sửa giờ, thu điện, xác nhận tài chính/ngoại lệ có lý do."
+  },
+  {
+    "code": "PORT_LEAD",
+    "name": "Trưởng bộ phận Cổng cảng kho bãi",
+    "dept": "CCKB",
+    "seniority": "Trưởng bộ phận",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Duyệt điều chỉnh tiền sau thu, xem đối soát, hỗ trợ nhân viên CCKB."
+  },
+  {
+    "code": "DIS_STAFF",
+    "name": "Nhân viên Điều phối",
+    "dept": "DIEU_PHOI",
+    "seniority": "Nhân viên",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Cập nhật tình trạng container HÀNG/RỖNG trong bãi."
+  },
+  {
+    "code": "DIS_LEAD",
+    "name": "Trưởng bộ phận Điều phối",
+    "dept": "DIEU_PHOI",
+    "seniority": "Trưởng bộ phận",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Xử lý thay đổi HÀNG/RỖNG sau khi cont đã ra; xem audit BP."
+  },
+  {
+    "code": "SYS_ADMIN",
+    "name": "Quản trị hệ thống",
+    "dept": "HE_THONG",
+    "seniority": "Quản trị",
+    "is_active": true,
+    "phase": "V1",
+    "desc": "Quản trị tài khoản, gán quyền, bảng giá, bảo trì và ngoại lệ có audit."
+  },
+  {
+    "code": "ACCOUNTING_FUTURE",
+    "name": "Kế toán (dự phòng)",
+    "dept": "KE_TOAN",
+    "seniority": "Chuyên môn",
+    "is_active": false,
+    "phase": "GĐ sau",
+    "desc": "Chưa bật trong V1; lưu thông tin hóa đơn, mở rộng khi có nghiệp vụ Kế toán."
+  }
+]

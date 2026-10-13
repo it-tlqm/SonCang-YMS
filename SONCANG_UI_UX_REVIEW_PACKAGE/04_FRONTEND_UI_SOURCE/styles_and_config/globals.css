@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  /* Tà Lùng Quang Minh — Sơn Cảng Design Tokens (Light Mode Only) */
+  --color-brand-green: #0A9444;
+  --color-brand-navy: #223873;
+  --color-brand-cta: #087C3C;
+  --color-brand-bg: #F5F8FA;
+  --color-brand-card: #FFFFFF;
+  --color-brand-border: #E3E8EF;
+  --color-brand-text: #1E293B;
+  --color-brand-text-muted: #64748B;
+  --color-brand-danger: #DC2626;
+  --color-brand-warning: #D97706;
+  --color-brand-success: #16A34A;
+
+  --background: var(--color-brand-bg);
+  --foreground: var(--color-brand-text);
+}
+
+@theme inline {
+  --color-primary: var(--color-brand-green);
+  --color-primary-dark: var(--color-brand-cta);
+  --color-secondary: var(--color-brand-navy);
+  --color-bg-main: var(--color-brand-bg);
+  --color-surface: var(--color-brand-card);
+  --color-border-main: var(--color-brand-border);
+  --color-muted: var(--color-brand-text-muted);
+  --font-sans: var(--font-be-vietnam-pro);
+}
+
+body {
+  background: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  font-family: var(--font-be-vietnam-pro), system-ui, sans-serif;
+  min-height: 100vh;
+}

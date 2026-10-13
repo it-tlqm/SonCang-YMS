@@ -1,0 +1,7 @@
+/thanhnx/OpenCode/YMS-project/supabase/tests/domain_vehicles_containers_004.sql .. ok
+All tests successful.
+Files=1, Tests=75,  1 wallclock secs ( 0.03 usr  0.01 sys +  0.01 cusr  0.01 csys =  0.06 CPU)
+Result: PASS
+
+Connecting to local database...
+psql:/thanhnx/OpenCode/YMS-project/supabase/tests/domain_vehicles_containers_004.sql:22: NOTICE:  extension "pgtap" already exists, skipping

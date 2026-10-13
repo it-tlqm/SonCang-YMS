@@ -1,0 +1,109 @@
+{
+  "total": 17,
+  "pass": 17,
+  "fail": 0,
+  "details": [
+    {
+      "id": "RACE-01",
+      "name": "Hai kết nối đồng thời cùng idempotency_key: Replay ID cũ an toàn, chỉ tạo đúng 1 bản ghi",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "RACE-02",
+      "name": "Hai kết nối đồng thời tạo cùng số container: Đúng 1 kết nối thành công, kết nối kia bị chặn an toàn (Count = 1)",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LG-01a",
+      "name": "Lượt xe: Tái sử dụng key nhưng thay đổi driver_name bị từ chối fail-safe",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LG-01c",
+      "name": "Lượt xe: Tái sử dụng key cùng payload tái hiện an toàn đúng ID ban đầu",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LG-01b",
+      "name": "Lượt cont: Tái sử dụng key nhưng thay đổi container_size bị từ chối fail-safe",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LG-01d",
+      "name": "Lượt cont: Tái sử dụng key cùng payload tái hiện an toàn đúng ID ban đầu",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SEC-01",
+      "name": "Database role anon bị từ chối gọi RPC sc_create_vehicle_visit",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SEC-02",
+      "name": "Database role anon bị từ chối SELECT trên app_container_number_changes",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SEC-03",
+      "name": "RLS: Điều phối (DIS_STAFF) không có quyền discrepancy.view nhìn thấy 0 bản ghi",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SEC-04",
+      "name": "An ninh (SEC_STAFF) không có quyền cập nhật HÀNG/RỖNG bị từ chối fail-closed",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SEC-05",
+      "name": "SYS_ADMIN đổi giá vé trực tiếp bị chặn theo kiểm soát tài chính AP10 Four-Eyes",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "HIST-01",
+      "name": "Sửa số container: UUID được bảo toàn 100%, sinh bản ghi lịch sử và audit log",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "HIST-02",
+      "name": "Trigger bất biến: Chặn lệnh DELETE trên app_container_number_changes",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "HIST-03",
+      "name": "Trigger bất biến: Chặn chỉnh sửa evidence_url/dữ liệu gốc",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LIFE-01",
+      "name": "Bảo vệ phạm vi Migration 007: Chưa có RPC công khai nào hoàn tất xuất bãi trong 004",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LIFE-02",
+      "name": "Ràng buộc toàn vẹn vòng đời: ck_container_status_outbound chặn container IN_YARD có outbound_at",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "LIFE-03",
+      "name": "Ràng buộc toàn vẹn vòng đời: ck_vehicle_status_exit chặn xe IN_YARD có exit_at/exit_by",
+      "status": "PASS",
+      "details": ""
+    }
+  ]
+}

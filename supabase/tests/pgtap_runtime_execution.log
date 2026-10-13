@@ -1,0 +1,37 @@
+================================================================================
+SUPABASE LOCAL PGTAP RUNTIME TEST EXECUTION LOG
+Project: Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng
+Date: 2026-10-11 18:26:34
+Database: PostgreSQL 17.11.0.004 on Supabase Local (Docker WSL2)
+Command: npx supabase test db --local
+================================================================================
+
+Connecting to local database...
+psql:/thanhnx/OpenCode/YMS-project/supabase/tests/rbac_verification.sql:18: NOTICE:  extension "pgtap" already exists, skipping
+/thanhnx/OpenCode/YMS-project/supabase/tests/rbac_verification.sql .. ok
+All tests successful.
+Files=1, Tests=49,  0 wallclock secs ( 0.06 usr +  0.03 sys =  0.09 CPU)
+Result: PASS
+Process exit code: 0
+
+================================================================================
+DETAILED TEST BREAKDOWN:
+- Suite 1 (Tests 1-7): Seed Invariants & V1 CORE Activation (8 roles, 67 perms, 206 grants, 0 wildcard) -> PASS
+- Suite 2 (Tests 8-10): Segregation of Duties (SoD - An ninh, CCKB, Điều phối) -> PASS
+- Suite 3 (Tests 11-14): Database Privileges (sc_log_audit_event REVOKED from authenticated, app_approval_requests direct INSERT REVOKED) -> PASS
+- Suite 4 (Tests 15-17): Database Check Constraints (Four-Eyes actor constraint, Lifecycle status, Non-empty reason) -> PASS
+- Suite 5 (Tests 18-19): Audit Immutability (sc_audit_immutable trigger blocks UPDATE & DELETE, identity column handled via RETURNING) -> PASS
+- Suite 6 (Tests 20-21): Direct Table Manipulation under Role authenticated (DENIED with SQLSTATE 42501) -> PASS
+- Suite 7 (Tests 22-23): AP06 One-Step Policy Fail-Closed (throws_ok P0001 with exact message, status preserved PENDING) -> PASS
+- Suite 8 (Tests 24-25): Four-Eyes Violation in RPC (throws_ok P0001 with exact message, status preserved PENDING) -> PASS
+- Suite 9 (Tests 26-41): Unit Tests for sc_can() Logic Across 4 Scopes (ALL, YARD, DEPARTMENT, SELF, Expired, Inactive, No-role) -> PASS
+- Suite 10 (Tests 42-48): Integration Tests: RLS Row-Level Visibility under Role authenticated:
+    * SEC_STAFF: 0 rows (no audit.read permission in V5) -> PASS
+    * SEC_LEAD: sees AN_NINH rows, CCKB hidden (0 rows) -> PASS
+    * PORT_LEAD: sees CCKB rows Bãi 1, AN_NINH hidden (0 rows) -> PASS
+    * SYS_ADMIN: sees ALL rows (>= 3 rows) -> PASS
+    * NONE: 0 rows hidden -> PASS
+- Suite 11 (Test 49): Automated Trigger Audit Event on Role Assignment -> PASS
+
+TOTAL: 49 / 49 TESTS PASSED (100% SUCCESS)
+================================================================================

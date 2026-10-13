@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Environment files
+.env*
+!.env.example
+
+# Zip bundles & backups
+*.zip
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.pem
+
+# IDE & Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Local Supabase
+.branches/
+.temp/
+supabase/.temp/
+
+# Scratch & Temporary analysis folders
+scratch/
+.tmp_chrome*

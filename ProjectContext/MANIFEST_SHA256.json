@@ -1,0 +1,92 @@
+{
+  "project": "PWA Quan ly bai Son Cang - TLQM",
+  "prepared_date": "2026-10-11",
+  "baseline": "PROJECT_CONTEXT V5 (2026-10-11)",
+  "source_precedence": "LATEST_USER_CONFIRMED > V5_CONTEXT_AND_RBAC > ANSWERED_V3 > V4_HISTORY > STITCH_UI > INFERENCE",
+  "notes": [
+    "Source files copied byte-for-byte without editing.",
+    "RBAC workbook verified 67 unique permission codes and 206 enabled grants at time of packaging.",
+    "SQL draft is not production-ready migration.",
+    "Stitch snapshots are older than screen 05 and must not be treated as full manifest.",
+    "Antigravity project repository/migrations/tests were not inspected."
+  ],
+  "sources": [
+    {
+      "path": "01_Nghiep_vu_V5/PROJECT_CONTEXT.md",
+      "original_in_workspace": "PROJECT_CONTEXT.md",
+      "bytes": 30729,
+      "sha256": "b32f62eeb9feacedc1651fa2c9c31ed3641f33dd9bf2d7dcedfe0b4441a23d0e",
+      "status": "V5_PRIMARY"
+    },
+    {
+      "path": "01_Nghiep_vu_V5/PWA_Son_Cang_V3_Tong_hop_V1_da_tra_loi_20261011.xlsx",
+      "original_in_workspace": "PWA_Son_Cang_V3_Tong_hop_V1_da_tra_loi_20261011.xlsx",
+      "bytes": 104293,
+      "sha256": "be52f8d2753ba0f463a4bb112336564d7039acf2b72b361ec9127930fd78ebf5",
+      "status": "ANSWERS_V3"
+    },
+    {
+      "path": "02_RBAC_V5/HUONG_DAN_TRIEN_KHAI_RBAC_PWA_SON_CANG.md",
+      "original_in_workspace": "HUONG_DAN_TRIEN_KHAI_RBAC_PWA_SON_CANG.md",
+      "bytes": 13766,
+      "sha256": "5d6833a07f5f5f8a79238503c2f962c4d6cd916f32f1e777422769785e7c0846",
+      "status": "V5_PRIMARY"
+    },
+    {
+      "path": "02_RBAC_V5/PWA_Son_Cang_V5_Phan_quyen_RBAC_DONG_HOAN_THIEN.xlsx",
+      "original_in_workspace": "PWA_Son_Cang_V5_Phan_quyen_RBAC_DONG_HOAN_THIEN.xlsx",
+      "bytes": 889111,
+      "sha256": "25ecea41d428d08d48d43cdfeaf8413abf77454860e2c817e531434dca5595cd",
+      "status": "V5_PRIMARY"
+    },
+    {
+      "path": "02_RBAC_V5/RBAC_SON_CANG_SUPABASE_SCHEMA_SEED_DRAFT.sql",
+      "original_in_workspace": "RBAC_SON_CANG_SUPABASE_SCHEMA_SEED_DRAFT.sql",
+      "bytes": 88206,
+      "sha256": "dabbb2e6452ca1085723253f5c6a5af4adf63ed5dc37d1c96a12aa9cf1a26205",
+      "status": "DRAFT_SQL_NOT_FOR_PRODUCTION"
+    },
+    {
+      "path": "03_UAT_Tai_lieu_lich_su/PWA_Son_Cang_V4_Dac_ta_nghiep_vu_BAN_RA_SOAT_20261011.md",
+      "original_in_workspace": "PWA_Son_Cang_V4_Dac_ta_nghiep_vu_BAN_RA_SOAT_20261011.md",
+      "bytes": 33669,
+      "sha256": "52b4bd60e6e90e9806fc8883fbb13c81206c1e871609103cbcffe47d8b273158",
+      "status": "REFERENCE_ONLY_HISTORY"
+    },
+    {
+      "path": "03_UAT_Tai_lieu_lich_su/PWA_Son_Cang_V4_Dac_ta_ra_soat_quy_tac_va_UAT_20261011.xlsx",
+      "original_in_workspace": "PWA_Son_Cang_V4_Dac_ta_ra_soat_quy_tac_va_UAT_20261011.xlsx",
+      "bytes": 161205,
+      "sha256": "e795a7e60e2a86a613b4101e84264ea4feae4c72a41019aceb92155f1bc959ee",
+      "status": "REFERENCE_ONLY_HISTORY"
+    },
+    {
+      "path": "04_UI_Stitch_tham_khao/DESIGN.md",
+      "original_in_workspace": "TLQM_Stitch_Starter_20261011/DESIGN.md",
+      "bytes": 11300,
+      "sha256": "d845d84f98ff8e58df79bcf5eb4532b72d5b7f5244a80ab56f4583b0a676974e",
+      "status": "REFERENCE_ONLY_UI"
+    },
+    {
+      "path": "04_UI_Stitch_tham_khao/QA_Snapshot_20261011.md",
+      "original_in_workspace": "Stitch_SonCang_QA_Review_20261011.md",
+      "bytes": 6894,
+      "sha256": "d75c4119e5f5edbd95cc5d60b6675f9917c672834bbc4a0de09f22f67af80dd6",
+      "status": "REFERENCE_ONLY_UI"
+    },
+    {
+      "path": "04_UI_Stitch_tham_khao/STITCH_DESIGN_CONTEXT.md",
+      "original_in_workspace": "TLQM_Stitch_Starter_20261011/STITCH_DESIGN_CONTEXT.md",
+      "bytes": 10891,
+      "sha256": "8f991f225eac2cad2fafa7201c837025de58e68164bd1f8927d5b08ea65e342e",
+      "status": "REFERENCE_ONLY_UI"
+    },
+    {
+      "path": "04_UI_Stitch_tham_khao/Screen_Manifest_Snapshot_20261011.json",
+      "original_in_workspace": "Stitch_SonCang_Antigravity_Screen_Manifest_20261011.json",
+      "bytes": 12519,
+      "sha256": "b5ad3d50c26d8ab1b30e91c6fbdaa9e9d5955aeddb6e6db867b1f1f633463098",
+      "status": "REFERENCE_ONLY_UI"
+    }
+  ]
+}

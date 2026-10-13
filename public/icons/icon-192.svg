@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="scGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#223873" />
+      <stop offset="100%" stop-color="#121F40" />
+    </linearGradient>
+    <linearGradient id="scAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A9444" />
+      <stop offset="100%" stop-color="#087C3C" />
+    </linearGradient>
+  </defs>
+  <!-- Background with rounded corners -->
+  <rect width="192" height="192" rx="36" fill="url(#scGrad)" />
+  
+  <!-- Container & Gate Geometric Motif -->
+  <g transform="translate(36, 36)">
+    <!-- Container 1 -->
+    <rect x="0" y="44" width="76" height="42" rx="6" fill="url(#scAccent)" />
+    <line x1="16" y1="44" x2="16" y2="86" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="32" y1="44" x2="32" y2="86" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="48" y1="44" x2="48" y2="86" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="64" y1="44" x2="64" y2="86" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    
+    <!-- Container 2 (Top) -->
+    <rect x="24" y="8" width="80" height="32" rx="5" fill="#3B82F6" />
+    <line x1="40" y1="8" x2="40" y2="40" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="56" y1="8" x2="56" y2="40" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="72" y1="8" x2="72" y2="40" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="88" y1="8" x2="88" y2="40" stroke="#ffffff" stroke-width="2" stroke-opacity="0.4" />
+
+    <!-- Yard Crane / Gantry Symbol -->
+    <path d="M0 102 L120 102" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+    <path d="M16 102 L8 116" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round" />
+    <path d="M104 102 L112 116" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round" />
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="scGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#223873" />
+      <stop offset="100%" stop-color="#121F40" />
+    </linearGradient>
+    <linearGradient id="scAccent512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A9444" />
+      <stop offset="100%" stop-color="#087C3C" />
+    </linearGradient>
+  </defs>
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="96" fill="url(#scGrad512)" />
+  
+  <!-- Container & Gate Geometric Motif -->
+  <g transform="translate(96, 96)">
+    <!-- Container 1 (Bottom Left) -->
+    <rect x="0" y="118" width="200" height="112" rx="14" fill="url(#scAccent512)" />
+    <line x1="40" y1="118" x2="40" y2="230" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="80" y1="118" x2="80" y2="230" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="120" y1="118" x2="120" y2="230" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="160" y1="118" x2="160" y2="230" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    
+    <!-- Container 2 (Top Right) -->
+    <rect x="64" y="20" width="216" height="86" rx="12" fill="#3B82F6" />
+    <line x1="108" y1="20" x2="108" y2="106" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="152" y1="20" x2="152" y2="106" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="196" y1="20" x2="196" y2="106" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+    <line x1="240" y1="20" x2="240" y2="106" stroke="#ffffff" stroke-width="5" stroke-opacity="0.4" />
+
+    <!-- Yard Crane / Gantry Symbol -->
+    <path d="M0 270 L320 270" stroke="#ffffff" stroke-width="12" stroke-linecap="round" />
+    <path d="M40 270 L20 310" stroke="#CBD5E1" stroke-width="10" stroke-linecap="round" />
+    <path d="M280 270 L300 310" stroke="#CBD5E1" stroke-width="10" stroke-linecap="round" />
+  </g>
+</svg>

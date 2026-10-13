@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"text-primary":"#1F2937","outline":"#757681","outline-variant":"#c5c6d1","secondary-fixed-dim":"#69de84","on-tertiary-fixed":"#2f1500","info-bg":"#EFF6FF","error-container":"#ffdad6","tertiary":"#3e1d00","danger":"#B42318","surface-container-low":"#eff4ff","surface-container":"#e6eeff","on-background":"#121c2a","on-primary-fixed-variant":"#2f447f","nav-active-bg":"#EAF6EF","tertiary-fixed-dim":"#ffb77f","on-primary":"#ffffff","danger-bg":"#FEF3F2","surface-dim":"#d0dbed","on-error-container":"#93000a","on-primary-fixed":"#00174b","on-tertiary-container":"#db965f","tertiary-container":"#5e2f00","on-primary-container":"#8fa3e6","surface-bright":"#f8f9ff","surface":"#FFFFFF","text-secondary":"#475467","inverse-surface":"#27313f","on-surface-variant":"#444650","success":"#067647","surface-tint":"#475c99","error":"#ba1a1a","on-secondary-container":"#007433","on-error":"#ffffff","primary":"#05215c","tertiary-fixed":"#ffdcc4","secondary-fixed":"#86fb9d","on-secondary-fixed":"#00210a","secondary":"#006d30","background":"#f8f9ff","surface-soft":"#F0F5F2","primary-fixed-dim":"#b4c5ff","border":"#E3E8EF","surface-container-high":"#dee9fc","text-muted":"#667085","on-tertiary":"#ffffff","surface-container-lowest":"#ffffff","canvas":"#F5F8FA","on-tertiary-fixed-variant":"#6c3a0a","info":"#1D4ED8","surface-container-highest":"#d9e3f6","warning":"#9A4808","on-secondary":"#ffffff","secondary-container":"#86fb9d","inverse-primary":"#b4c5ff","inverse-on-surface":"#eaf1ff","action-primary":"#087C3C","success-bg":"#ECFDF3","action-primary-hover":"#076934","warning-bg":"#FFFAEB","surface-variant":"#d9e3f6","on-secondary-fixed-variant":"#005322","primary-container":"#223873","on-surface":"#121c2a","primary-fixed":"#dbe1ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-md":"0.75rem","space-xs":"0.25rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","space-sm":"0.5rem","margin":"1rem","space-lg":"1rem","space-xl":"1.5rem","gutter":"1rem"},"fontFamily":{"headline-lg":["Be Vietnam Pro"],"label-lg":["Be Vietnam Pro"],"headline-md":["Be Vietnam Pro"],"code-container":["JetBrains Mono"],"body-sm":["Be Vietnam Pro"],"label-md":["Be Vietnam Pro"],"title-md":["Be Vietnam Pro"],"body-lg":["Be Vietnam Pro"],"headline-sm":["Be Vietnam Pro"],"body-md":["Be Vietnam Pro"]},"fontSize":{"headline-lg":["30px",{"lineHeight":"38px","fontWeight":"700"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"600"}],"code-container":["14px",{"lineHeight":"20px","letterSpacing":"0.05em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","fontWeight":"500"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}};</script></head><body class="bg-canvas text-on-surface font-body-md text-body-md antialiased"><header class="fixed top-0 left-0 right-0 z-50 h-16 bg-surface shadow-[0_1px_8px_rgba(34,56,115,0.06)]"><div class="w-full h-full px-gutter-desktop flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-md"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[22px]">anchor</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-title-md text-title-md font-bold tracking-tight text-primary leading-none">TÀ LÙNG QUANG MINH</span><span class="font-body-sm text-body-sm text-text-muted leading-none">|</span><span class="font-label-md text-label-md text-text-secondary uppercase tracking-wider leading-none">BÃI SƠN CẢNG</span></div><span class="font-body-sm text-body-sm text-text-muted mt-0.5">Phân hệ CCKB • Thu phí &amp; Quản lý điện lạnh</span></div></div><div class="hidden xl:flex items-center gap-space-sm pl-space-md"><span class="inline-flex items-center px-2 py-0.5 rounded-full bg-info-bg text-info font-label-md text-label-md font-medium"><span class="w-1.5 h-1.5 rounded-full bg-info mr-1.5"></span>Online Trạm Cổng</span><span class="inline-flex items-center px-2 py-0.5 rounded-full bg-success-bg text-success font-label-md text-label-md font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success mr-1.5"></span>Cột Cắm Hoạt Động: 48/64</span></div></div><div class="flex items-center gap-space-lg"><div class="hidden md:flex items-center gap-space-md px-space-md py-1.5 rounded-lg bg-surface-container-low"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-text-secondary leading-tight">Ca 1 • 06:00 - 14:00</span><span class="font-body-sm text-body-sm text-text-muted leading-tight">Ngày trực: Hôm nay</span></div><span class="material-symbols-outlined text-action-primary text-[20px]">schedule</span></div><div class="flex items-center gap-space-md pl-space-sm"><div class="flex flex-col text-right hidden sm:flex"><div class="flex items-center justify-end gap-space-xs"><span class="font-label-lg text-label-lg text-text-primary">Lê Thu Thủy</span><span class="inline-flex items-center px-1.5 py-0.2 rounded bg-success-bg text-success font-label-md text-label-md font-medium leading-none">Active</span></div><span class="font-body-sm text-body-sm text-text-muted">Nhân viên Điều hành CCKB</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><aside class="fixed left-0 top-16 bottom-0 w-72 bg-surface z-40 flex flex-col justify-between shadow-[0_1px_8px_rgba(34,56,115,0.04)]"><div class="flex-1 overflow-y-auto py-space-lg px-space-md"><div class="px-space-md mb-space-sm"><span class="font-label-md text-label-md font-semibold text-text-muted uppercase tracking-wider">Nghiệp Vụ Cổng Cảng</span></div><nav class="space-y-1" data-active-classes="bg-nav-active-bg text-action-primary font-label-lg border-l-4 border-action-primary"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-all bg-nav-active-bg text-action-primary font-label-lg border-l-4 border-action-primary" data-path="tong-quan-cckb" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Tổng quan CCKB</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-all font-body-md text-body-md" data-path="yeu-cau-dien-du-kien" href="#"><span class="material-symbols-outlined text-[20px]">electrical_services</span><span>Yêu cầu điện dự kiến</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-all font-body-md text-body-md" data-path="phien-cam-rut-dien-lanh" href="#"><span class="material-symbols-outlined text-[20px]">power</span><span>Phiên cắm rút điện lạnh</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-all font-body-md text-body-md" data-path="thu-tien-va-quyet-toan" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Thu tiền &amp; Quyết toán</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-all font-body-md text-body-md" data-path="doi-chieu-sai-so-cont" href="#"><span class="material-symbols-outlined text-[20px]">difference</span><span>Đối chiếu sai số cont</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-all font-body-md text-body-md" data-path="bao-cao-ca-truc" href="#"><span class="material-symbols-outlined text-[20px]">lab_profile</span><span>Báo cáo ca trực</span></a></nav></div><div class="p-space-md m-space-md bg-canvas rounded-lg space-y-space-sm"><div class="flex items-center justify-between pb-space-xs"><span class="font-label-md text-label-md font-semibold text-text-primary uppercase tracking-wider">Phân quyền vai trò Scope</span><span class="inline-flex items-center px-1.5 py-0.5 rounded bg-success-bg text-success font-label-md text-label-md font-medium">Active</span></div><div class="space-y-1 font-code-container text-[11px] leading-tight text-text-secondary"><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0"></span><span class="truncate">reefer.request.manage</span></div><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0"></span><span class="truncate">reefer.session.record</span></div><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0"></span><span class="truncate">reefer.payment.collect</span></div><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0"></span><span class="truncate">Duyệt điều kiện xuất bãi</span></div></div></div></aside><div class="pl-72"><main class="relative pt-16 min-h-screen bg-canvas w-full px-gutter-desktop py-space-xl"><div class="flex flex-col w-full">
+<!-- SUBHEADER / CONTEXT BAR -->
+<section class="flex flex-col gap-space-md mb-space-lg">
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md bg-surface p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">TỔNG QUAN TÁC NGHIỆP THƯƠNG VỤ &amp; CỔNG CẢNG KHO BÃI (CCKB)</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-nav-active-bg text-action-primary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-action-primary"></span>
+            Bãi Sơn Cảng • Ca trực 1 (06:00 - 14:00) • Quầy CCKB 01
+          </span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary max-w-4xl">
+          Phân định nghiệp vụ vận hành: CCKB kiểm soát nhập/sửa thời gian cắm/rút, thu tiền điện bãi và cấp quyền điều kiện tài chính xuất cổng. An ninh bãi phụ trách thao tác vật lý, ghi nhận số cont, thu vé cổng và thu phí lưu bãi khi xe ra thực tế.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-surface text-primary font-label-lg text-label-lg shadow-sm hover:bg-surface-soft transition-colors cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+<span>Làm mới (F5)</span>
+</button>
+<button class="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-surface-container text-primary font-label-lg text-label-lg hover:bg-surface-container-high transition-colors cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[20px]">search</span>
+<span>Tra cứu cont</span>
+</button>
+<button class="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-action-primary hover:bg-action-primary-hover text-on-primary font-label-lg text-label-lg shadow-sm transition-colors cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>+ Tạo yêu cầu điện dự kiến</span>
+</button>
+</div>
+</div>
+<!-- Banner Chú thích Nghiệp vụ V5 -->
+<div class="flex items-center justify-between px-space-lg py-space-sm rounded-lg bg-surface-container-low text-primary">
+<div class="flex items-center gap-space-sm text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-info text-[20px]">verified_user</span>
+<span class="font-label-md text-label-md text-primary">Quy tắc vận hành CCKB:</span>
+<span class="text-text-secondary">Chỉ container đã có cắm/rút hoàn tất + thu đủ tiền điện (hoặc duyệt ngoại lệ nợ) mới được CCKB cấp cờ "HỢP LỆ XUẤT CỔNG". Tránh thất thu điện lạnh tại Sơn Cảng.</span>
+</div>
+<span class="font-code-container text-[11px] text-text-muted">CHẾ ĐỘ MÔ PHỎNG OPERATIONAL ACTIVE</span>
+</div>
+</section>
+<!-- 6 THẺ KPI ĐIỀU HÀNH TÁC NGHIỆP -->
+<section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-space-md mb-space-lg">
+<!-- KPI 1 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-surface shadow-sm hover:bg-surface-container-low transition-all cursor-pointer group" onclick="filterByKpi('du-kien')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-text-secondary">Điện dự kiến</span>
+<span class="w-8 h-8 rounded-lg bg-info-bg text-info flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">pending_actions</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-info tracking-tight">08</span>
+<span class="font-body-sm text-body-sm text-text-muted">phiếu</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">Chờ xe vào gắn cont</span>
+</button>
+<!-- KPI 2 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-surface shadow-sm hover:bg-surface-soft transition-all cursor-pointer group" onclick="filterByKpi('dang-cam')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-text-secondary">Đang cắm điện</span>
+<span class="w-8 h-8 rounded-lg bg-success-bg text-success flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">power</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-success tracking-tight">14</span>
+<span class="font-body-sm text-body-sm text-text-muted">cont</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">Tổng công suất tải 48/64 ổ</span>
+</button>
+<!-- KPI 3 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-surface shadow-sm hover:bg-warning-bg transition-all cursor-pointer group" onclick="filterByKpi('cho-thu')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-text-secondary">Đã rút • Quyết toán</span>
+<span class="w-8 h-8 rounded-lg bg-warning-bg text-warning flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-warning tracking-tight">06</span>
+<span class="font-body-sm text-body-sm text-text-muted">cont</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">An ninh đã rút, cần chốt giờ</span>
+</button>
+<!-- KPI 4 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-surface shadow-sm hover:bg-danger-bg transition-all cursor-pointer group" onclick="filterByKpi('tien-chua-thu')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-text-secondary">Tiền điện chưa thu</span>
+<span class="w-8 h-8 rounded-lg bg-danger-bg text-danger flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-md text-headline-md text-danger tracking-tight">3.850K</span>
+<span class="font-body-sm text-body-sm text-danger font-medium">VNĐ</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">5 cont quá hạn/chờ quầy</span>
+</button>
+<!-- KPI 5 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-surface shadow-sm hover:bg-surface-container transition-all cursor-pointer group" onclick="filterByKpi('cho-duyet-xuat')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-text-secondary">Chờ duyệt xuất bãi</span>
+<span class="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-primary tracking-tight">09</span>
+<span class="font-body-sm text-body-sm text-text-muted">cont</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">Cần cờ hợp lệ tài chính</span>
+</button>
+<!-- KPI 6 -->
+<button class="flex flex-col text-left p-space-md rounded-xl bg-warning-bg shadow-sm hover:bg-surface transition-all cursor-pointer group" onclick="filterByKpi('canh-bao')" type="button">
+<div class="flex items-center justify-between w-full mb-space-xs">
+<span class="font-label-md text-label-md text-warning font-semibold">Sai lệch số cont</span>
+<span class="w-8 h-8 rounded-lg bg-surface text-warning flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-warning tracking-tight">02</span>
+<span class="font-body-sm text-body-sm text-warning font-medium">vụ việc</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1">An ninh đề xuất chỉnh sửa</span>
+</button>
+</section>
+<!-- KHUNG TRUNG TÂM: WORKLIST & CHI TIẾT TÁC NGHIỆP CCKB -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- CỘT TRÁI (8 CỘT): WORKLIST BẢNG DỮ LIỆU CÔNG VIỆC -->
+<section class="xl:col-span-8 flex flex-col gap-space-md">
+<div class="bg-surface rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Thanh công cụ lọc & tìm kiếm -->
+<div class="p-space-md bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<!-- Filter Tabs -->
+<div class="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0" id="filter-tabs">
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-nav-active-bg text-action-primary font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'all')" type="button">
+              Tất cả (39)
+            </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg text-text-secondary hover:bg-surface-soft font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'urgent')" type="button">
+              Cần xử lý ngay (12)
+            </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg text-text-secondary hover:bg-surface-soft font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'du-kien')" type="button">
+              Điện dự kiến (8)
+            </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg text-text-secondary hover:bg-surface-soft font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'dang-cam')" type="button">
+              Đang cắm (14)
+            </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg text-text-secondary hover:bg-surface-soft font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'cho-thu')" type="button">
+              Chờ thu tiền (6)
+            </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg text-text-secondary hover:bg-surface-soft font-label-md text-label-md cursor-pointer transition-colors whitespace-nowrap" onclick="setActiveTab(this, 'cho-duyet-xuat')" type="button">
+              Chờ duyệt xuất (9)
+            </button>
+</div>
+<!-- Ô tìm kiếm mã cont -->
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-text-muted text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-soft font-body-sm text-body-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface transition-all" id="cont-search-input" onkeyup="searchContainers()" placeholder="Tìm số cont (VD: MSKU 789...)" type="text"/>
+</div>
+</div>
+<!-- BẢNG WORKLIST CHÍNH -->
+<div class="overflow-x-auto">
+<table class="w-full text-left" id="cckb-table">
+<thead>
+<tr class="bg-canvas text-text-secondary font-label-md text-[12px] uppercase tracking-wider">
+<th class="py-3 px-space-md">Container • Mã Lượt</th>
+<th class="py-3 px-space-md">Dịch vụ • Biểu phí</th>
+<th class="py-3 px-space-md">Mốc Giờ Cắm / Rút</th>
+<th class="py-3 px-space-md">Tài Chính Tiền Điện</th>
+<th class="py-3 px-space-md">Thẩm Định Ra Bãi</th>
+<th class="py-3 px-space-md text-right">Tác Vụ CCKB</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm divide-y-0 text-text-primary">
+<!-- DÒNG 1: Đang chọn (Selected) - Đã rút điện, chờ thu và duyệt -->
+<tr class="hover:bg-surface-soft transition-colors cursor-pointer bg-surface-container-low group row-item" onclick="selectContainer('MSKU 7894561', 'CT-20261011-0054', '15C-345.67', '40 RF - Thịt bò đông lạnh', '10/10 14:40', '11/10 07:15', '16h 35p (Tính 16h 45p)', '1.675.000', 'unpaid', 'cho-duyet', 'An ninh Bốt 1', 'Cty Thực Phẩm Á Châu')">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-action-primary text-[18px]">radio_button_checked</span>
+<div class="flex flex-col">
+<span class="font-code-container text-code-container text-text-primary font-bold">MSKU 7894561</span>
+<span class="text-[11px] font-code-container text-text-muted">CT-20261011-0054</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">DIEN_CONT_GIO</span>
+<span class="text-[11px] text-text-muted">100.000 đ/h (làm tròn 15p)</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-warning">
+<span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                      Đã rút: 07:15 (11/10)
+                    </span>
+<span class="text-[11px] text-text-muted">Cắm: 14:40 (10/10) • 16h 35p</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-danger-bg text-danger font-label-md text-label-md">
+                      Chưa thu: 1.675.000 đ
+                    </span>
+<span class="text-[11px] text-text-muted mt-0.5">Khách tới quầy</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning-bg text-warning font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">hourglass_top</span>
+                    Chờ duyệt tài chính
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 rounded bg-action-primary text-on-primary font-label-md text-label-md hover:bg-action-primary-hover shadow-sm" type="button">Thu tiền</button>
+<button class="p-1 rounded hover:bg-surface text-text-secondary" title="Sửa giờ" type="button"><span class="material-symbols-outlined text-[18px]">edit_calendar</span></button>
+</div>
+</td>
+</tr>
+<!-- DÒNG 2: Đã rút & Đã thu tiền đủ -> Cần CCKB cấp cờ duyệt xuất -->
+<tr class="hover:bg-surface-soft transition-colors cursor-pointer bg-surface group row-item" onclick="selectContainer('TCKU 9283417', 'CT-20261011-0021', '29H-882.19', '40 RF - Thanh long', '10/10 20:00', '11/10 07:15', '11h 15p (Tính 11h 15p)', '1.125.000', 'paid', 'da-duyet', 'An ninh Bốt 2', 'HTX Nông Sản Bình Thuận')">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:text-action-primary">radio_button_unchecked</span>
+<div class="flex flex-col">
+<span class="font-code-container text-code-container text-text-primary font-bold">TCKU 9283417</span>
+<span class="text-[11px] font-code-container text-text-muted">CT-20261011-0021</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">DIEN_CONT_GIO</span>
+<span class="text-[11px] text-text-muted">100.000 đ/h</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      Đã rút: 07:15 (11/10)
+                    </span>
+<span class="text-[11px] text-text-muted">Cắm: 20:00 (10/10) • 11h 15p</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-success-bg text-success font-label-md text-label-md">
+                      Đã thu: 1.125.000 đ
+                    </span>
+<span class="text-[11px] text-text-muted mt-0.5">HD-DL-2026-4401</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-bg text-success font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Hợp lệ xuất bãi (#8921)
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-container-high" type="button">In biên lai</button>
+</div>
+</td>
+</tr>
+<!-- DÒNG 3: Đang cắm điện -> Chặn xuất vì chưa rút -->
+<tr class="hover:bg-surface-soft transition-colors cursor-pointer bg-surface group row-item" onclick="selectContainer('CMAU 8830190', 'CT-20261011-0089', '98C-112.44', '20 RF - Dược phẩm', '11/10 01:30', 'Đang cắm', '06h 45p liên tục', '675.000', 'ongoing', 'chan-xuat', 'Trực ban Bốt 1', 'Dược phẩm Đông Dương')">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:text-action-primary">radio_button_unchecked</span>
+<div class="flex flex-col">
+<span class="font-code-container text-code-container text-text-primary font-bold">CMAU 8830190</span>
+<span class="text-[11px] font-code-container text-text-muted">CT-20261011-0089</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">DIEN_CONT_GIO</span>
+<span class="text-[11px] text-text-muted">Ổ cắm A-12 (P=15kW)</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-info">
+<span class="w-1.5 h-1.5 rounded-full bg-info"></span>
+                      Đang cắm (06h 45p)
+                    </span>
+<span class="text-[11px] text-text-muted">Cắm lúc: 01:30 (11/10)</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="text-[12px] font-semibold text-text-secondary">Tạm tính: ~675.000 đ</span>
+<span class="text-[11px] text-text-muted">Chưa chốt giờ rút</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                    CHẶN: Chưa rút điện
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-container-high" type="button">Nhập giờ rút</button>
+</div>
+</td>
+</tr>
+<!-- DÒNG 4: Dự kiến (Chưa vào bãi) -->
+<tr class="hover:bg-surface-soft transition-colors cursor-pointer bg-surface group row-item" onclick="selectContainer('TEMU 4451029', 'CT-20261011-0099', '14C-234.11', '40 RF - Sầu riêng tươi', 'Chưa vào bãi', 'Chưa có', 'Yêu cầu: -18°C', '0', 'unpaid', 'cho-xe-vao', 'Hệ thống ePort', 'Cty XNK An Phát')">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:text-action-primary">radio_button_unchecked</span>
+<div class="flex flex-col">
+<span class="font-code-container text-code-container text-text-primary font-bold">TEMU 4451029</span>
+<span class="text-[11px] font-code-container text-text-muted">Yêu cầu #YC-9912</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-info">ĐIỆN DỰ KIẾN</span>
+<span class="text-[11px] text-text-muted">Cài đặt: -18°C • Cty An Phát</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-text-muted">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                      Chờ An ninh liên kết cont
+                    </span>
+<span class="text-[11px] text-text-muted">ETA dự kiến: 10:30 hôm nay</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="text-[12px] text-text-muted">Chưa phát sinh</span>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-low text-text-muted font-label-md text-label-md">
+                    Chưa vào bãi
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<button class="px-2 py-1 rounded bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-container-high" type="button">Gán số cont</button>
+</td>
+</tr>
+<!-- DÒNG 5: Trường hợp ngoại lệ còn nợ (Khách quen) -->
+<tr class="hover:bg-surface-soft transition-colors cursor-pointer bg-surface group row-item" onclick="selectContainer('OOLU 5521903', 'CT-20261011-0012', '16N-901.88', '40 RF - Thuỷ hải sản', '10/10 18:00', '11/10 06:00', '12h 00p', '320.000', 'debt-approved', 'da-duyet', 'Trực ban Bốt 2', 'Tổng Cty Thủy Sản Miền Bắc')">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:text-action-primary">radio_button_unchecked</span>
+<div class="flex flex-col">
+<span class="font-code-container text-code-container text-text-primary font-bold">OOLU 5521903</span>
+<span class="text-[11px] font-code-container text-text-muted">CT-20261011-0012</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">DIEN_CONT_GIO</span>
+<span class="text-[11px] text-text-muted">100.000 đ/h</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      Đã rút: 06:00 (11/10)
+                    </span>
+<span class="text-[11px] text-text-muted">Tổng thời gian: 12 giờ</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-warning-bg text-warning font-label-md text-label-md">
+                      Nợ ngoại lệ: 320.000 đ
+                    </span>
+<span class="text-[11px] text-text-muted mt-0.5">Cam kết chốt cuối tháng</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">fact_check</span>
+                    Duyệt ngoại lệ (#NO-04)
+                  </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<button class="px-2 py-1 rounded bg-surface-container text-text-secondary font-label-md text-label-md" type="button">Xem cam kết</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Phân trang và thanh trạng thái bảng -->
+<div class="p-space-md bg-canvas flex items-center justify-between text-body-sm text-text-secondary">
+<div class="flex items-center gap-space-sm">
+<span>Hiển thị <strong>5</strong> trong số <strong>39</strong> container tác nghiệp trong ca</span>
+<span class="text-text-muted">•</span>
+<span class="text-text-muted">Tự động cập nhật mỗi 30 giây</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 rounded bg-surface shadow-sm text-text-secondary hover:bg-surface-soft cursor-pointer text-[12px]" type="button">Trước</button>
+<span class="px-3 py-1 font-semibold text-primary text-[12px]">Trang 1 / 8</span>
+<button class="px-2.5 py-1 rounded bg-surface shadow-sm text-text-secondary hover:bg-surface-soft cursor-pointer text-[12px]" type="button">Sau</button>
+</div>
+</div>
+</div>
+<!-- BANNER NHẮC NHỞ QUY TRÌNH PHÍ LƯU (Anti-confusion CCKB & An ninh) -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[22px]">info</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-lg text-label-lg text-primary">Lưu ý phân chia thu phí lưu bãi container:</span>
+<p class="font-body-sm text-body-sm text-text-secondary">
+            Nhân viên Thương vụ CCKB <strong class="text-primary font-semibold">chỉ thu tiền điện lạnh và cấp cờ tài chính xuất bãi</strong>. Tiền phí lưu bãi (nếu xe đỗ quá 24h hoặc phát sinh giờ ngoài cổng) sẽ do <strong class="text-primary font-semibold">An ninh bốt cổng thu thực tế khi xe qua barie</strong>. Vui lòng không giải thích nhầm lẫn cho lái xe.
+          </p>
+</div>
+</div>
+</section>
+<!-- CỘT PHẢI (4 CỘT): PANEL TÁC NGHIỆP CHI TIẾT & THẨM ĐỊNH TÀI CHÍNH -->
+<aside class="xl:col-span-4 flex flex-col gap-space-md">
+<!-- CARD 1: CHI TIẾT PHIẾU ĐANG CHỌN (Master-Detail Panel) -->
+<div class="bg-surface rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="px-space-md py-3 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-action-primary text-[20px]">receipt</span>
+<span class="font-label-lg text-label-lg text-primary">CHI TIẾT PHIẾU ĐIỆN ĐANG CHỌN</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-warning-bg text-warning font-label-md text-label-md font-semibold">
+            Chờ CCKB thu tiền
+          </span>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Thông tin container header -->
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-code-container text-headline-sm text-headline-sm text-primary font-bold" id="detail-cont-no">MSKU 7894561</span>
+<span class="font-body-sm text-body-sm text-text-secondary" id="detail-cont-desc">40'RF • Thịt bò đông lạnh • Cty Thực Phẩm Á Châu</span>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container font-code-container text-[12px] font-bold text-primary" id="detail-truck">
+              15C-345.67
+            </span>
+</div>
+<!-- Metadata Grid -->
+<div class="grid grid-cols-2 gap-space-sm p-space-md rounded-lg bg-canvas text-body-sm">
+<div class="flex flex-col">
+<span class="text-text-muted text-[11px] uppercase">Mã lượt cont</span>
+<span class="font-code-container font-semibold text-text-primary text-[12px]" id="detail-visit-id">CT-20261011-0054</span>
+</div>
+<div class="flex flex-col">
+<span class="text-text-muted text-[11px] uppercase">Lượt xe vào cổng</span>
+<span class="font-code-container font-semibold text-text-primary text-[12px]">LX-20261011-0091</span>
+</div>
+<div class="flex flex-col">
+<span class="text-text-muted text-[11px] uppercase">Thời gian cắm điện</span>
+<span class="font-medium text-text-primary" id="detail-plugin">14:40 10/10/2026</span>
+</div>
+<div class="flex flex-col">
+<span class="text-text-muted text-[11px] uppercase">Thời gian rút điện</span>
+<span class="font-medium text-text-primary text-warning font-semibold" id="detail-plugout">07:15 11/10/2026</span>
+</div>
+</div>
+<!-- Bảng tính tiền chi tiết -->
+<div class="flex flex-col gap-space-xs p-space-md rounded-lg bg-surface-soft">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-text-secondary">Thời gian cắm thực tế:</span>
+<span class="font-medium text-text-primary" id="detail-duration">16 giờ 35 phút</span>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-text-secondary">Quy tắc làm tròn:</span>
+<span class="font-medium text-text-primary">Làm tròn lên 15 phút (16h 45p)</span>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-text-secondary">Đơn giá điện bãi:</span>
+<span class="font-medium text-text-primary">100.000 đ / giờ</span>
+</div>
+<div class="pt-space-xs mt-space-xs flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-primary">TỔNG TIỀN ĐIỆN PHẢI THU:</span>
+<span class="font-headline-sm text-headline-sm text-danger font-bold" id="detail-amount">1.675.000 đ</span>
+</div>
+</div>
+<!-- Form tác nghiệp Thu tiền tại quầy -->
+<div class="flex flex-col gap-space-sm">
+<label class="font-label-md text-label-md text-text-secondary">Hình thức thanh toán tại quầy CCKB</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-surface-soft hover:bg-surface-container cursor-pointer font-label-md text-label-md text-text-primary">
+<input checked="" class="accent-action-primary" name="payment-method" type="radio"/>
+<span>Tiền mặt</span>
+</label>
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-surface-soft hover:bg-surface-container cursor-pointer font-label-md text-label-md text-text-primary">
+<input class="accent-action-primary" name="payment-method" type="radio"/>
+<span>Chuyển khoản</span>
+</label>
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-surface-soft hover:bg-surface-container cursor-pointer font-label-md text-label-md text-text-primary">
+<input class="accent-action-primary" name="payment-method" type="radio"/>
+<span>Ghi nợ KH</span>
+</label>
+</div>
+</div>
+<!-- Nút hành động chính CCKB -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<button class="w-full h-11 rounded-lg bg-action-primary hover:bg-action-primary-hover text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer" onclick="confirmPayment()" type="button">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span>Xác nhận thu tiền điện 1.675.000 đ</span>
+</button>
+<div class="grid grid-cols-2 gap-space-sm">
+<button class="h-10 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1 transition-colors cursor-pointer" onclick="approveDuyệt xuất bãi()" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Duyệt xuất bãi</span>
+</button>
+<button class="h-10 rounded-lg bg-surface-container text-primary hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center gap-1 transition-colors cursor-pointer" onclick="openDebtModal()" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Duyệt nợ ngoại lệ</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 2: CẢNH BÁO SAI SỐ CONTAINER TỪ AN NINH CỔNG (CẦN ĐỐI CHIẾU) -->
+<div class="bg-surface rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="px-space-md py-3 bg-warning-bg flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-warning text-[20px]">warning</span>
+<span class="font-label-lg text-label-lg text-warning">YÊU CẦU ĐỐI CHIẾU SỐ CONT</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface font-code-container text-[11px] font-bold text-warning">
+            MÃ VỤ: CR-0881
+          </span>
+</div>
+<div class="p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-text-secondary">Người báo: <strong class="text-text-primary">Nguyễn Văn Long (An ninh Bãi 2)</strong></span>
+<span class="text-[11px] text-text-muted">12 phút trước</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary bg-canvas p-space-sm rounded-lg">
+            "Số cont thực tế tại bệ cắm là <strong class="text-text-primary font-code-container">TCKU 928341-1</strong>, bị lệch số kiểm tra (check digit) so với số trên phiếu ban đầu là <strong class="text-danger font-code-container">TCKU 928341-7</strong>. Đề nghị CCKB phê duyệt chuẩn hoá mã."
+          </p>
+<!-- Ảnh hiện trường đối chiếu số cont từ An ninh -->
+<div class="relative rounded-lg overflow-hidden h-36 bg-surface-dim">
+<img class="w-full h-full object-cover" data-alt="High clarity close-up photo of a refrigerated shipping container door showing the stamped container number TCKU 928341 1 in crisp white letters against a dark green textured metal plate, captured under daylight port lighting with inspection chalk marks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqzJwkDiEZhwZqjycX8NSgiwcrfHH-JeRRBVgvsPdnwLKVyGEtTmsqGgaGkP1Cc_921v77kIxs5TY5GVd0_VugJt4rjzNhkH_myTpFPPGaK1clXqlV-YKnVsm7Id8g8sIALwj4HocdAPbhiQ47KyqQEpj-IS1plMcESrDYQG_4kfOY5gUWASyPNvuD8n_rlGSYAR3QJzi34ZADwkqXoU7gHGaJFkBDkCcTdRIGlgwNPHQ6RzsDfZYQ"/>
+<div class="absolute bottom-2 left-2 bg-text-primary text-on-primary px-2 py-0.5 rounded text-[11px] font-code-container">
+              Ảnh hiện trường • Chụp lúc 07:10
+            </div>
+</div>
+<!-- Nút hành động phê duyệt -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+<button class="h-10 rounded-lg bg-action-primary text-on-primary font-label-md text-label-md hover:bg-action-primary-hover flex items-center justify-center gap-1 shadow-sm transition-colors cursor-pointer" onclick="resolveContainerDiff(true)" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Duyệt sửa số cont</span>
+</button>
+<button class="h-10 rounded-lg bg-surface-container text-danger font-label-md text-label-md hover:bg-danger-bg flex items-center justify-center gap-1 transition-colors cursor-pointer" onclick="resolveContainerDiff(false)" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Từ chối &amp; Y/c kiểm tra lại</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- TOAST THÔNG BÁO HOẠT ĐỘNG (INTERACTION FEEDBACK) -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none" id="toast-notify">
+<div class="flex items-center gap-space-sm px-4 py-3 rounded-xl bg-primary text-on-primary shadow-xl">
+<span class="material-symbols-outlined text-success-fixed text-[22px]" id="toast-icon">check_circle</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md" id="toast-title">Thao tác thành công</span>
+<span class="font-body-sm text-[12px] text-surface-container-high" id="toast-desc">Dữ liệu đã được ghi nhận trên phân hệ CCKB</span>
+</div>
+</div>
+</div>
+<!-- JAVASCRIPT MICRO-INTERACTIONS CHO CCKB DASHBOARD -->
+<script>
+    function showToast(title, desc, icon = 'check_circle') {
+      const toast = document.getElementById('toast-notify');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastTitle.textContent = title;
+      toastDesc.textContent = desc;
+      toastIcon.textContent = icon;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    function selectContainer(contNo, visitId, truckNo, desc, plugin, plugout, duration, amount, paymentStatus, approvalStatus, guard, customer) {
+      document.getElementById('detail-cont-no').innerText = contNo;
+      document.getElementById('detail-cont-desc').innerText = desc + ' • ' + customer;
+      document.getElementById('detail-truck').innerText = truckNo;
+      document.getElementById('detail-visit-id').innerText = visitId;
+      document.getElementById('detail-plugin').innerText = plugin;
+      document.getElementById('detail-plugout').innerText = plugout;
+      document.getElementById('detail-duration').innerText = duration;
+      document.getElementById('detail-amount').innerText = amount + ' đ';
+
+      showToast('Đã chuyển xem container', contNo + ' (' + visitId + ')', 'touch_app');
+    }
+
+    function confirmPayment() {
+      const contNo = document.getElementById('detail-cont-no').innerText;
+      const amount = document.getElementById('detail-amount').innerText;
+      showToast('Thu tiền thành công!', 'Đã lập biên lai thanh toán ' + amount + ' cho ' + contNo, 'payments');
+    }
+
+    function approveDuyệt xuất bãi() {
+      const contNo = document.getElementById('detail-cont-no').innerText;
+      showToast('Cấp quyền xuất bãi!', 'Container ' + contNo + ' đã đủ điều kiện tài chính ra cổng.', 'verified');
+    }
+
+    function openDebtModal() {
+      const contNo = document.getElementById('detail-cont-no').innerText;
+      showToast('Duyệt ngoại lệ nợ', 'Đã ghi nhận cam kết nợ theo hợp đồng của ' + contNo, 'edit_note');
+    }
+
+    function resolveContainerDiff(approved) {
+      if (approved) {
+        showToast('Đã sửa số cont', 'Đã chuẩn hóa thành TCKU 928341-1 trên toàn hệ thống.', 'task_alt');
+      } else {
+        showToast('Đã từ chối yêu cầu', 'Yêu cầu An ninh Bốt 2 rà soát lại số thẻ niêm chì.', 'block');
+      }
+    }
+
+    function setActiveTab(el, filterType) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-nav-active-bg', 'text-action-primary');
+        btn.classList.add('text-text-secondary');
+      });
+      el.classList.add('bg-nav-active-bg', 'text-action-primary');
+      el.classList.remove('text-text-secondary');
+
+      showToast('Lọc danh sách', 'Đang hiển thị mục: ' + el.innerText.trim(), 'filter_list');
+    }
+
+    function filterByKpi(kpiType) {
+      showToast('Lọc nhanh theo KPI', 'Đang chuyển tiêu chí lọc: ' + kpiType, 'analytics');
+    }
+
+    function searchContainers() {
+      const query = document.getElementById('cont-search-input').value.toUpperCase();
+      const rows = document.querySelectorAll('#cckb-table tbody tr.row-item');
+      rows.forEach(row => {
+        const text = row.innerText.toUpperCase();
+        if (text.indexOf(query) > -1) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</div></main></div></body></html>

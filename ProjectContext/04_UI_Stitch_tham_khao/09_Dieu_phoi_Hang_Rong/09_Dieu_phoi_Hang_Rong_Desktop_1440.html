@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-tint": "#475c99", "text-muted": "#667085", "secondary-fixed-dim": "#69de84", "tertiary": "#3e1d00", "outline": "#757681", "primary-container": "#223873", "warning-bg": "#FFFAEB", "danger": "#B42318", "primary": "#05215c", "success": "#067647", "canvas": "#F5F8FA", "tertiary-fixed": "#ffdcc4", "on-secondary": "#ffffff", "surface-container": "#e6eeff", "text-primary": "#1F2937", "nav-active-bg": "#EAF6EF", "action-primary": "#087C3C", "background": "#f8f9ff", "on-error": "#ffffff", "surface-container-low": "#eff4ff", "error-container": "#ffdad6", "on-secondary-fixed": "#00210a", "on-secondary-container": "#007433", "surface-variant": "#d9e3f6", "info": "#1D4ED8", "on-primary-fixed": "#00174b", "surface-container-high": "#dee9fc", "on-tertiary-fixed-variant": "#6c3a0a", "surface-container-highest": "#d9e3f6", "on-secondary-fixed-variant": "#005322", "tertiary-container": "#5e2f00", "inverse-on-surface": "#eaf1ff", "on-background": "#121c2a", "secondary-fixed": "#86fb9d", "info-bg": "#EFF6FF", "text-secondary": "#475467", "surface": "#FFFFFF", "surface-soft": "#F0F5F2", "on-surface": "#121c2a", "primary-fixed-dim": "#b4c5ff", "outline-variant": "#c5c6d1", "surface-dim": "#d0dbed", "on-error-container": "#93000a", "on-tertiary": "#ffffff", "secondary": "#006d30", "on-tertiary-container": "#db965f", "on-primary-container": "#8fa3e6", "tertiary-fixed-dim": "#ffb77f", "surface-container-lowest": "#ffffff", "on-primary": "#ffffff", "warning": "#9A4808", "surface-bright": "#f8f9ff", "secondary-container": "#86fb9d", "primary-fixed": "#dbe1ff", "on-primary-fixed-variant": "#2f447f", "on-tertiary-fixed": "#2f1500", "success-bg": "#ECFDF3", "inverse-primary": "#b4c5ff", "danger-bg": "#FEF3F2", "on-surface-variant": "#444650", "border": "#E3E8EF", "action-primary-hover": "#076934", "inverse-surface": "#27313f", "error": "#ba1a1a" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-xl": "1.5rem", "space-sm": "0.5rem", "gutter-desktop": "1.5rem", "space-lg": "1rem", "space-md": "0.75rem", "gutter": "1rem", "margin-desktop": "2rem", "margin": "1rem" }, "fontFamily": { "body-lg": ["Be Vietnam Pro"], "code-container": ["JetBrains Mono"], "body-sm": ["Be Vietnam Pro"], "headline-md": ["Be Vietnam Pro"], "headline-lg": ["Be Vietnam Pro"], "headline-sm": ["Be Vietnam Pro"], "label-md": ["Be Vietnam Pro"], "title-md": ["Be Vietnam Pro"], "label-lg": ["Be Vietnam Pro"], "body-md": ["Be Vietnam Pro"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "code-container": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "headline-lg": ["30px", { "lineHeight": "38px", "fontWeight": "700" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }], "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script></head><body class="bg-canvas font-body-md text-text-primary antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface border-r border-border z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-border bg-surface"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-surface text-[20px]">anchor</span></div><div class="flex flex-col min-w-0"><span class="font-label-lg text-label-lg text-primary truncate leading-tight uppercase font-bold tracking-tight">Tà Lùng Quang Minh</span><span class="font-body-sm text-body-sm text-text-muted truncate leading-tight">Bãi Sơn Cảng • Điều phối</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs mb-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-text-muted font-bold">Phân hệ tác nghiệp</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-nav-active-bg text-secondary font-bold border-l-4 border-action-primary shadow-xs"><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg font-label-lg text-label-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-colors" data-path="tong-quan-dieu-phoi" href="#"><span class="material-symbols-outlined text-[20px] text-text-muted">monitoring</span><span class="truncate">04. Tổng quan Điều phối</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg transition-colors bg-nav-active-bg text-secondary font-bold border-l-4 border-action-primary shadow-xs" data-path="quan-ly-hang-rong" href="#"><span class="material-symbols-outlined text-[20px] text-text-muted">inventory_2</span><span class="truncate">09. Quản lý Hàng / Rỗng</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg font-label-lg text-label-lg text-text-secondary hover:bg-surface-soft hover:text-text-primary transition-colors" data-path="bao-cao-tac-nghiep" href="#"><span class="material-symbols-outlined text-[20px] text-text-muted">assignment</span><span class="truncate">Báo cáo tác nghiệp</span></a></nav></div></div><div class="p-space-md border-t border-border bg-surface-soft m-space-md rounded-lg flex flex-col gap-space-xs"><div class="flex items-center justify-between"><span class="font-label-md text-label-md text-text-muted">Hạ tầng kết nối</span><span class="inline-flex items-center gap-1 font-label-md text-label-md text-success"><span class="w-2 h-2 rounded-full bg-secondary"></span>Trực tuyến</span></div><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-text-secondary">Máy chủ Yard CMS</span><span class="font-code-container text-code-container text-text-primary text-[11px]">TLC-PRD-01</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="sticky top-0 z-40 h-16 w-full bg-surface border-b border-border shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-text-muted text-[20px]">alt_route</span><span class="font-title-md text-title-md text-primary font-bold">ĐIỀU HÀNH BÃI SƠN CẢNG</span></div><span class="text-border font-bold">|</span><nav class="hidden md:flex items-center gap-space-xs"><span class="font-body-md text-body-md text-text-muted">Phân hệ</span><span class="material-symbols-outlined text-text-muted text-[16px]">chevron_right</span><span class="font-body-md text-body-md text-text-muted">Bãi Sơn</span><span class="material-symbols-outlined text-text-muted text-[16px]">chevron_right</span><span class="font-label-lg text-label-lg text-text-primary font-semibold">Quản lý Hàng / Rỗng</span></nav></div><div class="flex items-center gap-space-lg"><div class="hidden lg:flex items-center gap-space-sm px-space-md py-1 rounded bg-info-bg border border-border"><span class="material-symbols-outlined text-info text-[18px]">schedule</span><div class="flex items-center gap-space-xs"><span class="font-label-md text-label-md text-text-muted">Ca trực:</span><span class="font-label-md text-label-md text-text-primary font-bold">Ca 1 (06:00 - 14:00)</span></div></div><div class="flex items-center gap-space-sm pl-space-md border-l border-border"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-lg text-label-lg text-text-primary leading-tight font-bold">Nguyễn Văn Đạt</span><span class="font-body-sm text-body-sm text-text-muted leading-tight">Điều phối viên (DIS_STAFF)</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full flex-1 bg-canvas p-space-xl"><div class="flex flex-col w-full gap-space-lg">
+<!-- Operational Notice Banner (V5 Business Compliance & RBAC Scope) -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-surface text-[22px]">verified_user</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-title-md text-title-md text-primary font-bold">Phân hệ Điều phối Bãi Sơn Cảng • Quản lý trạng thái HÀNG / RỖNG</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold font-code-container bg-surface-soft text-text-secondary">CHUẨN QUY TRÌNH V5</span>
+<div class="flex items-center gap-1.5 ml-1">
+<span class="font-code-container text-body-sm px-2 py-0.5 rounded bg-info-bg text-info font-semibold">RBAC: container.visit.read</span>
+<span class="font-code-container text-body-sm px-2 py-0.5 rounded bg-success-bg text-success font-semibold">container.cargo.update</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary leading-relaxed">
+<strong class="text-text-primary">Quy định thẩm quyền:</strong> Điều phối <span class="text-danger font-semibold">KHÔNG</span> thao tác thu tiền, không chỉnh sửa mốc giờ barie xe và không phê duyệt tài chính xuất bãi. Container <span class="text-warning font-semibold">CHƯA CẬP NHẬT</span> không mặc định là RỖNG và không kích hoạt lệnh chặn phương tiện ra bãi.
+        </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center gap-space-sm bg-surface-soft px-space-md py-2 rounded-lg">
+<span class="material-symbols-outlined text-action-primary text-[20px]">sync</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Đồng bộ ca trực: <strong class="text-text-primary">02 phút trước</strong></span>
+</div>
+</div>
+<!-- Quick KPI Metagrid (4 summary cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Card 1: Total -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted">Tổng cont lưu bãi</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-lg text-headline-lg text-primary font-bold">24</span>
+<span class="font-label-lg text-label-lg text-text-muted">cont</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">Sức chứa bãi khả dụng: 78%</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-soft flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[28px]">warehouse</span>
+</div>
+</div>
+<!-- Card 2: HÀNG -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted">Đã xác định HÀNG</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-lg text-headline-lg text-info font-bold">14</span>
+<span class="font-label-lg text-label-lg text-text-muted">cont</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-info"></span>
+<span class="font-body-sm text-body-sm text-text-secondary">58.3% trên tổng tồn bãi</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-xl bg-info-bg flex items-center justify-center">
+<span class="material-symbols-outlined text-info text-[28px]">inventory_2</span>
+</div>
+</div>
+<!-- Card 3: RỖNG -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted">Đã xác định RỖNG</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-lg text-headline-lg text-text-primary font-bold">07</span>
+<span class="font-label-lg text-label-lg text-text-muted">cont</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-body-sm text-body-sm text-text-secondary">Sẵn sàng điều vỏ đóng hàng</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-soft flex items-center justify-center">
+<span class="material-symbols-outlined text-text-secondary text-[28px]">crop_free</span>
+</div>
+</div>
+<!-- Card 4: CHƯA CẬP NHẬT -->
+<div class="bg-surface rounded-xl p-space-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-warning font-semibold">Chưa cập nhật</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-lg text-headline-lg text-warning font-bold">03</span>
+<span class="font-label-lg text-label-lg text-text-muted">cont</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-warning"></span>
+<span class="font-body-sm text-body-sm text-warning font-semibold">Cần kiểm tra hiện trường</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-xl bg-warning-bg flex items-center justify-center">
+<span class="material-symbols-outlined text-warning text-[28px]">pending_actions</span>
+</div>
+</div>
+</div>
+<!-- Master-Detail 2-Column Workstation Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN (Master: Yard List & Search Engine - 62% col-span-7 or ~58-62%) -->
+<section class="lg:col-span-7 flex flex-col gap-space-md bg-surface rounded-xl p-space-lg shadow-sm">
+<!-- Search & Filter Controls -->
+<div class="flex flex-col gap-space-md">
+<!-- Multifunction Search Bar -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-[20px]">search</span>
+</div>
+<input class="w-full h-11 pl-11 pr-24 rounded-lg bg-surface font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary transition-all placeholder:text-text-muted" placeholder="Tìm số container đầy đủ (4 chữ + 7 số) hoặc 7 số cuối, mã lượt cont (CV-...)" type="text" value="MSKU"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1 pointer-events-none">
+<kbd class="px-2 py-0.5 text-[11px] font-code-container font-semibold text-text-muted bg-surface-soft rounded">⌘ K</kbd>
+</div>
+</div>
+<!-- Filter Tabs Toolbar -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-1">
+<div class="inline-flex p-1 bg-surface-soft rounded-lg gap-1">
+<button class="px-3.5 py-1.5 rounded font-label-lg text-label-lg font-semibold bg-surface text-text-primary shadow-xs transition-colors flex items-center gap-1.5">
+<span>Tất cả</span>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] bg-canvas text-text-secondary font-code-container">24</span>
+</button>
+<button class="px-3.5 py-1.5 rounded font-label-lg text-label-lg font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5">
+<span>HÀNG</span>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] bg-info-bg text-info font-code-container font-semibold">14</span>
+</button>
+<button class="px-3.5 py-1.5 rounded font-label-lg text-label-lg font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5">
+<span>RỖNG</span>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] bg-canvas text-text-secondary font-code-container font-semibold">07</span>
+</button>
+<button class="px-3.5 py-1.5 rounded font-label-lg text-label-lg font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5">
+<span>CHƯA CẬP NHẬT</span>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] bg-warning-bg text-warning font-code-container font-bold">03</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs text-text-muted font-body-sm text-body-sm">
+<span>Hiển thị 3 / 24 kết quả</span>
+<button class="p-1.5 rounded hover:bg-surface-soft text-text-secondary transition-colors" title="Làm mới bảng">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Yard Container Data Grid -->
+<div class="overflow-x-auto rounded-lg bg-surface">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-canvas text-text-secondary font-label-md text-label-md uppercase">
+<th class="py-3 px-space-md font-semibold tracking-wider">Số Cont &amp; Lượt Cont</th>
+<th class="py-3 px-space-md font-semibold tracking-wider">Trạng thái</th>
+<th class="py-3 px-space-md font-semibold tracking-wider">Xe đưa vào / Giờ</th>
+<th class="py-3 px-space-md font-semibold tracking-wider">Tình trạng xe</th>
+<th class="py-3 px-space-md font-semibold tracking-wider">Chủ hàng</th>
+<th class="py-3 px-space-md text-right font-semibold tracking-wider">Thao tác</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<!-- ROW 1: KỊCH BẢN A (Selected Card) -->
+<tr class="bg-nav-active-bg transition-colors cursor-pointer group">
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-code-container text-[15px] font-bold text-primary tracking-wide">MSKU 7894561</span>
+<span class="px-1.5 py-0.2 rounded bg-surface text-[10px] font-bold text-text-secondary uppercase">40'RF</span>
+</div>
+<span class="font-code-container text-body-sm text-text-muted mt-0.5">CV-20261011-0054</span>
+<span class="font-body-sm text-body-sm text-action-primary font-medium mt-1 inline-flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-action-primary"></span>Bãi R-04
+                  </span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-md text-label-md font-bold bg-info-bg text-info">
+                  HÀNG
+                </span>
+<span class="block font-body-sm text-body-sm text-text-muted mt-1">Sầu riêng cấp đông</span>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="font-code-container text-text-primary font-bold">15C-345.67</span>
+<span class="text-text-muted mt-0.5">11/10 08:30</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<!-- Kịch bản A: Lượt xe và container độc lập -->
+<div class="flex flex-col gap-1 max-w-[170px]">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-success-bg text-success">
+<span class="material-symbols-outlined text-[13px]">logout</span> Xe đã ra lúc 09:15
+                  </span>
+<p class="font-body-sm text-[11px] text-text-muted leading-tight">
+                    (Xe ra vỏ không cont • cont lưu bãi độc lập)
+                  </p>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="text-text-primary font-medium leading-snug">Cty Nông Sản Đại Lộc</span>
+<span class="text-text-muted text-[11px]">Hợp đồng kho lạnh</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-action-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-action-primary-hover transition-colors shadow-xs">
+                    Cập nhật
+                  </button>
+<button class="p-1.5 rounded-lg bg-surface hover:bg-surface-soft text-text-secondary transition-colors" title="Xem chi tiết hành trình">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: KỊCH BẢN B -->
+<tr class="hover:bg-surface-soft transition-colors">
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-code-container text-[15px] font-bold text-text-primary tracking-wide">CMAU 8830190</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-soft text-[10px] font-bold text-text-secondary uppercase">20'GP</span>
+</div>
+<span class="font-code-container text-body-sm text-text-muted mt-0.5">CV-20261011-0089</span>
+<span class="font-body-sm text-body-sm text-text-secondary mt-1 inline-flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>Bãi khô G-02
+                  </span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<!-- Badge trung tính ghi/xám cho RỖNG theo chuẩn DS-01 -->
+<span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-md text-label-md font-bold bg-[#F3F4F6] text-[#374151]">
+                  RỖNG
+                </span>
+<span class="block font-body-sm text-body-sm text-text-muted mt-1">Vỏ đạt kiểm định</span>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="font-code-container text-text-primary font-bold">14C-871.22</span>
+<span class="text-text-muted mt-0.5">11/10 10:10 (Vé 0đ)</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<!-- Kịch bản B: Xe vào kéo cont ra, an ninh cổng ghi nhận giờ ra -->
+<div class="flex flex-col gap-1 max-w-[170px]">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-info-bg text-info">
+<span class="material-symbols-outlined text-[13px]">rv_hookup</span> Chờ kéo cont ra
+                  </span>
+<p class="font-body-sm text-[11px] text-text-muted leading-tight">
+                    Đầu kéo 14C-871.22 trong bãi • An ninh barie xác nhận giờ ra
+                  </p>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="text-text-primary font-medium leading-snug">Logistics Tân Hưng</span>
+<span class="text-text-muted text-[11px]">Lệnh lấy vỏ rỗng</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface text-primary-container font-label-md text-label-md font-semibold hover:bg-canvas transition-colors shadow-xs">
+                    Cập nhật
+                  </button>
+<button class="p-1.5 rounded-lg bg-surface hover:bg-surface-soft text-text-secondary transition-colors" title="Xem chi tiết hành trình">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: KỊCH BẢN C -->
+<tr class="hover:bg-surface-soft transition-colors">
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-code-container text-[15px] font-bold text-text-primary tracking-wide">TCKU 9283417</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-soft text-[10px] font-bold text-text-secondary uppercase">40'HC</span>
+</div>
+<span class="font-code-container text-body-sm text-text-muted mt-0.5">CV-20261011-0112</span>
+<span class="font-body-sm text-body-sm text-warning font-medium mt-1 inline-flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-warning"></span>Khu đỗ tạm T-01
+                  </span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<!-- Kịch bản C: CHƯA CẬP NHẬT, không ép buộc sang RỖNG -->
+<span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-md text-label-md font-bold bg-warning-bg text-warning">
+                  CHƯA CẬP NHẬT
+                </span>
+<span class="block font-body-sm text-body-sm text-warning font-medium mt-1">Chờ kiểm tra hiện trường</span>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="font-code-container text-text-primary font-bold">29H-604.19</span>
+<span class="text-text-muted mt-0.5">11/10 11:05</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col gap-1 max-w-[170px]">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-soft text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">local_parking</span> Xe vẫn trong bãi
+                  </span>
+<p class="font-body-sm text-[11px] text-text-muted leading-tight">
+                    Đang hạ bãi • Chưa bàn giao phiếu seal
+                  </p>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top">
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="text-text-primary font-medium leading-snug">Vận Tải Biển Đông</span>
+<span class="text-text-muted text-[11px]">Chờ mở tờ khai</span>
+</div>
+</td>
+<td class="py-3.5 px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface text-primary-container font-label-md text-label-md font-semibold hover:bg-canvas transition-colors shadow-xs">
+                    Cập nhật
+                  </button>
+<button class="p-1.5 rounded-lg bg-surface hover:bg-surface-soft text-text-secondary transition-colors" title="Xem chi tiết hành trình">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Yard List Pagination & Status Footer -->
+<div class="flex items-center justify-between pt-space-xs text-text-muted font-body-sm text-body-sm">
+<span class="font-medium">Trang 1 / 1 • 3 container trong bộ lọc</span>
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded bg-surface-soft text-text-muted opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-2.5 py-1 bg-nav-active-bg text-secondary font-bold rounded">1</span>
+<button class="p-1.5 rounded bg-surface-soft text-text-muted opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN (Detail Panel & Update Form - 38% col-span-5) -->
+<section class="lg:col-span-5 flex flex-col gap-space-md bg-surface rounded-xl p-space-lg shadow-sm">
+<!-- Panel Header: Container Visit Identifier -->
+<div class="flex flex-col gap-space-xs pb-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted font-bold">Lượt container đang chọn</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold font-code-container bg-info-bg text-info">
+            ACTIVE VISIT
+          </span>
+</div>
+<div class="flex items-baseline justify-between gap-space-sm">
+<h2 class="font-headline-md text-headline-md text-primary font-code-container font-bold tracking-tight">
+            MSKU 7894561
+          </h2>
+<span class="font-code-container text-body-sm text-text-secondary font-semibold">
+            CV-20261011-0054
+          </span>
+</div>
+</div>
+<!-- Container Attribute Metadata Specs -->
+<div class="grid grid-cols-2 gap-space-sm p-space-md bg-canvas rounded-lg">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-muted">Kích cỡ / Chủng loại</span>
+<span class="font-body-md text-body-md text-text-primary font-bold">40' High Cube Reefer</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-muted">Vị trí lưu bãi</span>
+<span class="font-body-md text-body-md text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-action-primary">location_on</span>
+            Khu Bãi R-04 (Cắm điện)
+          </span>
+</div>
+<div class="flex flex-col col-span-2 pt-1">
+<span class="font-label-md text-label-md text-text-muted">Khách hàng / Doanh nghiệp</span>
+<span class="font-body-md text-body-md text-text-primary font-medium">Công ty TNHH Nông Sản Đại Lộc • MST: 0108928341</span>
+</div>
+</div>
+<!-- Interactive Status Update Form -->
+<form class="flex flex-col gap-space-md mt-1">
+<!-- Status Option Cards (3 distinct radio cards) -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-text-secondary font-semibold">
+            Xác nhận trạng thái hàng hoá <span class="text-danger">*</span>
+</label>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Option 1: HÀNG (Selected State) -->
+<label class="flex items-start gap-space-md p-space-md rounded-xl bg-info-bg cursor-pointer transition-all shadow-xs">
+<input checked="" class="mt-1 text-action-primary focus:ring-action-primary h-4 w-4" name="cargo_status" type="radio" value="CARGO"/>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-info font-bold">HÀNG</span>
+<span class="font-label-md text-label-md px-2 py-0.5 rounded bg-surface text-info font-semibold">Đang kích hoạt</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+                  Container có chứa hàng hoá nông sản, công nghiệp hoặc vật phẩm đóng bên trong.
+                </span>
+</div>
+</label>
+<!-- Option 2: RỖNG (Neutral tone) -->
+<label class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-canvas cursor-pointer transition-all">
+<input class="mt-1 text-action-primary focus:ring-action-primary h-4 w-4" name="cargo_status" type="radio" value="EMPTY"/>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-text-primary font-bold">RỖNG</span>
+<span class="font-label-md text-label-md text-text-muted">Vỏ sạch không hàng</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">
+                  Vỏ container rỗng, đã rút hết hàng hoặc chuyển vỏ chờ đóng hàng mới.
+                </span>
+</div>
+</label>
+<!-- Option 3: CHƯA CẬP NHẬT (Kịch bản C compliance) -->
+<label class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-warning-bg cursor-pointer transition-all">
+<input class="mt-1 text-action-primary focus:ring-action-primary h-4 w-4" name="cargo_status" type="radio" value="UNVERIFIED"/>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-warning font-bold">CHƯA CẬP NHẬT</span>
+<span class="font-label-md text-label-md px-2 py-0.5 rounded bg-warning-bg text-warning font-semibold">Không ép buộc RỖNG</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">
+                  Chưa đủ chứng từ hoặc hiện trường chưa đối soát thực tế. Giữ nguyên trạng thái chờ xử lý.
+                </span>
+</div>
+</label>
+</div>
+</div>
+<!-- Recorded By & Timestamp (Read-only / Pre-filled Session Metadata) -->
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-text-muted">Người ghi nhận (Tự động)</label>
+<div class="h-11 px-space-md rounded-lg bg-surface-soft flex items-center gap-space-xs text-text-primary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">badge</span>
+<span class="font-semibold truncate">Nguyễn Văn Đạt (DIS_STAFF)</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-text-muted">Thời điểm ghi nhận</label>
+<div class="h-11 px-space-md rounded-lg bg-surface-soft flex items-center gap-space-xs text-text-primary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">schedule</span>
+<span class="font-code-container text-body-sm">11/10/2026 11:45</span>
+</div>
+</div>
+</div>
+<!-- Dispatcher Field Notes (Textarea) -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-text-secondary font-semibold">
+            Ghi chú điều phối hiện trường
+          </label>
+<textarea class="w-full p-space-md rounded-lg bg-surface font-body-md text-body-md text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary resize-none placeholder:text-text-muted" placeholder="Nhập thông tin kiểm tra hiện trường, nhiệt độ bảo quản, tình trạng seal..." rows="2">Tài xế báo hàng nông sản sầu riêng cấp đông, đang chờ kiểm dịch cửa khẩu.</textarea>
+</div>
+<!-- Comparison Confirmation Preview Box -->
+<div class="p-space-md bg-canvas rounded-lg flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted font-bold">Xác nhận thay đổi</span>
+<span class="font-code-container text-[11px] text-text-muted">ID: CV-20261011-0054</span>
+</div>
+<div class="flex items-center gap-space-sm pt-1">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-warning-bg text-warning font-label-md text-label-md font-bold">
+<span>CHƯA CẬP NHẬT</span>
+</div>
+<span class="material-symbols-outlined text-text-muted text-[18px]">arrow_forward</span>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-info-bg text-info font-label-md text-label-md font-bold">
+<span>HÀNG</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-1 leading-snug">
+            Lưu ý: Audit log hệ thống sẽ ghi nhận phiên điều phối của bạn gắn liền với mã định danh lượt container bất biến.
+          </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-md pt-1">
+<button class="flex-1 h-11 px-space-lg rounded-lg bg-action-primary text-on-primary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 hover:bg-action-primary-hover transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Lưu cập nhật trạng thái HÀNG/RỖNG</span>
+</button>
+<button class="h-11 px-space-lg rounded-lg bg-surface text-text-secondary font-label-lg text-label-lg font-semibold hover:bg-surface-soft hover:text-text-primary transition-colors" type="button">
+            Đặt lại
+          </button>
+</div>
+</form>
+<!-- Audit History Block (Audit Trail Timeline) -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-text-muted font-bold">Lịch sử cập nhật trạng thái (Audit Trail)</span>
+<span class="material-symbols-outlined text-text-muted text-[16px]">history</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Timeline Entry 1 -->
+<div class="flex items-start gap-space-md p-space-sm rounded-lg bg-canvas">
+<div class="w-2 h-2 rounded-full bg-info mt-1.5 shrink-0"></div>
+<div class="flex flex-col flex-1 leading-snug">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-primary font-bold">11/10 10:15 • Ghi nhận bởi Điều phối viên</span>
+<span class="font-code-container text-[11px] text-text-muted">DIS_STAFF</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-body-sm text-text-secondary">Chuyển sang:</span>
+<span class="px-1.5 py-0.2 rounded bg-info-bg text-info text-[11px] font-bold font-code-container">HÀNG</span>
+</div>
+<span class="font-body-sm text-[11px] text-text-muted mt-0.5">Lý do: Kiểm tra trực quan hiện trường theo khai báo seal cửa khẩu.</span>
+</div>
+</div>
+<!-- Timeline Entry 2 -->
+<div class="flex items-start gap-space-md p-space-sm rounded-lg bg-canvas">
+<div class="w-2 h-2 rounded-full bg-outline mt-1.5 shrink-0"></div>
+<div class="flex flex-col flex-1 leading-snug">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-primary font-bold">11/10 08:30 • Khởi tạo lượt container</span>
+<span class="font-code-container text-[11px] text-text-muted">SYSTEM_GATE</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-body-sm text-text-secondary">Mặc định:</span>
+<span class="px-1.5 py-0.2 rounded bg-warning-bg text-warning text-[11px] font-bold font-code-container">CHƯA CẬP NHẬT</span>
+</div>
+<span class="font-body-sm text-[11px] text-text-muted mt-0.5">Hệ thống tạo tự động khi xe 15C-345.67 quét thẻ qua barie Cổng In 01.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Operational Footer Disclaimer -->
+<footer class="flex flex-col sm:flex-row items-center justify-between gap-space-sm py-space-sm px-space-md bg-surface rounded-xl shadow-xs text-text-muted font-body-sm text-body-sm">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex w-2 h-2 rounded-full bg-action-primary"></span>
+<span class="font-medium text-text-secondary">Minh họa UI — Chưa kết nối Backend • Dữ liệu nghiệp vụ V5 Tà Lùng Quang Minh</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span>Trạm điều hành Bãi Sơn Cảng</span>
+<span>Phiên bản giao diện: <strong>v5.2.4-DS01</strong></span>
+</div>
+</footer>
+</div></main></div></body></html>

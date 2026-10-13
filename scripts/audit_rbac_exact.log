@@ -1,0 +1,33 @@
+================================================================================
+AUDIT KIỂM CHỨNG TẬN GỐC & BẢO MẬT: WORKBOOK RBAC V5 vs MIGRATIONS 001-003
+================================================================================
+
+--- TIÊU CHÍ 1: MIGRATION 001 SCHEMA CONSTRAINTS & DEPARTMENT AUDIT ---
+  [OK] chk_approval_status_lifecycle: Đã ràng buộc PENDING -> APPROVED/REJECTED/CANCELLED
+  [OK] chk_approval_reason_not_empty: Lý do phê duyệt bắt buộc không rỗng
+  [OK] app_audit_events.department_code: Đã có cột lưu bộ phận phục vụ phân quyền DEPARTMENT
+
+--- TIÊU CHÍ 2: MIGRATION 002 ROLES, PERMISSIONS ACTIVE & GRANTS ---
+  Permissions: Tổng=67 | Active (TRUE)=60 (Yêu cầu: 60) | Inactive (FALSE)=7 (Yêu cầu: 7)
+  [OK] 8/8 Roles, 67/67 Permissions (60 V1 CORE active, 7 inactive), 206/206 Grants (scope + is_enabled) khớp 100%
+
+--- TIÊU CHÍ 3: MIGRATION 003 GIA CỐ BẢO MẬT (APPROVAL, AUDIT, RLS) ---
+  [OK] RBAC-03: Client bị chặn INSERT trực tiếp vào app_audit_events
+  [OK] SC-R2-01: Đã thu hồi quyền EXECUTE của sc_log_audit_event khỏi authenticated (chỉ cho nội bộ/service_role)
+  [OK] RBAC-03: Đã có hàm RPC sc_log_audit_event (SECURITY DEFINER)
+  [OK] RBAC-05: Đã có triggers tự động ghi audit khi gán/sửa roles và permissions
+  [OK] RBAC-02: Đã có RPC sc_approve_request & sc_reject_request thực thi Four-Eyes Integrity
+  [OK] SC-R2-02: Phê duyệt fail-closed với chính sách một bước (approve_permission_code IS NULL)
+  [OK] RBAC-04: RLS p_audit_select đã hỗ trợ cô lập audit theo DEPARTMENT
+  [OK] RBAC-02: Policy p_approval_insert đã khóa chặt chỉ cho tạo yêu cầu PENDING
+  [OK] SC-R2-04: Policy p_approval_insert đã sửa liên kết tường minh ap.policy_code = app_approval_requests.policy_code
+
+================================================================================
+KẾT QUẢ KIỂM TOÁN TỔNG THỂ: TẤT CẢ TIÊU CHÍ ĐỀU ĐẠT 100% (PASS)!
+  - RBAC-01: Đã kích hoạt đúng 60 quyền V1/CORE; 7 quyền GĐ sau giữ nguyên FALSE.
+  - RBAC-02: Đã khóa chặt Approval Requests; chuyển trạng thái qua RPC có kiểm soát.
+  - RBAC-03: Đã khóa hoàn toàn client INSERT vào audit; audit qua RPC & triggers.
+  - RBAC-04: Đã thêm department_code và cấu hình RLS cô lập audit theo DEPARTMENT.
+  - RBAC-05: Đã có trigger tự động ghi audit khi thay đổi roles và grants.
+  - Khớp dữ liệu: 8/8 roles, 67/67 permissions, 206/206 grants khớp 100% Workbook V5.
+================================================================================

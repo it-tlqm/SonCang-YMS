@@ -1,0 +1,324 @@
+{
+  "source_zip": "stitch_s_n_c_ng_yard_management.zip",
+  "verified_screen_count": 19,
+  "official_screen_count": 17,
+  "outdated_screen_count": 2,
+  "business_source": "PROJECT_CONTEXT.md V5 (11/10/2026) + danh mục 67 quyền V5",
+  "official_screens": [
+    {
+      "label": "DS-01",
+      "folder": "th_vi_n_design_system_b_i_s_n_c_ng_ds_01_chu_n_v5",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/th_vi_n_design_system_b_i_s_n_c_ng_ds_01_chu_n_v5/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/th_vi_n_design_system_b_i_s_n_c_ng_ds_01_chu_n_v5/screen.png",
+      "official": true,
+      "main_characters": 9470,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "An ninh Tong quan Desktop",
+      "folder": "t_ng_quan_an_ninh_b_i_s_n_c_ng_desktop_chu_n_v5",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_desktop_chu_n_v5/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_desktop_chu_n_v5/screen.png",
+      "official": true,
+      "main_characters": 5937,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "An ninh Tong quan Mobile",
+      "folder": "t_ng_quan_an_ninh_b_i_s_n_c_ng_mobile_chu_n_v5",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_mobile_chu_n_v5/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_mobile_chu_n_v5/screen.png",
+      "official": true,
+      "main_characters": 1689,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "An ninh Tong quan Tablet 1024",
+      "folder": "t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_landscape_1024px",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_landscape_1024px/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_landscape_1024px/screen.png",
+      "official": true,
+      "main_characters": 2884,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "An ninh Tong quan Tablet 820",
+      "folder": "t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_portrait_820px",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_portrait_820px/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/t_ng_quan_an_ninh_b_i_s_n_c_ng_tablet_portrait_820px/screen.png",
+      "official": true,
+      "main_characters": 2889,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "02 Xe vao Mobile 390",
+      "folder": "02_an_ninh_xe_vao_mobile_390",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_mobile_390/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_mobile_390/screen.png",
+      "official": true,
+      "main_characters": 2301,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": true,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "viewport khóa zoom",
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "02 Xe vao Tablet 820",
+      "folder": "02_an_ninh_xe_vao_tablet_portrait_820",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_portrait_820/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_portrait_820/screen.png",
+      "official": true,
+      "main_characters": 2217,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "02 Xe vao Tablet 1024",
+      "folder": "02_an_ninh_xe_vao_tablet_landscape_1024_2",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_landscape_1024_2/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_landscape_1024_2/screen.png",
+      "official": true,
+      "main_characters": 3222,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "02 Xe vao Desktop 1440",
+      "folder": "02_an_ninh_xe_vao_desktop_1440",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_desktop_1440/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_desktop_1440/screen.png",
+      "official": true,
+      "main_characters": 5179,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": true,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "03 Xe ra Mobile 390",
+      "folder": "03_an_ninh_xe_ra_mobile_390",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_mobile_390/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_mobile_390/screen.png",
+      "official": true,
+      "main_characters": 1952,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "03 Xe ra Tablet 820",
+      "folder": "03_an_ninh_xe_ra_tablet_portrait_820",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_tablet_portrait_820/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_tablet_portrait_820/screen.png",
+      "official": true,
+      "main_characters": 3514,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "03 Xe ra Tablet 1024",
+      "folder": "03_an_ninh_xe_ra_tablet_landscape_1024",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_tablet_landscape_1024/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_tablet_landscape_1024/screen.png",
+      "official": true,
+      "main_characters": 2571,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "03 Xe ra Desktop 1440",
+      "folder": "03_an_ninh_xe_ra_desktop_1440_2",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_desktop_1440_2/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_desktop_1440_2/screen.png",
+      "official": true,
+      "main_characters": 3624,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "04 CCKB Tong quan Mobile 390",
+      "folder": "04_cckb_tong_quan_mobile_390",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_mobile_390/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_mobile_390/screen.png",
+      "official": true,
+      "main_characters": 1307,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": true,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": [
+        "viewport khóa zoom"
+      ]
+    },
+    {
+      "label": "04 CCKB Tong quan Tablet 820",
+      "folder": "04_cckb_tong_quan_tablet_portrait_820",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_tablet_portrait_820/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_tablet_portrait_820/screen.png",
+      "official": true,
+      "main_characters": 2831,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": []
+    },
+    {
+      "label": "04 CCKB Tong quan Tablet 1024",
+      "folder": "04_cckb_tong_quan_tablet_landscape_1024",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_tablet_landscape_1024/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_tablet_landscape_1024/screen.png",
+      "official": true,
+      "main_characters": 2597,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    },
+    {
+      "label": "04 CCKB Tong quan Desktop 1440",
+      "folder": "04_cckb_tong_quan_desktop_1440",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_desktop_1440/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/04_cckb_tong_quan_desktop_1440/screen.png",
+      "official": true,
+      "main_characters": 3749,
+      "header_position": "fixed",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo"
+      ]
+    }
+  ],
+  "exclude_old_screens": [
+    {
+      "label": "03 Xe ra Desktop CŨ - TRỐNG",
+      "folder": "03_an_ninh_xe_ra_desktop_1440_1",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_desktop_1440_1/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/03_an_ninh_xe_ra_desktop_1440_1/screen.png",
+      "official": false,
+      "main_characters": 0,
+      "header_position": "sticky",
+      "duplicated_html_ids": {},
+      "zoom_disabled": false,
+      "has_timeout": false,
+      "has_browser_alert": false,
+      "has_fake_success_text": false,
+      "notes": [
+        "main trống"
+      ]
+    },
+    {
+      "label": "02 Xe vao Tablet ngang CŨ - TRUNG ID",
+      "folder": "02_an_ninh_xe_vao_tablet_landscape_1024_1",
+      "zip_html_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_landscape_1024_1/code.html",
+      "zip_image_path": "stitch_s_n_c_ng_yard_management/02_an_ninh_xe_vao_tablet_landscape_1024_1/screen.png",
+      "official": false,
+      "main_characters": 3122,
+      "header_position": "sticky",
+      "duplicated_html_ids": {
+        "input-plate": 2,
+        "input-vehicle-time": 2
+      },
+      "zoom_disabled": false,
+      "has_timeout": true,
+      "has_browser_alert": false,
+      "has_fake_success_text": true,
+      "notes": [
+        "chứa trạng thái thành công giả khi demo",
+        "HTML id trùng"
+      ]
+    }
+  ],
+  "release_status": "REFERENCE_ONLY_NOT_PRODUCTION_CODE"
+}

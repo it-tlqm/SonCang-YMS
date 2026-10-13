@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  /* Tà Lùng Quang Minh — Sơn Cảng Design Tokens (Industrial Logistics Enterprise) */
+  --color-brand-green: #0A9444;
+  --color-brand-navy: #223873;
+  --color-brand-cta: #087C3C;
+  --color-brand-bg: #F1F5F9;
+  --color-brand-card: #FFFFFF;
+  --color-brand-border: #CBD5E1;
+  --color-brand-text: #0F172A;
+  --color-brand-text-muted: #475569;
+  --color-brand-danger: #DC2626;
+  --color-brand-warning: #D97706;
+  --color-brand-success: #16A34A;
+
+  --background: var(--color-brand-bg);
+  --foreground: var(--color-brand-text);
+}
+
+@theme inline {
+  --color-primary: var(--color-brand-green);
+  --color-primary-dark: var(--color-brand-cta);
+  --color-secondary: var(--color-brand-navy);
+  --color-bg-main: var(--color-brand-bg);
+  --color-surface: var(--color-brand-card);
+  --color-border-main: var(--color-brand-border);
+  --color-muted: var(--color-brand-text-muted);
+  --font-sans: var(--font-be-vietnam-pro);
+
+  /* HỆ THỐNG GÓC BO CÔNG NGHIỆP — BẾN BÃI LOGISTICS (CHỐNG BO TRÒN TRẺ CON) */
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+}
+
+body {
+  background: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  font-family: var(--font-be-vietnam-pro), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Quy chuẩn nhập liệu & hiển thị công nghiệp dứt khoát */
+input, select, textarea {
+  border-radius: 4px !important;
+  font-family: inherit;
+}
+
+/* Kiểu chữ số liệu bến bãi, container, mã phiếu chuẩn monospace */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Bảng biểu công nghiệp phẳng, nét kẻ rõ ràng */
+table {
+  border-collapse: collapse;
+}
+
+th {
+  letter-spacing: 0.03em;
+}

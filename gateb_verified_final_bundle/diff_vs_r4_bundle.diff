@@ -1,0 +1,1066 @@
+--- R4_ZIP/supabase/migrations/20261011000004_domain_vehicles_containers.sql
++++ GATE_B_VERIFIED/supabase/migrations/20261011000004_domain_vehicles_containers.sql
+@@ -530,9 +530,13 @@
+     WHERE yard_id = p_yard_id AND idempotency_key = v_clean_idem;
+ 
+     IF FOUND THEN
+-      -- Nếu cùng thông tin: trả về ID cũ (idempotent replay an toàn)
++      -- Nếu cùng thông tin toàn bộ payload: trả về ID cũ (idempotent replay an toàn)
+       IF v_existing_veh.vehicle_type = p_vehicle_type AND 
+-         coalesce(v_existing_veh.license_plate, '') = coalesce(v_clean_plate, '') THEN
++         coalesce(v_existing_veh.license_plate, '') = coalesce(v_clean_plate, '') AND
++         coalesce(v_existing_veh.driver_name, '') = coalesce(trim(p_driver_name), '') AND
++         coalesce(v_existing_veh.driver_phone, '') = coalesce(trim(p_driver_phone), '') AND
++         coalesce(v_existing_veh.ticket_code, '') = coalesce(trim(p_ticket_code), '') AND
++         coalesce(v_existing_veh.note, '') = coalesce(trim(p_note), '') THEN
+         RETURN v_existing_veh.id;
+       ELSE
+         RAISE EXCEPTION 'Idempotency key % đã được sử dụng với thông tin lượt xe khác.', v_clean_idem;
+@@ -586,7 +590,11 @@
+       WHERE yard_id = p_yard_id AND idempotency_key = v_clean_idem;
+ 
+       IF FOUND AND v_existing_veh.vehicle_type = p_vehicle_type AND 
+-         coalesce(v_existing_veh.license_plate, '') = coalesce(v_clean_plate, '') THEN
++         coalesce(v_existing_veh.license_plate, '') = coalesce(v_clean_plate, '') AND
++         coalesce(v_existing_veh.driver_name, '') = coalesce(trim(p_driver_name), '') AND
++         coalesce(v_existing_veh.driver_phone, '') = coalesce(trim(p_driver_phone), '') AND
++         coalesce(v_existing_veh.ticket_code, '') = coalesce(trim(p_ticket_code), '') AND
++         coalesce(v_existing_veh.note, '') = coalesce(trim(p_note), '') THEN
+         RETURN v_existing_veh.id;
+       ELSE
+         RAISE EXCEPTION 'Idempotency key % đã được sử dụng với thông tin lượt xe khác.', v_clean_idem;
+@@ -723,9 +731,11 @@
+     WHERE yard_id = p_yard_id AND idempotency_key = v_clean_idem;
+ 
+     IF FOUND THEN
+-      -- Nếu cùng thông tin: trả về ID cũ (idempotent replay an toàn)
++      -- Nếu cùng thông tin toàn bộ payload: trả về ID cũ (idempotent replay an toàn)
+       IF v_existing_cont.container_no_current = v_clean_no AND 
+-         v_existing_cont.inbound_vehicle_visit_id = p_inbound_vehicle_visit_id THEN
++         v_existing_cont.inbound_vehicle_visit_id = p_inbound_vehicle_visit_id AND
++         coalesce(v_existing_cont.container_size, '') = coalesce(trim(p_container_size), '') AND
++         coalesce(v_existing_cont.container_type, '') = coalesce(trim(p_container_type), '') THEN
+         RETURN v_existing_cont.id;
+       ELSE
+         RAISE EXCEPTION 'Idempotency key % đã được sử dụng với thông tin lượt container khác.', v_clean_idem;
+@@ -807,7 +817,9 @@
+       WHERE yard_id = p_yard_id AND idempotency_key = v_clean_idem;
+ 
+       IF FOUND AND v_existing_cont.container_no_current = v_clean_no AND 
+-         v_existing_cont.inbound_vehicle_visit_id = p_inbound_vehicle_visit_id THEN
++         v_existing_cont.inbound_vehicle_visit_id = p_inbound_vehicle_visit_id AND
++         coalesce(v_existing_cont.container_size, '') = coalesce(trim(p_container_size), '') AND
++         coalesce(v_existing_cont.container_type, '') = coalesce(trim(p_container_type), '') THEN
+         RETURN v_existing_cont.id;
+       ELSE
+         RAISE EXCEPTION 'Idempotency key % đã được sử dụng với thông tin lượt container khác.', v_clean_idem;
+--- R4_ZIP/supabase/tests/domain_vehicles_containers_004.sql
++++ GATE_B_VERIFIED/supabase/tests/domain_vehicles_containers_004.sql
+@@ -29,43 +29,42 @@
+ -- ------------------------------------------------------------------------------
+ 
+ -- Bảng tạm lưu trữ biến và ID kiểm thử xuyên suốt session
+-CREATE TEMP TABLE IF NOT EXISTS pg_temp.test_vars (
++-- Bảng tạm lưu trữ biến và ID kiểm thử (tự động rollback ở cuối file)
++CREATE TABLE IF NOT EXISTS public.test_vars_004 (
+   var_key text PRIMARY KEY,
+   val_uuid uuid,
+   val_text text,
+   val_bigint bigint
+ );
+ 
+--- Cấp quyền đọc bảng tạm cho authenticated để chạy test RLS an toàn
+-GRANT USAGE ON SCHEMA pg_temp TO authenticated;
+-GRANT SELECT ON ALL TABLES IN SCHEMA pg_temp TO authenticated;
++GRANT ALL ON public.test_vars_004 TO authenticated, anon;
+ 
+ -- Các helper truy xuất biến kiểm thử
+-CREATE OR REPLACE FUNCTION pg_temp.set_val(p_key text, p_uuid uuid DEFAULT NULL, p_text text DEFAULT NULL, p_bigint bigint DEFAULT NULL)
+-RETURNS void LANGUAGE plpgsql AS $$
+-BEGIN
+-  INSERT INTO pg_temp.test_vars (var_key, val_uuid, val_text, val_bigint)
++CREATE OR REPLACE FUNCTION public.set_val_004(p_key text, p_uuid uuid DEFAULT NULL, p_text text DEFAULT NULL, p_bigint bigint DEFAULT NULL)
++RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++BEGIN
++  INSERT INTO public.test_vars_004 (var_key, val_uuid, val_text, val_bigint)
+   VALUES (p_key, p_uuid, p_text, p_bigint)
+   ON CONFLICT (var_key) DO UPDATE
+-    SET val_uuid = COALESCE(EXCLUDED.val_uuid, pg_temp.test_vars.val_uuid),
+-        val_text = COALESCE(EXCLUDED.val_text, pg_temp.test_vars.val_text),
+-        val_bigint = COALESCE(EXCLUDED.val_bigint, pg_temp.test_vars.val_bigint);
++    SET val_uuid = COALESCE(EXCLUDED.val_uuid, public.test_vars_004.val_uuid),
++        val_text = COALESCE(EXCLUDED.val_text, public.test_vars_004.val_text),
++        val_bigint = COALESCE(EXCLUDED.val_bigint, public.test_vars_004.val_bigint);
+ END;
+ $$;
+ 
+-CREATE OR REPLACE FUNCTION pg_temp.get_uuid(p_key text) RETURNS uuid
+-LANGUAGE sql STABLE AS $$
+-  SELECT val_uuid FROM pg_temp.test_vars WHERE var_key = p_key;
++CREATE OR REPLACE FUNCTION public.get_uuid_004(p_key text) RETURNS uuid
++LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
++  SELECT val_uuid FROM public.test_vars_004 WHERE var_key = p_key;
+ $$;
+ 
+-CREATE OR REPLACE FUNCTION pg_temp.get_bigint(p_key text) RETURNS bigint
+-LANGUAGE sql STABLE AS $$
+-  SELECT val_bigint FROM pg_temp.test_vars WHERE var_key = p_key;
++CREATE OR REPLACE FUNCTION public.get_bigint_004(p_key text) RETURNS bigint
++LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
++  SELECT val_bigint FROM public.test_vars_004 WHERE var_key = p_key;
+ $$;
+ 
+ -- Helper thiết lập JWT Context của Supabase (KHÔNG chuyển đổi database role session)
+-CREATE OR REPLACE FUNCTION pg_temp.set_test_jwt(p_user_id uuid)
+-RETURNS void LANGUAGE plpgsql AS $$
++CREATE OR REPLACE FUNCTION public.set_test_jwt_004(p_user_id uuid)
++RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+ BEGIN
+   IF p_user_id IS NULL THEN
+     PERFORM set_config('request.jwt.claim.sub', '', true);
+@@ -78,6 +77,11 @@
+   END IF;
+ END;
+ $$;
++
++GRANT EXECUTE ON FUNCTION public.set_val_004(text, uuid, text, bigint) TO authenticated, anon;
++GRANT EXECUTE ON FUNCTION public.get_uuid_004(text) TO authenticated, anon;
++GRANT EXECUTE ON FUNCTION public.get_bigint_004(text) TO authenticated, anon;
++GRANT EXECUTE ON FUNCTION public.set_test_jwt_004(uuid) TO authenticated, anon;
+ 
+ -- Thiết lập người dùng và bãi kiểm thử
+ DO $$
+@@ -101,20 +105,20 @@
+   IF v_yard_1 IS NULL THEN
+     INSERT INTO public.app_yards (name, is_active) VALUES ('Bãi Sơn Cảng 004 A', true) RETURNING id INTO v_yard_1;
+   END IF;
+-  PERFORM pg_temp.set_val('yard_1', v_yard_1);
++  PERFORM public.set_val_004('yard_1', v_yard_1);
+ 
+   SELECT id INTO v_yard_2 FROM public.app_yards WHERE name = 'Bãi Sơn Cảng 004 B' LIMIT 1;
+   IF v_yard_2 IS NULL THEN
+     INSERT INTO public.app_yards (name, is_active) VALUES ('Bãi Sơn Cảng 004 B', true) RETURNING id INTO v_yard_2;
+   END IF;
+-  PERFORM pg_temp.set_val('yard_2', v_yard_2);
++  PERFORM public.set_val_004('yard_2', v_yard_2);
+ 
+   -- M004-R3-07: Bãi vô hiệu hóa để kiểm thử từ chối container gate-in
+   SELECT id INTO v_yard_inact FROM public.app_yards WHERE name = 'Bãi Sơn Cảng 004 Inactive' LIMIT 1;
+   IF v_yard_inact IS NULL THEN
+     INSERT INTO public.app_yards (name, is_active) VALUES ('Bãi Sơn Cảng 004 Inactive', false) RETURNING id INTO v_yard_inact;
+   END IF;
+-  PERFORM pg_temp.set_val('yard_inactive', v_yard_inact);
++  PERFORM public.set_val_004('yard_inactive', v_yard_inact);
+ 
+   -- 2. Users trong auth.users
+   INSERT INTO auth.users (id, email) VALUES
+@@ -215,7 +219,7 @@
+ -- Thực hiện tạo loại xe mới dưới quyền SYS_ADMIN (không gán giá vé trước khi có biểu phí AP10)
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+   PERFORM public.sc_manage_vehicle_type(
+     p_code => 'TEST_SPECIAL',
+     p_display_name => 'Xe chuyên dụng thử nghiệm',
+@@ -233,7 +237,7 @@
+ );
+ 
+ -- Assertion 13: M004-R3-03: Tạo loại xe mới truyền giá vé bị từ chối theo AP10 Four-Eyes (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_manage_vehicle_type(
+@@ -248,7 +252,7 @@
+ );
+ 
+ -- Assertion 14: M004-R3-03: Sửa đổi giá vé xe CONT_LANH bị từ chối theo AP10 Four-Eyes (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_manage_vehicle_type(
+@@ -264,7 +268,7 @@
+ -- M004-R3-02: Cập nhật tên hiển thị CONT_LANH (Patch Semantics)
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+   PERFORM public.sc_manage_vehicle_type(
+     p_code => 'CONT_LANH',
+     p_display_name => 'Container Lạnh (Đã cập nhật)'
+@@ -279,7 +283,7 @@
+ );
+ 
+ -- Assertion 16: An ninh gọi sc_manage_vehicle_type bị từ chối do thiếu quyền admin.billing_settings.manage (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_manage_vehicle_type(
+@@ -295,7 +299,7 @@
+ -- Vô hiệu hóa loại xe TEST_SPECIAL để kiểm thử chặn xe inactive
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+   PERFORM public.sc_manage_vehicle_type(
+     p_code => 'TEST_SPECIAL',
+     p_is_active => false
+@@ -303,11 +307,11 @@
+ END $$;
+ 
+ -- Assertion 17: Loại xe is_active = false bị từ chối tiếp nhận vào bãi (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_vehicle_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_vehicle_type => 'TEST_SPECIAL',
+       p_license_plate => '29H-INACT01'
+     );
+@@ -320,7 +324,7 @@
+ -- Kích hoạt lại TEST_SPECIAL (vẫn chưa có giá vé) để kiểm thử chặn xe chưa cấu hình giá
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000001'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000001'::uuid);
+   PERFORM public.sc_manage_vehicle_type(
+     p_code => 'TEST_SPECIAL',
+     p_is_active => true
+@@ -328,11 +332,11 @@
+ END $$;
+ 
+ -- Assertion 18: Loại xe chưa có giá vé bị từ chối, không tự động miễn phí (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_vehicle_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_vehicle_type => 'TEST_SPECIAL',
+       p_license_plate => '29H-NOCONF01'
+     );
+@@ -351,7 +355,7 @@
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_vehicle_visits (yard_id, license_plate, vehicle_type, entry_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), '29H-99999', 'XE_KHAC', '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), '29H-99999', 'XE_KHAC', '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23503',
+   NULL,
+@@ -368,14 +372,14 @@
+   ON CONFLICT (code) DO NOTHING;
+ 
+   INSERT INTO public.app_vehicle_visits (yard_id, license_plate, vehicle_type, entry_by, status)
+-  VALUES (pg_temp.get_uuid('yard_1'), '29H-RESTRICT', 'TEST_RESTRICT_TYPE', '10000000-0000-0000-0000-000000000002'::uuid, 'IN_YARD')
++  VALUES (public.get_uuid_004('yard_1'), '29H-RESTRICT', 'TEST_RESTRICT_TYPE', '10000000-0000-0000-0000-000000000002'::uuid, 'IN_YARD')
+   RETURNING id INTO v_veh_res;
+-  PERFORM pg_temp.set_val('veh_restrict', v_veh_res);
++  PERFORM public.set_val_004('veh_restrict', v_veh_res);
+ END $$;
+ 
+ -- Assertion 20: M004-R3-01: Fixture lượt xe tham chiếu TEST_RESTRICT_TYPE tồn tại hợp lệ
+ SELECT ok(
+-  pg_temp.get_uuid('veh_restrict') IS NOT NULL,
++  public.get_uuid_004('veh_restrict') IS NOT NULL,
+   'M004-R3-01a: Fixture lượt xe tham chiếu TEST_RESTRICT_TYPE được tạo thành công làm điều kiện kiểm thử FK'
+ );
+ 
+@@ -399,7 +403,7 @@
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, container_size, created_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), 'TEST1234567', 'TEST1234567', '50', '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), 'TEST1234567', 'TEST1234567', '50', '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23514',
+   NULL,
+@@ -410,7 +414,7 @@
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, inbound_at, outbound_at, created_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), 'TESTTIME123', 'TESTTIME123', now(), now() - interval '1 hour', '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), 'TESTTIME123', 'TESTTIME123', now(), now() - interval '1 hour', '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23514',
+   NULL,
+@@ -421,7 +425,7 @@
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, status, outbound_at, created_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), 'TESTOUTBND1', 'TESTOUTBND1', 'IN_YARD', now(), '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), 'TESTOUTBND1', 'TESTOUTBND1', 'IN_YARD', now(), '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23514',
+   NULL,
+@@ -434,16 +438,16 @@
+   v_veh_yard2 uuid;
+ BEGIN
+   INSERT INTO public.app_vehicle_visits (yard_id, license_plate, vehicle_type, entry_by, status)
+-  VALUES (pg_temp.get_uuid('yard_2'), '99B-CROSS01', 'DAU_KEO', '10000000-0000-0000-0000-000000000008'::uuid, 'IN_YARD')
++  VALUES (public.get_uuid_004('yard_2'), '99B-CROSS01', 'DAU_KEO', '10000000-0000-0000-0000-000000000008'::uuid, 'IN_YARD')
+   RETURNING id INTO v_veh_yard2;
+-  PERFORM pg_temp.set_val('veh_yard2', v_veh_yard2);
++  PERFORM public.set_val_004('veh_yard2', v_veh_yard2);
+ END $$;
+ 
+ -- Assertion 26: Composite FK fk_container_inbound_vehicle_yard chặn container Bãi 1 gắn xe Bãi 2
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, inbound_vehicle_visit_id, created_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), 'TESTCROSS01', 'TESTCROSS01', pg_temp.get_uuid('veh_yard2'), '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), 'TESTCROSS01', 'TESTCROSS01', public.get_uuid_004('veh_yard2'), '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23503',
+   NULL,
+@@ -460,9 +464,9 @@
+ DECLARE
+   v_veh_id uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+   v_veh_id := public.sc_create_vehicle_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_vehicle_type => 'CONT_LANH',
+     p_license_plate => '29H-12345',
+     p_driver_name => 'Nguyễn Văn Tài',
+@@ -470,26 +474,26 @@
+     p_ticket_code => 'VE-001',
+     p_note => 'Xe vào kiểm thử'
+   );
+-  PERFORM pg_temp.set_val('veh_1', v_veh_id);
++  PERFORM public.set_val_004('veh_1', v_veh_id);
+ END $$;
+ 
+ -- Assertion 27: An ninh Bãi 1 tạo lượt xe thành công tại Bãi 1 (ALLOW)
+-SELECT ok(pg_temp.get_uuid('veh_1') IS NOT NULL, 'M004-T04: An ninh Bãi 1 tạo lượt xe thành công tại Bãi 1 (ALLOW)');
++SELECT ok(public.get_uuid_004('veh_1') IS NOT NULL, 'M004-T04: An ninh Bãi 1 tạo lượt xe thành công tại Bãi 1 (ALLOW)');
+ 
+ -- Assertion 28: Server tự tính giá vé 250.000đ cho CONT_LANH từ app_vehicle_types (Fix M004-R1-06)
+ SELECT is(
+-  (SELECT ticket_amount FROM public.app_vehicle_visits WHERE id = pg_temp.get_uuid('veh_1')),
++  (SELECT ticket_amount FROM public.app_vehicle_visits WHERE id = public.get_uuid_004('veh_1')),
+   250000.00,
+   'M004-T06a: Server tự tính giá vé CONT_LANH là 250.000đ từ app_vehicle_types, không nhận từ client (Fix M004-R1-06)'
+ );
+ 
+ -- M004-R2-02: throws_ok với mã lỗi P0001 và thông điệp lỗi chính xác 100%
+ -- Assertion 29: An ninh Bãi 1 tạo xe tại Bãi 2 bị từ chối phạm vi bãi (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_vehicle_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_2'),
++      p_yard_id => public.get_uuid_004('yard_2'),
+       p_vehicle_type => 'CONT_LANH',
+       p_license_plate => '29H-99999'
+     );
+@@ -500,11 +504,11 @@
+ );
+ 
+ -- Assertion 30: Nhân viên CCKB gọi tạo xe bị từ chối do thiếu quyền vehicle.visit.create (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000004'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000004'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_vehicle_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_vehicle_type => 'CONT_LANH',
+       p_license_plate => '29H-88888'
+     );
+@@ -524,26 +528,26 @@
+ DECLARE
+   v_cont_id uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+   v_cont_id := public.sc_create_container_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_container_no => 'MSCU1112223',
+-    p_inbound_vehicle_visit_id => pg_temp.get_uuid('veh_1'),
++    p_inbound_vehicle_visit_id => public.get_uuid_004('veh_1'),
+     p_container_size => '40',
+     p_container_type => 'RF'
+   );
+-  PERFORM pg_temp.set_val('cont_1', v_cont_id);
++  PERFORM public.set_val_004('cont_1', v_cont_id);
+ END $$;
+ 
+ -- Assertion 31: An ninh Bãi 1 tạo container visit thành công (ALLOW)
+-SELECT ok(pg_temp.get_uuid('cont_1') IS NOT NULL, 'M004-T07a: An ninh Bãi 1 tạo container visit thành công (ALLOW)');
++SELECT ok(public.get_uuid_004('cont_1') IS NOT NULL, 'M004-T07a: An ninh Bãi 1 tạo container visit thành công (ALLOW)');
+ 
+ -- Assertion 32: Container và Xe có UUID độc lập riêng biệt
+-SELECT ok(pg_temp.get_uuid('cont_1') <> pg_temp.get_uuid('veh_1'), 'M004-T07b: Container và Xe có 2 UUID độc lập riêng biệt');
++SELECT ok(public.get_uuid_004('cont_1') <> public.get_uuid_004('veh_1'), 'M004-T07b: Container và Xe có 2 UUID độc lập riêng biệt');
+ 
+ -- Assertion 33: Server luôn khởi tạo cargo_status = CHUA_XAC_DINH (Fix M004-R1-04)
+ SELECT is(
+-  (SELECT cargo_status FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_1')),
++  (SELECT cargo_status FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_1')),
+   'CHUA_XAC_DINH',
+   'M004-R1-04: Container mới tạo luôn có cargo_status = CHUA_XAC_DINH do server thiết lập'
+ );
+@@ -551,19 +555,19 @@
+ -- M004-R2-04: Assertion kiểm tra is_legacy_import đúng bảng app_container_visits (Fix M004-R2-04)
+ -- Assertion 34: Server tự gán is_legacy_import = false trên bảng container, không nhận từ client
+ SELECT is(
+-  (SELECT is_legacy_import FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_1')),
++  (SELECT is_legacy_import FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_1')),
+   false,
+   'M004-T06b: Server khởi tạo is_legacy_import = false cho lượt container mới (Fix M004-R2-04)'
+ );
+ 
+ -- Assertion 35: Điều phối viên gọi tạo container visit bị từ chối do thiếu quyền (DENY)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000006'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000006'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_container_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_container_no => 'TEMU1234567',
+-      p_inbound_vehicle_visit_id => pg_temp.get_uuid('veh_1')
++      p_inbound_vehicle_visit_id => public.get_uuid_004('veh_1')
+     );
+   $$,
+   'P0001',
+@@ -574,11 +578,11 @@
+ -- Mô phỏng Xe 1 rời bãi độc lập (vòng đời xe kết thúc)
+ UPDATE public.app_vehicle_visits
+ SET status = 'EXITED', exit_at = now(), exit_by = '10000000-0000-0000-0000-000000000002'::uuid
+-WHERE id = pg_temp.get_uuid('veh_1');
++WHERE id = public.get_uuid_004('veh_1');
+ 
+ -- Assertion 36: Xe 1 rời bãi, Container 1 vẫn giữ trạng thái IN_YARD (M004-T08)
+ SELECT is(
+-  (SELECT status FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_1')),
++  (SELECT status FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_1')),
+   'IN_YARD',
+   'M004-T08: Xe vào xuất bãi không làm thay đổi trạng thái IN_YARD của container'
+ );
+@@ -588,19 +592,19 @@
+ DECLARE
+   v_veh_b uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_b := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'DAU_KEO', '29C-88888');
+-  PERFORM pg_temp.set_val('veh_b', v_veh_b);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_b := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'DAU_KEO', '29C-88888');
++  PERFORM public.set_val_004('veh_b', v_veh_b);
+ 
+   UPDATE public.app_container_visits
+   SET outbound_vehicle_visit_id = v_veh_b
+-  WHERE id = pg_temp.get_uuid('cont_1');
++  WHERE id = public.get_uuid_004('cont_1');
+ END $$;
+ 
+ -- Assertion 37: Container 1 có thể liên kết với Xe B khác đến nhận ra khỏi bãi (M004-T09)
+ SELECT is(
+-  (SELECT outbound_vehicle_visit_id FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_1')),
+-  pg_temp.get_uuid('veh_b'),
++  (SELECT outbound_vehicle_visit_id FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_1')),
++  public.get_uuid_004('veh_b'),
+   'M004-T09: Container có thể liên kết với Xe B khác đến nhận ra khỏi bãi'
+ );
+ 
+@@ -615,20 +619,20 @@
+   v_veh_mooc uuid;
+ BEGIN
+   INSERT INTO public.app_vehicle_visits (yard_id, license_plate, vehicle_type, entry_by, status)
+-  VALUES (pg_temp.get_uuid('yard_1'), '29H-MOOC2X20', 'DAU_KEO', '10000000-0000-0000-0000-000000000002'::uuid, 'IN_YARD')
++  VALUES (public.get_uuid_004('yard_1'), '29H-MOOC2X20', 'DAU_KEO', '10000000-0000-0000-0000-000000000002'::uuid, 'IN_YARD')
+   RETURNING id INTO v_veh_mooc;
+-  PERFORM pg_temp.set_val('veh_mooc', v_veh_mooc);
++  PERFORM public.set_val_004('veh_mooc', v_veh_mooc);
+ 
+   INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, container_size, inbound_vehicle_visit_id, created_by)
+-  VALUES (pg_temp.get_uuid('yard_1'), 'TGHU2000001', 'TGHU2000001', '20', v_veh_mooc, '10000000-0000-0000-0000-000000000002'::uuid);
++  VALUES (public.get_uuid_004('yard_1'), 'TGHU2000001', 'TGHU2000001', '20', v_veh_mooc, '10000000-0000-0000-0000-000000000002'::uuid);
+ 
+   INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, container_size, inbound_vehicle_visit_id, created_by)
+-  VALUES (pg_temp.get_uuid('yard_1'), 'TGHU2000002', 'TGHU2000002', '20', v_veh_mooc, '10000000-0000-0000-0000-000000000002'::uuid);
++  VALUES (public.get_uuid_004('yard_1'), 'TGHU2000002', 'TGHU2000002', '20', v_veh_mooc, '10000000-0000-0000-0000-000000000002'::uuid);
+ END $$;
+ 
+ -- Assertion 38: CSDL hỗ trợ quan hệ 1:N ở tầng cấu trúc (M004-T11)
+ SELECT is(
+-  (SELECT count(*)::int FROM public.app_container_visits WHERE inbound_vehicle_visit_id = pg_temp.get_uuid('veh_mooc')),
++  (SELECT count(*)::int FROM public.app_container_visits WHERE inbound_vehicle_visit_id = public.get_uuid_004('veh_mooc')),
+   2,
+   'M004-T11: CSDL hỗ trợ quan hệ 1:N, cho phép 1 xe cõng nhiều cont trong cấu trúc DDL'
+ );
+@@ -638,17 +642,17 @@
+ DECLARE
+   v_veh_v1 uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_v1 := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-V1CHECK');
+-  PERFORM pg_temp.set_val('veh_v1check', v_veh_v1);
+-  PERFORM public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'V1CONT00001', v_veh_v1);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_v1 := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-V1CHECK');
++  PERFORM public.set_val_004('veh_v1check', v_veh_v1);
++  PERFORM public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'V1CONT00001', v_veh_v1);
+ END $$;
+ 
+ -- Assertion 39: RPC V1 từ chối cont thứ 2 trên cùng xe (chưa CANCELLED) theo V1 baseline (M004-T12, Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'V1CONT00002', pg_temp.get_uuid('veh_v1check'));
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'V1CONT00002', public.get_uuid_004('veh_v1check'));
+   $$,
+   'P0001',
+   'Quy tắc vận hành V1 hiện hành: Mỗi lượt xe chỉ tiếp nhận tối đa 1 container. Thao tác tiếp nhận nhiều container trên cùng một lượt xe chưa được phê duyệt UAT.',
+@@ -660,16 +664,16 @@
+ DECLARE
+   v_veh_dup uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_dup := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-DUPCHECK');
+-  PERFORM pg_temp.set_val('veh_dupcheck', v_veh_dup);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_dup := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-DUPCHECK');
++  PERFORM public.set_val_004('veh_dupcheck', v_veh_dup);
+ END $$;
+ 
+ -- Assertion 40: RPC sc_create_container_visit từ chối khi số container đang IN_YARD tại cùng bãi (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'MSCU1112223', pg_temp.get_uuid('veh_dupcheck'));
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'MSCU1112223', public.get_uuid_004('veh_dupcheck'));
+   $$,
+   'P0001',
+   'Cảnh báo trùng số container: Container MSCU1112223 hiện đang có một lượt lưu bãi khác ở trạng thái IN_YARD trong cùng bãi. Không tự động gộp lượt. Vui lòng xác minh thực tế.',
+@@ -681,16 +685,16 @@
+ DECLARE
+   v_veh_bo uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_bo := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'XE_BO_3_BANH', NULL);
+-  PERFORM pg_temp.set_val('veh_bo_3_banh', v_veh_bo);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_bo := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'XE_BO_3_BANH', NULL);
++  PERFORM public.set_val_004('veh_bo_3_banh', v_veh_bo);
+ END $$;
+ 
+ -- M004-R2-07 & M004-R3-09: Assertion 41 kiểm tra chặn gắn container vào loại xe không được phép theo cấu hình danh mục
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'CONTVEHCHECK', pg_temp.get_uuid('veh_bo_3_banh'));
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'CONTVEHCHECK', public.get_uuid_004('veh_bo_3_banh'));
+   $$,
+   'P0001',
+   'Loại phương tiện XE_BO_3_BANH không được phép tiếp nhận container vào bãi theo cấu hình danh mục phương tiện.',
+@@ -701,7 +705,7 @@
+ SELECT throws_ok(
+   $$
+     INSERT INTO public.app_container_visits (yard_id, container_no_current, container_no_original, created_by)
+-    VALUES (pg_temp.get_uuid('yard_1'), 'MSCU1112223', 'MSCU1112223', '10000000-0000-0000-0000-000000000002'::uuid);
++    VALUES (public.get_uuid_004('yard_1'), 'MSCU1112223', 'MSCU1112223', '10000000-0000-0000-0000-000000000002'::uuid);
+   $$,
+   '23505',
+   NULL,
+@@ -719,44 +723,44 @@
+   v_idem1 uuid;
+   v_idem2 uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+   v_idem1 := public.sc_create_vehicle_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_vehicle_type => 'CONT_LANH',
+     p_license_plate => '29C-IDEM01',
+     p_idempotency_key => 'IDEM-VEH-001'
+   );
+-  PERFORM pg_temp.set_val('veh_idem1', v_idem1);
++  PERFORM public.set_val_004('veh_idem1', v_idem1);
+ 
+   -- Gọi lại lần 2 cùng thông tin và idempotency key (mô phỏng network retry)
+   v_idem2 := public.sc_create_vehicle_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_vehicle_type => 'CONT_LANH',
+     p_license_plate => '29C-IDEM01',
+     p_idempotency_key => 'IDEM-VEH-001'
+   );
+-  PERFORM pg_temp.set_val('veh_idem2', v_idem2);
++  PERFORM public.set_val_004('veh_idem2', v_idem2);
+ END $$;
+ 
+ -- Assertion 43: Tạo lượt xe với idempotency_key thành công lần đầu
+ SELECT ok(
+-  pg_temp.get_uuid('veh_idem1') IS NOT NULL,
++  public.get_uuid_004('veh_idem1') IS NOT NULL,
+   'M004-R3-04a: Tạo lượt xe với idempotency_key thành công lần đầu'
+ );
+ 
+ -- Assertion 44: Retry gọi sc_create_vehicle_visit cùng key trả về đúng ID cũ (idempotent replay)
+ SELECT is(
+-  pg_temp.get_uuid('veh_idem2'),
+-  pg_temp.get_uuid('veh_idem1'),
++  public.get_uuid_004('veh_idem2'),
++  public.get_uuid_004('veh_idem1'),
+   'M004-R3-04b: Idempotent replay: Retry gọi sc_create_vehicle_visit trả về đúng visit ID cũ mà không tạo trùng'
+ );
+ 
+ -- Assertion 45: Tái sử dụng idempotency_key của xe với thông tin khác bị từ chối fail-safe
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_vehicle_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_vehicle_type => 'CONT_LANH',
+       p_license_plate => '29C-DIFFERENT',
+       p_driver_name => NULL,
+@@ -777,46 +781,46 @@
+   v_cidem1 uuid;
+   v_cidem2 uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+   v_cidem1 := public.sc_create_container_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_container_no => 'IDEMCONT01',
+-    p_inbound_vehicle_visit_id => pg_temp.get_uuid('veh_idem1'),
++    p_inbound_vehicle_visit_id => public.get_uuid_004('veh_idem1'),
+     p_idempotency_key => 'IDEM-CONT-001'
+   );
+-  PERFORM pg_temp.set_val('cont_idem1', v_cidem1);
++  PERFORM public.set_val_004('cont_idem1', v_cidem1);
+ 
+   -- Gọi lại lần 2 cùng thông tin container và key
+   v_cidem2 := public.sc_create_container_visit(
+-    p_yard_id => pg_temp.get_uuid('yard_1'),
++    p_yard_id => public.get_uuid_004('yard_1'),
+     p_container_no => 'IDEMCONT01',
+-    p_inbound_vehicle_visit_id => pg_temp.get_uuid('veh_idem1'),
++    p_inbound_vehicle_visit_id => public.get_uuid_004('veh_idem1'),
+     p_idempotency_key => 'IDEM-CONT-001'
+   );
+-  PERFORM pg_temp.set_val('cont_idem2', v_cidem2);
++  PERFORM public.set_val_004('cont_idem2', v_cidem2);
+ END $$;
+ 
+ -- Assertion 46: Tạo lượt container với idempotency_key thành công lần đầu
+ SELECT ok(
+-  pg_temp.get_uuid('cont_idem1') IS NOT NULL,
++  public.get_uuid_004('cont_idem1') IS NOT NULL,
+   'M004-R3-04d: Tạo lượt container với idempotency_key thành công lần đầu'
+ );
+ 
+ -- Assertion 47: Retry gọi sc_create_container_visit cùng key trả về đúng ID cũ (idempotent replay)
+ SELECT is(
+-  pg_temp.get_uuid('cont_idem2'),
+-  pg_temp.get_uuid('cont_idem1'),
++  public.get_uuid_004('cont_idem2'),
++  public.get_uuid_004('cont_idem1'),
+   'M004-R3-04e: Idempotent replay: Retry gọi sc_create_container_visit trả về đúng container ID cũ'
+ );
+ 
+ -- Assertion 48: Tái sử dụng idempotency_key của container với thông tin khác bị từ chối fail-safe
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   $$
+     SELECT public.sc_create_container_visit(
+-      p_yard_id => pg_temp.get_uuid('yard_1'),
++      p_yard_id => public.get_uuid_004('yard_1'),
+       p_container_no => 'IDEMCONT99',
+-      p_inbound_vehicle_visit_id => pg_temp.get_uuid('veh_idem1'),
++      p_inbound_vehicle_visit_id => public.get_uuid_004('veh_idem1'),
+       p_container_size => NULL,
+       p_container_type => 'RF',
+       p_idempotency_key => 'IDEM-CONT-001'
+@@ -833,15 +837,15 @@
+ -- ------------------------------------------------------------------------------
+ 
+ -- Assertion 49: M004-R3-07: sc_create_container_visit từ chối tiếp nhận container vào bãi đang bị vô hiệu hóa
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
+ SELECT throws_ok(
+   format(
+     $$ SELECT public.sc_create_container_visit('%s'::uuid, 'INACTCONT01', '%s'::uuid); $$,
+-    pg_temp.get_uuid('yard_inactive'),
+-    pg_temp.get_uuid('veh_1')
++    public.get_uuid_004('yard_inactive'),
++    public.get_uuid_004('veh_1')
+   ),
+   'P0001',
+-  'Bãi không hợp lệ hoặc đang bị vô hiệu hóa: ' || pg_temp.get_uuid('yard_inactive')::text,
++  'Bãi không hợp lệ hoặc đang bị vô hiệu hóa: ' || public.get_uuid_004('yard_inactive')::text,
+   'M004-T33: sc_create_container_visit từ chối tiếp nhận container vào bãi đang bị vô hiệu hóa (Fix M004-R3-07)'
+ );
+ 
+@@ -857,10 +861,10 @@
+   v_cont_chg uuid;
+   v_chg_id bigint;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_chg := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-NUMCHG');
+-  v_cont_chg := public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'WRONG123456', v_veh_chg);
+-  PERFORM pg_temp.set_val('cont_chg', v_cont_chg);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_chg := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-NUMCHG');
++  v_cont_chg := public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'WRONG123456', v_veh_chg);
++  PERFORM public.set_val_004('cont_chg', v_cont_chg);
+ 
+   v_chg_id := public.sc_correct_container_number(
+     p_container_visit_id => v_cont_chg,
+@@ -868,15 +872,15 @@
+     p_reason => 'Nhập sai ký tự số 4 theo biên bản hiện trường',
+     p_evidence_url => 'https://storage.soncang.vn/evidence/001.jpg'
+   );
+-  PERFORM pg_temp.set_val('chg_1', NULL, NULL, v_chg_id);
++  PERFORM public.set_val_004('chg_1', NULL, NULL, v_chg_id);
+ END $$;
+ 
+ -- Assertion 50: An ninh sửa số container thành công, sinh bản ghi lịch sử (M004-T14a)
+-SELECT ok(pg_temp.get_bigint('chg_1') IS NOT NULL, 'M004-T14a: An ninh sửa số container thành công, sinh bản ghi lịch sử');
++SELECT ok(public.get_bigint_004('chg_1') IS NOT NULL, 'M004-T14a: An ninh sửa số container thành công, sinh bản ghi lịch sử');
+ 
+ -- Assertion 51: Số container hiện hành trong app_container_visits được đổi sang số mới
+ SELECT is(
+-  (SELECT container_no_current FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_chg')),
++  (SELECT container_no_current FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_chg')),
+   'RIGHT123456',
+   'M004-T14b: Số container hiện hành được cập nhật sang số mới'
+ );
+@@ -884,22 +888,22 @@
+ -- M004-R2-09: Assertion 52 đối chiếu UUID trước và sau khi sửa số container
+ SELECT is(
+   (SELECT id FROM public.app_container_visits WHERE container_no_current = 'RIGHT123456'),
+-  pg_temp.get_uuid('cont_chg'),
++  public.get_uuid_004('cont_chg'),
+   'M004-T16: UUID container trước và sau khi sửa số trùng khớp nhau 100% (Fix M004-R2-09)'
+ );
+ 
+ -- M004-R2-09: Assertion 53 xác minh audit log thực tế được sinh ra trong app_audit_events
+ SELECT is(
+-  (SELECT count(*)::int FROM public.app_audit_events WHERE action_code = 'container.number.correct' AND target_id = pg_temp.get_uuid('cont_chg')::text),
++  (SELECT count(*)::int FROM public.app_audit_events WHERE action_code = 'container.number.correct' AND target_id = public.get_uuid_004('cont_chg')::text),
+   1,
+   'M004-T14c: Bản ghi audit log container.number.correct được sinh thực tế trong app_audit_events (Fix M004-R2-09)'
+ );
+ 
+ -- Assertion 54: Sửa số container không có lý do bị từ chối (M004-T15a, Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_correct_container_number(pg_temp.get_uuid('cont_chg'), 'NEWNUM999', '   ');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_correct_container_number(public.get_uuid_004('cont_chg'), 'NEWNUM999', '   ');
+   $$,
+   'P0001',
+   'Lý do sửa số container là bắt buộc (tối thiểu 3 ký tự).',
+@@ -907,10 +911,10 @@
+ );
+ 
+ -- Assertion 55: Sửa số mới trùng số cũ bị từ chối fail-safe (M004-T22, Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_correct_container_number(pg_temp.get_uuid('cont_chg'), 'RIGHT123456', 'Sửa trùng số');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_correct_container_number(public.get_uuid_004('cont_chg'), 'RIGHT123456', 'Sửa trùng số');
+   $$,
+   'P0001',
+   'Số container mới phải khác số container hiện tại (RIGHT123456).',
+@@ -918,10 +922,10 @@
+ );
+ 
+ -- Assertion 56: Sửa số mới trùng số container khác đang IN_YARD bị từ chối (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_correct_container_number(pg_temp.get_uuid('cont_chg'), 'MSCU1112223', 'Sửa trùng cont đang trong bãi');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_correct_container_number(public.get_uuid_004('cont_chg'), 'MSCU1112223', 'Sửa trùng cont đang trong bãi');
+   $$,
+   'P0001',
+   'Cảnh báo trùng số container: Số container mới (MSCU1112223) hiện đang thuộc một lượt container khác đang ở trong bãi (IN_YARD). Không thể sửa trùng lặp.',
+@@ -929,10 +933,10 @@
+ );
+ 
+ -- Assertion 57: An ninh Bãi 2 sửa container Bãi 1 bị từ chối phạm vi bãi (M004-T15b, Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000008'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_correct_container_number(pg_temp.get_uuid('cont_chg'), 'YARD2HACK01', 'An ninh bãi 2 can thiệp');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000008'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_correct_container_number(public.get_uuid_004('cont_chg'), 'YARD2HACK01', 'An ninh bãi 2 can thiệp');
+   $$,
+   'P0001',
+   'Permission Denied: Không có quyền sửa số container tại bãi tương ứng.',
+@@ -942,7 +946,7 @@
+ -- Assertion 58: Trigger chặn DELETE trên bảng app_container_number_changes (append-only) (Fix M004-R2-02 exact message)
+ SELECT throws_ok(
+   $$
+-    DELETE FROM public.app_container_number_changes WHERE id = pg_temp.get_bigint('chg_1');
++    DELETE FROM public.app_container_number_changes WHERE id = public.get_bigint_004('chg_1');
+   $$,
+   'P0001',
+   'Lịch sử sửa số container là bất biến (append-only). Nghiêm cấm xóa bản ghi.',
+@@ -954,7 +958,7 @@
+   $$
+     UPDATE public.app_container_number_changes
+     SET evidence_url = 'https://hacked.com/pic.jpg'
+-    WHERE id = pg_temp.get_bigint('chg_1');
++    WHERE id = public.get_bigint_004('chg_1');
+   $$,
+   'P0001',
+   'Dữ liệu lịch sử sửa số container và chứng cứ là bất biến. Không được phép chỉnh sửa các thông tin gốc.',
+@@ -969,8 +973,8 @@
+ -- An ninh xác nhận đã báo CCKB
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  PERFORM public.sc_ack_container_number_discrepancy(pg_temp.get_bigint('chg_1'));
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  PERFORM public.sc_ack_container_number_discrepancy(public.get_bigint_004('chg_1'));
+ END $$;
+ 
+ -- M004-R2-08: Assertion 60 kiểm tra trigger chặn xóa dấu xác nhận An ninh về NULL qua IS DISTINCT FROM
+@@ -978,7 +982,7 @@
+   $$
+     UPDATE public.app_container_number_changes
+     SET sec_ack_at = NULL
+-    WHERE id = pg_temp.get_bigint('chg_1');
++    WHERE id = public.get_bigint_004('chg_1');
+   $$,
+   'P0001',
+   'Thông tin xác nhận của An ninh đã được ghi nhận trước đó, không được phép sửa đổi hoặc xóa bỏ.',
+@@ -988,16 +992,16 @@
+ -- CCKB Bãi 1 thực hiện đối soát bản ghi chg_1
+ DO $$
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000004'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000004'::uuid);
+   PERFORM public.sc_reconcile_container_number_discrepancy(
+-    p_change_id => pg_temp.get_bigint('chg_1'),
++    p_change_id => public.get_bigint_004('chg_1'),
+     p_reconcile_notes => 'Đã đối chiếu với chứng từ điện tử hải quan'
+   );
+ END $$;
+ 
+ -- Assertion 61: CCKB đối soát discrepancy thành công (M004-T18a)
+ SELECT ok(
+-  (SELECT reconciled_at FROM public.app_container_number_changes WHERE id = pg_temp.get_bigint('chg_1')) IS NOT NULL,
++  (SELECT reconciled_at FROM public.app_container_number_changes WHERE id = public.get_bigint_004('chg_1')) IS NOT NULL,
+   'M004-T18a: CCKB đối soát sai lệch số container thành công (ALLOW)'
+ );
+ 
+@@ -1006,7 +1010,7 @@
+   $$
+     UPDATE public.app_container_number_changes
+     SET reconciled_at = NULL
+-    WHERE id = pg_temp.get_bigint('chg_1');
++    WHERE id = public.get_bigint_004('chg_1');
+   $$,
+   'P0001',
+   'Thông tin đối soát của CCKB đã được ghi nhận trước đó, không được phép sửa đổi hoặc xóa bỏ.',
+@@ -1020,18 +1024,18 @@
+   v_cont_chg2 uuid;
+   v_chg_id2 bigint;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_chg2 := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-NUMCHG2');
+-  v_cont_chg2 := public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'ORIGIN99999', v_veh_chg2);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_chg2 := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-NUMCHG2');
++  v_cont_chg2 := public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'ORIGIN99999', v_veh_chg2);
+   v_chg_id2 := public.sc_correct_container_number(v_cont_chg2, 'REVISE99999', 'Sửa lần 2 tạo fixture đối soát');
+-  PERFORM pg_temp.set_val('chg_2', NULL, NULL, v_chg_id2);
++  PERFORM public.set_val_004('chg_2', NULL, NULL, v_chg_id2);
+ END $$;
+ 
+ -- Assertion 63: An ninh gọi đối soát CCKB bị từ chối do thiếu quyền (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_reconcile_container_number_discrepancy(pg_temp.get_bigint('chg_2'), 'An ninh thử đối soát');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_reconcile_container_number_discrepancy(public.get_bigint_004('chg_2'), 'An ninh thử đối soát');
+   $$,
+   'P0001',
+   'Permission Denied: Chỉ bộ phận CCKB (PORT_STAFF, PORT_LEAD) hoặc Quản trị mới có quyền đối soát sai số container tại bãi này.',
+@@ -1040,20 +1044,20 @@
+ 
+ -- M004-R2-03: Kiểm thử RLS bằng SET LOCAL ROLE authenticated tạm thời, sau đó RESET ROLE
+ -- Assertion 64: RLS kiểm tra: CCKB có quyền container.number.discrepancy.view nhìn thấy 2 bản ghi
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000004'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000004'::uuid);
+ SET LOCAL ROLE authenticated;
+ SELECT is(
+-  (SELECT count(*)::int FROM public.app_container_number_changes WHERE yard_id = pg_temp.get_uuid('yard_1')),
++  (SELECT count(*)::int FROM public.app_container_number_changes WHERE yard_id = public.get_uuid_004('yard_1')),
+   2,
+   'M004-R1-05a: CCKB có quyền container.number.discrepancy.view nhìn thấy 2 bản ghi lịch sử sửa số qua RLS'
+ );
+ RESET ROLE;
+ 
+ -- Assertion 65: RLS kiểm tra: Điều phối (chỉ có container.visit.read, KHÔNG có discrepancy.view) thấy 0 bản ghi
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000006'::uuid);
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000006'::uuid);
+ SET LOCAL ROLE authenticated;
+ SELECT is(
+-  (SELECT count(*)::int FROM public.app_container_number_changes WHERE yard_id = pg_temp.get_uuid('yard_1')),
++  (SELECT count(*)::int FROM public.app_container_number_changes WHERE yard_id = public.get_uuid_004('yard_1')),
+   0,
+   'M004-R1-05b: Điều phối bị RLS chặn hoàn toàn không thấy lịch sử sửa số (Fix M004-R1-05)'
+ );
+@@ -1070,28 +1074,28 @@
+   v_veh_cargo uuid;
+   v_cont_cargo uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_cargo := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-CARGOK');
+-  v_cont_cargo := public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'CARGOCONT001', v_veh_cargo);
+-  PERFORM pg_temp.set_val('cont_cargo', v_cont_cargo);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_cargo := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-CARGOK');
++  v_cont_cargo := public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'CARGOCONT001', v_veh_cargo);
++  PERFORM public.set_val_004('cont_cargo', v_cont_cargo);
+ 
+   -- Điều phối cập nhật sang HANG
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000006'::uuid);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000006'::uuid);
+   PERFORM public.sc_update_container_cargo(v_cont_cargo, 'HANG');
+ END $$;
+ 
+ -- Assertion 66: Điều phối viên cập nhật HÀNG/RỖNG thành công khi cont IN_YARD (M004-T19)
+ SELECT is(
+-  (SELECT cargo_status FROM public.app_container_visits WHERE id = pg_temp.get_uuid('cont_cargo')),
++  (SELECT cargo_status FROM public.app_container_visits WHERE id = public.get_uuid_004('cont_cargo')),
+   'HANG',
+   'M004-T19: Điều phối cập nhật HÀNG/RỖNG thành công khi cont IN_YARD (ALLOW)'
+ );
+ 
+ -- Assertion 67: An ninh thử cập nhật HÀNG/RỖNG bị từ chối do thiếu quyền (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_update_container_cargo(pg_temp.get_uuid('cont_cargo'), 'RONG');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_update_container_cargo(public.get_uuid_004('cont_cargo'), 'RONG');
+   $$,
+   'P0001',
+   'Permission Denied: Chỉ bộ phận Điều phối (DIS_STAFF, DIS_LEAD) hoặc Quản trị mới có quyền cập nhật HÀNG/RỖNG tại bãi này.',
+@@ -1101,13 +1105,13 @@
+ -- Giả lập container xuất bãi để kiểm thử quy tắc AP05 (đảm bảo outbound_at IS NOT NULL)
+ UPDATE public.app_container_visits
+ SET status = 'EXITED', outbound_at = now()
+-WHERE id = pg_temp.get_uuid('cont_cargo');
++WHERE id = public.get_uuid_004('cont_cargo');
+ 
+ -- Assertion 68: Điều phối cập nhật HÀNG/RỖNG khi cont EXITED bị từ chối theo AP05 (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000006'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_update_container_cargo(pg_temp.get_uuid('cont_cargo'), 'RONG');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000006'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_update_container_cargo(public.get_uuid_004('cont_cargo'), 'RONG');
+   $$,
+   'P0001',
+   'Container đã xuất bãi (EXITED). Sửa trạng thái HÀNG/RỖNG sau khi xuất bãi yêu cầu quy trình phê duyệt AP05 (container.cargo.post_exit.request/approve).',
+@@ -1120,10 +1124,10 @@
+   v_veh_cfix uuid;
+   v_cont_cfix uuid;
+ BEGIN
+-  PERFORM pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000002'::uuid);
+-  v_veh_cfix := public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-CANCELFIX');
+-  v_cont_cfix := public.sc_create_container_visit(pg_temp.get_uuid('yard_1'), 'CANCELCONT01', v_veh_cfix);
+-  PERFORM pg_temp.set_val('cont_cancel_fix', v_cont_cfix);
++  PERFORM public.set_test_jwt_004('10000000-0000-0000-0000-000000000002'::uuid);
++  v_veh_cfix := public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-CANCELFIX');
++  v_cont_cfix := public.sc_create_container_visit(public.get_uuid_004('yard_1'), 'CANCELCONT01', v_veh_cfix);
++  PERFORM public.set_val_004('cont_cancel_fix', v_cont_cfix);
+ 
+   -- Hủy container trực tiếp từ trạng thái IN_YARD (outbound_at vẫn là NULL)
+   UPDATE public.app_container_visits
+@@ -1132,10 +1136,10 @@
+ END $$;
+ 
+ -- Assertion 69: M004-R3-08: Cập nhật HÀNG/RỖNG khi cont CANCELLED bị từ chối
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000006'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_update_container_cargo(pg_temp.get_uuid('cont_cancel_fix'), 'RONG');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000006'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_update_container_cargo(public.get_uuid_004('cont_cancel_fix'), 'RONG');
+   $$,
+   'P0001',
+   'Không thể cập nhật HÀNG/RỖNG cho container đã bị hủy (CANCELLED).',
+@@ -1148,10 +1152,10 @@
+ -- ------------------------------------------------------------------------------
+ 
+ -- Assertion 70: Assignment hết hạn bị từ chối gọi RPC (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000009'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-EXPIRED');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000009'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-EXPIRED');
+   $$,
+   'P0001',
+   'Permission Denied: Không có quyền tạo lượt xe vào tại bãi tương ứng.',
+@@ -1159,10 +1163,10 @@
+ );
+ 
+ -- Assertion 71: Assignment inactive bị từ chối gọi RPC (Fix M004-R2-02 exact message)
+-SELECT pg_temp.set_test_jwt('10000000-0000-0000-0000-000000000010'::uuid);
+-SELECT throws_ok(
+-  $$
+-    SELECT public.sc_create_vehicle_visit(pg_temp.get_uuid('yard_1'), 'CONT_LANH', '29C-INACTIVE');
++SELECT public.set_test_jwt_004('10000000-0000-0000-0000-000000000010'::uuid);
++SELECT throws_ok(
++  $$
++    SELECT public.sc_create_vehicle_visit(public.get_uuid_004('yard_1'), 'CONT_LANH', '29C-INACTIVE');
+   $$,
+   'P0001',
+   'Permission Denied: Không có quyền tạo lượt xe vào tại bãi tương ứng.',

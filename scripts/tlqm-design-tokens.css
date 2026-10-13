@@ -1,0 +1,42 @@
+/* TLQM Design System DS-01 | Light Mode only | 2026-10-11
+   Brand colors confirmed; functional UI colors proposed for this PWA. */
+:root {
+  color-scheme: light;
+  --brand-green: #0A9444;
+  --brand-navy: #223873;
+  --canvas: #F5F8FA;
+  --surface: #FFFFFF;
+  --surface-soft: #F0F5F2;
+  --text-primary: #1F2937;
+  --text-secondary: #475467;
+  --text-muted: #667085;
+  --border: #E3E8EF;
+  --action-primary: #087C3C;
+  --action-primary-hover: #076934;
+  --nav-active-bg: #EAF6EF;
+  --success: #067647;
+  --success-bg: #ECFDF3;
+  --warning: #9A4808;
+  --warning-bg: #FFFAEB;
+  --danger: #B42318;
+  --danger-bg: #FEF3F2;
+  --info: #1D4ED8;
+  --info-bg: #EFF6FF;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --touch-min: 44px;
+  --font-ui: "Be Vietnam Pro", Arial, sans-serif;
+}
+body { color: var(--text-primary); background: var(--canvas); font-family: var(--font-ui); }
+button, input, select, textarea { font: inherit; }
+button, [role="button"] { min-height: var(--touch-min); }
+:focus-visible { outline: 2px solid var(--brand-green); outline-offset: 3px; }
+@media (max-width: 767px) { input, select, textarea { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

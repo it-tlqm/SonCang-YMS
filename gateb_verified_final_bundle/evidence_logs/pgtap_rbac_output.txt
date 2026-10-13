@@ -1,0 +1,7 @@
+/thanhnx/OpenCode/YMS-project/supabase/tests/rbac_verification.sql .. ok
+All tests successful.
+Files=1, Tests=49,  0 wallclock secs ( 0.02 usr  0.00 sys +  0.00 cusr  0.01 csys =  0.03 CPU)
+Result: PASS
+
+Connecting to local database...
+psql:/thanhnx/OpenCode/YMS-project/supabase/tests/rbac_verification.sql:18: NOTICE:  extension "pgtap" already exists, skipping

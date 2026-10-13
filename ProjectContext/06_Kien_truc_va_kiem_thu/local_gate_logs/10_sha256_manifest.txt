@@ -1,0 +1,37 @@
+﻿
+
+Algorithm : SHA256
+Hash      : 837C9E7E42D029F07A6765B0361F04112D37060ADD0A26A9CA8D17F936D56621
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261011000001_foundation_rbac.sql
+
+Algorithm : SHA256
+Hash      : A6D6034AF895ED63BFC305A2CCC77B1A6ED3D45B8AFD6C24437E010DE8B4D406
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261011000002_seed_rbac_v5.sql
+
+Algorithm : SHA256
+Hash      : 63D9AABF685C6A2E607D5B424600832F5C8D94F55B4EE3AE531831F17DBA6742
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261011000003_rbac_security_functions_rls.sql
+
+Algorithm : SHA256
+Hash      : F364D0535C797ABEF9382E9F22BEF6A3B3AC5790381C013425A091856DAB20D0
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261011000004_domain_vehicles_containers.sql
+
+Algorithm : SHA256
+Hash      : 5B8AF585A18323C1A6FBF5877E4C2EAE612C7039C62518ACE53C612EDA3DA74C
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261012000005_gate_ticket_atomic_guard.sql
+
+Algorithm : SHA256
+Hash      : DF73E93806B66BD52B826539475192A7AA5AB035C35CE66BB384BCF6D9D14BC5
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261012000006_domain_reefer_power.sql
+
+Algorithm : SHA256
+Hash      : CFB7B844E24310BF41F13BFB76CB9825662D3DFE2CA3478C0779F7E3F31C131D
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261012000007_domain_financial_ledger.sql
+
+Algorithm : SHA256
+Hash      : 23344F6F06061C8E6B0F0FCA19CCD1A1112287FC18234BB00FCA4581E1C53102
+Path      : D:\thanhnx\OpenCode\YMS-project\supabase\migrations\20261012000008_domain_exit_clearance.sql
+
+
+
+

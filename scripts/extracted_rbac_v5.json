@@ -1,0 +1,3184 @@
+{
+  "19_V5_VAI_TRO": [
+    {
+      "A1": "V5 — DANH SÁCH VAI TRÒ (ROLE)"
+    },
+    {
+      "A2": "7 vai trò V1 đang hoạt động + Kế toán dự phòng. Không dùng chuỗi tên vai trò trong code để cho phép thao tác."
+    },
+    {
+      "A4": "ROLE_CODE",
+      "B4": "Tên hiển thị",
+      "C4": "Bộ phận",
+      "D4": "Cấp",
+      "E4": "Kích hoạt V1",
+      "F4": "Giai đoạn",
+      "G4": "Mô tả / phạm vi"
+    },
+    {
+      "A5": "SEC_STAFF",
+      "B5": "Nhân viên An ninh",
+      "C5": "AN_NINH",
+      "D5": "Nhân viên",
+      "E5": "Có",
+      "F5": "V1",
+      "G5": "Kiểm soát cổng, thu vé/phí lưu, ghi xe/cont ra, sửa mã cont có nhật ký."
+    },
+    {
+      "A6": "SEC_LEAD",
+      "B6": "Trưởng bộ phận An ninh",
+      "C6": "AN_NINH",
+      "D6": "Trưởng bộ phận",
+      "E6": "Có",
+      "F6": "V1",
+      "G6": "Toàn quyền nghiệp vụ An ninh, xem thu ca/bộ phận, xử lý ngoại lệ."
+    },
+    {
+      "A7": "PORT_STAFF",
+      "B7": "Nhân viên Cổng cảng kho bãi",
+      "C7": "CCKB",
+      "D7": "Nhân viên",
+      "E7": "Có",
+      "F7": "V1",
+      "G7": "Điện dự kiến, nhập/sửa giờ, thu điện, xác nhận tài chính/ngoại lệ có lý do."
+    },
+    {
+      "A8": "PORT_LEAD",
+      "B8": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C8": "CCKB",
+      "D8": "Trưởng bộ phận",
+      "E8": "Có",
+      "F8": "V1",
+      "G8": "Duyệt điều chỉnh tiền sau thu, xem đối soát, hỗ trợ nhân viên CCKB."
+    },
+    {
+      "A9": "DIS_STAFF",
+      "B9": "Nhân viên Điều phối",
+      "C9": "DIEU_PHOI",
+      "D9": "Nhân viên",
+      "E9": "Có",
+      "F9": "V1",
+      "G9": "Cập nhật tình trạng container HÀNG/RỖNG trong bãi."
+    },
+    {
+      "A10": "DIS_LEAD",
+      "B10": "Trưởng bộ phận Điều phối",
+      "C10": "DIEU_PHOI",
+      "D10": "Trưởng bộ phận",
+      "E10": "Có",
+      "F10": "V1",
+      "G10": "Xử lý thay đổi HÀNG/RỖNG sau khi cont đã ra; xem audit BP."
+    },
+    {
+      "A11": "SYS_ADMIN",
+      "B11": "Quản trị hệ thống",
+      "C11": "HE_THONG",
+      "D11": "Quản trị",
+      "E11": "Có",
+      "F11": "V1",
+      "G11": "Quản trị tài khoản, gán quyền, bảng giá, bảo trì và ngoại lệ có audit."
+    },
+    {
+      "A12": "ACCOUNTING_FUTURE",
+      "B12": "Kế toán (dự phòng)",
+      "C12": "KE_TOAN",
+      "D12": "Chuyên môn",
+      "E12": "Không",
+      "F12": "GĐ sau",
+      "G12": "Chưa bật trong V1; lưu thông tin hóa đơn, mở rộng khi có nghiệp vụ Kế toán."
+    }
+  ],
+  "20_V5_DANH_MUC_QUYEN": [
+    {
+      "A1": "V5 — DANH MỤC QUYỀN THAO TÁC"
+    },
+    {
+      "A2": "Mỗi quyền có mã cố định resource.action. Thêm role/đổi quyền không sửa code; chức năng hoàn toàn mới vẫn phải lập trình."
+    },
+    {
+      "A4": "PERMISSION_CODE",
+      "B4": "Phân hệ",
+      "C4": "Thao tác được kiểm soát",
+      "D4": "Mã câu nguồn",
+      "E4": "Giai đoạn",
+      "F4": "Cờ tính năng",
+      "G4": "Rủi ro",
+      "H4": "Quy tắc bắt buộc"
+    },
+    {
+      "A5": "vehicle.visit.read",
+      "B5": "Cổng xe",
+      "C5": "Xem lượt xe trong bãi",
+      "D5": "Q01,Q03,Q25",
+      "E5": "V1",
+      "F5": "CORE",
+      "G5": "Thông thường",
+      "H5": ""
+    },
+    {
+      "A6": "vehicle.visit.create",
+      "B6": "Cổng xe",
+      "C6": "Tạo lượt xe/giờ vào",
+      "D6": "Q01",
+      "E6": "V1",
+      "F6": "CORE",
+      "G6": "Thông thường",
+      "H6": ""
+    },
+    {
+      "A7": "vehicle.visit.update_basic",
+      "B7": "Cổng xe",
+      "C7": "Sửa thông tin cơ bản của lượt xe",
+      "D7": "Q03",
+      "E7": "V1",
+      "F7": "CORE",
+      "G7": "Nhạy cảm",
+      "H7": "Biển số/loại xe; audit trước/sau; không tự viết lại số tiền đã thu."
+    },
+    {
+      "A8": "vehicle.visit.time_correction.request",
+      "B8": "Cổng xe",
+      "C8": "Yêu cầu sửa giờ vào sau khi phát sinh tiền",
+      "D8": "Q03",
+      "E8": "V1",
+      "F8": "CORE",
+      "G8": "Nhạy cảm",
+      "H8": ""
+    },
+    {
+      "A9": "vehicle.visit.time_correction.approve",
+      "B9": "Cổng xe",
+      "C9": "Duyệt sửa giờ vào sau khi phát sinh tiền",
+      "D9": "Q03",
+      "E9": "V1",
+      "F9": "CORE",
+      "G9": "Cao",
+      "H9": "Không tự duyệt yêu cầu do mình tạo; tách điều chỉnh phí."
+    },
+    {
+      "A10": "ticket.payment.collect",
+      "B10": "Vé vào",
+      "C10": "Ghi nhận thu tiền vé xe vào",
+      "D10": "Q02",
+      "E10": "V1",
+      "F10": "CORE",
+      "G10": "Tài chính",
+      "H10": ""
+    },
+    {
+      "A11": "ticket.lost_fee.collect",
+      "B11": "Vé vào",
+      "C11": "Ghi nhận và thu phạt mất vé",
+      "D11": "Q20",
+      "E11": "V1",
+      "F11": "CORE",
+      "G11": "Tài chính",
+      "H11": ""
+    },
+    {
+      "A12": "ticket.paper_number.adjust",
+      "B12": "Vé vào",
+      "C12": "Chỉnh số seri vé giấy / in vé",
+      "D12": "Q04",
+      "E12": "GĐ sau",
+      "F12": "TICKET_AUTOPRINT",
+      "G12": "Thông thường",
+      "H12": "Chưa xây theo quyết định V1; vẫn lưu thông tin số vé nếu có."
+    },
+    {
+      "A13": "vehicle.visit.exit_confirm",
+      "B13": "Cổng ra",
+      "C13": "Xác nhận lượt xe thực tế ra",
+      "D13": "Q25",
+      "E13": "V1",
+      "F13": "CORE",
+      "G13": "Cao",
+      "H13": "Bắt buộc server xác thực và chặn bấm đúp; không xác nhận offline."
+    },
+    {
+      "A14": "container.visit.read",
+      "B14": "Container",
+      "C14": "Xem lượt container trong bãi",
+      "D14": "Q05,Q06,Q18",
+      "E14": "V1",
+      "F14": "CORE",
+      "G14": "Thông thường",
+      "H14": ""
+    },
+    {
+      "A15": "container.visit.create",
+      "B15": "Container",
+      "C15": "Tạo lượt container vào và giờ vào",
+      "D15": "Q05",
+      "E15": "V1",
+      "F15": "CORE",
+      "G15": "Thông thường",
+      "H15": ""
+    },
+    {
+      "A16": "container.number.correct",
+      "B16": "Container",
+      "C16": "Sửa số container trên cùng ID lượt",
+      "D16": "Q06,Q35",
+      "E16": "V1",
+      "F16": "CORE",
+      "G16": "Cao",
+      "H16": "Ghi số cũ/mới, lý do, người sửa; tự cảnh báo CCKB; giữ nguyên charge/payment và ID."
+    },
+    {
+      "A17": "container.number.discrepancy.view",
+      "B17": "Container",
+      "C17": "Xem cảnh báo sai số container",
+      "D17": "Q35,Q36,Q39",
+      "E17": "V1",
+      "F17": "CORE",
+      "G17": "Thông thường",
+      "H17": ""
+    },
+    {
+      "A18": "container.number.discrepancy.sec_ack",
+      "B18": "Container",
+      "C18": "An ninh xác nhận đã báo CCKB",
+      "D18": "Q35,Q39",
+      "E18": "V1",
+      "F18": "CORE",
+      "G18": "Thông thường",
+      "H18": ""
+    },
+    {
+      "A19": "container.number.discrepancy.port_reconcile",
+      "B19": "Container",
+      "C19": "CCKB đối chiếu sai số và đóng cảnh báo",
+      "D19": "Q36,Q38,Q39",
+      "E19": "V1",
+      "F19": "CORE",
+      "G19": "Nhạy cảm",
+      "H19": ""
+    },
+    {
+      "A20": "container.number.evidence.attach",
+      "B20": "Chứng từ",
+      "C20": "Đính kèm ảnh/video xác minh số cont",
+      "D20": "Q37",
+      "E20": "V1",
+      "F20": "CORE",
+      "G20": "Thông thường",
+      "H20": ""
+    },
+    {
+      "A21": "container.visit.link_request",
+      "B21": "Container",
+      "C21": "Ghép yêu cầu dự kiến vào lượt cont vào",
+      "D21": "Q34",
+      "E21": "V1",
+      "F21": "CORE",
+      "G21": "Nhạy cảm",
+      "H21": "Chỉ xác nhận thủ công, không auto-ghép từ mã gần giống."
+    },
+    {
+      "A22": "container.cargo.read",
+      "B22": "Điều phối",
+      "C22": "Xem HÀNG/RỖNG",
+      "D22": "Q08,Q09",
+      "E22": "V1",
+      "F22": "CORE",
+      "G22": "Thông thường",
+      "H22": ""
+    },
+    {
+      "A23": "container.cargo.update",
+      "B23": "Điều phối",
+      "C23": "Cập nhật HÀNG/RỖNG khi còn trong bãi",
+      "D23": "Q08",
+      "E23": "V1",
+      "F23": "CORE",
+      "G23": "Thông thường",
+      "H23": ""
+    },
+    {
+      "A24": "container.cargo.post_exit.request",
+      "B24": "Điều phối",
+      "C24": "Đề nghị sửa HÀNG/RỖNG sau ra",
+      "D24": "Q09",
+      "E24": "V1",
+      "F24": "CORE",
+      "G24": "Nhạy cảm",
+      "H24": ""
+    },
+    {
+      "A25": "container.cargo.post_exit.approve",
+      "B25": "Điều phối",
+      "C25": "Duyệt sửa HÀNG/RỖNG sau ra",
+      "D25": "Q09",
+      "E25": "V1",
+      "F25": "CORE",
+      "G25": "Cao",
+      "H25": ""
+    },
+    {
+      "A26": "container.handling.record",
+      "B26": "Container",
+      "C26": "Ghi nhận hạ/xếp, vị trí khu/dãy/ô",
+      "D26": "Q07",
+      "E26": "GĐ sau",
+      "F26": "YARD_SLOT_MANAGEMENT",
+      "G26": "Thông thường",
+      "H26": "Không dùng sự kiện hạ/xếp làm căn cứ thu phí lưu container."
+    },
+    {
+      "A27": "reefer.request.read",
+      "B27": "Điện dự kiến",
+      "C27": "Xem yêu cầu điện dự kiến / đang xử lý",
+      "D27": "Q10,Q31,Q33",
+      "E27": "V1",
+      "F27": "CORE",
+      "G27": "Thông thường",
+      "H27": ""
+    },
+    {
+      "A28": "reefer.request.create",
+      "B28": "Điện dự kiến",
+      "C28": "Tạo phiếu yêu cầu cắm/rút (kể cả cont chưa vào)",
+      "D28": "Q10,Q31",
+      "E28": "V1",
+      "F28": "CORE",
+      "G28": "Thông thường",
+      "H28": "Một phiếu/cont, nhiều phiên; không tạo GIO_CONT_VAO khi phiếu là dự kiến."
+    },
+    {
+      "A29": "reefer.request.update",
+      "B29": "Điện dự kiến",
+      "C29": "Sửa thông tin yêu cầu dự kiến",
+      "D29": "Q32,Q36",
+      "E29": "V1",
+      "F29": "CORE",
+      "G29": "Thông thường",
+      "H29": "Sửa số cont/khách/loại yêu cầu có lịch sử và báo An ninh."
+    },
+    {
+      "A30": "reefer.request.cancel",
+      "B30": "Điện dự kiến",
+      "C30": "Hủy phiếu điện chưa thực hiện",
+      "D30": "Q32",
+      "E30": "V1",
+      "F30": "CORE",
+      "G30": "Nhạy cảm",
+      "H30": "Hủy mềm có lịch sử; không xóa phiếu đã phát sinh điện."
+    },
+    {
+      "A31": "reefer.request.alert.view",
+      "B31": "Điện dự kiến",
+      "C31": "Xem cảnh báo yêu cầu điện khi xe vào",
+      "D31": "Q33",
+      "E31": "V1",
+      "F31": "CORE",
+      "G31": "Thông thường",
+      "H31": ""
+    },
+    {
+      "A32": "reefer.request.match_confirm",
+      "B32": "Điện dự kiến",
+      "C32": "Xác nhận ghép phiếu dự kiến với cont thực",
+      "D32": "Q34",
+      "E32": "V1",
+      "F32": "CORE",
+      "G32": "Nhạy cảm",
+      "H32": ""
+    },
+    {
+      "A33": "reefer.field_work.note",
+      "B33": "Cắm điện",
+      "C33": "Ghi nhận thông tin An ninh báo cắm/rút ngoài hiện trường",
+      "D33": "Q11",
+      "E33": "V1",
+      "F33": "CORE",
+      "G33": "Thông thường",
+      "H33": "Quyền ghi chú/bằng chứng; KHÔNG biến việc bấm nút thành điều kiện bắt buộc để cắm/rút thực tế."
+    },
+    {
+      "A34": "reefer.session.read",
+      "B34": "Cắm điện",
+      "C34": "Xem phiên điện/trạng thái",
+      "D34": "Q12,Q13",
+      "E34": "V1",
+      "F34": "CORE",
+      "G34": "Thông thường",
+      "H34": ""
+    },
+    {
+      "A35": "reefer.session.actual_start.record",
+      "B35": "Cắm điện",
+      "C35": "CCKB nhập giờ cắm thực tế",
+      "D35": "Q12",
+      "E35": "V1",
+      "F35": "CORE",
+      "G35": "Thông thường",
+      "H35": ""
+    },
+    {
+      "A36": "reefer.session.actual_end.record",
+      "B36": "Cắm điện",
+      "C36": "CCKB nhập giờ rút thực tế",
+      "D36": "Q13",
+      "E36": "V1",
+      "F36": "CORE",
+      "G36": "Thông thường",
+      "H36": ""
+    },
+    {
+      "A37": "reefer.session.time.edit_unpaid",
+      "B37": "Cắm điện",
+      "C37": "CCKB sửa giờ cắm/rút trước khi thu",
+      "D37": "Q14",
+      "E37": "V1",
+      "F37": "CORE",
+      "G37": "Nhạy cảm",
+      "H37": ""
+    },
+    {
+      "A38": "reefer.session.billable.override_unpaid",
+      "B38": "Cắm điện",
+      "C38": "Chỉnh thời lượng tính tiền trước khi thu",
+      "D38": "Q14",
+      "E38": "V1",
+      "F38": "CORE",
+      "G38": "Tài chính",
+      "H38": "Tự làm tròn 15 phút mặc định; nếu chỉnh thì lưu số tính tự động, số điều chỉnh và lý do."
+    },
+    {
+      "A39": "reefer.session.amendment.request",
+      "B39": "Cắm điện",
+      "C39": "Đề nghị điều chỉnh giờ/tiền sau thu",
+      "D39": "Q15",
+      "E39": "V1",
+      "F39": "CORE",
+      "G39": "Tài chính",
+      "H39": ""
+    },
+    {
+      "A40": "reefer.session.amendment.approve",
+      "B40": "Cắm điện",
+      "C40": "Duyệt chênh lệch sau thu điện",
+      "D40": "Q16",
+      "E40": "V1",
+      "F40": "CORE",
+      "G40": "Cao",
+      "H40": "Tài khoản duyệt phải khác người đề nghị; không ghi đè tiền đã thu."
+    },
+    {
+      "A41": "reefer.payment.collect",
+      "B41": "Thanh toán",
+      "C41": "Thu tiền điện từng phiên hoặc tổng hợp",
+      "D41": "Q19",
+      "E41": "V1",
+      "F41": "CORE",
+      "G41": "Tài chính",
+      "H41": ""
+    },
+    {
+      "A42": "reefer.payment.partial_collect",
+      "B42": "Thanh toán",
+      "C42": "Thu một phần phí điện",
+      "D42": "Q19",
+      "E42": "V1",
+      "F42": "CORE",
+      "G42": "Tài chính",
+      "H42": ""
+    },
+    {
+      "A43": "storage.payment.collect",
+      "B43": "Thanh toán",
+      "C43": "An ninh tính/thu phí lưu tại giờ cont ra",
+      "D43": "Q18",
+      "E43": "V1",
+      "F43": "CORE",
+      "G43": "Tài chính",
+      "H43": "Chốt dựa GIO_CONT_VAO và GIO_CONT_RA thực tế, không khóa phí lúc rút điện."
+    },
+    {
+      "A44": "payment.bank_evidence.attach",
+      "B44": "Thanh toán",
+      "C44": "Đính kèm ảnh chứng từ thanh toán",
+      "D44": "Q02,Q19,Q21",
+      "E44": "V1",
+      "F44": "CORE",
+      "G44": "Thông thường",
+      "H44": "Quy định bắt buộc chứng từ có thể cấu hình riêng theo hình thức thu."
+    },
+    {
+      "A45": "payment.bank.reconcile",
+      "B45": "Thanh toán",
+      "C45": "Đối soát chuyển khoản theo bộ phận",
+      "D45": "Q21",
+      "E45": "V1",
+      "F45": "CORE",
+      "G45": "Tài chính",
+      "H45": ""
+    },
+    {
+      "A46": "payment.post_correction.request",
+      "B46": "Thanh toán",
+      "C46": "Yêu cầu xử lý chênh lệch khi sửa mã cont đã thu",
+      "D46": "Q38",
+      "E46": "V1",
+      "F46": "CORE",
+      "G46": "Tài chính",
+      "H46": ""
+    },
+    {
+      "A47": "payment.post_correction.approve",
+      "B47": "Thanh toán",
+      "C47": "Duyệt chênh lệch tiền do sửa số cont",
+      "D47": "Q38",
+      "E47": "V1",
+      "F47": "CORE",
+      "G47": "Cao",
+      "H47": ""
+    },
+    {
+      "A48": "charge.adjust.request",
+      "B48": "Thanh toán",
+      "C48": "Gửi đề nghị miễn/giảm/điều chỉnh tiền",
+      "D48": "Q22",
+      "E48": "GĐ sau",
+      "F48": "CHARGE_DISCOUNT",
+      "G48": "Tài chính",
+      "H48": ""
+    },
+    {
+      "A49": "charge.adjust.approve",
+      "B49": "Thanh toán",
+      "C49": "Duyệt miễn/giảm/điều chỉnh tiền",
+      "D49": "Q22",
+      "E49": "GĐ sau",
+      "F49": "CHARGE_DISCOUNT",
+      "G49": "Cao",
+      "H49": ""
+    },
+    {
+      "A50": "payment.refund.request",
+      "B50": "Thanh toán",
+      "C50": "Đề nghị hoàn tiền",
+      "D50": "Q23",
+      "E50": "GĐ sau",
+      "F50": "REFUNDS",
+      "G50": "Tài chính",
+      "H50": ""
+    },
+    {
+      "A51": "payment.refund.approve",
+      "B51": "Thanh toán",
+      "C51": "Duyệt hoàn tiền / hủy bút toán",
+      "D51": "Q23",
+      "E51": "GĐ sau",
+      "F51": "REFUNDS",
+      "G51": "Cao",
+      "H51": ""
+    },
+    {
+      "A52": "exit.clearance.read",
+      "B52": "Cổng ra",
+      "C52": "Xem tình trạng tài chính và cho ra",
+      "D52": "Q24,Q25",
+      "E52": "V1",
+      "F52": "CORE",
+      "G52": "Thông thường",
+      "H52": ""
+    },
+    {
+      "A53": "exit.clearance.issue",
+      "B53": "Cổng ra",
+      "C53": "CCKB xác nhận điều kiện tài chính",
+      "D53": "Q24",
+      "E53": "V1",
+      "F53": "CORE",
+      "G53": "Cao",
+      "H53": "Xác nhận điện/công nợ đã biết; KHÔNG khóa phí lưu container."
+    },
+    {
+      "A54": "exit.clearance.debt_exception",
+      "B54": "Cổng ra",
+      "C54": "CCKB xác nhận cho ra còn khoản chưa thu",
+      "D54": "Q24",
+      "E54": "V1",
+      "F54": "CORE",
+      "G54": "Cao",
+      "H54": "Bắt buộc lý do, hiện cảnh báo và giữ khoản còn nợ; phải kiểm tra lại nếu phí lưu mới phát sinh."
+    },
+    {
+      "A55": "exit.clearance.revoke.request",
+      "B55": "Cổng ra",
+      "C55": "Đề nghị thu hồi chấp thuận xuất trước khi xe ra",
+      "D55": "Q26",
+      "E55": "V1",
+      "F55": "CORE",
+      "G55": "Nhạy cảm",
+      "H55": ""
+    },
+    {
+      "A56": "exit.clearance.revoke.approve",
+      "B56": "Cổng ra",
+      "C56": "Thu hồi chấp thuận cho ra trước khi thực xuất",
+      "D56": "Q26",
+      "E56": "V1",
+      "F56": "CORE",
+      "G56": "Cao",
+      "H56": ""
+    },
+    {
+      "A57": "exit.actual.confirm",
+      "B57": "Cổng ra",
+      "C57": "An ninh xác nhận cont/xe ra thật",
+      "D57": "Q25",
+      "E57": "V1",
+      "F57": "CORE",
+      "G57": "Cao",
+      "H57": "Server transaction và idempotency; không được tự hoàn tất nếu offline."
+    },
+    {
+      "A58": "exit.reefer_state.exception",
+      "B58": "Cổng ra",
+      "C58": "CCKB ghi ngoại lệ trạng thái điện chưa cập nhật",
+      "D58": "Q24",
+      "E58": "V1",
+      "F58": "CORE",
+      "G58": "Cao",
+      "H58": "Phải có An ninh xác minh ngoài hiện trường đã rút điện, không được cho cont rời bãi khi còn kết nối điện thực tế."
+    },
+    {
+      "A59": "report.revenue.read",
+      "B59": "Báo cáo",
+      "C59": "Xem doanh thu và khoản thu theo phạm vi",
+      "D59": "Q29",
+      "E59": "V1",
+      "F59": "CORE",
+      "G59": "Tài chính",
+      "H59": ""
+    },
+    {
+      "A60": "report.revenue.export",
+      "B60": "Báo cáo",
+      "C60": "Xuất báo cáo doanh thu theo bộ phận",
+      "D60": "Q30",
+      "E60": "V1",
+      "F60": "CORE",
+      "G60": "Tài chính",
+      "H60": ""
+    },
+    {
+      "A61": "audit.read",
+      "B61": "Giám sát",
+      "C61": "Xem lịch sử thao tác thuộc phạm vi",
+      "D61": "Q28",
+      "E61": "V1",
+      "F61": "CORE",
+      "G61": "Thông thường",
+      "H61": ""
+    },
+    {
+      "A62": "audit.export_all",
+      "B62": "Giám sát",
+      "C62": "Xuất nhật ký kiểm toán toàn hệ thống",
+      "D62": "Q30",
+      "E62": "V1",
+      "F62": "CORE",
+      "G62": "Cao",
+      "H62": ""
+    },
+    {
+      "A63": "tariff.read",
+      "B63": "Bảng giá",
+      "C63": "Xem giá dịch vụ theo hiệu lực",
+      "D63": "Q17",
+      "E63": "V1",
+      "F63": "CORE",
+      "G63": "Thông thường",
+      "H63": ""
+    },
+    {
+      "A64": "tariff.change.request",
+      "B64": "Bảng giá",
+      "C64": "Gửi đề nghị thay đổi bảng giá",
+      "D64": "Q17",
+      "E64": "V1",
+      "F64": "CORE",
+      "G64": "Tài chính",
+      "H64": ""
+    },
+    {
+      "A65": "tariff.change.publish",
+      "B65": "Bảng giá",
+      "C65": "Ban hành mức giá và ngày hiệu lực",
+      "D65": "Q17",
+      "E65": "V1",
+      "F65": "CORE",
+      "G65": "Cao",
+      "H65": "Thay đổi giá qua bảng tariff_versions, không sửa code/giá lịch sử."
+    },
+    {
+      "A66": "admin.users.manage",
+      "B66": "Quản trị",
+      "C66": "Tạo/khóa user và gán role theo phạm vi",
+      "D66": "Q27",
+      "E66": "V1",
+      "F66": "CORE",
+      "G66": "Cao",
+      "H66": ""
+    },
+    {
+      "A67": "admin.roles.manage",
+      "B67": "Quản trị",
+      "C67": "Thêm/sửa tên vai trò và thành phần vai trò",
+      "D67": "Q27",
+      "E67": "V1",
+      "F67": "CORE",
+      "G67": "Cao",
+      "H67": "Vai trò tùy biến nhưng không thể tạo tính năng mới chỉ bằng cách đặt role."
+    },
+    {
+      "A68": "admin.role_permissions.manage",
+      "B68": "Quản trị",
+      "C68": "Cấp/thu hồi quyền của vai trò",
+      "D68": "Q27",
+      "E68": "V1",
+      "F68": "CORE",
+      "G68": "Cao",
+      "H68": "Cấm tự động cho quyền cao hơn do seed chủ sở hữu quy định; audit và quyền bootstrap."
+    },
+    {
+      "A69": "admin.billing_settings.manage",
+      "B69": "Quản trị",
+      "C69": "Quản lý tham số tính phí và chức năng mở rộng",
+      "D69": "Q17",
+      "E69": "V1",
+      "F69": "CORE",
+      "G69": "Cao",
+      "H69": ""
+    },
+    {
+      "A70": "admin.legacy_correct",
+      "B70": "Quản trị",
+      "C70": "Sửa dữ liệu nhập lịch sử AppSheet có audit",
+      "D70": "Q03,Q06",
+      "E70": "V1",
+      "F70": "CORE",
+      "G70": "Cao",
+      "H70": "Không chỉnh sửa trực tiếp DB; phải ghi đối chiếu lịch sử và không tạo nợ legacy chưa xác minh."
+    },
+    {
+      "A71": "accounting.invoice.prepare",
+      "B71": "Hóa đơn",
+      "C71": "Nhập dữ liệu hóa đơn từ bộ phận Kế toán",
+      "D71": "",
+      "E71": "GĐ sau",
+      "F71": "E_INVOICE",
+      "G71": "Nhạy cảm",
+      "H71": ""
+    }
+  ],
+  "21_V5_CAP_QUYEN_SEED": [
+    {
+      "A1": "V5 — GÁN QUYỀN THEO VAI TRÒ (SEED)"
+    },
+    {
+      "A2": "Dữ liệu mẫu triển khai role_permissions. Scope: SELF = khoản mình làm, DEPARTMENT = bộ phận, YARD = bãi, ALL = toàn hệ thống."
+    },
+    {
+      "A4": "ROLE_CODE",
+      "B4": "Tên vai trò",
+      "C4": "PERMISSION_CODE",
+      "D4": "SCOPE",
+      "E4": "Đang cấp",
+      "F4": "Độ nhạy",
+      "G4": "Mã tham chiếu",
+      "H4": "Điều kiện hệ thống"
+    },
+    {
+      "A5": "SEC_STAFF",
+      "B5": "Nhân viên An ninh",
+      "C5": "vehicle.visit.read",
+      "D5": "YARD",
+      "E5": "Có",
+      "F5": "Thông thường",
+      "G5": "Q01,Q03,Q25",
+      "H5": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A6": "SEC_LEAD",
+      "B6": "Trưởng bộ phận An ninh",
+      "C6": "vehicle.visit.read",
+      "D6": "YARD",
+      "E6": "Có",
+      "F6": "Thông thường",
+      "G6": "Q01,Q03,Q25",
+      "H6": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A7": "PORT_STAFF",
+      "B7": "Nhân viên Cổng cảng kho bãi",
+      "C7": "vehicle.visit.read",
+      "D7": "YARD",
+      "E7": "Có",
+      "F7": "Thông thường",
+      "G7": "Q01,Q03,Q25",
+      "H7": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A8": "PORT_LEAD",
+      "B8": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C8": "vehicle.visit.read",
+      "D8": "YARD",
+      "E8": "Có",
+      "F8": "Thông thường",
+      "G8": "Q01,Q03,Q25",
+      "H8": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A9": "DIS_STAFF",
+      "B9": "Nhân viên Điều phối",
+      "C9": "vehicle.visit.read",
+      "D9": "YARD",
+      "E9": "Có",
+      "F9": "Thông thường",
+      "G9": "Q01,Q03,Q25",
+      "H9": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A10": "DIS_LEAD",
+      "B10": "Trưởng bộ phận Điều phối",
+      "C10": "vehicle.visit.read",
+      "D10": "YARD",
+      "E10": "Có",
+      "F10": "Thông thường",
+      "G10": "Q01,Q03,Q25",
+      "H10": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A11": "SYS_ADMIN",
+      "B11": "Quản trị hệ thống",
+      "C11": "vehicle.visit.read",
+      "D11": "ALL",
+      "E11": "Có",
+      "F11": "Thông thường",
+      "G11": "Q01,Q03,Q25",
+      "H11": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A12": "SEC_STAFF",
+      "B12": "Nhân viên An ninh",
+      "C12": "vehicle.visit.create",
+      "D12": "YARD",
+      "E12": "Có",
+      "F12": "Thông thường",
+      "G12": "Q01",
+      "H12": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A13": "SEC_LEAD",
+      "B13": "Trưởng bộ phận An ninh",
+      "C13": "vehicle.visit.create",
+      "D13": "YARD",
+      "E13": "Có",
+      "F13": "Thông thường",
+      "G13": "Q01",
+      "H13": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A14": "SYS_ADMIN",
+      "B14": "Quản trị hệ thống",
+      "C14": "vehicle.visit.create",
+      "D14": "ALL",
+      "E14": "Có",
+      "F14": "Thông thường",
+      "G14": "Q01",
+      "H14": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A15": "SEC_STAFF",
+      "B15": "Nhân viên An ninh",
+      "C15": "vehicle.visit.update_basic",
+      "D15": "YARD",
+      "E15": "Có",
+      "F15": "Nhạy cảm",
+      "G15": "Q03",
+      "H15": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A16": "SEC_LEAD",
+      "B16": "Trưởng bộ phận An ninh",
+      "C16": "vehicle.visit.update_basic",
+      "D16": "YARD",
+      "E16": "Có",
+      "F16": "Nhạy cảm",
+      "G16": "Q03",
+      "H16": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A17": "SYS_ADMIN",
+      "B17": "Quản trị hệ thống",
+      "C17": "vehicle.visit.update_basic",
+      "D17": "ALL",
+      "E17": "Có",
+      "F17": "Nhạy cảm",
+      "G17": "Q03",
+      "H17": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A18": "SEC_STAFF",
+      "B18": "Nhân viên An ninh",
+      "C18": "vehicle.visit.time_correction.request",
+      "D18": "YARD",
+      "E18": "Có",
+      "F18": "Nhạy cảm",
+      "G18": "Q03",
+      "H18": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A19": "SEC_LEAD",
+      "B19": "Trưởng bộ phận An ninh",
+      "C19": "vehicle.visit.time_correction.request",
+      "D19": "YARD",
+      "E19": "Có",
+      "F19": "Nhạy cảm",
+      "G19": "Q03",
+      "H19": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A20": "SYS_ADMIN",
+      "B20": "Quản trị hệ thống",
+      "C20": "vehicle.visit.time_correction.request",
+      "D20": "ALL",
+      "E20": "Có",
+      "F20": "Nhạy cảm",
+      "G20": "Q03",
+      "H20": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A21": "SEC_LEAD",
+      "B21": "Trưởng bộ phận An ninh",
+      "C21": "vehicle.visit.time_correction.approve",
+      "D21": "DEPARTMENT",
+      "E21": "Có",
+      "F21": "Cao",
+      "G21": "Q03",
+      "H21": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A22": "SYS_ADMIN",
+      "B22": "Quản trị hệ thống",
+      "C22": "vehicle.visit.time_correction.approve",
+      "D22": "ALL",
+      "E22": "Có",
+      "F22": "Cao",
+      "G22": "Q03",
+      "H22": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A23": "SEC_STAFF",
+      "B23": "Nhân viên An ninh",
+      "C23": "ticket.payment.collect",
+      "D23": "YARD",
+      "E23": "Có",
+      "F23": "Tài chính",
+      "G23": "Q02",
+      "H23": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A24": "SEC_LEAD",
+      "B24": "Trưởng bộ phận An ninh",
+      "C24": "ticket.payment.collect",
+      "D24": "YARD",
+      "E24": "Có",
+      "F24": "Tài chính",
+      "G24": "Q02",
+      "H24": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A25": "SYS_ADMIN",
+      "B25": "Quản trị hệ thống",
+      "C25": "ticket.payment.collect",
+      "D25": "ALL",
+      "E25": "Có",
+      "F25": "Tài chính",
+      "G25": "Q02",
+      "H25": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A26": "SEC_STAFF",
+      "B26": "Nhân viên An ninh",
+      "C26": "ticket.lost_fee.collect",
+      "D26": "YARD",
+      "E26": "Có",
+      "F26": "Tài chính",
+      "G26": "Q20",
+      "H26": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A27": "SEC_LEAD",
+      "B27": "Trưởng bộ phận An ninh",
+      "C27": "ticket.lost_fee.collect",
+      "D27": "YARD",
+      "E27": "Có",
+      "F27": "Tài chính",
+      "G27": "Q20",
+      "H27": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A28": "SYS_ADMIN",
+      "B28": "Quản trị hệ thống",
+      "C28": "ticket.lost_fee.collect",
+      "D28": "ALL",
+      "E28": "Có",
+      "F28": "Tài chính",
+      "G28": "Q20",
+      "H28": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A29": "SEC_STAFF",
+      "B29": "Nhân viên An ninh",
+      "C29": "vehicle.visit.exit_confirm",
+      "D29": "YARD",
+      "E29": "Có",
+      "F29": "Cao",
+      "G29": "Q25",
+      "H29": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A30": "SEC_LEAD",
+      "B30": "Trưởng bộ phận An ninh",
+      "C30": "vehicle.visit.exit_confirm",
+      "D30": "YARD",
+      "E30": "Có",
+      "F30": "Cao",
+      "G30": "Q25",
+      "H30": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A31": "SYS_ADMIN",
+      "B31": "Quản trị hệ thống",
+      "C31": "vehicle.visit.exit_confirm",
+      "D31": "ALL",
+      "E31": "Có",
+      "F31": "Cao",
+      "G31": "Q25",
+      "H31": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A32": "SEC_STAFF",
+      "B32": "Nhân viên An ninh",
+      "C32": "container.visit.read",
+      "D32": "YARD",
+      "E32": "Có",
+      "F32": "Thông thường",
+      "G32": "Q05,Q06,Q18",
+      "H32": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A33": "SEC_LEAD",
+      "B33": "Trưởng bộ phận An ninh",
+      "C33": "container.visit.read",
+      "D33": "YARD",
+      "E33": "Có",
+      "F33": "Thông thường",
+      "G33": "Q05,Q06,Q18",
+      "H33": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A34": "PORT_STAFF",
+      "B34": "Nhân viên Cổng cảng kho bãi",
+      "C34": "container.visit.read",
+      "D34": "YARD",
+      "E34": "Có",
+      "F34": "Thông thường",
+      "G34": "Q05,Q06,Q18",
+      "H34": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A35": "PORT_LEAD",
+      "B35": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C35": "container.visit.read",
+      "D35": "YARD",
+      "E35": "Có",
+      "F35": "Thông thường",
+      "G35": "Q05,Q06,Q18",
+      "H35": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A36": "DIS_STAFF",
+      "B36": "Nhân viên Điều phối",
+      "C36": "container.visit.read",
+      "D36": "YARD",
+      "E36": "Có",
+      "F36": "Thông thường",
+      "G36": "Q05,Q06,Q18",
+      "H36": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A37": "DIS_LEAD",
+      "B37": "Trưởng bộ phận Điều phối",
+      "C37": "container.visit.read",
+      "D37": "YARD",
+      "E37": "Có",
+      "F37": "Thông thường",
+      "G37": "Q05,Q06,Q18",
+      "H37": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A38": "SYS_ADMIN",
+      "B38": "Quản trị hệ thống",
+      "C38": "container.visit.read",
+      "D38": "ALL",
+      "E38": "Có",
+      "F38": "Thông thường",
+      "G38": "Q05,Q06,Q18",
+      "H38": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A39": "SEC_STAFF",
+      "B39": "Nhân viên An ninh",
+      "C39": "container.visit.create",
+      "D39": "YARD",
+      "E39": "Có",
+      "F39": "Thông thường",
+      "G39": "Q05",
+      "H39": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A40": "SEC_LEAD",
+      "B40": "Trưởng bộ phận An ninh",
+      "C40": "container.visit.create",
+      "D40": "YARD",
+      "E40": "Có",
+      "F40": "Thông thường",
+      "G40": "Q05",
+      "H40": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A41": "SYS_ADMIN",
+      "B41": "Quản trị hệ thống",
+      "C41": "container.visit.create",
+      "D41": "ALL",
+      "E41": "Có",
+      "F41": "Thông thường",
+      "G41": "Q05",
+      "H41": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A42": "SEC_STAFF",
+      "B42": "Nhân viên An ninh",
+      "C42": "container.number.correct",
+      "D42": "YARD",
+      "E42": "Có",
+      "F42": "Cao",
+      "G42": "Q06,Q35",
+      "H42": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A43": "SEC_LEAD",
+      "B43": "Trưởng bộ phận An ninh",
+      "C43": "container.number.correct",
+      "D43": "YARD",
+      "E43": "Có",
+      "F43": "Cao",
+      "G43": "Q06,Q35",
+      "H43": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A44": "SYS_ADMIN",
+      "B44": "Quản trị hệ thống",
+      "C44": "container.number.correct",
+      "D44": "ALL",
+      "E44": "Có",
+      "F44": "Cao",
+      "G44": "Q06,Q35",
+      "H44": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A45": "SEC_STAFF",
+      "B45": "Nhân viên An ninh",
+      "C45": "container.number.discrepancy.view",
+      "D45": "YARD",
+      "E45": "Có",
+      "F45": "Thông thường",
+      "G45": "Q35,Q36,Q39",
+      "H45": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A46": "SEC_LEAD",
+      "B46": "Trưởng bộ phận An ninh",
+      "C46": "container.number.discrepancy.view",
+      "D46": "YARD",
+      "E46": "Có",
+      "F46": "Thông thường",
+      "G46": "Q35,Q36,Q39",
+      "H46": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A47": "PORT_STAFF",
+      "B47": "Nhân viên Cổng cảng kho bãi",
+      "C47": "container.number.discrepancy.view",
+      "D47": "YARD",
+      "E47": "Có",
+      "F47": "Thông thường",
+      "G47": "Q35,Q36,Q39",
+      "H47": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A48": "PORT_LEAD",
+      "B48": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C48": "container.number.discrepancy.view",
+      "D48": "YARD",
+      "E48": "Có",
+      "F48": "Thông thường",
+      "G48": "Q35,Q36,Q39",
+      "H48": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A49": "SYS_ADMIN",
+      "B49": "Quản trị hệ thống",
+      "C49": "container.number.discrepancy.view",
+      "D49": "ALL",
+      "E49": "Có",
+      "F49": "Thông thường",
+      "G49": "Q35,Q36,Q39",
+      "H49": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A50": "SEC_STAFF",
+      "B50": "Nhân viên An ninh",
+      "C50": "container.number.discrepancy.sec_ack",
+      "D50": "YARD",
+      "E50": "Có",
+      "F50": "Thông thường",
+      "G50": "Q35,Q39",
+      "H50": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A51": "SEC_LEAD",
+      "B51": "Trưởng bộ phận An ninh",
+      "C51": "container.number.discrepancy.sec_ack",
+      "D51": "YARD",
+      "E51": "Có",
+      "F51": "Thông thường",
+      "G51": "Q35,Q39",
+      "H51": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A52": "SYS_ADMIN",
+      "B52": "Quản trị hệ thống",
+      "C52": "container.number.discrepancy.sec_ack",
+      "D52": "ALL",
+      "E52": "Có",
+      "F52": "Thông thường",
+      "G52": "Q35,Q39",
+      "H52": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A53": "PORT_STAFF",
+      "B53": "Nhân viên Cổng cảng kho bãi",
+      "C53": "container.number.discrepancy.port_reconcile",
+      "D53": "YARD",
+      "E53": "Có",
+      "F53": "Nhạy cảm",
+      "G53": "Q36,Q38,Q39",
+      "H53": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A54": "PORT_LEAD",
+      "B54": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C54": "container.number.discrepancy.port_reconcile",
+      "D54": "YARD",
+      "E54": "Có",
+      "F54": "Nhạy cảm",
+      "G54": "Q36,Q38,Q39",
+      "H54": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A55": "SYS_ADMIN",
+      "B55": "Quản trị hệ thống",
+      "C55": "container.number.discrepancy.port_reconcile",
+      "D55": "ALL",
+      "E55": "Có",
+      "F55": "Nhạy cảm",
+      "G55": "Q36,Q38,Q39",
+      "H55": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A56": "SEC_STAFF",
+      "B56": "Nhân viên An ninh",
+      "C56": "container.number.evidence.attach",
+      "D56": "YARD",
+      "E56": "Có",
+      "F56": "Thông thường",
+      "G56": "Q37",
+      "H56": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A57": "SEC_LEAD",
+      "B57": "Trưởng bộ phận An ninh",
+      "C57": "container.number.evidence.attach",
+      "D57": "YARD",
+      "E57": "Có",
+      "F57": "Thông thường",
+      "G57": "Q37",
+      "H57": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A58": "PORT_STAFF",
+      "B58": "Nhân viên Cổng cảng kho bãi",
+      "C58": "container.number.evidence.attach",
+      "D58": "YARD",
+      "E58": "Có",
+      "F58": "Thông thường",
+      "G58": "Q37",
+      "H58": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A59": "PORT_LEAD",
+      "B59": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C59": "container.number.evidence.attach",
+      "D59": "YARD",
+      "E59": "Có",
+      "F59": "Thông thường",
+      "G59": "Q37",
+      "H59": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A60": "SYS_ADMIN",
+      "B60": "Quản trị hệ thống",
+      "C60": "container.number.evidence.attach",
+      "D60": "ALL",
+      "E60": "Có",
+      "F60": "Thông thường",
+      "G60": "Q37",
+      "H60": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A61": "SEC_STAFF",
+      "B61": "Nhân viên An ninh",
+      "C61": "container.visit.link_request",
+      "D61": "YARD",
+      "E61": "Có",
+      "F61": "Nhạy cảm",
+      "G61": "Q34",
+      "H61": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A62": "SEC_LEAD",
+      "B62": "Trưởng bộ phận An ninh",
+      "C62": "container.visit.link_request",
+      "D62": "YARD",
+      "E62": "Có",
+      "F62": "Nhạy cảm",
+      "G62": "Q34",
+      "H62": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A63": "PORT_STAFF",
+      "B63": "Nhân viên Cổng cảng kho bãi",
+      "C63": "container.visit.link_request",
+      "D63": "YARD",
+      "E63": "Có",
+      "F63": "Nhạy cảm",
+      "G63": "Q34",
+      "H63": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A64": "PORT_LEAD",
+      "B64": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C64": "container.visit.link_request",
+      "D64": "YARD",
+      "E64": "Có",
+      "F64": "Nhạy cảm",
+      "G64": "Q34",
+      "H64": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A65": "SYS_ADMIN",
+      "B65": "Quản trị hệ thống",
+      "C65": "container.visit.link_request",
+      "D65": "ALL",
+      "E65": "Có",
+      "F65": "Nhạy cảm",
+      "G65": "Q34",
+      "H65": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A66": "SEC_STAFF",
+      "B66": "Nhân viên An ninh",
+      "C66": "container.cargo.read",
+      "D66": "YARD",
+      "E66": "Có",
+      "F66": "Thông thường",
+      "G66": "Q08,Q09",
+      "H66": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A67": "SEC_LEAD",
+      "B67": "Trưởng bộ phận An ninh",
+      "C67": "container.cargo.read",
+      "D67": "YARD",
+      "E67": "Có",
+      "F67": "Thông thường",
+      "G67": "Q08,Q09",
+      "H67": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A68": "PORT_STAFF",
+      "B68": "Nhân viên Cổng cảng kho bãi",
+      "C68": "container.cargo.read",
+      "D68": "YARD",
+      "E68": "Có",
+      "F68": "Thông thường",
+      "G68": "Q08,Q09",
+      "H68": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A69": "PORT_LEAD",
+      "B69": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C69": "container.cargo.read",
+      "D69": "YARD",
+      "E69": "Có",
+      "F69": "Thông thường",
+      "G69": "Q08,Q09",
+      "H69": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A70": "DIS_STAFF",
+      "B70": "Nhân viên Điều phối",
+      "C70": "container.cargo.read",
+      "D70": "YARD",
+      "E70": "Có",
+      "F70": "Thông thường",
+      "G70": "Q08,Q09",
+      "H70": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A71": "DIS_LEAD",
+      "B71": "Trưởng bộ phận Điều phối",
+      "C71": "container.cargo.read",
+      "D71": "YARD",
+      "E71": "Có",
+      "F71": "Thông thường",
+      "G71": "Q08,Q09",
+      "H71": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A72": "SYS_ADMIN",
+      "B72": "Quản trị hệ thống",
+      "C72": "container.cargo.read",
+      "D72": "ALL",
+      "E72": "Có",
+      "F72": "Thông thường",
+      "G72": "Q08,Q09",
+      "H72": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A73": "DIS_STAFF",
+      "B73": "Nhân viên Điều phối",
+      "C73": "container.cargo.update",
+      "D73": "YARD",
+      "E73": "Có",
+      "F73": "Thông thường",
+      "G73": "Q08",
+      "H73": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A74": "DIS_LEAD",
+      "B74": "Trưởng bộ phận Điều phối",
+      "C74": "container.cargo.update",
+      "D74": "YARD",
+      "E74": "Có",
+      "F74": "Thông thường",
+      "G74": "Q08",
+      "H74": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A75": "SYS_ADMIN",
+      "B75": "Quản trị hệ thống",
+      "C75": "container.cargo.update",
+      "D75": "ALL",
+      "E75": "Có",
+      "F75": "Thông thường",
+      "G75": "Q08",
+      "H75": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A76": "DIS_STAFF",
+      "B76": "Nhân viên Điều phối",
+      "C76": "container.cargo.post_exit.request",
+      "D76": "YARD",
+      "E76": "Có",
+      "F76": "Nhạy cảm",
+      "G76": "Q09",
+      "H76": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A77": "DIS_LEAD",
+      "B77": "Trưởng bộ phận Điều phối",
+      "C77": "container.cargo.post_exit.request",
+      "D77": "YARD",
+      "E77": "Có",
+      "F77": "Nhạy cảm",
+      "G77": "Q09",
+      "H77": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A78": "SYS_ADMIN",
+      "B78": "Quản trị hệ thống",
+      "C78": "container.cargo.post_exit.request",
+      "D78": "ALL",
+      "E78": "Có",
+      "F78": "Nhạy cảm",
+      "G78": "Q09",
+      "H78": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A79": "DIS_LEAD",
+      "B79": "Trưởng bộ phận Điều phối",
+      "C79": "container.cargo.post_exit.approve",
+      "D79": "DEPARTMENT",
+      "E79": "Có",
+      "F79": "Cao",
+      "G79": "Q09",
+      "H79": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A80": "SYS_ADMIN",
+      "B80": "Quản trị hệ thống",
+      "C80": "container.cargo.post_exit.approve",
+      "D80": "ALL",
+      "E80": "Có",
+      "F80": "Cao",
+      "G80": "Q09",
+      "H80": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A81": "SEC_STAFF",
+      "B81": "Nhân viên An ninh",
+      "C81": "reefer.request.read",
+      "D81": "YARD",
+      "E81": "Có",
+      "F81": "Thông thường",
+      "G81": "Q10,Q31,Q33",
+      "H81": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A82": "SEC_LEAD",
+      "B82": "Trưởng bộ phận An ninh",
+      "C82": "reefer.request.read",
+      "D82": "YARD",
+      "E82": "Có",
+      "F82": "Thông thường",
+      "G82": "Q10,Q31,Q33",
+      "H82": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A83": "PORT_STAFF",
+      "B83": "Nhân viên Cổng cảng kho bãi",
+      "C83": "reefer.request.read",
+      "D83": "YARD",
+      "E83": "Có",
+      "F83": "Thông thường",
+      "G83": "Q10,Q31,Q33",
+      "H83": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A84": "PORT_LEAD",
+      "B84": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C84": "reefer.request.read",
+      "D84": "YARD",
+      "E84": "Có",
+      "F84": "Thông thường",
+      "G84": "Q10,Q31,Q33",
+      "H84": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A85": "DIS_STAFF",
+      "B85": "Nhân viên Điều phối",
+      "C85": "reefer.request.read",
+      "D85": "YARD",
+      "E85": "Có",
+      "F85": "Thông thường",
+      "G85": "Q10,Q31,Q33",
+      "H85": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A86": "DIS_LEAD",
+      "B86": "Trưởng bộ phận Điều phối",
+      "C86": "reefer.request.read",
+      "D86": "YARD",
+      "E86": "Có",
+      "F86": "Thông thường",
+      "G86": "Q10,Q31,Q33",
+      "H86": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A87": "SYS_ADMIN",
+      "B87": "Quản trị hệ thống",
+      "C87": "reefer.request.read",
+      "D87": "ALL",
+      "E87": "Có",
+      "F87": "Thông thường",
+      "G87": "Q10,Q31,Q33",
+      "H87": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A88": "PORT_STAFF",
+      "B88": "Nhân viên Cổng cảng kho bãi",
+      "C88": "reefer.request.create",
+      "D88": "YARD",
+      "E88": "Có",
+      "F88": "Thông thường",
+      "G88": "Q10,Q31",
+      "H88": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A89": "PORT_LEAD",
+      "B89": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C89": "reefer.request.create",
+      "D89": "YARD",
+      "E89": "Có",
+      "F89": "Thông thường",
+      "G89": "Q10,Q31",
+      "H89": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A90": "SYS_ADMIN",
+      "B90": "Quản trị hệ thống",
+      "C90": "reefer.request.create",
+      "D90": "ALL",
+      "E90": "Có",
+      "F90": "Thông thường",
+      "G90": "Q10,Q31",
+      "H90": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A91": "PORT_STAFF",
+      "B91": "Nhân viên Cổng cảng kho bãi",
+      "C91": "reefer.request.update",
+      "D91": "YARD",
+      "E91": "Có",
+      "F91": "Thông thường",
+      "G91": "Q32,Q36",
+      "H91": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A92": "PORT_LEAD",
+      "B92": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C92": "reefer.request.update",
+      "D92": "YARD",
+      "E92": "Có",
+      "F92": "Thông thường",
+      "G92": "Q32,Q36",
+      "H92": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A93": "SYS_ADMIN",
+      "B93": "Quản trị hệ thống",
+      "C93": "reefer.request.update",
+      "D93": "ALL",
+      "E93": "Có",
+      "F93": "Thông thường",
+      "G93": "Q32,Q36",
+      "H93": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A94": "PORT_STAFF",
+      "B94": "Nhân viên Cổng cảng kho bãi",
+      "C94": "reefer.request.cancel",
+      "D94": "YARD",
+      "E94": "Có",
+      "F94": "Nhạy cảm",
+      "G94": "Q32",
+      "H94": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A95": "PORT_LEAD",
+      "B95": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C95": "reefer.request.cancel",
+      "D95": "YARD",
+      "E95": "Có",
+      "F95": "Nhạy cảm",
+      "G95": "Q32",
+      "H95": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A96": "SYS_ADMIN",
+      "B96": "Quản trị hệ thống",
+      "C96": "reefer.request.cancel",
+      "D96": "ALL",
+      "E96": "Có",
+      "F96": "Nhạy cảm",
+      "G96": "Q32",
+      "H96": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A97": "SEC_STAFF",
+      "B97": "Nhân viên An ninh",
+      "C97": "reefer.request.alert.view",
+      "D97": "YARD",
+      "E97": "Có",
+      "F97": "Thông thường",
+      "G97": "Q33",
+      "H97": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A98": "SEC_LEAD",
+      "B98": "Trưởng bộ phận An ninh",
+      "C98": "reefer.request.alert.view",
+      "D98": "YARD",
+      "E98": "Có",
+      "F98": "Thông thường",
+      "G98": "Q33",
+      "H98": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A99": "PORT_STAFF",
+      "B99": "Nhân viên Cổng cảng kho bãi",
+      "C99": "reefer.request.alert.view",
+      "D99": "YARD",
+      "E99": "Có",
+      "F99": "Thông thường",
+      "G99": "Q33",
+      "H99": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A100": "PORT_LEAD",
+      "B100": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C100": "reefer.request.alert.view",
+      "D100": "YARD",
+      "E100": "Có",
+      "F100": "Thông thường",
+      "G100": "Q33",
+      "H100": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A101": "SYS_ADMIN",
+      "B101": "Quản trị hệ thống",
+      "C101": "reefer.request.alert.view",
+      "D101": "ALL",
+      "E101": "Có",
+      "F101": "Thông thường",
+      "G101": "Q33",
+      "H101": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A102": "SEC_STAFF",
+      "B102": "Nhân viên An ninh",
+      "C102": "reefer.request.match_confirm",
+      "D102": "YARD",
+      "E102": "Có",
+      "F102": "Nhạy cảm",
+      "G102": "Q34",
+      "H102": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A103": "SEC_LEAD",
+      "B103": "Trưởng bộ phận An ninh",
+      "C103": "reefer.request.match_confirm",
+      "D103": "YARD",
+      "E103": "Có",
+      "F103": "Nhạy cảm",
+      "G103": "Q34",
+      "H103": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A104": "PORT_STAFF",
+      "B104": "Nhân viên Cổng cảng kho bãi",
+      "C104": "reefer.request.match_confirm",
+      "D104": "YARD",
+      "E104": "Có",
+      "F104": "Nhạy cảm",
+      "G104": "Q34",
+      "H104": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A105": "PORT_LEAD",
+      "B105": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C105": "reefer.request.match_confirm",
+      "D105": "YARD",
+      "E105": "Có",
+      "F105": "Nhạy cảm",
+      "G105": "Q34",
+      "H105": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A106": "SYS_ADMIN",
+      "B106": "Quản trị hệ thống",
+      "C106": "reefer.request.match_confirm",
+      "D106": "ALL",
+      "E106": "Có",
+      "F106": "Nhạy cảm",
+      "G106": "Q34",
+      "H106": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A107": "SEC_STAFF",
+      "B107": "Nhân viên An ninh",
+      "C107": "reefer.field_work.note",
+      "D107": "YARD",
+      "E107": "Có",
+      "F107": "Thông thường",
+      "G107": "Q11",
+      "H107": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A108": "SEC_LEAD",
+      "B108": "Trưởng bộ phận An ninh",
+      "C108": "reefer.field_work.note",
+      "D108": "YARD",
+      "E108": "Có",
+      "F108": "Thông thường",
+      "G108": "Q11",
+      "H108": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A109": "PORT_STAFF",
+      "B109": "Nhân viên Cổng cảng kho bãi",
+      "C109": "reefer.field_work.note",
+      "D109": "YARD",
+      "E109": "Có",
+      "F109": "Thông thường",
+      "G109": "Q11",
+      "H109": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A110": "PORT_LEAD",
+      "B110": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C110": "reefer.field_work.note",
+      "D110": "YARD",
+      "E110": "Có",
+      "F110": "Thông thường",
+      "G110": "Q11",
+      "H110": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A111": "SYS_ADMIN",
+      "B111": "Quản trị hệ thống",
+      "C111": "reefer.field_work.note",
+      "D111": "ALL",
+      "E111": "Có",
+      "F111": "Thông thường",
+      "G111": "Q11",
+      "H111": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A112": "SEC_STAFF",
+      "B112": "Nhân viên An ninh",
+      "C112": "reefer.session.read",
+      "D112": "YARD",
+      "E112": "Có",
+      "F112": "Thông thường",
+      "G112": "Q12,Q13",
+      "H112": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A113": "SEC_LEAD",
+      "B113": "Trưởng bộ phận An ninh",
+      "C113": "reefer.session.read",
+      "D113": "YARD",
+      "E113": "Có",
+      "F113": "Thông thường",
+      "G113": "Q12,Q13",
+      "H113": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A114": "PORT_STAFF",
+      "B114": "Nhân viên Cổng cảng kho bãi",
+      "C114": "reefer.session.read",
+      "D114": "YARD",
+      "E114": "Có",
+      "F114": "Thông thường",
+      "G114": "Q12,Q13",
+      "H114": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A115": "PORT_LEAD",
+      "B115": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C115": "reefer.session.read",
+      "D115": "YARD",
+      "E115": "Có",
+      "F115": "Thông thường",
+      "G115": "Q12,Q13",
+      "H115": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A116": "DIS_STAFF",
+      "B116": "Nhân viên Điều phối",
+      "C116": "reefer.session.read",
+      "D116": "YARD",
+      "E116": "Có",
+      "F116": "Thông thường",
+      "G116": "Q12,Q13",
+      "H116": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A117": "DIS_LEAD",
+      "B117": "Trưởng bộ phận Điều phối",
+      "C117": "reefer.session.read",
+      "D117": "YARD",
+      "E117": "Có",
+      "F117": "Thông thường",
+      "G117": "Q12,Q13",
+      "H117": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A118": "SYS_ADMIN",
+      "B118": "Quản trị hệ thống",
+      "C118": "reefer.session.read",
+      "D118": "ALL",
+      "E118": "Có",
+      "F118": "Thông thường",
+      "G118": "Q12,Q13",
+      "H118": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A119": "PORT_STAFF",
+      "B119": "Nhân viên Cổng cảng kho bãi",
+      "C119": "reefer.session.actual_start.record",
+      "D119": "YARD",
+      "E119": "Có",
+      "F119": "Thông thường",
+      "G119": "Q12",
+      "H119": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A120": "PORT_LEAD",
+      "B120": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C120": "reefer.session.actual_start.record",
+      "D120": "YARD",
+      "E120": "Có",
+      "F120": "Thông thường",
+      "G120": "Q12",
+      "H120": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A121": "SYS_ADMIN",
+      "B121": "Quản trị hệ thống",
+      "C121": "reefer.session.actual_start.record",
+      "D121": "ALL",
+      "E121": "Có",
+      "F121": "Thông thường",
+      "G121": "Q12",
+      "H121": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A122": "PORT_STAFF",
+      "B122": "Nhân viên Cổng cảng kho bãi",
+      "C122": "reefer.session.actual_end.record",
+      "D122": "YARD",
+      "E122": "Có",
+      "F122": "Thông thường",
+      "G122": "Q13",
+      "H122": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A123": "PORT_LEAD",
+      "B123": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C123": "reefer.session.actual_end.record",
+      "D123": "YARD",
+      "E123": "Có",
+      "F123": "Thông thường",
+      "G123": "Q13",
+      "H123": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A124": "SYS_ADMIN",
+      "B124": "Quản trị hệ thống",
+      "C124": "reefer.session.actual_end.record",
+      "D124": "ALL",
+      "E124": "Có",
+      "F124": "Thông thường",
+      "G124": "Q13",
+      "H124": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A125": "PORT_STAFF",
+      "B125": "Nhân viên Cổng cảng kho bãi",
+      "C125": "reefer.session.time.edit_unpaid",
+      "D125": "YARD",
+      "E125": "Có",
+      "F125": "Nhạy cảm",
+      "G125": "Q14",
+      "H125": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A126": "PORT_LEAD",
+      "B126": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C126": "reefer.session.time.edit_unpaid",
+      "D126": "YARD",
+      "E126": "Có",
+      "F126": "Nhạy cảm",
+      "G126": "Q14",
+      "H126": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A127": "SYS_ADMIN",
+      "B127": "Quản trị hệ thống",
+      "C127": "reefer.session.time.edit_unpaid",
+      "D127": "ALL",
+      "E127": "Có",
+      "F127": "Nhạy cảm",
+      "G127": "Q14",
+      "H127": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A128": "PORT_STAFF",
+      "B128": "Nhân viên Cổng cảng kho bãi",
+      "C128": "reefer.session.billable.override_unpaid",
+      "D128": "YARD",
+      "E128": "Có",
+      "F128": "Tài chính",
+      "G128": "Q14",
+      "H128": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A129": "PORT_LEAD",
+      "B129": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C129": "reefer.session.billable.override_unpaid",
+      "D129": "YARD",
+      "E129": "Có",
+      "F129": "Tài chính",
+      "G129": "Q14",
+      "H129": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A130": "SYS_ADMIN",
+      "B130": "Quản trị hệ thống",
+      "C130": "reefer.session.billable.override_unpaid",
+      "D130": "ALL",
+      "E130": "Có",
+      "F130": "Tài chính",
+      "G130": "Q14",
+      "H130": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A131": "PORT_STAFF",
+      "B131": "Nhân viên Cổng cảng kho bãi",
+      "C131": "reefer.session.amendment.request",
+      "D131": "YARD",
+      "E131": "Có",
+      "F131": "Tài chính",
+      "G131": "Q15",
+      "H131": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A132": "PORT_LEAD",
+      "B132": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C132": "reefer.session.amendment.request",
+      "D132": "YARD",
+      "E132": "Có",
+      "F132": "Tài chính",
+      "G132": "Q15",
+      "H132": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A133": "SYS_ADMIN",
+      "B133": "Quản trị hệ thống",
+      "C133": "reefer.session.amendment.request",
+      "D133": "ALL",
+      "E133": "Có",
+      "F133": "Tài chính",
+      "G133": "Q15",
+      "H133": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A134": "PORT_LEAD",
+      "B134": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C134": "reefer.session.amendment.approve",
+      "D134": "DEPARTMENT",
+      "E134": "Có",
+      "F134": "Cao",
+      "G134": "Q16",
+      "H134": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A135": "SYS_ADMIN",
+      "B135": "Quản trị hệ thống",
+      "C135": "reefer.session.amendment.approve",
+      "D135": "ALL",
+      "E135": "Có",
+      "F135": "Cao",
+      "G135": "Q16",
+      "H135": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A136": "PORT_STAFF",
+      "B136": "Nhân viên Cổng cảng kho bãi",
+      "C136": "reefer.payment.collect",
+      "D136": "YARD",
+      "E136": "Có",
+      "F136": "Tài chính",
+      "G136": "Q19",
+      "H136": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A137": "PORT_LEAD",
+      "B137": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C137": "reefer.payment.collect",
+      "D137": "YARD",
+      "E137": "Có",
+      "F137": "Tài chính",
+      "G137": "Q19",
+      "H137": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A138": "SYS_ADMIN",
+      "B138": "Quản trị hệ thống",
+      "C138": "reefer.payment.collect",
+      "D138": "ALL",
+      "E138": "Có",
+      "F138": "Tài chính",
+      "G138": "Q19",
+      "H138": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A139": "PORT_STAFF",
+      "B139": "Nhân viên Cổng cảng kho bãi",
+      "C139": "reefer.payment.partial_collect",
+      "D139": "YARD",
+      "E139": "Có",
+      "F139": "Tài chính",
+      "G139": "Q19",
+      "H139": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A140": "PORT_LEAD",
+      "B140": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C140": "reefer.payment.partial_collect",
+      "D140": "YARD",
+      "E140": "Có",
+      "F140": "Tài chính",
+      "G140": "Q19",
+      "H140": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A141": "SYS_ADMIN",
+      "B141": "Quản trị hệ thống",
+      "C141": "reefer.payment.partial_collect",
+      "D141": "ALL",
+      "E141": "Có",
+      "F141": "Tài chính",
+      "G141": "Q19",
+      "H141": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A142": "SEC_STAFF",
+      "B142": "Nhân viên An ninh",
+      "C142": "storage.payment.collect",
+      "D142": "YARD",
+      "E142": "Có",
+      "F142": "Tài chính",
+      "G142": "Q18",
+      "H142": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A143": "SEC_LEAD",
+      "B143": "Trưởng bộ phận An ninh",
+      "C143": "storage.payment.collect",
+      "D143": "YARD",
+      "E143": "Có",
+      "F143": "Tài chính",
+      "G143": "Q18",
+      "H143": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A144": "SYS_ADMIN",
+      "B144": "Quản trị hệ thống",
+      "C144": "storage.payment.collect",
+      "D144": "ALL",
+      "E144": "Có",
+      "F144": "Tài chính",
+      "G144": "Q18",
+      "H144": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A145": "SEC_STAFF",
+      "B145": "Nhân viên An ninh",
+      "C145": "payment.bank_evidence.attach",
+      "D145": "YARD",
+      "E145": "Có",
+      "F145": "Thông thường",
+      "G145": "Q02,Q19,Q21",
+      "H145": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A146": "SEC_LEAD",
+      "B146": "Trưởng bộ phận An ninh",
+      "C146": "payment.bank_evidence.attach",
+      "D146": "YARD",
+      "E146": "Có",
+      "F146": "Thông thường",
+      "G146": "Q02,Q19,Q21",
+      "H146": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A147": "PORT_STAFF",
+      "B147": "Nhân viên Cổng cảng kho bãi",
+      "C147": "payment.bank_evidence.attach",
+      "D147": "YARD",
+      "E147": "Có",
+      "F147": "Thông thường",
+      "G147": "Q02,Q19,Q21",
+      "H147": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A148": "PORT_LEAD",
+      "B148": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C148": "payment.bank_evidence.attach",
+      "D148": "YARD",
+      "E148": "Có",
+      "F148": "Thông thường",
+      "G148": "Q02,Q19,Q21",
+      "H148": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A149": "SYS_ADMIN",
+      "B149": "Quản trị hệ thống",
+      "C149": "payment.bank_evidence.attach",
+      "D149": "ALL",
+      "E149": "Có",
+      "F149": "Thông thường",
+      "G149": "Q02,Q19,Q21",
+      "H149": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A150": "SEC_LEAD",
+      "B150": "Trưởng bộ phận An ninh",
+      "C150": "payment.bank.reconcile",
+      "D150": "DEPARTMENT",
+      "E150": "Có",
+      "F150": "Tài chính",
+      "G150": "Q21",
+      "H150": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A151": "PORT_LEAD",
+      "B151": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C151": "payment.bank.reconcile",
+      "D151": "DEPARTMENT",
+      "E151": "Có",
+      "F151": "Tài chính",
+      "G151": "Q21",
+      "H151": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A152": "SYS_ADMIN",
+      "B152": "Quản trị hệ thống",
+      "C152": "payment.bank.reconcile",
+      "D152": "ALL",
+      "E152": "Có",
+      "F152": "Tài chính",
+      "G152": "Q21",
+      "H152": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A153": "PORT_STAFF",
+      "B153": "Nhân viên Cổng cảng kho bãi",
+      "C153": "payment.post_correction.request",
+      "D153": "YARD",
+      "E153": "Có",
+      "F153": "Tài chính",
+      "G153": "Q38",
+      "H153": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A154": "PORT_LEAD",
+      "B154": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C154": "payment.post_correction.request",
+      "D154": "YARD",
+      "E154": "Có",
+      "F154": "Tài chính",
+      "G154": "Q38",
+      "H154": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A155": "SEC_LEAD",
+      "B155": "Trưởng bộ phận An ninh",
+      "C155": "payment.post_correction.request",
+      "D155": "YARD",
+      "E155": "Có",
+      "F155": "Tài chính",
+      "G155": "Q38",
+      "H155": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A156": "SYS_ADMIN",
+      "B156": "Quản trị hệ thống",
+      "C156": "payment.post_correction.request",
+      "D156": "ALL",
+      "E156": "Có",
+      "F156": "Tài chính",
+      "G156": "Q38",
+      "H156": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A157": "PORT_LEAD",
+      "B157": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C157": "payment.post_correction.approve",
+      "D157": "DEPARTMENT",
+      "E157": "Có",
+      "F157": "Cao",
+      "G157": "Q38",
+      "H157": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A158": "SYS_ADMIN",
+      "B158": "Quản trị hệ thống",
+      "C158": "payment.post_correction.approve",
+      "D158": "ALL",
+      "E158": "Có",
+      "F158": "Cao",
+      "G158": "Q38",
+      "H158": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A159": "SEC_STAFF",
+      "B159": "Nhân viên An ninh",
+      "C159": "exit.clearance.read",
+      "D159": "YARD",
+      "E159": "Có",
+      "F159": "Thông thường",
+      "G159": "Q24,Q25",
+      "H159": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A160": "SEC_LEAD",
+      "B160": "Trưởng bộ phận An ninh",
+      "C160": "exit.clearance.read",
+      "D160": "YARD",
+      "E160": "Có",
+      "F160": "Thông thường",
+      "G160": "Q24,Q25",
+      "H160": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A161": "PORT_STAFF",
+      "B161": "Nhân viên Cổng cảng kho bãi",
+      "C161": "exit.clearance.read",
+      "D161": "YARD",
+      "E161": "Có",
+      "F161": "Thông thường",
+      "G161": "Q24,Q25",
+      "H161": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A162": "PORT_LEAD",
+      "B162": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C162": "exit.clearance.read",
+      "D162": "YARD",
+      "E162": "Có",
+      "F162": "Thông thường",
+      "G162": "Q24,Q25",
+      "H162": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A163": "DIS_STAFF",
+      "B163": "Nhân viên Điều phối",
+      "C163": "exit.clearance.read",
+      "D163": "YARD",
+      "E163": "Có",
+      "F163": "Thông thường",
+      "G163": "Q24,Q25",
+      "H163": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A164": "DIS_LEAD",
+      "B164": "Trưởng bộ phận Điều phối",
+      "C164": "exit.clearance.read",
+      "D164": "YARD",
+      "E164": "Có",
+      "F164": "Thông thường",
+      "G164": "Q24,Q25",
+      "H164": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A165": "SYS_ADMIN",
+      "B165": "Quản trị hệ thống",
+      "C165": "exit.clearance.read",
+      "D165": "ALL",
+      "E165": "Có",
+      "F165": "Thông thường",
+      "G165": "Q24,Q25",
+      "H165": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A166": "PORT_STAFF",
+      "B166": "Nhân viên Cổng cảng kho bãi",
+      "C166": "exit.clearance.issue",
+      "D166": "YARD",
+      "E166": "Có",
+      "F166": "Cao",
+      "G166": "Q24",
+      "H166": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A167": "PORT_LEAD",
+      "B167": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C167": "exit.clearance.issue",
+      "D167": "YARD",
+      "E167": "Có",
+      "F167": "Cao",
+      "G167": "Q24",
+      "H167": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A168": "SYS_ADMIN",
+      "B168": "Quản trị hệ thống",
+      "C168": "exit.clearance.issue",
+      "D168": "ALL",
+      "E168": "Có",
+      "F168": "Cao",
+      "G168": "Q24",
+      "H168": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A169": "PORT_STAFF",
+      "B169": "Nhân viên Cổng cảng kho bãi",
+      "C169": "exit.clearance.debt_exception",
+      "D169": "YARD",
+      "E169": "Có",
+      "F169": "Cao",
+      "G169": "Q24",
+      "H169": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A170": "PORT_LEAD",
+      "B170": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C170": "exit.clearance.debt_exception",
+      "D170": "YARD",
+      "E170": "Có",
+      "F170": "Cao",
+      "G170": "Q24",
+      "H170": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A171": "SYS_ADMIN",
+      "B171": "Quản trị hệ thống",
+      "C171": "exit.clearance.debt_exception",
+      "D171": "ALL",
+      "E171": "Có",
+      "F171": "Cao",
+      "G171": "Q24",
+      "H171": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A172": "PORT_STAFF",
+      "B172": "Nhân viên Cổng cảng kho bãi",
+      "C172": "exit.clearance.revoke.request",
+      "D172": "YARD",
+      "E172": "Có",
+      "F172": "Nhạy cảm",
+      "G172": "Q26",
+      "H172": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A173": "PORT_LEAD",
+      "B173": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C173": "exit.clearance.revoke.request",
+      "D173": "YARD",
+      "E173": "Có",
+      "F173": "Nhạy cảm",
+      "G173": "Q26",
+      "H173": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A174": "SYS_ADMIN",
+      "B174": "Quản trị hệ thống",
+      "C174": "exit.clearance.revoke.request",
+      "D174": "ALL",
+      "E174": "Có",
+      "F174": "Nhạy cảm",
+      "G174": "Q26",
+      "H174": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A175": "PORT_LEAD",
+      "B175": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C175": "exit.clearance.revoke.approve",
+      "D175": "DEPARTMENT",
+      "E175": "Có",
+      "F175": "Cao",
+      "G175": "Q26",
+      "H175": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A176": "SYS_ADMIN",
+      "B176": "Quản trị hệ thống",
+      "C176": "exit.clearance.revoke.approve",
+      "D176": "ALL",
+      "E176": "Có",
+      "F176": "Cao",
+      "G176": "Q26",
+      "H176": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A177": "SEC_STAFF",
+      "B177": "Nhân viên An ninh",
+      "C177": "exit.actual.confirm",
+      "D177": "YARD",
+      "E177": "Có",
+      "F177": "Cao",
+      "G177": "Q25",
+      "H177": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A178": "SEC_LEAD",
+      "B178": "Trưởng bộ phận An ninh",
+      "C178": "exit.actual.confirm",
+      "D178": "YARD",
+      "E178": "Có",
+      "F178": "Cao",
+      "G178": "Q25",
+      "H178": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A179": "SYS_ADMIN",
+      "B179": "Quản trị hệ thống",
+      "C179": "exit.actual.confirm",
+      "D179": "ALL",
+      "E179": "Có",
+      "F179": "Cao",
+      "G179": "Q25",
+      "H179": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A180": "PORT_STAFF",
+      "B180": "Nhân viên Cổng cảng kho bãi",
+      "C180": "exit.reefer_state.exception",
+      "D180": "YARD",
+      "E180": "Có",
+      "F180": "Cao",
+      "G180": "Q24",
+      "H180": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A181": "PORT_LEAD",
+      "B181": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C181": "exit.reefer_state.exception",
+      "D181": "YARD",
+      "E181": "Có",
+      "F181": "Cao",
+      "G181": "Q24",
+      "H181": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A182": "SYS_ADMIN",
+      "B182": "Quản trị hệ thống",
+      "C182": "exit.reefer_state.exception",
+      "D182": "ALL",
+      "E182": "Có",
+      "F182": "Cao",
+      "G182": "Q24",
+      "H182": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A183": "SEC_STAFF",
+      "B183": "Nhân viên An ninh",
+      "C183": "report.revenue.read",
+      "D183": "SELF",
+      "E183": "Có",
+      "F183": "Tài chính",
+      "G183": "Q29",
+      "H183": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A184": "SEC_LEAD",
+      "B184": "Trưởng bộ phận An ninh",
+      "C184": "report.revenue.read",
+      "D184": "DEPARTMENT",
+      "E184": "Có",
+      "F184": "Tài chính",
+      "G184": "Q29",
+      "H184": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A185": "PORT_STAFF",
+      "B185": "Nhân viên Cổng cảng kho bãi",
+      "C185": "report.revenue.read",
+      "D185": "SELF",
+      "E185": "Có",
+      "F185": "Tài chính",
+      "G185": "Q29",
+      "H185": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A186": "PORT_LEAD",
+      "B186": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C186": "report.revenue.read",
+      "D186": "DEPARTMENT",
+      "E186": "Có",
+      "F186": "Tài chính",
+      "G186": "Q29",
+      "H186": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A187": "SYS_ADMIN",
+      "B187": "Quản trị hệ thống",
+      "C187": "report.revenue.read",
+      "D187": "ALL",
+      "E187": "Có",
+      "F187": "Tài chính",
+      "G187": "Q29",
+      "H187": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A188": "SEC_LEAD",
+      "B188": "Trưởng bộ phận An ninh",
+      "C188": "report.revenue.export",
+      "D188": "DEPARTMENT",
+      "E188": "Có",
+      "F188": "Tài chính",
+      "G188": "Q30",
+      "H188": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A189": "PORT_LEAD",
+      "B189": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C189": "report.revenue.export",
+      "D189": "DEPARTMENT",
+      "E189": "Có",
+      "F189": "Tài chính",
+      "G189": "Q30",
+      "H189": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A190": "SYS_ADMIN",
+      "B190": "Quản trị hệ thống",
+      "C190": "report.revenue.export",
+      "D190": "ALL",
+      "E190": "Có",
+      "F190": "Tài chính",
+      "G190": "Q30",
+      "H190": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A191": "SEC_LEAD",
+      "B191": "Trưởng bộ phận An ninh",
+      "C191": "audit.read",
+      "D191": "DEPARTMENT",
+      "E191": "Có",
+      "F191": "Thông thường",
+      "G191": "Q28",
+      "H191": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A192": "PORT_LEAD",
+      "B192": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C192": "audit.read",
+      "D192": "DEPARTMENT",
+      "E192": "Có",
+      "F192": "Thông thường",
+      "G192": "Q28",
+      "H192": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A193": "DIS_LEAD",
+      "B193": "Trưởng bộ phận Điều phối",
+      "C193": "audit.read",
+      "D193": "DEPARTMENT",
+      "E193": "Có",
+      "F193": "Thông thường",
+      "G193": "Q28",
+      "H193": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A194": "SYS_ADMIN",
+      "B194": "Quản trị hệ thống",
+      "C194": "audit.read",
+      "D194": "ALL",
+      "E194": "Có",
+      "F194": "Thông thường",
+      "G194": "Q28",
+      "H194": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A195": "SYS_ADMIN",
+      "B195": "Quản trị hệ thống",
+      "C195": "audit.export_all",
+      "D195": "ALL",
+      "E195": "Có",
+      "F195": "Cao",
+      "G195": "Q30",
+      "H195": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A196": "SEC_STAFF",
+      "B196": "Nhân viên An ninh",
+      "C196": "tariff.read",
+      "D196": "YARD",
+      "E196": "Có",
+      "F196": "Thông thường",
+      "G196": "Q17",
+      "H196": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A197": "SEC_LEAD",
+      "B197": "Trưởng bộ phận An ninh",
+      "C197": "tariff.read",
+      "D197": "YARD",
+      "E197": "Có",
+      "F197": "Thông thường",
+      "G197": "Q17",
+      "H197": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A198": "PORT_STAFF",
+      "B198": "Nhân viên Cổng cảng kho bãi",
+      "C198": "tariff.read",
+      "D198": "YARD",
+      "E198": "Có",
+      "F198": "Thông thường",
+      "G198": "Q17",
+      "H198": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A199": "PORT_LEAD",
+      "B199": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C199": "tariff.read",
+      "D199": "YARD",
+      "E199": "Có",
+      "F199": "Thông thường",
+      "G199": "Q17",
+      "H199": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A200": "DIS_STAFF",
+      "B200": "Nhân viên Điều phối",
+      "C200": "tariff.read",
+      "D200": "YARD",
+      "E200": "Có",
+      "F200": "Thông thường",
+      "G200": "Q17",
+      "H200": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A201": "DIS_LEAD",
+      "B201": "Trưởng bộ phận Điều phối",
+      "C201": "tariff.read",
+      "D201": "YARD",
+      "E201": "Có",
+      "F201": "Thông thường",
+      "G201": "Q17",
+      "H201": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A202": "SYS_ADMIN",
+      "B202": "Quản trị hệ thống",
+      "C202": "tariff.read",
+      "D202": "ALL",
+      "E202": "Có",
+      "F202": "Thông thường",
+      "G202": "Q17",
+      "H202": "Kiểm tra server theo dữ liệu thuộc phạm vi."
+    },
+    {
+      "A203": "PORT_LEAD",
+      "B203": "Trưởng bộ phận Cổng cảng kho bãi",
+      "C203": "tariff.change.request",
+      "D203": "DEPARTMENT",
+      "E203": "Có",
+      "F203": "Tài chính",
+      "G203": "Q17",
+      "H203": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A204": "SYS_ADMIN",
+      "B204": "Quản trị hệ thống",
+      "C204": "tariff.change.request",
+      "D204": "ALL",
+      "E204": "Có",
+      "F204": "Tài chính",
+      "G204": "Q17",
+      "H204": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A205": "SYS_ADMIN",
+      "B205": "Quản trị hệ thống",
+      "C205": "tariff.change.publish",
+      "D205": "ALL",
+      "E205": "Có",
+      "F205": "Cao",
+      "G205": "Q17",
+      "H205": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A206": "SYS_ADMIN",
+      "B206": "Quản trị hệ thống",
+      "C206": "admin.users.manage",
+      "D206": "ALL",
+      "E206": "Có",
+      "F206": "Cao",
+      "G206": "Q27",
+      "H206": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A207": "SYS_ADMIN",
+      "B207": "Quản trị hệ thống",
+      "C207": "admin.roles.manage",
+      "D207": "ALL",
+      "E207": "Có",
+      "F207": "Cao",
+      "G207": "Q27",
+      "H207": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A208": "SYS_ADMIN",
+      "B208": "Quản trị hệ thống",
+      "C208": "admin.role_permissions.manage",
+      "D208": "ALL",
+      "E208": "Có",
+      "F208": "Cao",
+      "G208": "Q27",
+      "H208": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A209": "SYS_ADMIN",
+      "B209": "Quản trị hệ thống",
+      "C209": "admin.billing_settings.manage",
+      "D209": "ALL",
+      "E209": "Có",
+      "F209": "Cao",
+      "G209": "Q17",
+      "H209": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    },
+    {
+      "A210": "SYS_ADMIN",
+      "B210": "Quản trị hệ thống",
+      "C210": "admin.legacy_correct",
+      "D210": "ALL",
+      "E210": "Có",
+      "F210": "Cao",
+      "G210": "Q03,Q06",
+      "H210": "Chỉ bật nếu phân hệ đang hoạt động; ràng buộc server/RLS + audit."
+    }
+  ],
+  "23_V5_PHÊ_DUYỆT": [
+    {
+      "A1": "V5 — CHÍNH SÁCH XỬ LÝ & PHÊ DUYỆT"
+    },
+    {
+      "A2": "Không đồng nhất quyền sửa mã container với quyền sửa TIỀN đã thu. Trạng thái phê duyệt, lý do và người thực hiện đều được lưu."
+    },
+    {
+      "A4": "Mã",
+      "B4": "Tình huống",
+      "C4": "Quyền khởi tạo",
+      "D4": "Quyền phê duyệt",
+      "E4": "Trách nhiệm",
+      "F4": "Tách người",
+      "G4": "Lý do",
+      "H4": "Giai đoạn",
+      "I4": "Quy tắc"
+    },
+    {
+      "A5": "AP01",
+      "B5": "Sửa giờ điện/chênh tiền SAU khi thu",
+      "C5": "reefer.session.amendment.request",
+      "D5": "reefer.session.amendment.approve",
+      "E5": "PORT_LEAD / SYS_ADMIN",
+      "F5": "Không tự duyệt",
+      "G5": "Bắt buộc",
+      "H5": "V1",
+      "I5": "Giữ giao dịch đã thu; tạo điều chỉnh công nợ/hoàn trả, không ghi đè."
+    },
+    {
+      "A6": "AP02",
+      "B6": "Sửa giờ điện TRƯỚC khi thu",
+      "C6": "reefer.session.time.edit_unpaid",
+      "D6": "",
+      "E6": "PORT_STAFF / PORT_LEAD",
+      "F6": "Không cần duyệt",
+      "G6": "Bắt buộc",
+      "H6": "V1",
+      "I6": "Ghi trước/sau, lý do, giờ thực tế khác giờ nhập."
+    },
+    {
+      "A7": "AP03",
+      "B7": "Điều chỉnh thời lượng điện trước thu",
+      "C7": "reefer.session.billable.override_unpaid",
+      "D7": "",
+      "E7": "PORT_STAFF / PORT_LEAD",
+      "F7": "Không cần duyệt",
+      "G7": "Bắt buộc",
+      "H7": "V1",
+      "I7": "Lưu số tự tính làm tròn 15p và số sửa tay, hiện chênh lệch."
+    },
+    {
+      "A8": "AP04",
+      "B8": "Sửa số cont SAU đã thu",
+      "C8": "container.number.correct",
+      "D8": "payment.post_correction.approve",
+      "E8": "SEC_STAFF; CCKB đối soát",
+      "F8": "Không bắt buộc duyệt sửa SỐ",
+      "G8": "Bắt buộc",
+      "H8": "V1",
+      "I8": "Sửa mã ngay có audit/CCKB nhận cảnh báo. Chỉ sửa TIỀN chênh sau thu mới phải duyệt."
+    },
+    {
+      "A9": "AP05",
+      "B9": "Chỉnh HÀNG/RỖNG SAU cont ra",
+      "C9": "container.cargo.post_exit.request",
+      "D9": "container.cargo.post_exit.approve",
+      "E9": "DIS_LEAD / SYS_ADMIN",
+      "F9": "Không tự duyệt",
+      "G9": "Bắt buộc",
+      "H9": "V1",
+      "I9": "Không cấp sửa sau ra trực tiếp cho NV/An ninh."
+    },
+    {
+      "A10": "AP06",
+      "B10": "CCKB cho xuất còn công nợ",
+      "C10": "exit.clearance.debt_exception",
+      "D10": "",
+      "E10": "PORT_STAFF / PORT_LEAD",
+      "F10": "Theo quyền CCKB, có cảnh báo",
+      "G10": "Bắt buộc",
+      "H10": "V1",
+      "I10": "Không xóa công nợ; thời điểm An ninh xác nhận cont ra vẫn tính tiền lưu mới."
+    },
+    {
+      "A11": "AP07",
+      "B11": "Có tiền lưu phát sinh ngay cửa ra",
+      "C11": "storage.payment.collect",
+      "D11": "exit.clearance.debt_exception",
+      "E11": "SEC_STAFF thu; CCKB xác nhận nợ",
+      "F11": "Nếu không thu cần CCKB xác nhận nợ",
+      "G11": "Bắt buộc",
+      "H11": "V1",
+      "I11": "Cảnh báo/đồng bộ lại số phí lưu tại giờ thực ra, không khóa tiền trước khi ra."
+    },
+    {
+      "A12": "AP08",
+      "B12": "Trạng thái PWA Đang cắm nhưng ngoài hiện trường đã rút",
+      "C12": "exit.reefer_state.exception",
+      "D12": "",
+      "E12": "CCKB + An ninh xác minh",
+      "F12": "Có xác nhận tình trạng thực tế",
+      "G12": "Bắt buộc",
+      "H12": "V1",
+      "I12": "Không cho phép xuất khi cont thực tế vẫn đang nối điện; lưu giải trình khi dữ liệu app chưa cập nhật."
+    },
+    {
+      "A13": "AP09",
+      "B13": "Thu hồi CCKB đã xác nhận cho ra",
+      "C13": "exit.clearance.revoke.request",
+      "D13": "exit.clearance.revoke.approve",
+      "E13": "PORT_LEAD / SYS_ADMIN",
+      "F13": "Không tự duyệt",
+      "G13": "Bắt buộc",
+      "H13": "V1",
+      "I13": "Chỉ thu hồi trước khi xác nhận ra thực tế; sau ra dùng sửa lịch sử."
+    },
+    {
+      "A14": "AP10",
+      "B14": "Bảng giá thay đổi",
+      "C14": "tariff.change.request",
+      "D14": "tariff.change.publish",
+      "E14": "SYS_ADMIN",
+      "F14": "Đề nghị/ban hành tách biệt",
+      "G14": "Bắt buộc",
+      "H14": "V1",
+      "I14": "Lưu phiên bản giá/hiệu lực; không thay tiền của lịch sử."
+    },
+    {
+      "A15": "AP11",
+      "B15": "Hoàn tiền / miễn giảm",
+      "C15": "payment.refund.request",
+      "D15": "payment.refund.approve",
+      "E15": "Chưa triển khai",
+      "F15": "Không kích hoạt",
+      "G15": "Bắt buộc nếu triển khai",
+      "H15": "GĐ sau",
+      "I15": "Các quyền seed chưa cấp cho ai, cờ tính năng tắt."
+    },
+    {
+      "A16": "AP12",
+      "B16": "Đăng nhập bốt An ninh dùng chung thiết bị",
+      "C16": "admin.users.manage",
+      "D16": "",
+      "E16": "SEC_STAFF / SEC_LEAD",
+      "F16": "Bắt buộc xác định người thao tác",
+      "G16": "Có",
+      "H16": "V1",
+      "I16": "Ưu tiên đăng nhập cá nhân; nếu chế độ bốt thì phải xác minh người trực/phiên, không gắn mọi khoản thu vào email dùng chung."
+    }
+  ],
+  "24_V5_THAM_SO": [
+    {
+      "A1": "V5 — THAM SỐ CÓ THỂ CẤU HÌNH"
+    },
+    {
+      "A2": "Không chỉnh công thức/role cứng khi đổi giá hoặc chính sách. Tham số kỹ thuật không vượt qua các ràng buộc an toàn."
+    },
+    {
+      "A4": "STT",
+      "B4": "Mã tham số",
+      "C4": "Giá trị khởi tạo",
+      "D4": "Loại",
+      "E4": "Trạng thái",
+      "F4": "Ghi chú"
+    },
+    {
+      "A5": "RF01",
+      "B5": "ELECTRIC_ROUNDING_MINUTES",
+      "C5": "15",
+      "D5": "Cấu hình",
+      "E5": "Đã chốt",
+      "F5": "Làm tròn lên bội 15 phút theo từng phiên điện; mặc định do server tính."
+    },
+    {
+      "A6": "RF02",
+      "B6": "ELECTRIC_RATE_HOURLY_VND",
+      "C6": "100000",
+      "D6": "Bảng giá",
+      "E6": "Đã chốt",
+      "F6": "Mã DIEN_CONT_GIO; quản lý phiên bản giá trong DB."
+    },
+    {
+      "A7": "RF03",
+      "B7": "ELECTRIC_RATE_CONTINUOUS_VND",
+      "C7": "100000",
+      "D7": "Bảng giá",
+      "E7": "Đã chốt",
+      "F7": "Mã DIEN_CONT_LIEN_TUC; cấu hình độc lập dù giá hiện giống nhau."
+    },
+    {
+      "A8": "RF04",
+      "B8": "STORAGE_RATE_NIGHT_VND",
+      "C8": "100000",
+      "D8": "Bảng giá",
+      "E8": "Đã chốt",
+      "F8": "Phí lưu chỉ tính khi cont thực tế ra."
+    },
+    {
+      "A9": "RF05",
+      "B9": "STORAGE_FREE_NIGHTS",
+      "C9": "1",
+      "D9": "Cấu hình",
+      "E9": "Đã chốt",
+      "F9": "01 đêm miễn phí theo chính sách hiện tại."
+    },
+    {
+      "A10": "RF06",
+      "B10": "STORAGE_NIGHT_START",
+      "C10": "22:00",
+      "D10": "Cấu hình",
+      "E10": "Đã chốt",
+      "F10": "Mốc đêm 22h; giờ địa phương Asia/Ho_Chi_Minh."
+    },
+    {
+      "A11": "RF07",
+      "B11": "STORAGE_NIGHT_END",
+      "C11": "06:00",
+      "D11": "Cấu hình",
+      "E11": "Đã chốt",
+      "F11": "Mốc kết thúc đêm 06h hôm sau."
+    },
+    {
+      "A12": "RF08",
+      "B12": "ALLOW_EXIT_WITH_DEBT",
+      "C12": "true",
+      "D12": "Cờ nghiệp vụ",
+      "E12": "Đã chốt",
+      "F12": "CCKB xác nhận có lý do, giữ nợ; không tự miễn khoản thu."
+    },
+    {
+      "A13": "RF09",
+      "B13": "PLANNED_REEFER_REQUEST_ENABLED",
+      "C13": "true",
+      "D13": "Cờ tính năng",
+      "E13": "Đã chốt",
+      "F13": "Cho CCKB tạo phiếu cont chưa vào; cảnh báo An ninh khi container tới."
+    },
+    {
+      "A14": "RF10",
+      "B14": "CONTAINER_NUMBER_CORRECTION_ENABLED",
+      "C14": "true",
+      "D14": "Cờ tính năng",
+      "E14": "Đã chốt",
+      "F14": "An ninh sửa mã có lịch sử và thông báo CCKB."
+    },
+    {
+      "A15": "RF11",
+      "B15": "ALLOW_REEFER_RETRO_ENTRY",
+      "C15": "true",
+      "D15": "Cờ tính năng",
+      "E15": "Đã chốt",
+      "F15": "Cho phép nhập giờ cắm/rút thực tế sau khi An ninh báo qua Zalo."
+    },
+    {
+      "A16": "RF12",
+      "B16": "ACCOUNTING_MODULE_ENABLED",
+      "C16": "false",
+      "D16": "Cờ tính năng",
+      "E16": "GĐ sau",
+      "F16": "V1 chưa phát hành hóa đơn; Kế toán ở trạng thái dự phòng."
+    },
+    {
+      "A17": "RF13",
+      "B17": "TICKET_AUTOPRINT_ENABLED",
+      "C17": "false",
+      "D17": "Cờ tính năng",
+      "E17": "GĐ sau",
+      "F17": "Vé giấy hiện vẫn có nghiệp vụ, chưa làm chức năng in tự động."
+    },
+    {
+      "A18": "RF14",
+      "B18": "CHARGE_DISCOUNT_ENABLED",
+      "C18": "false",
+      "D18": "Cờ tính năng",
+      "E18": "GĐ sau",
+      "F18": "Không triển khai miễn/giảm toàn phần trong V1."
+    },
+    {
+      "A19": "RF15",
+      "B19": "REFUND_MODULE_ENABLED",
+      "C19": "false",
+      "D19": "Cờ tính năng",
+      "E19": "GĐ sau",
+      "F19": "Không triển khai hoàn tiền/hủy ghi thu toàn phần trong V1."
+    },
+    {
+      "A20": "RF16",
+      "B20": "YARD_SLOT_MANAGEMENT_ENABLED",
+      "C20": "false",
+      "D20": "Cờ tính năng",
+      "E20": "GĐ sau",
+      "F20": "Vị trí khu/dãy/ô dự phòng, không gắn logic phí lưu."
+    },
+    {
+      "A21": "RF17",
+      "B21": "BANK_TRANSFER_PROOF_REQUIRED",
+      "C21": "configurable",
+      "D21": "Quy định thu",
+      "E21": "Cần UAT",
+      "F21": "Không mặc định bắt buộc mọi chứng từ, do file trả lời V1 cho phép triển khai dần."
+    },
+    {
+      "A22": "RF18",
+      "B22": "PRICE_SNAPSHOT_AT",
+      "C22": "configurable",
+      "D22": "Quy định giá",
+      "E22": "Cần UAT",
+      "F22": "Cần thống nhất khi đổi giá giữa phiên; không tự động đổi các phiên đã thu."
+    },
+    {
+      "A23": "RF19",
+      "B23": "SHARED_GATE_KIOSK_MODE",
+      "C23": "configurable",
+      "D23": "Truy cập",
+      "E23": "Cần UAT",
+      "F23": "Phải ghi nhân viên thực thu/thực xác nhận, không chỉ ghi user chung tại bốt."
+    },
+    {
+      "A24": "RF20",
+      "B24": "OFFLINE_GATE_EXIT_ALLOWED",
+      "C24": "false",
+      "D24": "An toàn",
+      "E24": "Đã chốt",
+      "F24": "Không tự xác nhận thành công ra cổng khi mất Internet."
+    }
+  ]
+}

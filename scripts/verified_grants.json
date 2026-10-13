@@ -1,0 +1,1238 @@
+[
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "vehicle.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "vehicle.visit.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.create",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "vehicle.visit.update_basic",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.update_basic",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.update_basic",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "vehicle.visit.time_correction.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.time_correction.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.time_correction.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.time_correction.approve",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.time_correction.approve",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "ticket.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "ticket.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "ticket.payment.collect",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "ticket.lost_fee.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "ticket.lost_fee.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "ticket.lost_fee.collect",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "vehicle.visit.exit_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "vehicle.visit.exit_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "vehicle.visit.exit_confirm",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "container.visit.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.visit.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.visit.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.visit.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.visit.create",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.number.correct",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.number.correct",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.number.correct",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.number.discrepancy.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.number.discrepancy.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.number.discrepancy.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.number.discrepancy.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.number.discrepancy.view",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.number.discrepancy.sec_ack",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.number.discrepancy.sec_ack",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.number.discrepancy.sec_ack",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.number.discrepancy.port_reconcile",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.number.discrepancy.port_reconcile",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.number.discrepancy.port_reconcile",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.number.evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.number.evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.number.evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.number.evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.number.evidence.attach",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.visit.link_request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.visit.link_request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.visit.link_request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.visit.link_request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.visit.link_request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "container.cargo.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.cargo.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "container.cargo.update",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "container.cargo.update",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.cargo.update",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "container.cargo.post_exit.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "container.cargo.post_exit.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.cargo.post_exit.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "container.cargo.post_exit.approve",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "container.cargo.post_exit.approve",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "reefer.request.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.create",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.create",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.update",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.update",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.update",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.cancel",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.cancel",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.cancel",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "reefer.request.alert.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "reefer.request.alert.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.alert.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.alert.view",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.alert.view",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "reefer.request.match_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "reefer.request.match_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.request.match_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.request.match_confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.request.match_confirm",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "reefer.field_work.note",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "reefer.field_work.note",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.field_work.note",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.field_work.note",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.field_work.note",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "reefer.session.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.actual_start.record",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.actual_start.record",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.actual_start.record",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.actual_end.record",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.actual_end.record",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.actual_end.record",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.time.edit_unpaid",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.time.edit_unpaid",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.time.edit_unpaid",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.billable.override_unpaid",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.billable.override_unpaid",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.billable.override_unpaid",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.session.amendment.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.amendment.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.amendment.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.session.amendment.approve",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.session.amendment.approve",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.payment.collect",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "reefer.payment.partial_collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "reefer.payment.partial_collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "reefer.payment.partial_collect",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "storage.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "storage.payment.collect",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "storage.payment.collect",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "payment.bank_evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "payment.bank_evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "payment.bank_evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "payment.bank_evidence.attach",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "payment.bank_evidence.attach",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "payment.bank.reconcile",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "payment.bank.reconcile",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "payment.bank.reconcile",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "payment.post_correction.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "payment.post_correction.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "payment.post_correction.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "payment.post_correction.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "payment.post_correction.approve",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "payment.post_correction.approve",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "exit.clearance.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.clearance.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "exit.clearance.issue",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.clearance.issue",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.clearance.issue",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "exit.clearance.debt_exception",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.clearance.debt_exception",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.clearance.debt_exception",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "exit.clearance.revoke.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.clearance.revoke.request",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.clearance.revoke.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.clearance.revoke.approve",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.clearance.revoke.approve",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "exit.actual.confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "exit.actual.confirm",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.actual.confirm",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "exit.reefer_state.exception",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "exit.reefer_state.exception",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "exit.reefer_state.exception",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "report.revenue.read",
+    "scope": "SELF",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "report.revenue.read",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "report.revenue.read",
+    "scope": "SELF",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "report.revenue.read",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "report.revenue.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "report.revenue.export",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "report.revenue.export",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "report.revenue.export",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "audit.read",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "audit.read",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "audit.read",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "audit.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "audit.export_all",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_STAFF",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SEC_LEAD",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_STAFF",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_STAFF",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "DIS_LEAD",
+    "permission_code": "tariff.read",
+    "scope": "YARD",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "tariff.read",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "PORT_LEAD",
+    "permission_code": "tariff.change.request",
+    "scope": "DEPARTMENT",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "tariff.change.request",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "tariff.change.publish",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "admin.users.manage",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "admin.roles.manage",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "admin.role_permissions.manage",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "admin.billing_settings.manage",
+    "scope": "ALL",
+    "is_enabled": true
+  },
+  {
+    "role_code": "SYS_ADMIN",
+    "permission_code": "admin.legacy_correct",
+    "scope": "ALL",
+    "is_enabled": true
+  }
+]
