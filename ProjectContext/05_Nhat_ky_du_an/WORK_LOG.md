@@ -1,5 +1,21 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 15:26 — Sửa Lỗi Khóa Ngoại Foreign Key Department Code Trong Hàm Cắm Điện Container (Migration 020)
+
+- **Yêu cầu / nguồn:** Báo cáo lỗi từ Chủ dự án khi thao tác Cắm điện Container trên web:
+  *"insert or update on table 'app_audit_events' violates foreign key constraint 'app_audit_events_department_code_fkey'"*
+- **Nguyên nhân gốc rễ (Root Cause Analysis):**
+  * Trong bảng nền tảng `public.app_departments`, chỉ có 5 mã phòng ban chuẩn V5: `AN_NINH`, `CCKB`, `DIEU_PHOI`, `HE_THONG`, `KE_TOAN`.
+  * Cột `app_audit_events.department_code` có ràng buộc khóa ngoại `REFERENCES public.app_departments(code)`.
+  * Trong migration 014 và 015, hàm RPC `sc_plug_in_reefer` và `sc_record_completed_reefer_session` đã gọi hàm audit log với mã hardcode `'AN_NINH_CCKB'`. Do `'AN_NINH_CCKB'` không tồn tại trong `app_departments`, PostgreSQL lập tức từ chối và abort giao dịch cắm điện.
+- **Giải pháp xử lý triệt để (Migration 020):**
+  1. Nâng cấp hàm `public.sc_log_audit_event`: Bổ sung cơ chế phòng thủ tự động làm sạch (sanitize) tham số `p_department_code`. Nếu nhận chuỗi không hợp lệ, hàm sẽ tự động chuẩn hóa (ví dụ `'AN_NINH_CCKB'` ➔ `'CCKB'`) hoặc lấy phòng ban thực tế từ `app_user_role_assignments` của tài khoản đang đăng nhập.
+  2. Nâng cấp hàm `public.sc_plug_in_reefer` và `public.sc_record_completed_reefer_session`: Lấy trực tiếp phòng ban của người dùng (`v_actor_dept`) hoặc fallback về `'CCKB'`.
+- **Kiểm thử & Áp dụng:**
+  * Đã thực thi trực tiếp Migration 020 lên Supabase Cloud DEV (`euswzyespwaxyrjkfkrq`) qua Supabase Management API.
+  * Đã truy vấn đối soát `pg_proc` xác nhận mã nguồn hàm `sc_plug_in_reefer` và `sc_log_audit_event` mới đã có hiệu lực trên database.
+  * Đã commit và đồng bộ file migration lên GitHub repository `it-tlqm/SonCang-YMS`.
+
 ## 2026-10-13 15:10 — Triển Khai Hệ Thống Lên Môi Trường Internet Trực Tuyến Toàn Cầu (Vercel Production)
 
 - **Yêu cầu / nguồn:** Phê duyệt từ Chủ dự án:

@@ -40,6 +40,15 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 15:26 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI KHÓA NGOẠI AUDIT LOG KHI CẮM ĐIỆN CONTAINER (MIGRATION 020)**:
+  * **1. Phân tích nguyên nhân:** Hàm RPC `sc_plug_in_reefer` và `sc_record_completed_reefer_session` trước đây hardcode chuỗi phòng ban `'AN_NINH_CCKB'`. Tuy nhiên, bảng `app_departments` chỉ có 5 mã chuẩn V5 (`AN_NINH`, `CCKB`, `DIEU_PHOI`, `HE_THONG`, `KE_TOAN`). Khi hàm audit gọi `INSERT INTO app_audit_events`, PostgreSQL báo lỗi vi phạm khóa ngoại `app_audit_events_department_code_fkey`.
+  * **2. Khắc phục & Phòng thủ toàn diện (Migration 020):**
+    - Nâng cấp hàm `sc_log_audit_event`: Tự động làm sạch (sanitize) `department_code` nếu nhận mã không hợp lệ (tự động map sang `CCKB` hoặc `HE_THONG` hoặc fallback theo assignment của user).
+    - Cập nhật hàm `sc_plug_in_reefer` & `sc_record_completed_reefer_session`: Truyền đúng phòng ban thực tế của người thao tác (`v_actor_dept`), mặc định `CCKB`.
+  * **3. Đã áp dụng:** Chạy trực tiếp Migration 020 lên Supabase Cloud DEV (`euswzyespwaxyrjkfkrq`) thành công (Exit Code 0).
+  * **4. Đồng bộ mã nguồn:** Đã commit và đẩy migration 020 lên nhánh `main` của GitHub `it-tlqm/SonCang-YMS` (commit `6cd07a8`).
+
 - **Cập nhật lúc:** 13/10/2026 15:10 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **TRIỂN KHAI THÀNH CÔNG HỆ THỐNG LÊN MÔI TRƯỜNG INTERNET TOÀN CẦU QUA VERCEL**:
   * **1. Tên miền trực tuyến chính thức:** 👉 **`https://son-cang-yms.vercel.app`**
