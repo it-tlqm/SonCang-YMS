@@ -44,16 +44,23 @@ import { generateVietQrUrl } from '@/lib/vietqr-generator';
 export default function CashierBillingPage() {
   const { user, role, yardId, can, repository } = useAuth();
 
-  // Kiểm tra quyền theo RBAC V5
-  const canCollectTicket = can('ticket.payment.collect'); // An ninh hoặc Admin
-  const canCollectReefer = can('reefer.payment.collect'); // Chỉ CCKB hoặc Admin
-  const canCollectStorage = can('storage.payment.collect'); // An ninh AP07 hoặc CCKB hoặc Admin
+  // Phân quyền tách bạch triệt để theo RBAC V5:
+  // - CCKB (PORT_STAFF, PORT_LEAD): CHỈ thu và CHỈ thấy cước điện (REEFER)
+  // - An ninh (SEC_STAFF, SEC_LEAD): CHỈ thu vé xe (TICKET) và xem lịch sử phí lưu bãi (STORAGE)
+  // - Quản trị viên (SYS_ADMIN): Toàn quyền
   const isSecurityRole = role === 'SEC_STAFF' || role === 'SEC_LEAD';
+  const isCCKBRole = role === 'PORT_STAFF' || role === 'PORT_LEAD';
+  const isAdminRole = role === 'SYS_ADMIN' || !role;
+
+  // Quyền hạn thu tiền theo vai trò
+  const canCollectTicket = can('ticket.payment.collect') && (isSecurityRole || isAdminRole);
+  const canCollectReefer = can('reefer.payment.collect') && (isCCKBRole || isAdminRole);
 
   const canCollectCharge = (c: ChargeItem) => {
     if (c.charge_type === 'TICKET') return canCollectTicket;
     if (c.charge_type === 'REEFER') return canCollectReefer;
-    if (c.charge_type === 'STORAGE') return canCollectStorage;
+    // Phí lưu bãi container chỉ được chốt và thu trực tiếp tại Cổng ra (/exit) khi xe chở cont rời bãi!
+    if (c.charge_type === 'STORAGE') return false;
     return false;
   };
 
@@ -73,6 +80,8 @@ export default function CashierBillingPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | ChargeType>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>('ALL');
+  const [contFilter, setContFilter] = useState<string>('ALL');
+  const [customerFilter, setCustomerFilter] = useState<string>('ALL');
 
   // Chọn nhiều khoản (Batch Collection)
   const [selectedChargeIds, setSelectedChargeIds] = useState<string[]>([]);
@@ -404,7 +413,7 @@ export default function CashierBillingPage() {
 
   const handleSelectAllUnpaid = () => {
     const collectableUnpaidIds = filteredCharges
-      .filter(c => c.status === 'UNPAID' && canCollectCharge(c))
+      .filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE')
       .map(c => c.id);
     
     if (collectableUnpaidIds.length > 0 && collectableUnpaidIds.every(id => selectedChargeIds.includes(id))) {
@@ -414,12 +423,40 @@ export default function CashierBillingPage() {
     }
   };
 
+  // Gom nhanh tất cả khoản nợ của 1 container
+  const handleSelectAllOfContainer = (contNo: string) => {
+    const matchingIds = filteredCharges
+      .filter(c => c.status === 'UNPAID' && c.container_no === contNo && canCollectCharge(c) && c.charge_type !== 'STORAGE')
+      .map(c => c.id);
+    if (matchingIds.length === 0) return;
+    setSelectedChargeIds(prev => Array.from(new Set([...prev, ...matchingIds])));
+  };
+
+  // Gom nhanh tất cả khoản nợ của 1 khách hàng
+  const handleSelectAllOfCustomer = (customerName: string) => {
+    const matchingIds = filteredCharges
+      .filter(c => c.status === 'UNPAID' && c.customer_name === customerName && canCollectCharge(c) && c.charge_type !== 'STORAGE')
+      .map(c => c.id);
+    if (matchingIds.length === 0) return;
+    setSelectedChargeIds(prev => Array.from(new Set([...prev, ...matchingIds])));
+  };
+
   const selectedChargesList = useMemo(() => {
     return charges.filter(c => selectedChargeIds.includes(c.id));
   }, [charges, selectedChargeIds]);
 
   const selectedBatchTotal = useMemo(() => {
     return selectedChargesList.reduce((sum, c) => sum + (c.amount - c.paid_amount), 0);
+  }, [selectedChargesList]);
+
+  const selectedBatchConts = useMemo(() => {
+    const conts = selectedChargesList.map(c => c.container_no).filter((no): no is string => Boolean(no));
+    return Array.from(new Set(conts));
+  }, [selectedChargesList]);
+
+  const selectedBatchCustomers = useMemo(() => {
+    const custs = selectedChargesList.map(c => c.customer_name).filter((name): name is string => Boolean(name));
+    return Array.from(new Set(custs));
   }, [selectedChargesList]);
 
   const handleOpenBatchModal = () => {
@@ -436,7 +473,14 @@ export default function CashierBillingPage() {
     setBatchPayMethod('CASH');
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
     setBatchReceiptCode(`PT-GOP-${randomSuffix}`);
-    setBatchNotes('');
+
+    let defaultNotes = `Thu gộp ${selectedChargeIds.length} khoản phí dịch vụ`;
+    if (selectedBatchConts.length === 1) {
+      defaultNotes = `Thu gộp ${selectedChargeIds.length} phiên cước điện cho container ${selectedBatchConts[0]}`;
+    } else if (selectedBatchCustomers.length === 1) {
+      defaultNotes = `Thu gộp ${selectedChargeIds.length} khoản cho khách hàng ${selectedBatchCustomers[0]}`;
+    }
+    setBatchNotes(defaultNotes);
     setShowBatchModal(true);
   };
 
@@ -482,40 +526,110 @@ export default function CashierBillingPage() {
     }
   };
 
-  // Lọc danh sách sổ cái
-  const filteredCharges = charges.filter((c) => {
-    const q = searchQuery.toLowerCase();
-    const matchesSearch = 
-      c.title.toLowerCase().includes(q) ||
-      (c.container_no && c.container_no.toLowerCase().includes(q)) ||
-      (c.license_plate && c.license_plate.toLowerCase().includes(q));
-    const matchesType = typeFilter === 'ALL' || c.charge_type === typeFilter;
-    const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  // Lọc tập dữ liệu theo vai trò (Role Isolation RBAC V5)
+  const roleScopedCharges = useMemo(() => {
+    if (isCCKBRole) {
+      // CCKB CHỈ thấy cước điện container lạnh
+      return charges.filter(c => c.charge_type === 'REEFER');
+    }
+    if (isSecurityRole) {
+      // An ninh CHỈ thấy vé xe vào cổng và xem lịch sử phí lưu bãi (tuyệt đối không thấy cước điện)
+      return charges.filter(c => c.charge_type === 'TICKET' || c.charge_type === 'STORAGE');
+    }
+    // Admin thấy toàn bộ
+    return charges;
+  }, [charges, isCCKBRole, isSecurityRole]);
 
-  const totalUnpaid = charges
-    .filter((c) => c.status === 'UNPAID')
-    .reduce((acc, curr) => acc + (curr.amount - curr.paid_amount), 0);
+  // Danh sách các container và khách hàng có trong tập dữ liệu của vai trò này
+  const availableContainers = useMemo(() => {
+    const conts = roleScopedCharges
+      .map(c => c.container_no)
+      .filter((no): no is string => Boolean(no));
+    return Array.from(new Set(conts));
+  }, [roleScopedCharges]);
 
-  const totalPaid = charges
-    .filter((c) => c.status === 'PAID')
-    .reduce((acc, curr) => acc + curr.paid_amount, 0);
+  const availableCustomers = useMemo(() => {
+    const custs = roleScopedCharges
+      .map(c => c.customer_name)
+      .filter((name): name is string => Boolean(name));
+    return Array.from(new Set(custs));
+  }, [roleScopedCharges]);
+
+  // Lọc danh sách sổ cái theo tìm kiếm và bộ lọc
+  const filteredCharges = useMemo(() => {
+    return roleScopedCharges.filter((c) => {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = 
+        c.title.toLowerCase().includes(q) ||
+        (c.container_no && c.container_no.toLowerCase().includes(q)) ||
+        (c.license_plate && c.license_plate.toLowerCase().includes(q)) ||
+        (c.customer_name && c.customer_name.toLowerCase().includes(q)) ||
+        (c.notes && c.notes.toLowerCase().includes(q));
+
+      const matchesType = typeFilter === 'ALL' || c.charge_type === typeFilter;
+      const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
+      const matchesCont = contFilter === 'ALL' || c.container_no === contFilter;
+      const matchesCustomer = customerFilter === 'ALL' || c.customer_name === customerFilter;
+
+      return matchesSearch && matchesType && matchesStatus && matchesCont && matchesCustomer;
+    });
+  }, [roleScopedCharges, searchQuery, typeFilter, statusFilter, contFilter, customerFilter]);
+
+  const totalUnpaid = useMemo(() => {
+    // Chỉ tính các khoản nợ thực tế cần thu tại giao diện này (loại trừ STORAGE vì STORAGE thu tại /exit)
+    return roleScopedCharges
+      .filter((c) => c.status === 'UNPAID' && c.charge_type !== 'STORAGE')
+      .reduce((acc, curr) => acc + (curr.amount - curr.paid_amount), 0);
+  }, [roleScopedCharges]);
+
+  const totalPaid = useMemo(() => {
+    return roleScopedCharges
+      .filter((c) => c.status === 'PAID')
+      .reduce((acc, curr) => acc + curr.paid_amount, 0);
+  }, [roleScopedCharges]);
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
       {/* Header & Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-300 pb-4">
         <div>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 inline-block">
-            Tài chính Bến bãi & Thu ngân Ca trực
+          <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded border inline-block ${
+            isCCKBRole 
+              ? 'text-amber-800 bg-amber-50 border-amber-300' 
+              : isSecurityRole 
+              ? 'text-blue-800 bg-blue-50 border-blue-300'
+              : 'text-emerald-800 bg-emerald-50 border-emerald-300'
+          }`}>
+            {isCCKBRole 
+              ? 'Thương vụ CCKB — Thu cước điện Container' 
+              : isSecurityRole 
+              ? 'An ninh Cổng — Thu vé xe & Tra cứu Lưu bãi' 
+              : 'Tài chính Bến bãi & Thu ngân Ca trực'}
           </span>
           <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 mt-1">
-            <Receipt className="w-6 h-6 text-[#0A9444]" />
-            Thu phí, Sổ cái & Báo cáo Ca trực Sơn Cảng
+            {isCCKBRole ? (
+              <>
+                <Zap className="w-6 h-6 text-amber-500" />
+                Thu phí Cước điện Container Lạnh — Thương vụ CCKB
+              </>
+            ) : isSecurityRole ? (
+              <>
+                <Truck className="w-6 h-6 text-[#223873]" />
+                Thu phí Vé xe & Tra cứu Phí lưu bãi — An ninh Cổng
+              </>
+            ) : (
+              <>
+                <Receipt className="w-6 h-6 text-[#0A9444]" />
+                Thu phí, Sổ cái & Báo cáo Ca trực Sơn Cảng
+              </>
+            )}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Quản lý các khoản phải thu, thu gộp nhiều khoản, đối soát tiền mặt ca trực & in biên bản bàn giao
+            {isCCKBRole 
+              ? 'Chuyên trách thu cước cắm điện container, hỗ trợ gom thu nhiều lần cắm theo container hoặc theo khách hàng'
+              : isSecurityRole 
+              ? 'Thu vé vào cổng phương tiện. Phí lưu bãi container được chốt và thu trực tiếp tại Cổng ra (/exit)'
+              : 'Quản lý toàn bộ các khoản phải thu bến bãi, thu gộp nhiều khoản, đối soát tiền mặt ca trực & in biên bản bàn giao'}
           </p>
         </div>
 
@@ -609,7 +723,9 @@ export default function CashierBillingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">Công nợ / Chưa thanh toán</p>
+                <p className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">
+                  {isCCKBRole ? 'Cước điện chưa thu' : isSecurityRole ? 'Vé xe chưa thu' : 'Công nợ / Chưa thanh toán'}
+                </p>
                 <p className="text-xl font-bold font-mono text-rose-600 mt-0.5">{totalUnpaid.toLocaleString()} đ</p>
               </div>
               <div className="p-2 bg-rose-50 rounded border border-rose-200">
@@ -619,7 +735,9 @@ export default function CashierBillingPage() {
 
             <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold text-[#0A9444] uppercase tracking-wider">Đã thực thu</p>
+                <p className="text-[11px] font-bold text-[#0A9444] uppercase tracking-wider">
+                  {isCCKBRole ? 'Cước điện đã thực thu' : isSecurityRole ? 'Vé xe đã thực thu' : 'Đã thực thu'}
+                </p>
                 <p className="text-xl font-bold font-mono text-[#0A9444] mt-0.5">{totalPaid.toLocaleString()} đ</p>
               </div>
               <div className="p-2 bg-emerald-50 rounded border border-emerald-200">
@@ -629,65 +747,139 @@ export default function CashierBillingPage() {
 
             <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Biểu phí hiệu lực</p>
-                <p className="text-xl font-bold font-mono text-[#223873] mt-0.5">{tariffs.length} mục giá</p>
+                {isCCKBRole ? (
+                  <>
+                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Container cắm điện</p>
+                    <p className="text-xl font-bold font-mono text-amber-800 mt-0.5">
+                      {availableContainers.length} cont <span className="text-xs font-normal text-slate-500">({availableCustomers.length} khách)</span>
+                    </p>
+                  </>
+                ) : isSecurityRole ? (
+                  <>
+                    <p className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Lịch sử lưu bãi cổng ra</p>
+                    <p className="text-xl font-bold font-mono text-purple-800 mt-0.5">
+                      {roleScopedCharges
+                        .filter(c => c.charge_type === 'STORAGE' && c.status === 'PAID')
+                        .reduce((sum, c) => sum + c.paid_amount, 0)
+                        .toLocaleString()} đ
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Biểu phí hiệu lực</p>
+                    <p className="text-xl font-bold font-mono text-[#223873] mt-0.5">{tariffs.length} mục giá</p>
+                  </>
+                )}
               </div>
               <div className="p-2 bg-blue-50 rounded border border-blue-200">
-                <Tag className="w-5 h-5 text-[#223873]" />
+                {isCCKBRole ? (
+                  <Zap className="w-5 h-5 text-amber-500" />
+                ) : isSecurityRole ? (
+                  <Clock className="w-5 h-5 text-purple-500" />
+                ) : (
+                  <Tag className="w-5 h-5 text-[#223873]" />
+                )}
               </div>
             </div>
           </div>
 
           {/* Bộ lọc và Tìm kiếm */}
           <div className="bg-white p-3 rounded-lg border border-slate-300 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full md:w-80">
+            <div className="relative w-full md:w-72">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm theo cont, biển số, tên khoản thu..."
+                placeholder="Tìm cont, khách hàng, biển số xe..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#223873] bg-white"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
-              {/* Lọc loại phí */}
-              {(['ALL', 'TICKET', 'REEFER', 'STORAGE'] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
-                  className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
-                    typeFilter === t
-                      ? 'bg-[#223873] text-white border-[#223873]'
-                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-                  }`}
-                >
-                  {t === 'ALL' && 'Tất cả loại'}
-                  {t === 'TICKET' && 'Vé vào cổng'}
-                  {t === 'REEFER' && 'Tiền điện'}
-                  {t === 'STORAGE' && 'Phí lưu cont'}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              {/* Dropdown lọc theo Container (dành cho CCKB và Admin) */}
+              {(isCCKBRole || isAdminRole) && availableContainers.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase">Cont:</span>
+                  <select
+                    value={contFilter}
+                    onChange={(e) => setContFilter(e.target.value)}
+                    className="px-2 py-1 border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none"
+                  >
+                    <option value="ALL">Tất cả container ({availableContainers.length})</option>
+                    {availableContainers.map((cn) => (
+                      <option key={cn} value={cn}>
+                        Cont {cn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-              <span className="text-slate-300 mx-1">|</span>
+              {/* Dropdown lọc theo Khách hàng (dành cho CCKB và Admin) */}
+              {(isCCKBRole || isAdminRole) && availableCustomers.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase">Khách:</span>
+                  <select
+                    value={customerFilter}
+                    onChange={(e) => setCustomerFilter(e.target.value)}
+                    className="px-2 py-1 border border-slate-300 rounded text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none max-w-[170px] truncate"
+                  >
+                    <option value="ALL">Tất cả khách ({availableCustomers.length})</option>
+                    {availableCustomers.map((cust) => (
+                      <option key={cust} value={cust}>
+                        {cust}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Lọc loại phí (Ẩn đối với CCKB vì CCKB chỉ có cước điện) */}
+              {!isCCKBRole && (
+                <div className="flex items-center gap-1">
+                  {(isSecurityRole
+                    ? (['ALL', 'TICKET', 'STORAGE'] as const)
+                    : (['ALL', 'TICKET', 'REEFER', 'STORAGE'] as const)
+                  ).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTypeFilter(t)}
+                      className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
+                        typeFilter === t
+                          ? 'bg-[#223873] text-white border-[#223873]'
+                          : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                      }`}
+                    >
+                      {t === 'ALL' && 'Tất cả loại'}
+                      {t === 'TICKET' && 'Vé vào cổng'}
+                      {t === 'REEFER' && 'Tiền điện'}
+                      {t === 'STORAGE' && 'Lịch sử lưu bãi'}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <span className="text-slate-300 hidden sm:inline">|</span>
 
               {/* Lọc trạng thái */}
-              {(['ALL', 'UNPAID', 'PAID'] as const).map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setStatusFilter(st)}
-                  className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
-                    statusFilter === st
-                      ? 'bg-[#0A9444] text-white border-[#0A9444]'
-                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-                  }`}
-                >
-                  {st === 'ALL' && 'Tất cả'}
-                  {st === 'UNPAID' && 'Chưa thu'}
-                  {st === 'PAID' && 'Đã thu'}
-                </button>
-              ))}
+              <div className="flex items-center gap-1">
+                {(['ALL', 'UNPAID', 'PAID'] as const).map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setStatusFilter(st)}
+                    className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
+                      statusFilter === st
+                        ? 'bg-[#0A9444] text-white border-[#0A9444]'
+                        : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                    }`}
+                  >
+                    {st === 'ALL' && 'Tất cả'}
+                    {st === 'UNPAID' && 'Chưa thu'}
+                    {st === 'PAID' && 'Đã thu'}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -695,20 +887,33 @@ export default function CashierBillingPage() {
           {selectedChargeIds.length > 0 && (
             <div className="bg-[#223873] text-white p-3.5 rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-blue-900">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-white/10 rounded">
+                <div className="p-1.5 bg-white/10 rounded flex-shrink-0">
                   <Layers className="w-5 h-5 text-amber-300" />
                 </div>
                 <div>
-                  <p className="font-bold text-xs uppercase tracking-wide">
-                    Đã chọn {selectedChargeIds.length} khoản nợ chưa thanh toán
-                  </p>
-                  <p className="text-xs text-blue-200">
-                    Tổng số tiền cần thu: <strong className="text-amber-300 text-sm font-mono font-bold">{selectedBatchTotal.toLocaleString()} đ</strong>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-xs uppercase tracking-wide">
+                      Đã chọn {selectedChargeIds.length} khoản nợ cần thanh toán
+                    </p>
+                    {selectedBatchConts.length > 0 && (
+                      <span className="bg-white/15 px-2 py-0.5 rounded text-[11px] font-mono text-amber-200">
+                        📦 {selectedBatchConts.length} cont: {selectedBatchConts.join(', ')}
+                      </span>
+                    )}
+                    {selectedBatchCustomers.length > 0 && (
+                      <span className="bg-white/15 px-2 py-0.5 rounded text-[11px] text-emerald-200">
+                        👤 Khách: {selectedBatchCustomers.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-blue-200 mt-0.5">
+                    Tổng tiền thu gộp: <strong className="text-amber-300 text-sm font-mono font-bold">{selectedBatchTotal.toLocaleString()} đ</strong>
+                    <span className="italic text-[11px] text-blue-300 ml-1.5">({formatMoneyInWords(selectedBatchTotal)})</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setSelectedChargeIds([])}
@@ -755,8 +960,8 @@ export default function CashierBillingPage() {
                         <input
                           type="checkbox"
                           checked={
-                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c)).length > 0 &&
-                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c)).every(c => selectedChargeIds.includes(c.id))
+                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').length > 0 &&
+                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').every(c => selectedChargeIds.includes(c.id))
                           }
                           onChange={handleSelectAllUnpaid}
                           className="rounded border-slate-300 text-[#223873] focus:ring-[#223873]"
@@ -790,7 +995,7 @@ export default function CashierBillingPage() {
                         let forbiddenReason = '';
                         if (isForbidden) {
                           if (isReefer) forbiddenReason = 'Khoản thu điện lạnh thuộc thẩm quyền Thương vụ CCKB';
-                          else if (isStorage) forbiddenReason = 'Cần quyền thu phí lưu bãi';
+                          else if (isStorage) forbiddenReason = 'Phí lưu bãi container chỉ thu tại Cổng ra (/exit)';
                           else if (isTicket) forbiddenReason = 'Khoản thu vé xe cổng thuộc phân hệ An ninh';
                         }
 
@@ -802,7 +1007,7 @@ export default function CashierBillingPage() {
                             }`}
                           >
                             <td className="px-3 py-2.5 text-center">
-                              {!isPaid && !isForbidden ? (
+                              {!isPaid && !isForbidden && !isStorage ? (
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
@@ -814,28 +1019,80 @@ export default function CashierBillingPage() {
                               )}
                             </td>
                             <td className="px-3 py-2.5 text-xs">
-                              {c.charge_type === 'TICKET' && (
+                              {isTicket && (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-[#223873] border border-blue-200">
                                   <Truck className="w-3 h-3" /> Vé xe
                                 </span>
                               )}
-                              {c.charge_type === 'REEFER' && (
+                              {isReefer && (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
                                   <Zap className="w-3 h-3 text-amber-500" /> Tiền điện
                                 </span>
                               )}
-                              {c.charge_type === 'STORAGE' && (
+                              {isStorage && (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-300">
-                                  <Clock className="w-3 h-3 text-purple-500" /> Phí lưu cont
+                                  <Clock className="w-3 h-3 text-purple-500" /> Lưu bãi
                                 </span>
                               )}
                             </td>
                             <td className="px-3.5 py-2.5 text-xs">
                               <p className="font-bold text-slate-900">{c.title}</p>
-                              <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5 font-mono">
-                                {c.container_no && <span className="text-[#223873] font-bold">Cont: {c.container_no}</span>}
-                                {c.license_plate && <span className="font-bold text-slate-700">Xe: {c.license_plate}</span>}
+                              
+                              {/* Thông tin đối tượng rõ ràng: Container, Khách hàng, Xe chở vào */}
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                {c.container_no ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 text-[#223873] border border-blue-200">
+                                    📦 Cont: {c.container_no}
+                                  </span>
+                                ) : (
+                                  isTicket && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-slate-500 bg-slate-100 border border-slate-200">
+                                      Xe lẻ (không cont)
+                                    </span>
+                                  )
+                                )}
+
+                                {c.customer_name && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                                    👤 Khách: {c.customer_name} {c.customer_phone ? `(${c.customer_phone})` : ''}
+                                  </span>
+                                )}
+
+                                {c.license_plate && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                                    🚛 Xe: {c.license_plate}
+                                  </span>
+                                )}
                               </div>
+
+                              {/* Thao tác gom nhanh 1-chạm nếu là cước điện hoặc vé xe chưa thu */}
+                              {!isPaid && !isStorage && (
+                                <div className="flex items-center gap-2 mt-1.5 pt-1 border-t border-slate-100">
+                                  {c.container_no && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSelectAllOfContainer(c.container_no!)}
+                                      className="text-[11px] font-semibold text-[#223873] hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                                      title={`Tích chọn tất cả các khoản nợ của container ${c.container_no}`}
+                                    >
+                                      ⚡ Gom tất cả của cont này
+                                    </button>
+                                  )}
+                                  {c.customer_name && (
+                                    <>
+                                      <span className="text-slate-300 text-[10px]">•</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSelectAllOfCustomer(c.customer_name!)}
+                                        className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 cursor-pointer"
+                                        title={`Tích chọn tất cả các khoản nợ của khách hàng ${c.customer_name}`}
+                                      >
+                                        👤 Gom tất cả của khách này
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </td>
                             <td className="px-3.5 py-2.5 font-bold font-mono text-xs sm:text-sm text-slate-900">
                               {c.amount.toLocaleString()} đ
@@ -845,6 +1102,10 @@ export default function CashierBillingPage() {
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                   <CheckCircle2 className="w-3 h-3" /> Đã thu
                                 </span>
+                              ) : isStorage ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                  <Clock className="w-3 h-3" /> Chốt tại Cổng ra
+                                </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300">
                                   <AlertTriangle className="w-3 h-3" /> Chưa thu
@@ -852,16 +1113,24 @@ export default function CashierBillingPage() {
                               )}
                             </td>
                             <td className="px-3.5 py-2.5 text-xs text-slate-600 font-mono">
-                              {new Date(c.created_at).toLocaleString()}
+                              {new Date(c.created_at).toLocaleString('vi-VN')}
                             </td>
                             <td className="px-3.5 py-2.5 text-right">
                               {!isPaid ? (
-                                isForbidden ? (
+                                isStorage ? (
+                                  <span
+                                    title="Phí lưu bãi container chỉ được chốt và thu trực tiếp tại Cổng ra (/exit) khi xe chở cont rời bãi"
+                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200"
+                                  >
+                                    <Clock className="w-3 h-3 text-purple-600" />
+                                    Thu tại Cổng ra
+                                  </span>
+                                ) : isForbidden ? (
                                   <span
                                     title={forbiddenReason}
                                     className="text-[11px] text-slate-400 font-medium italic"
                                   >
-                                    {c.charge_type === 'TICKET' ? 'An ninh thu' : 'CCKB thu'}
+                                    {isTicket ? 'An ninh thu' : 'CCKB thu'}
                                   </span>
                                 ) : (
                                   <button
@@ -1305,12 +1574,13 @@ export default function CashierBillingPage() {
             )}
 
             {/* Danh sách các khoản được gộp */}
-            <div className="border border-slate-300 rounded overflow-hidden text-xs max-h-48 overflow-y-auto">
+            <div className="border border-slate-300 rounded overflow-hidden text-xs max-h-56 overflow-y-auto">
               <table className="w-full text-left">
                 <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold text-[10px] uppercase tracking-wider">
                   <tr>
                     <th className="p-2">Khoản thu</th>
-                    <th className="p-2">Đối tượng</th>
+                    <th className="p-2">Container</th>
+                    <th className="p-2">Khách hàng / Xe</th>
                     <th className="p-2 text-right">Số tiền</th>
                   </tr>
                 </thead>
@@ -1319,7 +1589,17 @@ export default function CashierBillingPage() {
                     <tr key={chg.id} className="hover:bg-slate-50">
                       <td className="p-2 font-semibold text-slate-900">{chg.title}</td>
                       <td className="p-2 font-mono text-slate-700">
-                        {chg.license_plate || chg.container_no || '—'}
+                        {chg.container_no ? (
+                          <span className="font-bold text-[#223873] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                            {chg.container_no}
+                          </span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                      <td className="p-2 text-slate-700 text-[11px]">
+                        <div>{chg.customer_name || 'Khách vãng lai'}</div>
+                        {chg.license_plate && <div className="font-mono text-slate-500 font-bold">Xe: {chg.license_plate}</div>}
                       </td>
                       <td className="p-2 text-right font-mono font-bold text-slate-900">
                         {(chg.amount - chg.paid_amount).toLocaleString()} đ
@@ -1330,13 +1610,18 @@ export default function CashierBillingPage() {
               </table>
             </div>
 
-            <div className="p-3 bg-slate-50 border border-slate-300 rounded flex items-center justify-between">
-              <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider">
-                Tổng số tiền thanh toán gộp:
-              </span>
-              <span className="text-lg font-mono font-bold text-emerald-700">
-                {selectedBatchTotal.toLocaleString()} VNĐ
-              </span>
+            <div className="p-3 bg-slate-50 border border-slate-300 rounded space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider">
+                  Tổng số tiền thanh toán gộp ({selectedChargeIds.length} khoản):
+                </span>
+                <span className="text-lg font-mono font-bold text-emerald-700">
+                  {selectedBatchTotal.toLocaleString()} VNĐ
+                </span>
+              </div>
+              <p className="text-[11px] italic text-slate-600 text-right">
+                (Bằng chữ: <strong className="not-italic text-slate-800">{formatMoneyInWords(selectedBatchTotal)}</strong>)
+              </p>
             </div>
 
             <form onSubmit={handleConfirmBatchCollect} className="space-y-3">
@@ -1663,6 +1948,15 @@ export default function CashierBillingPage() {
                   </div>
                 )}
 
+                {receiptCharge.customer_name && (
+                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                    <span className="text-slate-500 sm:w-40 flex-shrink-0 text-xs uppercase font-semibold">Khách hàng / Chủ hàng:</span>
+                    <span className="font-semibold text-slate-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block w-fit">
+                      {receiptCharge.customer_name} {receiptCharge.customer_phone ? `(${receiptCharge.customer_phone})` : ''}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
                   <span className="text-slate-500 sm:w-40 flex-shrink-0 text-xs uppercase font-semibold">Hình thức thanh toán:</span>
                   <span className="font-semibold text-slate-800">
@@ -1781,9 +2075,10 @@ export default function CashierBillingPage() {
                 <table className="w-full text-left">
                   <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold text-[10px] uppercase tracking-wider">
                     <tr>
-                      <th className="p-2 text-center w-10">STT</th>
+                      <th className="p-2 text-center w-8">STT</th>
                       <th className="p-2">Hạng mục dịch vụ</th>
-                      <th className="p-2">Đối tượng (Xe / Cont)</th>
+                      <th className="p-2">Số Container</th>
+                      <th className="p-2">Khách hàng / Phương tiện</th>
                       <th className="p-2 text-right">Số tiền</th>
                     </tr>
                   </thead>
@@ -1793,7 +2088,15 @@ export default function CashierBillingPage() {
                         <td className="p-2 text-center text-slate-400 font-mono">{idx + 1}</td>
                         <td className="p-2 font-semibold text-slate-900">{item.title}</td>
                         <td className="p-2 font-mono text-slate-700">
-                          {item.license_plate || item.container_no || '—'}
+                          {item.container_no ? (
+                            <span className="font-bold text-[#223873]">Cont {item.container_no}</span>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="p-2 text-slate-700 text-[11px]">
+                          <div>{item.customer_name || 'Khách vãng lai'}</div>
+                          {item.license_plate && <div className="font-mono text-slate-500 font-bold">Xe: {item.license_plate}</div>}
                         </td>
                         <td className="p-2 text-right font-mono font-bold text-slate-900">
                           {(item.amount - item.paid_amount).toLocaleString()} đ
@@ -1803,8 +2106,8 @@ export default function CashierBillingPage() {
                   </tbody>
                   <tfoot className="bg-slate-100 border-t border-slate-300 font-bold">
                     <tr>
-                      <td colSpan={3} className="p-2.5 text-right text-slate-700 text-xs uppercase tracking-wider">
-                        Tổng tiền đã thanh toán:
+                      <td colSpan={4} className="p-2.5 text-right text-slate-700 text-xs uppercase tracking-wider">
+                        Tổng tiền đã thanh toán ({batchReceiptItems.length} khoản):
                       </td>
                       <td className="p-2.5 text-right text-sm font-mono font-bold text-emerald-700">
                         {batchReceiptMeta.totalAmount.toLocaleString()} VNĐ

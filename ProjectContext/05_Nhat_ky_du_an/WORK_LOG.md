@@ -1,5 +1,32 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-13 17:15 — Chuẩn Hóa Toàn Diện Nghiệp Vụ Thu Phí & Sổ Cái (/billing): Bổ Sung Định Danh Đối Tượng, Thu Gộp 1-N Cont / 1-N Khách & Phân Quyền Triệt Để
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *Thiếu định danh trên Sổ cái:* Các khoản thu cước điện chỉ hiển thị thời gian phút cắm mà không biết của container nào, khách hàng nào, xe nào chở vào.
+  2. *Thu gộp linh hoạt:* Khi cont chuẩn bị ra bãi, CCKB cần gom thu 1 phát tất cả các lần cắm của container đó trong đợt vào bãi này; hoặc 1 khách hàng thanh toán cùng lúc cho nhiều yêu cầu / nhiều container khác nhau (1-n yêu cầu, 1-n cont).
+  3. *Tách bạch vai trò triệt để:*
+     - CCKB (`PORT_STAFF`, `PORT_LEAD`): CHỈ thấy và thu Cước điện (`REEFER`), không thấy tiền lưu kho hay vé xe.
+     - An ninh (`SEC_STAFF`, `SEC_LEAD`): CHỈ thu Vé xe (`TICKET`) và xem lịch sử Phí lưu bãi (`STORAGE`), tuyệt đối không thấy/thu cước điện.
+     - Quản trị viên (`SYS_ADMIN`): Thấy và quản lý toàn bộ các khoản.
+  4. *Phí lưu đêm container:* Chốt và thu trực tiếp tại Cổng ra (`/exit`) khi xe chở cont rời bãi; tại trang `/billing` chỉ dùng tra cứu lịch sử, không có nút thu lẻ tẻ trước khi cont xuất bãi.
+- **Tập tin sửa đổi:**
+  - `src/types/domain.types.ts`: Bổ sung `customer_name?: string | null; customer_phone?: string | null;` vào `ChargeItem`.
+  - `src/lib/services/supabase-repository.ts`: Nâng cấp hàm `getCharges()` để truy vấn liên kết đa tầng giữa `app_charges`, `app_reefer_power_sessions`, `app_container_visits`, `app_vehicle_visits`, và `app_reefer_requests`. Trả về đầy đủ `container_no`, `license_plate`, `customer_name`, `customer_phone`, và định dạng tiêu đề chi tiết.
+  - `src/lib/services/demo-repository.ts`: Bổ sung dữ liệu mẫu khách hàng, SĐT, số cont, và phiên điện cắm bổ sung cho container `OOLU6543210` và `TEMU9182341`.
+  - `src/app/billing/page.tsx`:
+    * Tách bạch vai trò triệt để theo RBAC V5 (CCKB chỉ thấy cước điện; An ninh chỉ thấy vé xe & lưu bãi).
+    * Hiển thị đầy đủ badges đối tượng trên Sổ cái: `📦 Cont: {container_no}`, `👤 Khách: {customer_name}`, `🚛 Xe: {license_plate}`.
+    * Nút gom nhanh 1-chạm trên từng dòng: `⚡ Gom tất cả của cont này` và `👤 Gom tất cả của khách này`.
+    * Bộ lọc Dropdown lọc nhanh theo Container và Khách hàng cho CCKB/Admin.
+    * Thanh công cụ Thu gộp nổi: Liệt kê số lượng cont, danh sách khách hàng, tổng tiền bằng số và bằng chữ.
+    * Modal Thu gộp nâng cao: Bảng kê chi tiết các khoản gom thu kèm mã QR VietQR tự động.
+    * Phí lưu bãi container: Đánh dấu trạng thái "Chốt thu tại Cổng ra" / "Đã thu tại Cổng ra", không hiển thị checkbox hay nút thu lẻ tại Sổ cái.
+    * Mẫu in Biên lai tổng hợp gộp: In chi tiết từng cont, từng khách hàng và số tiền.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, Turbopack hoàn tất 100% 17 routes tĩnh, 0 lỗi TypeScript.
+- **Trạng thái:** Hoàn tất, sẵn sàng commit và push lên nhánh `main` để Vercel cập nhật Production.
+
 ## 2026-10-13 16:50 — Nâng Cấp Giao Diện Bãi Xe, CRUD Phân Khu, Kiểm Soát Xuất Bãi Nợ Cước Điện & Toàn Diện 67 Quyền RBAC V5
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

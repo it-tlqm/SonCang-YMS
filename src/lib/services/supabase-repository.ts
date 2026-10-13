@@ -1016,33 +1016,122 @@ export class SupabaseRepository implements IYardRepository {
       }
       const rows = data as unknown as ChargeRow[];
 
-      // Đọc bảng app_vehicle_visits để lấy biển số xe và loại xe
-      const vehicleIds = rows
-        .map(r => r.vehicle_visit_id)
-        .filter((id): id is string => Boolean(id));
-
-      const plateMap: Record<string, { plate: string; type: string }> = {};
-      if (vehicleIds.length > 0) {
-        const { data: vehData } = await supabase
-          .from('app_vehicle_visits')
-          .select('id, license_plate, vehicle_type')
-          .in('id', Array.from(new Set(vehicleIds)));
-
-        if (vehData) {
-          vehData.forEach((v: { id: string; license_plate: string | null; vehicle_type: string }) => {
-            plateMap[v.id] = {
-              plate: v.license_plate || '',
-              type: v.vehicle_type || ''
-            };
-          });
+      // 1. Phục hồi container_visit_id từ app_reefer_power_sessions nếu dòng khoản thu chỉ có reefer_session_id
+      const reeferSessionIds = Array.from(
+        new Set(rows.map(r => r.reefer_session_id).filter((id): id is string => Boolean(id)))
+      );
+      const sessionToContMap: Record<string, string> = {};
+      if (reeferSessionIds.length > 0) {
+        try {
+          const { data: sData } = await supabase
+            .from('app_reefer_power_sessions')
+            .select('id, container_visit_id')
+            .in('id', reeferSessionIds);
+          if (sData) {
+            sData.forEach((s: { id: string; container_visit_id: string }) => {
+              if (s.container_visit_id) {
+                sessionToContMap[s.id] = s.container_visit_id;
+              }
+            });
+          }
+        } catch {
+          // Bỏ qua lỗi phụ
         }
       }
 
-      // Khử trùng lặp: Nếu 1 vehicle_visit_id có nhiều hơn 1 khoản TICKET, ưu tiên bản ghi PAID hoặc bản ghi chi tiết hơn
+      // 2. Đọc bảng app_container_visits để lấy mã số container và xe chở vào
+      const rawContIds = rows.map(
+        r => r.container_visit_id || (r.reefer_session_id ? sessionToContMap[r.reefer_session_id] : null)
+      );
+      const containerVisitIds = Array.from(new Set(rawContIds.filter((id): id is string => Boolean(id))));
+      const contMap: Record<string, { contNo: string; inboundVehicleId?: string | null }> = {};
+
+      if (containerVisitIds.length > 0) {
+        try {
+          const { data: contData } = await supabase
+            .from('app_container_visits')
+            .select('id, container_no_current, inbound_vehicle_visit_id')
+            .in('id', containerVisitIds);
+          if (contData) {
+            contData.forEach((c: { id: string; container_no_current: string; inbound_vehicle_visit_id: string | null }) => {
+              contMap[c.id] = {
+                contNo: c.container_no_current || '',
+                inboundVehicleId: c.inbound_vehicle_visit_id || null,
+              };
+            });
+          }
+        } catch {
+          // Bỏ qua lỗi phụ
+        }
+      }
+
+      // 3. Đọc bảng app_vehicle_visits để lấy biển số xe và loại xe (cả xe trực tiếp và xe chở cont vào)
+      const allVehIds = new Set<string>();
+      rows.forEach(r => {
+        if (r.vehicle_visit_id) allVehIds.add(r.vehicle_visit_id);
+        const cId = r.container_visit_id || (r.reefer_session_id ? sessionToContMap[r.reefer_session_id] : null);
+        if (cId && contMap[cId]?.inboundVehicleId) {
+          allVehIds.add(contMap[cId].inboundVehicleId!);
+        }
+      });
+
+      const plateMap: Record<string, { plate: string; type: string; driverName?: string | null; driverPhone?: string | null }> = {};
+      if (allVehIds.size > 0) {
+        try {
+          const { data: vehData } = await supabase
+            .from('app_vehicle_visits')
+            .select('id, license_plate, vehicle_type, driver_name, driver_phone')
+            .in('id', Array.from(allVehIds));
+
+          if (vehData) {
+            vehData.forEach((v: { id: string; license_plate: string | null; vehicle_type: string; driver_name?: string | null; driver_phone?: string | null }) => {
+              plateMap[v.id] = {
+                plate: v.license_plate || '',
+                type: v.vehicle_type || '',
+                driverName: v.driver_name || null,
+                driverPhone: v.driver_phone || null,
+              };
+            });
+          }
+        } catch {
+          // Bỏ qua lỗi phụ
+        }
+      }
+
+      // 4. Tra cứu thông tin Khách hàng / Chủ hàng từ app_reefer_requests (CCKB)
+      const customerByContVisitId: Record<string, { name: string; phone?: string | null; expectedPlate?: string | null }> = {};
+      const customerByContNo: Record<string, { name: string; phone?: string | null; expectedPlate?: string | null }> = {};
+      try {
+        let reqQuery = (supabase as any)
+          .from('app_reefer_requests')
+          .select('container_no_planned, customer_name, customer_phone, matched_container_visit_id, expected_license_plate');
+        if (yardId) {
+          reqQuery = reqQuery.eq('yard_id', yardId);
+        }
+        const { data: reqData } = await reqQuery;
+        if (reqData) {
+          reqData.forEach((rq: any) => {
+            const info = {
+              name: rq.customer_name || '',
+              phone: rq.customer_phone || null,
+              expectedPlate: rq.expected_license_plate || null,
+            };
+            if (rq.matched_container_visit_id) {
+              customerByContVisitId[rq.matched_container_visit_id] = info;
+            }
+            if (rq.container_no_planned) {
+              customerByContNo[rq.container_no_planned.trim().toUpperCase()] = info;
+            }
+          });
+        }
+      } catch {
+        // Bỏ qua lỗi phụ
+      }
+
+      // Khử trùng lặp: Nếu 1 vehicle_visit_id có nhiều hơn 1 khoản TICKET, ưu tiên bản ghi PAID
       const seenVehicles = new Set<string>();
       const dedupedRows: ChargeRow[] = [];
 
-      // Sắp xếp ưu tiên các bản ghi PAID lên trước để không bị loại nhầm bản ghi đã thanh toán
       const sortedRows = [...rows].sort((a, b) => {
         if (a.status === 'PAID' && b.status !== 'PAID') return -1;
         if (a.status !== 'PAID' && b.status === 'PAID') return 1;
@@ -1052,7 +1141,7 @@ export class SupabaseRepository implements IYardRepository {
       for (const r of sortedRows) {
         if (r.charge_type === 'TICKET' && r.vehicle_visit_id) {
           if (seenVehicles.has(r.vehicle_visit_id)) {
-            continue; // Bỏ qua bản ghi duplicate thừa
+            continue;
           }
           seenVehicles.add(r.vehicle_visit_id);
         }
@@ -1060,14 +1149,33 @@ export class SupabaseRepository implements IYardRepository {
       }
 
       return dedupedRows.map(r => {
-        const vehInfo = r.vehicle_visit_id ? plateMap[r.vehicle_visit_id] : null;
+        const cVisitId = r.container_visit_id || (r.reefer_session_id ? sessionToContMap[r.reefer_session_id] : null);
+        const contInfo = cVisitId ? contMap[cVisitId] : null;
+        const contNo = contInfo?.contNo || null;
+
+        const effectiveVehId = r.vehicle_visit_id || (contInfo?.inboundVehicleId || null);
+        const vehInfo = effectiveVehId ? plateMap[effectiveVehId] : null;
+
+        const custInfo = (cVisitId ? customerByContVisitId[cVisitId] : null) ||
+                         (contNo ? customerByContNo[contNo.trim().toUpperCase()] : null);
+        const customerName = custInfo?.name || vehInfo?.driverName || null;
+        const customerPhone = custInfo?.phone || vehInfo?.driverPhone || null;
+        const plate = vehInfo?.plate || custInfo?.expectedPlate || null;
+
         let formattedTitle = r.notes || `Khoản thu ${r.charge_type}`;
 
-        // Chuyển đổi tên mã kỹ thuật CONT_LANH thành tên tiếng Việt chuẩn
         if (r.charge_type === 'TICKET') {
           const typeName = vehInfo?.type ? getVehicleTypeName(vehInfo.type) : 'phương tiện';
-          const plateText = vehInfo?.plate ? ` (${vehInfo.plate})` : '';
+          const plateText = plate ? ` (${plate})` : '';
           formattedTitle = `Vé xe vào cổng: ${typeName}${plateText}`;
+        } else if (r.charge_type === 'REEFER') {
+          const contPrefix = contNo ? `Container ${contNo}` : 'container';
+          const noteSuffix = r.notes ? ` — ${r.notes}` : '';
+          formattedTitle = `Cước cắm điện ${contPrefix}${noteSuffix}`;
+        } else if (r.charge_type === 'STORAGE') {
+          const contPrefix = contNo ? `Container ${contNo}` : 'container';
+          const noteSuffix = r.notes ? ` — ${r.notes}` : '';
+          formattedTitle = `Phí lưu bãi ${contPrefix}${noteSuffix}`;
         }
 
         return {
@@ -1075,11 +1183,13 @@ export class SupabaseRepository implements IYardRepository {
           yard_id: r.yard_id,
           charge_type: r.charge_type as ChargeType,
           title: formattedTitle,
-          container_visit_id: r.container_visit_id,
-          vehicle_visit_id: r.vehicle_visit_id,
-          reefer_session_id: r.reefer_session_id,
-          container_no: null,
-          license_plate: vehInfo?.plate || null,
+          container_visit_id: cVisitId || null,
+          vehicle_visit_id: effectiveVehId || null,
+          reefer_session_id: r.reefer_session_id || null,
+          container_no: contNo,
+          license_plate: plate,
+          customer_name: customerName,
+          customer_phone: customerPhone,
           amount: r.amount,
           paid_amount: r.paid_amount,
           status: r.status as ChargeItem['status'],

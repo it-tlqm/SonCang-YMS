@@ -40,6 +40,18 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
+- **Cập nhật lúc:** 13/10/2026 17:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHUẨN HÓA TOÀN DIỆN NGHIỆP VỤ THU PHÍ & SỔ CÁI (/billing): ĐỊNH DANH ĐỐI TƯỢNG, THU GỘP 1-N VÀ PHÂN QUYỀN TRIỆT ĐỂ**:
+  * **1. Định danh đối tượng rõ ràng trên Sổ cái:** Truy vấn liên kết đa tầng giữa `app_charges`, `app_reefer_power_sessions`, `app_container_visits`, `app_vehicle_visits`, và `app_reefer_requests`. Hiển thị đầy đủ badges: Số container (`📦 Cont: {container_no}`), Tên & SĐT khách hàng/chủ hàng (`👤 Khách: {customer_name}`), và Xe chở vào (`🚛 Xe: {license_plate}`).
+  * **2. Thu gộp linh hoạt 1-n yêu cầu / 1-n container:** Hỗ trợ nút gom nhanh 1-chạm (`⚡ Gom tất cả của cont này` và `👤 Gom tất cả của khách này`); thêm bộ lọc dropdown theo Container và theo Khách hàng; thanh tác vụ gom thu nổi hiển thị tổng số cont, danh sách khách hàng, tổng tiền bằng số và chữ; Modal thu gộp có bảng kê chi tiết và mã VietQR thanh toán tự động; mẫu in biên lai tổng hợp gộp chi tiết từng cont.
+  * **3. Tách bạch vai trò triệt để (Role Isolation):**
+    - CCKB (`PORT_STAFF`, `PORT_LEAD`): CHỈ thấy và thu Cước điện (`REEFER`), tiêu đề giao diện và các thẻ KPI chuyên biệt cho cước điện; hoàn toàn không thấy vé xe hay tiền lưu bãi.
+    - An ninh (`SEC_STAFF`, `SEC_LEAD`): CHỈ thu Vé xe (`TICKET`) và xem lịch sử Phí lưu bãi (`STORAGE`); tuyệt đối không thấy và không thu tiền điện.
+    - Quản trị viên (`SYS_ADMIN`): Toàn quyền quản lý và lọc tự do.
+  * **4. Phí lưu đêm container chốt tại Cổng ra (`/exit`):** Tại trang `/billing`, khoản lưu bãi chỉ để tra cứu lịch sử, không có checkbox hay nút thu tiền lẻ tẻ trước khi xe chở cont xuất bãi thực tế (đúng nguyên tắc V5).
+  * **5. Đã xác minh:** Lệnh `npm run build` kết thúc thành công mã 0 (17/17 routes, 0 lỗi TypeScript).
+  * **6. Trạng thái:** Sẵn sàng commit và push lên GitHub `it-tlqm/SonCang-YMS` nhánh `main` để Vercel tự động triển khai.
+
 - **Cập nhật lúc:** 13/10/2026 16:50 (Asia/Ho_Chi_Minh)
 - **Mốc hiện tại:** **NÂNG CẤP GIAO DIỆN BÃI XE, CRUD PHÂN KHU, KIỂM SOÁT XUẤT BÃI NỢ ĐIỆN VÀ TOÀN DIỆN 67 QUYỀN RBAC V5**:
   * **1. Cột Tác vụ bãi xe (`/yard`):** Gom toàn bộ 5-6 nút thao tác dàn trải (`Sửa biển`, `Hiệu chỉnh`, `Log xe`, `HÀNG/RỖNG`, `Sửa cont`, `Gán ô đỗ`) thành Dropdown Action Menu `Thao tác ▾` sạch sẽ, tự đóng khi click ngoài; chỉ giữ nút `Thu phí` (nếu chưa thu vé) hiển thị nổi bật trực tiếp.

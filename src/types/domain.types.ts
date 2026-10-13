@@ -267,6 +267,8 @@ export interface ChargeItem {
   container_no?: string | null;
   reefer_session_id?: string | null;
   license_plate?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
   amount: number;
   paid_amount: number;
   status: ChargeStatus;
