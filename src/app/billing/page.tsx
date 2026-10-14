@@ -555,24 +555,35 @@ export default function CashierBillingPage() {
     return Array.from(new Set(custs));
   }, [roleScopedCharges]);
 
-  // Lọc danh sách sổ cái theo tìm kiếm và bộ lọc
+  // Lọc danh sách sổ cái theo tìm kiếm và bộ lọc, ưu tiên đẩy Chưa thu (UNPAID) lên trên đầu
   const filteredCharges = useMemo(() => {
-    return roleScopedCharges.filter((c) => {
-      const q = searchQuery.toLowerCase();
-      const matchesSearch = 
-        c.title.toLowerCase().includes(q) ||
-        (c.container_no && c.container_no.toLowerCase().includes(q)) ||
-        (c.license_plate && c.license_plate.toLowerCase().includes(q)) ||
-        (c.customer_name && c.customer_name.toLowerCase().includes(q)) ||
-        (c.notes && c.notes.toLowerCase().includes(q));
+    return roleScopedCharges
+      .filter((c) => {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = 
+          c.title.toLowerCase().includes(q) ||
+          (c.container_no && c.container_no.toLowerCase().includes(q)) ||
+          (c.license_plate && c.license_plate.toLowerCase().includes(q)) ||
+          (c.customer_name && c.customer_name.toLowerCase().includes(q)) ||
+          (c.notes && c.notes.toLowerCase().includes(q));
 
-      const matchesType = typeFilter === 'ALL' || c.charge_type === typeFilter;
-      const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
-      const matchesCont = contFilter === 'ALL' || c.container_no === contFilter;
-      const matchesCustomer = customerFilter === 'ALL' || c.customer_name === customerFilter;
+        const matchesType = typeFilter === 'ALL' || c.charge_type === typeFilter;
+        const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
+        const matchesCont = contFilter === 'ALL' || c.container_no === contFilter;
+        const matchesCustomer = customerFilter === 'ALL' || c.customer_name === customerFilter;
 
-      return matchesSearch && matchesType && matchesStatus && matchesCont && matchesCustomer;
-    });
+        return matchesSearch && matchesType && matchesStatus && matchesCont && matchesCustomer;
+      })
+      .sort((a, b) => {
+        // 1. Ưu tiên các khoản CHƯA THU (UNPAID) lên trên cùng để thu ngân dễ thấy và xử lý ngay
+        if (a.status === 'UNPAID' && b.status !== 'UNPAID') return -1;
+        if (a.status !== 'UNPAID' && b.status === 'UNPAID') return 1;
+
+        // 2. Cùng trạng thái: khoản tạo mới nhất xếp lên trước
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return timeB - timeA;
+      });
   }, [roleScopedCharges, searchQuery, typeFilter, statusFilter, contFilter, customerFilter]);
 
   const totalUnpaid = useMemo(() => {

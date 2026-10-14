@@ -1,5 +1,23 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 08:10 — Sắp Xếp Ưu Tiên Đẩy Các Khoản Chưa Thu (UNPAID) Lên Đầu Sổ Cái Bến Bãi (`/billing`)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: "chưa thu thì đẩy lên trên chứ bạn" tại giao diện Sổ cái Thu phí Bến bãi (`/billing`).
+- **Phân tích vấn đề:**
+  - Trước đây, hàm `filteredCharges` trong [`src/app/billing/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/billing/page.tsx) chỉ áp dụng các bộ lọc (`filter`) mà chưa có bước sắp xếp (`sort`).
+  - Dữ liệu trả về từ Repository giữ nguyên thứ tự hoặc xếp theo thời gian đơn thuần, dẫn đến các khoản đã thu (`PAID`) có thể chen lên trước các khoản chưa thu (`UNPAID`), khiến thu ngân / kế toán khó quan sát và phải cuộn tìm các khoản cần thu.
+- **Giải pháp triển khai:**
+  - Bổ sung logic `.sort()` vào `filteredCharges`:
+    1. Ưu tiên hàng đầu: Các khoản `status === 'UNPAID'` (Chưa thu) được đẩy lên trên cùng (`return -1`).
+    2. Các khoản `status === 'PAID'` (Đã thu) nằm ở phía dưới (`return 1`).
+    3. Trong cùng nhóm trạng thái: Sắp xếp theo thời gian tạo mới nhất lên trước (`timeB - timeA`).
+  - Đảm bảo tương thích hoàn hảo với các tính năng thu gộp: "Chọn/Bỏ tất cả khoản chưa thu", gom theo số container, gom theo khách hàng và bộ lọc đa tiêu chí (loại phí, trạng thái, cont, khách).
+- **Tập tin sửa đổi:**
+  - `src/app/billing/page.tsx`: Cập nhật `filteredCharges` với logic sắp xếp ưu tiên `UNPAID` trước `PAID`.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, Turbopack tối ưu 18/18 static routes, TypeScript hoàn thành không lỗi.
+- **Trạng thái:** Hoàn tất, giao diện Sổ cái hiển thị các khoản nợ cần thu nổi bật trên cùng.
+
 ## 2026-10-14 07:50 — Nâng Cấp Triệt Để Các Điểm Lưu Tạm & Hoàn Thiện Kiểm Soát 30 Giắc Cắm Điện 380V (Migration 23)
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: "Còn chỗ nào bịa nữa không nâng cấp luôn đi" & yêu cầu về kiểm soát giắc cắm của container và mở tạo sửa xóa phân khu bãi.

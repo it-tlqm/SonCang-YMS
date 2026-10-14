@@ -40,8 +40,13 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 07:50 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **NÂNG CẤP TRIỆT ĐỂ BẢNG PHÂN KHU DB THẬT, KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V & CẬP NHẬT BIỂU PHÍ (MIGRATION 23)**:
+- **Cập nhật lúc:** 14/10/2026 08:10 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ƯU TIÊN ĐẨY KHOẢN CHƯA THU (UNPAID) LÊN ĐẦU SỔ CÁI BẾN BÃI (`/billing`)**:
+  * **Trải nghiệm Thu ngân & Kế toán Ca trực:** Trong bảng Sổ cái thu phí bến bãi, tất cả các khoản nợ / chưa thanh toán (`UNPAID`) được sắp xếp ưu tiên hiển thị lên trên cùng, sau đó mới đến các khoản đã hoàn tất (`PAID`). Trong cùng nhóm trạng thái, các khoản phát sinh mới nhất được sắp xếp lên trước.
+  * Giúp thu ngân nhận diện ngay công nợ chưa thu, sử dụng thao tác 1-chạm: "Chọn/Bỏ tất cả khoản chưa thu", "Gom tất cả của cont này", "Gom tất cả của khách này" để thu gộp nhanh chóng.
+  * **Xác minh kỹ thuật:** `npm run build` exit code 0 thành công 100% (18/18 routes, Turbopack).
+
+- **Mốc trước đó (14/10/2026 07:50):** **NÂNG CẤP TRIỆT ĐỂ BẢNG PHÂN KHU DB THẬT, KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V & CẬP NHẬT BIỂU PHÍ (MIGRATION 23)**:
   * **Phân khu bãi (Yard Zones):** Tạo bảng thực tế `public.app_yard_zones` trên Supabase Cloud thay thế hoàn toàn localStorage. Hỗ trợ CRUD phân khu đầy đủ.
   * **Kiểm soát giắc cắm điện:** Bổ sung cột `plug_socket_code` (R01 - R30) vào container và phiên điện. Cung cấp bộ chọn thông minh tại Modal Cắm điện (tự động nhận diện bận/trống) và bảng lưới kiểm soát 30 giắc cắm 380V trực quan thời gian thực tại tab Phân khu trang `/yard`.
   * **Sửa biển số xe:** Lưu lịch sử vào bảng thực tế `public.app_vehicle_plate_changes` trên DB.
