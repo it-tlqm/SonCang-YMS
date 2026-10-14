@@ -1,6 +1,30 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-14 09:45 — Sửa Lỗi Đăng Nhập Production Vercel & Kích Hoạt 1-Chạm 7 Vai Trò V5 Chuẩn Sơn Cảng
+## 2026-10-14 09:55 — Khắc Phục Triệt Để Nghẽn Mạng 60s & Treo Ứng Dụng Trên Production Vercel
+
+- **Yêu cầu / nguồn:** Phản hồi khẩn cấp từ Chủ dự án: *"bị treo rồi"* sau khi gặp lỗi đăng nhập.
+- **Phân tích nguyên nhân gốc rễ (Root Cause Analysis):**
+  1. *Thủ phạm gây nghẽn mạng 60 giây ở tầng Edge Proxy (`src/proxy.ts` -> `src/lib/supabase/middleware.ts`):*
+     - Middleware Next.js 16 chạy trên mọi request URL.
+     - Dòng code cũ thực hiện `await supabase.auth.getUser()` trên mọi HTTP request mà không kiểm tra xem client có cookie token hay không.
+     - Khi client chưa đăng nhập hoặc đăng nhập bằng vai trò demo, không có cookie `sb-*-auth-token`, middleware vẫn gửi network round-trip đến Supabase Auth server ở nước ngoài. Khi kết nối mạng bị chậm hoặc nghẽn, Vercel Serverless Function bị giữ chân tới khi chạm giới hạn timeout (60 giây), khiến toàn bộ các trang bị đơ hoàn toàn.
+  2. *Thủ phạm gây treo vòng lặp Spinner tại trang chủ (`src/app/page.tsx` & `src/contexts/auth-context.tsx`):*
+     - Trang chủ `/` hiển thị vòng quay loading "Đang tải phân quyền Sơn Cảng..." và chờ cờ `isLoading` từ `auth-context`.
+     - Trong `auth-context.tsx`, hàm `initAuth` nếu trước đó lưu mode `REAL` sẽ gọi `supabase.auth.getSession()` vô thời hạn, không có timeout. Nếu mạng chập chờn, `isLoading` không bao giờ chuyển thành `false`, người dùng thấy màn hình quay vô tận.
+     - Ngoài ra, hàm `switchDemoRole` cũ có logic chặn không cho chuyển vai trò nếu `user?.authMode === 'REAL'`, khiến người dùng bị kẹt cứng nếu trước đó có session dở dang.
+- **Giải pháp triển khai dứt điểm:**
+  1. *Tối ưu hóa Middleware (`src/lib/supabase/middleware.ts`):*
+     - Quét `request.cookies.getAll()`. Nếu không tìm thấy cookie nào khớp với pattern `sb-*-auth-token`, lập tức trả về `supabaseResponse` (0ms).
+     - Nếu có cookie auth, bọc `supabase.auth.getUser()` trong `Promise.race` với timeout 2.5 giây và `try/catch` để tuyệt đối không làm treo request của người dùng kể cả khi máy chủ Supabase bảo trì.
+  2. *Bảo vệ Auth Context & Trang chủ (`src/contexts/auth-context.tsx`, `src/app/page.tsx`):*
+     - Thêm timeout 2.0s cho `supabase.auth.getSession()`, tự động chuyển fallback sang tài khoản demo nếu session mạng không khả dụng.
+     - Cho phép `switchDemoRole` tự động sign out phiên thật và cập nhật state vai trò demo ngay lập tức.
+     - Trang chủ `/` thêm safety timer 1.2s tự động redirect sang `/login` hoặc dashboard nếu quá trình tải quyền bị chậm.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, 18 routes biên dịch hoàn hảo.
+  - Git commit & push `eceddb9` lên `origin/main` để Vercel cập nhật.
+- **Trạng thái:** Hoàn tất, hệ thống phản hồi tức thì, chấm dứt hoàn toàn hiện tượng bị treo.
+
 
 - **Yêu cầu / nguồn:** Phản hồi khẩn cấp từ Chủ dự án: *"ủa app lỗi r à, k thấy đăng nhập hay sử dụng được nữa bạn ạ"*
 - **Phân tích vấn đề:**

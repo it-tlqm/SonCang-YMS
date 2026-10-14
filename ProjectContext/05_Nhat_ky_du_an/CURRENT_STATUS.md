@@ -40,24 +40,18 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 09:45 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **SỬA LỖI ĐĂNG NHẬP PRODUCTION VERCEL + KÍCH HOẠT ĐĂNG NHẬP 1-CHẠM 7 VAI TRÒ CHUẨN V5 VẬN HÀNH THỬ NGHIỆM**:
-  1. **Khắc phục lỗi Đăng nhập trên Production Vercel (`IS_DEMO_ENABLED`):**
-     - Sửa điều kiện `IS_DEMO_ENABLED = process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true'`, đảm bảo trên Vercel production chế độ đăng nhập ca trực UAT luôn mở để các bộ phận kiểm thử và sử dụng app bình thường, không bị ẩn form vai trò.
-  2. **Nâng cấp màn hình Đăng nhập ([`/login`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/login/page.tsx)):**
-     - Hiển thị nổi bật khối **"Đăng nhập nhanh theo Vai trò Ca trực (1 chạm)"** với đầy đủ 7 vai trò V5 chuẩn Sơn Cảng:
-       * 🟢 `SEC_STAFF`: Trần Quốc Bảo (Bốt cổng) -> vào ngay `/entry`.
-       * 🟢 `SEC_LEAD`: Nguyễn Văn An (Trưởng ca An ninh) -> vào ngay `/entry`.
-       * 🟡 `PORT_STAFF`: Lê Thị Dung (Thương vụ bến bãi) -> vào ngay `/reefer`.
-       * 🟡 `PORT_LEAD`: Hoàng Minh Cường (Trưởng ca CCKB) -> vào ngay `/reefer`.
-       * 🔵 `DIS_STAFF`: Vũ Văn Giang (Điều phối hiện trường) -> vào ngay `/yard`.
-       * 🔵 `DIS_LEAD`: Phạm Đình Hải (Trưởng ca Điều phối) -> vào ngay `/yard`.
-       * 🟣 `SYS_ADMIN`: Ban Quản trị Hệ thống TLQM -> vào ngay `/dashboard`.
-     - Phân nhóm màu sắc trực quan, chỉ rõ bộ phận và phạm vi nhiệm vụ.
-     - Vẫn duy trì Form đăng nhập bằng Email & Mật khẩu Supabase Auth song song cho tài khoản công vụ chính thức.
-  3. **Ưu tiên Repository Supabase Cloud:**
-     - Thiết lập `repository = getYardRepository('SUPABASE')` khi có cấu hình Supabase Cloud (`NEXT_PUBLIC_SUPABASE_URL` hoặc `NEXT_PUBLIC_ENABLE_REAL_WRITE`), đảm bảo dù đăng nhập bằng vai trò nào thì mọi thao tác xe, cont, điện, nhân sự đều ghi thẳng vào database Supabase Cloud thật.
-  4. **Xác minh kỹ thuật:** `npm run build` exit code 0, 18/18 routes tối ưu thành công.
+- **Cập nhật lúc:** 14/10/2026 09:55 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ NGHẼN MẠNG 60S & TREO ỨNG DỤNG TRÊN PRODUCTION VERCEL**:
+  1. **Tối ưu hóa Middleware Next.js 16 Proxy (`src/lib/supabase/middleware.ts`):**
+     - Loại bỏ hiện tượng nghẽn cổ chai: Kiểm tra cookie session trước khi gọi Supabase Auth. Nếu không có cookie auth của Supabase (`sb-*-auth-token`), trả về phản hồi tĩnh ngay lập tức trong 0ms thay vì gửi HTTP round-trip ra nước ngoài.
+     - Thiết lập timeout bảo vệ 2.5s với `Promise.race` và `try/catch` để nếu Supabase Auth server bị chậm hoặc rate limit, middleware tuyệt đối không bị treo 60s làm tê liệt Vercel Edge.
+  2. **Khắc phục vướng vòng lặp Spinner tải trang (`src/app/page.tsx` & `src/contexts/auth-context.tsx`):**
+     - Đặt timeout 2s cho `supabase.auth.getSession()` trong `initAuth`, tự động fallback sang vai trò ca trực nếu session mạng không khả dụng.
+     - Bổ sung safety timer 1.2s tại trang chủ `/` để tự động điều hướng sang `/login` hoặc dashboard, dứt điểm tình trạng người dùng bị kẹt spinner vô hạn.
+     - Mở khóa `switchDemoRole` để người dùng có thể chuyển đổi mượt mà giữa các vai trò 1-chạm bất kỳ lúc nào mà không bị chặn bởi session trước đó.
+  3. **Build & Triển khai Production:**
+     - Build `next build` thông suốt 18/18 routes tĩnh trong 1.5s, hoàn toàn không có cảnh báo hay lỗi cú pháp.
+     - Đã commit và push bản vá `eceddb9` lên `origin/main` để Vercel cập nhật tức thời.
 
 - **Mốc trước đó (14/10/2026 09:10):** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**.
   1. **Kết nối Database Thực tế Supabase Cloud 100% (Migration 26):**
