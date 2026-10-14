@@ -12,11 +12,11 @@ Nguồn: mục 10 `../01_Nghiep_vu_V5/PROJECT_CONTEXT.md`; workbook V5 tab `27_V
 | RV05 | App hiển thị đang cắm nhưng hiện trường đã rút: ai xác minh, CCKB sửa/ghi ngoại lệ; **không xuất khi còn cắm vật lý** | CHỜ UAT |
 | RV06 | Tiền lưu mới phát sinh ở cổng ra sau khi CCKB đã duyệt tài chính: An ninh thu qua `storage.payment.collect` hoặc CCKB duyệt ngoại lệ nợ AP07 | **CHỜ CHỐT / UAT CÒN MỞ** |
 | RV07 | Mã loại xe `CONT_LANH` nhưng áp dụng xe container có hàng khô/lạnh; cách hiển thị & mapping | CHỜ UAT / xem quyết định V5 đã chốt |
-| RV08 | Vai trò Kế toán dự phòng, chưa hoạt động trong V1 | CHỜ UAT cho giai đoạn tương lai; V1 tắt |
+| RV08 | Phân hệ & Vai trò Kế toán bến bãi (`ACCOUNTANT`), xuất hóa đơn MST/CCCD, thu nợ AP07 | **ĐÃ CHỐT (D-018)** — Hoạt động chính thức từ Migration 28 |
 | RV09 | Định danh người thao tác khi dùng chung máy/bốt; trách nhiệm thu và xác nhận | **CHỜ CHỐT / UAT CÒN MỞ** |
 | RV10 | Dữ liệu AppSheet cũ thiếu giờ ra/thu tiền: đánh dấu legacy_unverified, không tạo công nợ giả | CHỜ UAT |
 | RV11 | Chứng từ và trao đổi qua Zalo thủ công; chưa có tích hợp API tự động V1 | CHỜ UAT cho chứng từ chi tiết |
-| RV12 | Mốc chốt ca báo cáo thu khác ca trực; cách phân loại thống kê | CHỜ UAT |
+| RV12 | Mốc chốt ca báo cáo thu khác ca trực; phân loại tiền mặt vs chuyển khoản | **ĐÃ CHỐT (D-018)** — Chốt tiền mặt linh hoạt thời gian, kiểm soát 4 mắt |
 
 ## Cách cập nhật
 

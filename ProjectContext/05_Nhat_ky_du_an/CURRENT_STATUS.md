@@ -40,31 +40,35 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 10:10 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **BỔ SUNG TÍNH NĂNG ĐỔI MẬT KHẨU CÁ NHÂN & ĐẶT LẠI MẬT KHẨU CHO NHÂN SỰ TRỰC CA (MIGRATION 27)**:
-  1. **Quản trị Đặt lại Mật khẩu Nhân sự ([`/admin/users`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx)):**
-     - Thêm nút hành động Đặt lại mật khẩu (icon chìa khóa `KeyRound` màu tím) trên cả **Dạng Bảng (Table View)** và **Dạng Thẻ (Card View)**.
-     - Modal Đặt lại Mật khẩu Nhân sự chuyên nghiệp:
-       * Tự động sinh ngẫu nhiên mật khẩu mạnh (`🎲 Tạo ngẫu nhiên`, vd: `SonCang@2026!`).
-       * Nút sao chép 1 chạm (`📋 Sao chép`) gửi nhanh cho nhân viên qua Zalo/tin nhắn.
-       * Ô nhập lý do đặt lại mật khẩu bắt buộc để ghi vết kiểm toán (Audit Trail).
-       * Tùy chọn bắt buộc nhân viên đổi mật khẩu ở lần đăng nhập tiếp theo (`must_change_password`).
-     - Tích hợp Route Handler bảo mật server-side [`/api/admin/users/reset-password`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/api/admin/users/reset-password/route.ts) đồng bộ trực tiếp với Supabase Auth và bảng `app_staff_users`.
-  2. **Đổi Mật khẩu Cá nhân (AppShell & Modal):**
-     - Tạo Modal component [`ChangePasswordModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/modals/change-password-modal.tsx).
-     - Tích hợp nút "Đổi mật khẩu tài khoản" vào Menu Tài khoản (Top Navbar), Sidebar Footer và Mobile Drawer để người dùng có thể đổi mật khẩu từ bất kỳ trang nào.
-     - Hỗ trợ xem/ẩn mật khẩu, kiểm tra độ dài tối thiểu 6 ký tự, kiểm tra xác nhận khớp mật khẩu.
-     - Đồng bộ tự động với Supabase Auth (`supabase.auth.updateUser`) và ghi nhận vào `app_audit_events`.
-  3. **Backend Database & Audit Trail (Migration 27):**
-     - Đã `npx supabase db push` thành công migration `20261014000027_staff_password_management_and_audit.sql` lên Supabase Cloud.
-     - Bổ sung các cột `password_reset_at`, `must_change_password`, `temp_password_hint` vào bảng `app_staff_users`.
-     - Cung cấp 2 RPC: `sc_admin_reset_staff_password` và `sc_user_change_password_audit`.
-  4. **Nâng cấp Màn hình Đăng nhập ([`/login`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/login/page.tsx)):**
-     - Bổ sung nút Ẩn/Hiện mật khẩu trực quan tại ô nhập password.
-     - Thêm dòng hướng dẫn xin cấp lại mật khẩu ca trực qua Trưởng bộ phận hoặc Quản trị viên (SYS_ADMIN).
-  5. **Xác minh kỹ thuật:** `npm run build` thành công 100% cho 19 routes (18 static + 1 dynamic API).
+- **Cập nhật lúc:** 14/10/2026 12:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TRIỂN KHAI HOÀN THIỆN PHÂN HỆ KẾ TOÁN BẾN BÃI SƠN CẢNG (`/accounting`), BÀN GIAO TIỀN MẶT HIỆN TRƯỜNG, XUẤT HÓA ĐƠN GTGT DOANH NGHIỆP (MST) & CÁ NHÂN (CCCD 12 SỐ), THU HỒI CÔNG NỢ AP07 VÀ BÁO CÁO EXCEL ĐA SHEET (MIGRATION 28)**:
+  1. **Backend Database & Security (Migration 28):**
+     - Đã `npx supabase db push` thành công migration `20261014000028_accounting_settlement_and_invoicing.sql` lên Supabase Cloud DEV (`son-cang-yms-dev`).
+     - Khởi tạo bộ phận `KE_TOAN` và vai trò `ACCOUNTANT` (Kế toán Bến bãi).
+     - Bổ sung 4 action permissions: `accounting.shift_cash.collect`, `accounting.invoice.prepare`, `accounting.debt.manage`, `accounting.reports.view`.
+     - Tạo 3 bảng dữ liệu chuyên biệt: `app_cash_settlements`, `app_cash_settlement_items` (bảo toàn tính bất biến tuyệt đối của sổ cái `app_payments`), và `app_invoices`.
+     - Nới lỏng check constraint `app_payments_collector_dept_check` cho phép `KE_TOAN` ghi nhận giao dịch thu nợ.
+     - Cung cấp 4 RPC bảo mật: `sc_confirm_cash_settlement`, `sc_accounting_collect_debt`, `sc_create_or_update_invoice`, `sc_issue_invoice`.
+     - Cấp tài khoản seed kế toán: `acc_01@soncang.vn` (Bùi Thị Lan).
+  2. **Tích hợp Điều hướng & Phân quyền Cách ly ([`AppShell`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/layout/app-shell.tsx)):**
+     - Bổ sung menu `/accounting` (Icon `Landmark`) vào nhóm `FINANCE`.
+     - Phân quyền nghiêm ngặt: Chỉ `ACCOUNTANT` và `SYS_ADMIN` được truy cập; nhân viên hiện trường (An ninh, CCKB, Điều phối) bị chặn không xem được sổ quỹ.
+  3. **Tab 1: Chốt Tiền Hiện Trường & In Biên Bản Bàn Giao:**
+     - Component [`CreateSettlementModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/create-settlement-modal.tsx): Lọc phiếu thu theo điểm chốt (An ninh, CCKB, Toàn bãi); kiểm soát 4 mắt giữa tiền thực đếm và sổ sách; tự động bắt buộc nhập lý do nếu phát sinh chênh lệch; nhập đại diện bàn giao hiện trường.
+     - Component [`SettlementReceiptPrint`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/settlement-receipt-print.tsx): In Biên bản bàn giao tiền mặt đạt chuẩn kế toán (Mẫu 02/BB-BGTM) có chữ ký 2 bên, đọc số tiền thành chữ tiếng Việt.
+  4. **Tab 2: Quản Lý Hóa Đơn GTGT (Doanh nghiệp MST & Cá nhân CCCD 12 số):**
+     - Component [`CreateInvoiceModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/create-invoice-modal.tsx): Gom các khoản thu (vé cổng, cước điện, lưu bãi); toggle linh hoạt Doanh nghiệp (MST 10/13 số) vs Cá nhân/Lái xe (CCCD đúng 12 số); cơ chế thuế Gross tự động tách ngược doanh thu và VAT (8% hoặc 10%), tổng hóa đơn khớp từng đồng với tiền thu.
+     - Component [`RecordEInvoiceModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/record-e-invoice-modal.tsx): Cập nhật số HĐĐT chính thức sau khi xuất trên phần mềm HĐĐT (VNPT/Viettel/MISA).
+     - Component [`InvoiceStatementPrint`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/invoice-statement-print.tsx): In Bảng kê chi tiết Mẫu số 01:BPA đính kèm hóa đơn GTGT.
+  5. **Tab 3: Công Nợ Bến Bãi (AP07):**
+     - Component [`CollectDebtModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/accounting/collect-debt-modal.tsx): Theo dõi danh sách cont/xe nợ cước xuất trước trả sau; thu hồi nợ (Tiền mặt / Chuyển khoản VietQR), ghi nhận sổ cái không vi phạm constraint, tự động gạch nợ.
+  6. **Tab 4: Báo Cáo Sổ Quỹ & Xuất Excel 4 Sheet OpenXML (.xlsx):**
+     - Hàm `exportAccountingReportExcel` trong [`src/lib/export-excel.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/export-excel.ts): Xuất tệp Excel gồm 4 sheet chuyên biệt (Doanh thu & Dòng tiền, Bảng kê Chốt tiền mặt, Sổ Hóa đơn MST & CCCD, Sổ Theo dõi Công nợ) với styling Navy `#1E3A8A`.
+  7. **Xác minh kỹ thuật:**
+     - TypeScript `npx tsc --noEmit`: 100% PASS 0 lỗi.
+     - Production Build `npm run build`: Hoàn tất 100% cho toàn bộ 20 routes (19 static + 1 dynamic API).
 
-- **Mốc trước đó (14/10/2026 09:10):** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**.
+- **Mốc trước đó (14/10/2026 10:10):** **BỔ SUNG TÍNH NĂNG ĐỔI MẬT KHẨU CÁ NHÂN & ĐẶT LẠI MẬT KHẨU CHO NHÂN SỰ TRỰC CA (MIGRATION 27)**.
   1. **Kết nối Database Thực tế Supabase Cloud 100% (Migration 26):**
      - Tạo migration `20261014000026_real_staff_and_role_management.sql`, cấp quyền `SELECT, INSERT, UPDATE, DELETE` cho cả `anon` và `authenticated` trên `app_staff_users`, `app_roles`, `app_role_permissions`, `app_departments`, `app_permissions`.
      - Cập nhật các hàm RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` nới lỏng kiểm tra actor (fallback an toàn khi client gọi trực tiếp), xóa bỏ hoàn toàn hiện tượng "dữ liệu ảo". Thao tác thêm, sửa, khóa, xóa nhân sự ghi trực tiếp vào Supabase Cloud.

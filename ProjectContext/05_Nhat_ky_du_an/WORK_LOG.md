@@ -1,5 +1,39 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 12:00 — Triển Khai Hoàn Thiện Phân Hệ Kế Toán Bến Bãi Sơn Cảng (/accounting) Kèm Bàn Giao Tiền Mặt, Xuất Hóa Đơn MST/CCCD 12 Số, Thu Nợ AP07 và Excel 4 Sheet (Migration 28)
+
+- **Yêu cầu / nguồn:** Phê duyệt từ Chủ dự án kèm file đối soát thực tế kế toán Ánh Bé: *"Phương án A (Cho phép xuất hóa đơn trước)... cái này OK... Phương án B (Bắt buộc trả nợ xong mới xuất HĐ)... chuẩn rồi... tôi gửi b file kế toán đang theo dõi nhé... ok triển khai đ"*
+- **Phân tích yêu cầu & Thiết kế giải pháp:**
+  1. *Phân tích tệp sổ sách kế toán thực tế bến bãi Tà Lùng Quang Minh:*
+     - Khách hàng xuất HĐ: hơn 90% là cá nhân/lái xe với CCCD 12 số (031077007508, 008084000159...) kèm địa chỉ thường trú Hải Phòng, Hà Tĩnh, Nghệ An, Bắc Giang... Bên cạnh là các doanh nghiệp xuất theo MST (vd: Công ty CPTM XNK Thiên An, MST: 0200923894).
+     - Cơ chế thuế Gross: Đơn giá hiện trường (vé cổng 250k, cắm điện 100k/h, lưu bãi 100k/đêm) là giá đã gồm VAT. Khi xuất HĐ GTGT tách ngược: Doanh thu = Tổng tiền / (1 + VAT) và Thuế VAT = Tổng tiền - Doanh thu. Tổng hóa đơn khớp từng đồng với sổ cái.
+     - Chốt tiền mặt ca trực: kiểm soát 4 mắt (Kế toán đếm tay vs Sổ sách tính toán); tự động tính chênh lệch; nếu lệch bắt buộc nhập lý do; có biên bản bàn giao ký nhận 2 bên.
+     - Phân định rõ Tiền mặt nộp quỹ vs Tiền chuyển khoản VietQR trong kỳ.
+     - Quản lý công nợ AP07 xuất trước trả sau: hỗ trợ thu nợ (tiền mặt/chuyển khoản), gạch nợ tự động trên sổ cái.
+     - Báo cáo sổ quỹ xuất tệp Excel 4 Sheet OpenXML (.xlsx) chuẩn thương hiệu Navy `#1E3A8A`.
+  2. *Database Migration 28 (`20261014000028_accounting_settlement_and_invoicing.sql`):*
+     - Tạo bộ phận `KE_TOAN` và vai trò `ACCOUNTANT`.
+     - Cấp 4 action permissions: `accounting.shift_cash.collect`, `accounting.invoice.prepare`, `accounting.debt.manage`, `accounting.reports.view`.
+     - Tạo bảng `app_cash_settlements`, `app_cash_settlement_items` (bảo toàn tính bất biến của `app_payments`), `app_invoices`.
+     - Cập nhật check constraint `app_payments_collector_dept_check` cho phép `KE_TOAN` thu nợ.
+     - 4 RPC: `sc_confirm_cash_settlement`, `sc_accounting_collect_debt`, `sc_create_or_update_invoice`, `sc_issue_invoice`.
+     - Seed user `acc_01@soncang.vn` (Bùi Thị Lan). Đã `npx supabase db push` thành công lên Supabase Cloud DEV.
+  3. *Tích hợp Giao diện & Component:*
+     - `src/components/layout/app-shell.tsx`: Thêm menu `/accounting` (Icon `Landmark`), phân quyền cách ly chỉ Kế toán và Admin truy cập.
+     - `src/components/accounting/create-settlement-modal.tsx`: Modal đếm tiền 4 mắt, tính chênh lệch và lý do chênh lệch.
+     - `src/components/accounting/settlement-receipt-print.tsx`: Mẫu in Biên bản bàn giao ca trực (Mẫu 02/BB-BGTM), đọc số tiền thành chữ tiếng Việt.
+     - `src/components/accounting/create-invoice-modal.tsx`: Modal lập đề nghị xuất HĐ GTGT đa đối tượng (Doanh nghiệp MST & Cá nhân CCCD 12 số), tính thuế Gross VAT 8%/10%.
+     - `src/components/accounting/record-e-invoice-modal.tsx`: Modal ghi nhận số HĐĐT chính thức.
+     - `src/components/accounting/invoice-statement-print.tsx`: Mẫu in Bảng kê chi tiết Mẫu 01:BPA đính kèm HĐĐT.
+     - `src/components/accounting/collect-debt-modal.tsx`: Modal thu nợ bến bãi AP07.
+     - `src/lib/export-excel.ts` & `src/lib/excel-export.ts`: Tiện ích xuất file Excel 4 sheet (.xlsx) chuyên nghiệp.
+     - `src/app/accounting/page.tsx`: Màn hình điều khiển trung tâm 4 tab hoàn chỉnh.
+- **Kiểm thử & Xác minh:**
+  - `npx tsx scripts/test-migration-28.ts`: RPC test gọi thành công trên Cloud DB.
+  - `npx tsc --noEmit`: 100% PASS 0 type errors.
+  - `npm run build`: Hoàn tất 100% cho 20 routes (19 static + 1 dynamic API).
+- **Trạng thái:** Hoàn tất, đã đóng quyết định RV08 và RV12.
+
 ## 2026-10-14 10:10 — Bổ Sung Chức Năng Đổi Mật Khẩu Cá Nhân & Đặt Lại Mật Khẩu Cho Nhân Sự Trực Ca (Migration 27)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"Bổ sung thêm các chức năng như đổi MK, set lại mk cho nhân sự,.."*
