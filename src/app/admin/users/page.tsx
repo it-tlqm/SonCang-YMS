@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { RoleCode, DepartmentCode } from '@/types/auth.types';
-import { StaffUser } from '@/types/domain.types';
+import { StaffUser, AppRole, AppRolePermission } from '@/types/domain.types';
 import { ROLE_PERMISSIONS_V5 } from '@/lib/rbac-rules';
 import { 
   Users, 
@@ -30,7 +30,14 @@ import {
   Loader2, 
   Save, 
   Power,
-  UserPlus
+  UserPlus,
+  Table as TableIcon,
+  LayoutGrid,
+  RefreshCw,
+  Eye,
+  X,
+  Database,
+  Info
 } from 'lucide-react';
 
 interface PermissionDefinition {
@@ -130,7 +137,7 @@ const FULL_PERMISSIONS_V5: PermissionDefinition[] = [
   { code: 'accounting.invoice.prepare', module: 'Hóa đơn', action: 'Nhập dữ liệu hóa đơn từ bộ phận Kế toán', risk: 'Nhạy cảm', phase: 'GĐ sau' },
 ];
 
-// Danh mục 7 vai trò hoạt động V1 theo chuẩn V5
+// Danh mục vai trò V1 chuẩn V5
 const ROLES_V5_METADATA = [
   {
     code: 'SEC_STAFF' as RoleCode,
@@ -139,6 +146,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận An ninh & Bảo vệ',
     description: 'Tiếp nhận xe, kiểm tra container, thu tiền vé cổng, thu phí lưu bãi, xác nhận xe rời bãi.',
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    avatarBg: 'bg-emerald-600',
   },
   {
     code: 'SEC_LEAD' as RoleCode,
@@ -147,6 +155,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận An ninh & Bảo vệ',
     description: 'Giám sát ca trực an ninh, duyệt điều chỉnh giờ xe, đối soát doanh thu vé cổng và phí lưu.',
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    avatarBg: 'bg-emerald-700',
   },
   {
     code: 'PORT_STAFF' as RoleCode,
@@ -155,6 +164,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
     description: 'Tiếp nhận yêu cầu cắm điện trước, ghi nhận giờ cắm/rút điện, thu tiền điện, duyệt điều kiện xuất bãi.',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+    avatarBg: 'bg-amber-600',
   },
   {
     code: 'PORT_LEAD' as RoleCode,
@@ -163,6 +173,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
     description: 'Duyệt điều chỉnh giờ điện đã thu, duyệt xuất bãi ngoại lệ nợ (AP07), chốt doanh thu điện cont.',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+    avatarBg: 'bg-amber-700',
   },
   {
     code: 'DIS_STAFF' as RoleCode,
@@ -171,6 +182,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận Điều phối & Hiện trường',
     description: 'Kiểm tra bãi, cập nhật tình trạng HÀNG hoặc RỖNG của container, theo dõi phương tiện trong bãi.',
     badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
+    avatarBg: 'bg-blue-600',
   },
   {
     code: 'DIS_LEAD' as RoleCode,
@@ -179,6 +191,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Bộ phận Điều phối & Hiện trường',
     description: 'Giám sát mặt bằng lưu bãi, duyệt điều chỉnh tình trạng container sau khi đã xuất bãi.',
     badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
+    avatarBg: 'bg-blue-700',
   },
   {
     code: 'SYS_ADMIN' as RoleCode,
@@ -187,6 +200,7 @@ const ROLES_V5_METADATA = [
     deptName: 'Ban Quản trị & Công nghệ',
     description: 'Quản trị biểu phí, cấu hình tham số, phân quyền vai trò, quản lý người dùng và audit logs.',
     badgeColor: 'bg-purple-100 text-purple-800 border-purple-300',
+    avatarBg: 'bg-purple-700',
   },
 ];
 
@@ -197,21 +211,41 @@ export default function UsersAndRbacAdminPage() {
   const isAllowed = can('admin.roles.manage') || role === 'SYS_ADMIN';
 
   const [activeTab, setActiveTab] = useState<'USERS' | 'MATRIX'>('USERS');
+  const [viewMode, setViewMode] = useState<'TABLE' | 'CARD'>('TABLE');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('ALL');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<'ALL' | 'ACTIVE' | 'LOCKED'>('ALL');
   const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('ALL');
 
-  // Quản lý Danh sách Nhân sự Động
+  // Danh sách Nhân sự Động từ Supabase Database
   const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
   const [isLoadingStaff, setIsLoadingStaff] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string>('');
+
+  // Danh sách Vai trò & Quyền Động từ Database
+  const [rolesList, setRolesList] = useState<AppRole[]>([]);
+  const [rolePermissionsList, setRolePermissionsList] = useState<AppRolePermission[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState<boolean>(false);
 
   // Modal Tạo / Sửa Nhân sự
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
   const [selectedStaff, setSelectedStaff] = useState<StaffUser | null>(null);
 
-  // Form Fields
+  // Modal Tạo Vai trò Mới
+  const [showCreateRoleModal, setShowCreateRoleModal] = useState<boolean>(false);
+  const [newRoleCode, setNewRoleCode] = useState<string>('');
+  const [newRoleName, setNewRoleName] = useState<string>('');
+  const [newRoleDeptCode, setNewRoleDeptCode] = useState<DepartmentCode>('AN_NINH');
+  const [newRoleDescription, setNewRoleDescription] = useState<string>('');
+  const [isSubmittingRole, setIsSubmittingRole] = useState<boolean>(false);
+  const [createRoleError, setCreateRoleError] = useState<string>('');
+
+  // Modal Xem Quyền Nhân sự
+  const [viewPermsStaff, setViewPermsStaff] = useState<StaffUser | null>(null);
+
+  // Form Fields Nhân sự
   const [formFullName, setFormFullName] = useState<string>('');
   const [formEmail, setFormEmail] = useState<string>('');
   const [formPhone, setFormPhone] = useState<string>('');
@@ -223,7 +257,7 @@ export default function UsersAndRbacAdminPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [modalError, setModalError] = useState<string>('');
 
-  // Tải danh sách nhân sự từ repository
+  // Tải danh sách nhân sự từ Supabase Cloud
   const loadStaffUsers = async () => {
     try {
       setIsLoadingStaff(true);
@@ -233,14 +267,40 @@ export default function UsersAndRbacAdminPage() {
       console.error('Lỗi tải danh sách nhân sự:', err);
     } finally {
       setIsLoadingStaff(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Tải danh mục vai trò & ma trận phân quyền từ DB
+  const loadRolesAndPermissions = async () => {
+    try {
+      setIsLoadingRoles(true);
+      const [roles, perms] = await Promise.all([
+        repository.getRoles(),
+        repository.getRolePermissions()
+      ]);
+      setRolesList(roles);
+      setRolePermissionsList(perms);
+    } catch (err) {
+      console.error('Lỗi tải danh mục vai trò:', err);
+    } finally {
+      setIsLoadingRoles(false);
     }
   };
 
   useEffect(() => {
     if (isAllowed) {
       loadStaffUsers();
+      loadRolesAndPermissions();
     }
   }, [isAllowed, repository]);
+
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    await Promise.all([loadStaffUsers(), loadRolesAndPermissions()]);
+    setSuccessMsg('✓ Đã đồng bộ dữ liệu mới nhất từ Supabase Cloud (app_staff_users)');
+    setTimeout(() => setSuccessMsg(''), 3500);
+  };
 
   // Tự động gán bộ phận chuẩn khi đổi vai trò trên form
   const handleRoleChange = (newRole: RoleCode) => {
@@ -329,7 +389,7 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`Đã tạo thành công tài khoản nhân sự cho "${res.user.full_name}" (${res.user.role_code}).`);
+        setSuccessMsg(`✓ Đã lưu thành công nhân viên "${res.user.full_name}" vào cơ sở dữ liệu Supabase.`);
       } else if (selectedStaff) {
         const res = await repository.updateStaffUser({
           id: selectedStaff.id,
@@ -351,12 +411,12 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`Đã cập nhật thành công nhân sự "${res.user.full_name}".`);
+        setSuccessMsg(`✓ Đã cập nhật thành công nhân sự "${res.user.full_name}" trên cơ sở dữ liệu Supabase.`);
       }
 
       setShowModal(false);
       await loadStaffUsers();
-      setTimeout(() => setSuccessMsg(''), 4000);
+      setTimeout(() => setSuccessMsg(''), 4500);
     } catch (err: any) {
       setModalError('Lỗi thao tác: ' + (err?.message || String(err)));
     } finally {
@@ -370,7 +430,7 @@ export default function UsersAndRbacAdminPage() {
     try {
       const res = await repository.toggleStaffUserStatus(staff.id, nextStatus);
       if (res.success) {
-        setSuccessMsg(`Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}".`);
+        setSuccessMsg(`✓ Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}" trên Supabase.`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       }
@@ -381,14 +441,14 @@ export default function UsersAndRbacAdminPage() {
 
   // Xóa nhân sự
   const handleDeleteStaff = async (staff: StaffUser) => {
-    if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${staff.full_name}" (${staff.email}) khỏi hệ thống?`)) {
+    if (!confirm(`XÁC NHẬN: Bạn có chắc chắn muốn xóa nhân viên "${staff.full_name}" (${staff.email}) khỏi cơ sở dữ liệu?`)) {
       return;
     }
 
     try {
       const res = await repository.deleteStaffUser(staff.id);
       if (res.success) {
-        setSuccessMsg(`Đã xóa nhân sự "${staff.full_name}".`);
+        setSuccessMsg(`✓ Đã xóa vĩnh viễn nhân sự "${staff.full_name}" khỏi cơ sở dữ liệu Supabase.`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
@@ -396,6 +456,77 @@ export default function UsersAndRbacAdminPage() {
       }
     } catch (err: any) {
       alert('Lỗi xóa nhân viên: ' + (err?.message || String(err)));
+    }
+  };
+
+  // Tạo Vai trò Mới
+  const handleCreateRoleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanCode = newRoleCode.trim().toUpperCase();
+    const cleanName = newRoleName.trim();
+    if (!cleanCode) {
+      setCreateRoleError('Mã vai trò không được để trống.');
+      return;
+    }
+    if (!cleanName) {
+      setCreateRoleError('Tên vai trò không được để trống.');
+      return;
+    }
+
+    try {
+      setIsSubmittingRole(true);
+      setCreateRoleError('');
+      const res = await repository.createRole({
+        code: cleanCode,
+        name: cleanName,
+        department_code: newRoleDeptCode,
+        description: newRoleDescription.trim()
+      });
+
+      if (!res.success) {
+        setCreateRoleError(res.error || 'Lỗi khi tạo vai trò mới');
+        return;
+      }
+
+      setSuccessMsg(`✓ Đã tạo thành công vai trò mới "${cleanName}" (${cleanCode}) vào bảng app_roles.`);
+      setShowCreateRoleModal(false);
+      setNewRoleCode('');
+      setNewRoleName('');
+      setNewRoleDescription('');
+      await loadRolesAndPermissions();
+      setTimeout(() => setSuccessMsg(''), 4500);
+    } catch (err: any) {
+      setCreateRoleError(err?.message || 'Lỗi ngoại lệ khi tạo vai trò');
+    } finally {
+      setIsSubmittingRole(false);
+    }
+  };
+
+  // Bật / Tắt trực tiếp quyền cho vai trò (Interactive Matrix)
+  const handleTogglePermission = async (roleCode: string, permissionCode: string, currentEnabled: boolean) => {
+    const nextEnabled = !currentEnabled;
+    try {
+      // Cập nhật UI optimistic
+      setRolePermissionsList(prev => {
+        if (nextEnabled) {
+          return [...prev, { role_code: roleCode, permission_code: permissionCode, scope: 'ALL', is_enabled: true }];
+        } else {
+          return prev.filter(p => !(p.role_code === roleCode && p.permission_code === permissionCode));
+        }
+      });
+
+      const res = await repository.toggleRolePermission(roleCode, permissionCode, nextEnabled, 'ALL');
+      if (res.success) {
+        setSuccessMsg(`✓ Đã ${nextEnabled ? 'cấp quyền' : 'thu hồi quyền'} [${permissionCode}] cho vai trò [${roleCode}] trên Supabase.`);
+        setTimeout(() => setSuccessMsg(''), 3000);
+      } else {
+        // Rollback nếu lỗi
+        await loadRolesAndPermissions();
+        alert(res.error || 'Lỗi khi cập nhật quyền');
+      }
+    } catch (err) {
+      await loadRolesAndPermissions();
+      console.error('Lỗi toggle quyền:', err);
     }
   };
 
@@ -430,7 +561,11 @@ export default function UsersAndRbacAdminPage() {
       (acc.role_name && acc.role_name.toLowerCase().includes(q)) ||
       (acc.phone && acc.phone.includes(q));
     const matchesRole = selectedRoleFilter === 'ALL' || acc.role_code === selectedRoleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = 
+      selectedStatusFilter === 'ALL' ? true :
+      selectedStatusFilter === 'ACTIVE' ? acc.is_active : !acc.is_active;
+
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   // Lọc ma trận quyền theo Module & Từ khóa tìm kiếm
@@ -452,90 +587,98 @@ export default function UsersAndRbacAdminPage() {
   const disCount = staffUsers.filter(s => s.role_code.startsWith('DIS_')).length;
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Header Bar */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E3E8EF] shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#223873] flex items-center justify-center font-bold">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold tracking-wider uppercase text-blue-700">
-                Quản trị Nhân sự & Phân quyền RBAC
-              </span>
-              <h1 className="text-lg sm:text-xl font-black text-[#223873] mt-0.5">
-                Nhân viên Trực ca & Ma trận Quyền RBAC V5
-              </h1>
-            </div>
-          </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* HEADER QUẢN TRỊ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+        <div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin/customers"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 bg-blue-50 text-xs font-bold text-[#223873] hover:bg-blue-100 transition-colors"
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Quản lý Khách hàng</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleOpenCreateModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0A9444] hover:bg-[#087C3C] text-xs font-bold text-white shadow-2xs transition-colors cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>Thêm mới Nhân viên</span>
-            </button>
+            <h1 className="text-base sm:text-lg font-black text-[#223873] tracking-tight">
+              Quản trị Nhân sự & Phân quyền RBAC V5
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              <Database className="w-3 h-3 text-emerald-600" />
+              <span>Dữ liệu thật Supabase</span>
+            </span>
           </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Quản lý nhân viên trực ca bến bãi, cấu hình vai trò động và kiểm soát 67 quyền thực thi chuẩn V5
+          </p>
         </div>
 
-        {/* Thông báo thao tác thành công */}
-        {successMsg && (
-          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handleRefreshData}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 transition-colors cursor-pointer"
+            title="Đồng bộ lại danh sách nhân sự từ cơ sở dữ liệu Supabase"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Làm mới</span>
+          </button>
 
-        {/* THÔNG BÁO QUY ĐỊNH PHÂN QUYỀN V5 */}
-        <div className="mt-4 p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 text-blue-950 text-xs flex items-start space-x-2.5">
-          <ShieldCheck className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <strong className="font-bold text-[#223873]">Tiêu chuẩn Phân định Trách nhiệm RBAC V5:</strong>
-            <p className="text-[11px] text-blue-900 mt-0.5">
-              Phân định độc lập 3 bộ phận: <strong>An ninh</strong> (thu vé vào cổng & phí lưu bãi, kiểm soát cổng), <strong>CCKB</strong> (quản lý tiền điện container & phê duyệt tài chính xuất bãi), <strong>Điều phối</strong> (cập nhật HÀNG/RỖNG). Tuyệt đối không để An ninh thu tiền điện container.
-            </p>
-          </div>
-        </div>
+          <Link
+            href="/admin/customers"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 transition-colors"
+          >
+            <Building2 className="w-3.5 h-3.5 text-slate-500" />
+            <span>Quản lý Khách hàng</span>
+          </Link>
 
-        {/* THỐNG KÊ THẺ NHÂN SỰ */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-4 pt-4 border-t border-slate-100 text-xs">
-          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-            <span className="text-slate-500 block text-[10px]">Tổng số tài khoản</span>
-            <span className="text-base font-black text-slate-900 mt-0.5 block">{totalStaffCount}</span>
-          </div>
-          <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-100">
-            <span className="text-emerald-700 block text-[10px]">Đang hoạt động</span>
-            <span className="text-base font-black text-[#0A9444] mt-0.5 block">{activeStaffCount}</span>
-          </div>
-          <div className="p-2.5 bg-emerald-50/40 rounded-xl border border-emerald-100">
-            <span className="text-emerald-800 block text-[10px]">An ninh Cổng</span>
-            <span className="text-base font-black text-emerald-800 mt-0.5 block">{secCount}</span>
-          </div>
-          <div className="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100">
-            <span className="text-amber-800 block text-[10px]">Thương vụ CCKB</span>
-            <span className="text-base font-black text-amber-800 mt-0.5 block">{portCount}</span>
-          </div>
-          <div className="p-2.5 bg-blue-50/60 rounded-xl border border-blue-100">
-            <span className="text-blue-800 block text-[10px]">Điều phối Bãi</span>
-            <span className="text-base font-black text-blue-800 mt-0.5 block">{disCount}</span>
-          </div>
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-xl shadow-2xs transition-colors cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Thêm mới Nhân viên</span>
+          </button>
         </div>
       </div>
 
-      {/* TABS CHUYỂN ĐỔI: TÀI KHOẢN VS MA TRẬN QUYỀN */}
-      <div className="flex border-b border-slate-200 gap-2">
+      {/* THÔNG BÁO THÀNH CÔNG */}
+      {successMsg && (
+        <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg('')}
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* THẺ THỐNG KÊ NHÂN SỰ */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Tổng số tài khoản</span>
+          <span className="text-xl font-black text-slate-800">{totalStaffCount}</span>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Đang hoạt động</span>
+          <span className="text-xl font-black text-emerald-600">{activeStaffCount}</span>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">An ninh Cổng</span>
+          <span className="text-xl font-black text-emerald-700">{secCount}</span>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Thương vụ CCKB</span>
+          <span className="text-xl font-black text-amber-600">{portCount}</span>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs col-span-2 sm:col-span-1">
+          <span className="text-[11px] text-slate-500 block">Điều phối Bãi</span>
+          <span className="text-xl font-black text-blue-600">{disCount}</span>
+        </div>
+      </div>
+
+      {/* TABS ĐIỀU HƯỚNG */}
+      <div className="flex border-b border-slate-200 bg-white px-3 pt-2 rounded-t-2xl shadow-2xs">
         <button
           type="button"
           onClick={() => setActiveTab('USERS')}
@@ -559,49 +702,271 @@ export default function UsersAndRbacAdminPage() {
           }`}
         >
           <Key className="w-4 h-4 text-[#0A9444]" />
-          <span>Ma trận Phân quyền RBAC V5 (67 Quyền / 206 Grants)</span>
+          <span>Quản lý Vai trò & Ma trận Phân quyền ({rolesList.length || 7} Vai trò / 67 Quyền)</span>
         </button>
       </div>
 
-      {/* TAB 1: DANH SÁCH NHÂN SỰ & VAI TRÒ */}
+      {/* ========================================================================= */}
+      {/* TAB 1: DANH SÁCH NHÂN SỰ & VAI TRÒ (HỖ TRỢ DẠNG TABLE & DẠNG CARD)         */}
+      {/* ========================================================================= */}
       {activeTab === 'USERS' && (
-        <div className="space-y-4">
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full sm:w-80">
+        <div className="space-y-3">
+          {/* THANH TÌM KIẾM, BỘ LỌC VÀ CHUYỂN ĐỔI GIAO DIỆN */}
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Tìm nhân viên, email, vai trò, SĐT..."
+                placeholder="Tìm tên nhân viên, email, vai trò, SĐT..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#223873] bg-slate-50/50"
               />
             </div>
 
-            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 flex-wrap justify-end">
               <select
                 value={selectedRoleFilter}
                 onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700"
+                className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none"
               >
                 <option value="ALL">Tất cả vai trò ({staffUsers.length})</option>
                 {ROLES_V5_METADATA.map((r) => (
                   <option key={r.code} value={r.code}>{r.name} ({r.code})</option>
                 ))}
               </select>
+
+              <select
+                value={selectedStatusFilter}
+                onChange={(e) => setSelectedStatusFilter(e.target.value as any)}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none"
+              >
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="ACTIVE">🟢 Đang hoạt động</option>
+                <option value="LOCKED">🔴 Đã tạm khóa</option>
+              </select>
+
+              {/* NÚT CHUYỂN ĐỔI CHẾ ĐỘ HIỂN THỊ (TABLE / CARD) */}
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('TABLE')}
+                  className={`px-2.5 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                    viewMode === 'TABLE'
+                      ? 'bg-white text-[#223873] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Xem danh sách nhân sự dạng Bảng (Table)"
+                >
+                  <TableIcon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Dạng Bảng</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('CARD')}
+                  className={`px-2.5 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                    viewMode === 'CARD'
+                      ? 'bg-white text-[#223873] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Xem danh sách nhân sự dạng Thẻ (Cards)"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Dạng Thẻ</span>
+                </button>
+              </div>
             </div>
           </div>
 
+          {/* NỘI DUNG DANH SÁCH NHÂN SỰ */}
           {isLoadingStaff ? (
             <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
               <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#223873]" />
-              <span>Đang tải danh sách nhân sự...</span>
+              <span>Đang kết nối cơ sở dữ liệu Supabase tải danh sách nhân sự...</span>
             </div>
           ) : filteredAccounts.length === 0 ? (
             <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
               Không tìm thấy nhân viên nào phù hợp với bộ lọc tìm kiếm.
             </div>
+          ) : viewMode === 'TABLE' ? (
+            /* =============================================================== */
+            /* DẠNG BẢNG (TABLE VIEW) — CHUẨN MỰC NGHIỆP VỤ BẾN BÃI            */
+            /* =============================================================== */
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                      <th className="py-3 px-3.5 text-center w-12">#</th>
+                      <th className="py-3 px-3 min-w-[200px]">Nhân viên trực ca</th>
+                      <th className="py-3 px-3 min-w-[180px]">Thông tin liên hệ</th>
+                      <th className="py-3 px-3 min-w-[180px]">Vai trò & Bộ phận</th>
+                      <th className="py-3 px-3 min-w-[120px]">Địa bàn trực</th>
+                      <th className="py-3 px-3 text-center min-w-[120px]">Quyền thực thi</th>
+                      <th className="py-3 px-3 text-center min-w-[110px]">Trạng thái</th>
+                      <th className="py-3 px-3 min-w-[160px]">Ghi chú nhiệm vụ</th>
+                      <th className="py-3 px-3 text-right min-w-[110px]">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredAccounts.map((acc, index) => {
+                      const roleMeta = ROLES_V5_METADATA.find((r) => r.code === acc.role_code);
+                      const grantedCount = ROLE_PERMISSIONS_V5[acc.role_code]?.length || 0;
+                      const isActive = acc.is_active;
+
+                      return (
+                        <tr 
+                          key={acc.id} 
+                          className={`hover:bg-slate-50/60 transition-colors ${
+                            !isActive ? 'bg-slate-50/50 opacity-75' : ''
+                          }`}
+                        >
+                          {/* STT */}
+                          <td className="py-3 px-3.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                            {index + 1}
+                          </td>
+
+                          {/* NHÂN VIÊN */}
+                          <td className="py-3 px-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 ${roleMeta?.avatarBg || 'bg-slate-600'}`}>
+                                {acc.full_name ? acc.full_name.charAt(0).toUpperCase() : 'U'}
+                              </div>
+                              <div>
+                                <span className="font-bold text-slate-900 text-xs block hover:text-[#223873]">
+                                  {acc.full_name}
+                                </span>
+                                <span className="text-[10px] font-mono text-slate-400 block">
+                                  ID: {acc.id ? acc.id.slice(0, 8) + '...' : '—'}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* LIÊN HỆ */}
+                          <td className="py-3 px-3 font-mono text-xs">
+                            <div className="flex items-center gap-1.5 text-slate-700">
+                              <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <a href={`mailto:${acc.email}`} className="hover:underline hover:text-blue-700">
+                                {acc.email}
+                              </a>
+                            </div>
+                            {acc.phone && (
+                              <div className="flex items-center gap-1.5 text-slate-500 mt-0.5 text-[11px]">
+                                <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                                <a href={`tel:${acc.phone}`} className="hover:underline">
+                                  {acc.phone}
+                                </a>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* VAI TRÒ & BỘ PHẬN */}
+                          <td className="py-3 px-3">
+                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mb-1 ${roleMeta?.badgeColor || 'bg-slate-100 text-slate-800'}`}>
+                              {acc.role_code}
+                            </span>
+                            <span className="text-[11px] text-slate-600 block font-medium">
+                              {roleMeta?.name || acc.role_name || acc.role_code}
+                            </span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {acc.department_name || roleMeta?.deptName}
+                            </span>
+                          </td>
+
+                          {/* ĐỊA BÀN TRỰC */}
+                          <td className="py-3 px-3">
+                            <span className="font-semibold text-slate-700 text-xs flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              <span>{acc.yard_name || (acc.role_code === 'SYS_ADMIN' ? 'Toàn hệ thống' : 'Bãi Sơn Cảng')}</span>
+                            </span>
+                          </td>
+
+                          {/* QUYỀN THỰC THI */}
+                          <td className="py-3 px-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => setViewPermsStaff(acc)}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-mono font-bold text-[11px] cursor-pointer transition-colors"
+                              title="Bấm để xem danh sách 67 quyền chi tiết"
+                            >
+                              <Key className="w-3 h-3 text-blue-600" />
+                              <span>{grantedCount} / 67 Quyền</span>
+                            </button>
+                          </td>
+
+                          {/* TRẠNG THÁI */}
+                          <td className="py-3 px-3 text-center">
+                            {isActive ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                <span>Hoạt động</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-300">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                <span>Đã khóa</span>
+                              </span>
+                            )}
+                          </td>
+
+                          {/* GHI CHÚ NHIỆM VỤ */}
+                          <td className="py-3 px-3 text-slate-500 text-[11px] italic">
+                            {acc.notes ? (
+                              <span className="line-clamp-2" title={acc.notes}>
+                                “{acc.notes}”
+                              </span>
+                            ) : (
+                              <span className="text-slate-300">—</span>
+                            )}
+                          </td>
+
+                          {/* THAO TÁC */}
+                          <td className="py-3 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditModal(acc)}
+                                title="Sửa thông tin & vai trò"
+                                className="p-1.5 rounded-lg text-blue-700 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(acc)}
+                                title={isActive ? 'Tạm khóa tài khoản' : 'Kích hoạt lại tài khoản'}
+                                className={`p-1.5 rounded-lg border border-transparent transition-colors cursor-pointer ${
+                                  isActive 
+                                    ? 'text-slate-500 hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200' 
+                                    : 'text-emerald-700 hover:bg-emerald-50 hover:border-emerald-200'
+                                }`}
+                              >
+                                <Power className="w-3.5 h-3.5" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteStaff(acc)}
+                                title="Xóa tài khoản nhân viên"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           ) : (
+            /* =============================================================== */
+            /* DẠNG THẺ (CARD VIEW) CHO NGƯỜI DÙNG THÍCH XEM LƯỚI CARD         */
+            /* =============================================================== */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {filteredAccounts.map((acc) => {
                 const roleMeta = ROLES_V5_METADATA.find((r) => r.code === acc.role_code);
@@ -616,19 +981,24 @@ export default function UsersAndRbacAdminPage() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-slate-900 text-sm">{acc.full_name}</h3>
-                          {!isActive && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded border border-rose-200">
-                              Đã khóa
-                            </span>
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 ${roleMeta?.avatarBg || 'bg-slate-600'}`}>
+                          {acc.full_name ? acc.full_name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-slate-900 text-sm">{acc.full_name}</h3>
+                            {!isActive && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded border border-rose-200">
+                                Đã khóa
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] font-mono text-slate-500 mt-0.5">{acc.email}</p>
+                          {acc.phone && (
+                            <p className="text-[11px] text-slate-600 mt-0.5 font-mono">📞 {acc.phone}</p>
                           )}
                         </div>
-                        <p className="text-[11px] font-mono text-slate-500 mt-0.5">{acc.email}</p>
-                        {acc.phone && (
-                          <p className="text-[11px] text-slate-600 mt-0.5 font-mono">📞 {acc.phone}</p>
-                        )}
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${roleMeta?.badgeColor || 'bg-slate-100 text-slate-800'}`}>
                         {acc.role_code}
@@ -650,12 +1020,18 @@ export default function UsersAndRbacAdminPage() {
                       </div>
                       <div className="flex justify-between pt-1 border-t border-slate-200/60">
                         <span className="text-slate-500">Quyền thực thi:</span>
-                        <span className="font-mono font-bold text-blue-700">{grantedCount} / 67 Quyền</span>
+                        <button
+                          type="button"
+                          onClick={() => setViewPermsStaff(acc)}
+                          className="font-mono font-bold text-blue-700 hover:underline cursor-pointer"
+                        >
+                          {grantedCount} / 67 Quyền (Xem)
+                        </button>
                       </div>
                     </div>
 
                     {acc.notes && (
-                      <p className="text-[11px] text-slate-500 italic line-clamp-1">
+                      <p className="text-[11px] text-slate-500 italic line-clamp-2">
                         &ldquo;{acc.notes}&rdquo;
                       </p>
                     )}
@@ -705,126 +1081,272 @@ export default function UsersAndRbacAdminPage() {
         </div>
       )}
 
-      {/* TAB 2: MA TRẬN PHÂN QUYỀN RBAC V5 (67 QUYỀN CHUẨN) */}
+      {/* ========================================================================= */}
+      {/* TAB 2: QUẢN LÝ VAI TRÒ & MA TRẬN PHÂN QUYỀN TƯƠNG TÁC THẬT               */}
+      {/* ========================================================================= */}
       {activeTab === 'MATRIX' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden space-y-4 p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
-            <div>
-              <h3 className="text-sm font-black text-[#223873]">
-                Ma trận Cấp quyền Runtime theo Quyết định V5 (67 Quyền / 206 Grants)
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Dấu check (✓) thể hiện quyền được cấp phép thực thi trên server PostgreSQL và giao diện
-              </p>
+        <div className="space-y-4">
+          {/* KHỐI QUẢN LÝ VAI TRÒ (ROLES) */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-slate-100">
+              <div>
+                <h3 className="text-sm font-bold text-[#223873] flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Danh mục Vai trò Hệ thống (Bảng app_roles trong DB)</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Các vai trò đang hoạt động trong hệ thống Sơn Cảng, được gán các quyền thực thi chuẩn V5
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCreateRoleError('');
+                  setShowCreateRoleModal(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded-xl shadow-2xs cursor-pointer transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>➕ Tạo mới Vai trò</span>
+              </button>
             </div>
 
-            {/* Bộ lọc Module */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold text-slate-600 flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5 text-slate-400" />
-                Lọc Module:
-              </span>
-              <select
-                value={selectedModuleFilter}
-                onChange={(e) => setSelectedModuleFilter(e.target.value)}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none"
-              >
-                <option value="ALL">Tất cả Module ({FULL_PERMISSIONS_V5.length})</option>
-                {modulesList.map((m) => (
-                  <option key={m} value={m}>
-                    {m} ({FULL_PERMISSIONS_V5.filter(p => p.module === m).length})
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                placeholder="Tìm quyền..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:outline-none w-36 sm:w-44"
-              />
+            {/* DANH SÁCH CÁC THẺ VAI TRÒ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
+              {rolesList.map(r => (
+                <div key={r.code} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-[#223873] px-2 py-0.5 bg-white rounded border border-slate-200">
+                      {r.code}
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                      {r.permissions_count !== undefined ? `${r.permissions_count} Quyền` : 'Đang tải...'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-slate-800 text-xs">{r.name}</h4>
+                  <p className="text-[11px] text-slate-500 line-clamp-2">{r.description || 'Chưa có mô tả'}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Bảng Ma trận */}
-          <div className="overflow-x-auto border border-slate-200 rounded-xl">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="px-3.5 py-3 min-w-[240px]">Hành động nghiệp vụ / Quyền</th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Nhân viên An ninh">
-                    SEC_STAFF
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(26)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Trưởng ca An ninh">
-                    SEC_LEAD
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(31)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Nhân viên CCKB">
-                    PORT_STAFF
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(31)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Trưởng ca CCKB">
-                    PORT_LEAD
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(38)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Nhân viên Điều phối">
-                    DIS_STAFF
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(9)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap" title="Trưởng ca Điều phối">
-                    DIS_LEAD
-                    <div className="text-[9px] font-normal lowercase text-slate-500 font-mono">(11)</div>
-                  </th>
-                  <th className="px-2 py-3 text-center whitespace-nowrap text-purple-900" title="Quản trị hệ thống">
-                    SYS_ADMIN
-                    <div className="text-[9px] font-normal lowercase text-purple-700 font-mono">(60)</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredPermissions.map((item) => {
-                  const hasSecStaff = ROLE_PERMISSIONS_V5.SEC_STAFF.includes(item.code);
-                  const hasSecLead = ROLE_PERMISSIONS_V5.SEC_LEAD.includes(item.code);
-                  const hasPortStaff = ROLE_PERMISSIONS_V5.PORT_STAFF.includes(item.code);
-                  const hasPortLead = ROLE_PERMISSIONS_V5.PORT_LEAD.includes(item.code);
-                  const hasDisStaff = ROLE_PERMISSIONS_V5.DIS_STAFF.includes(item.code);
-                  const hasDisLead = ROLE_PERMISSIONS_V5.DIS_LEAD.includes(item.code);
-                  const hasSysAdmin = ROLE_PERMISSIONS_V5.SYS_ADMIN.includes(item.code);
+          {/* BẢNG MA TRẬN PHÂN QUYỀN 67 QUYỀN */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden space-y-4 p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-sm font-black text-[#223873]">
+                  Ma trận Cấp quyền Runtime theo Quyết định V5 (67 Quyền / 206 Grants)
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Click vào từng ô để Bật / Tắt cấp quyền trực tiếp cho vai trò trên cơ sở dữ liệu Supabase Cloud
+                </p>
+              </div>
 
-                  return (
-                    <tr key={item.code} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-3.5 py-2.5">
-                        <div className="font-bold text-slate-800">{item.action}</div>
-                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">{item.code}</div>
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasSecStaff ? <Check className="w-4 h-4 text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasSecLead ? <Check className="w-4 h-4 text-emerald-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasPortStaff ? <Check className="w-4 h-4 text-amber-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasPortLead ? <Check className="w-4 h-4 text-amber-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasDisStaff ? <Check className="w-4 h-4 text-blue-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center">
-                        {hasDisLead ? <Check className="w-4 h-4 text-blue-600 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-2 py-2.5 text-center bg-purple-50/30">
-                        {hasSysAdmin ? <Check className="w-4 h-4 text-purple-700 mx-auto" /> : <span className="text-slate-300">—</span>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+              {/* Bộ lọc Module */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-slate-600 flex items-center gap-1">
+                  <Filter className="w-3.5 h-3.5 text-slate-400" />
+                  Lọc:
+                </span>
+                <select
+                  value={selectedModuleFilter}
+                  onChange={(e) => setSelectedModuleFilter(e.target.value)}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">Tất cả Module ({FULL_PERMISSIONS_V5.length})</option>
+                  {modulesList.map((m) => (
+                    <option key={m} value={m}>
+                      {m} ({FULL_PERMISSIONS_V5.filter(p => p.module === m).length})
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Tìm quyền..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:outline-none w-36 sm:w-44"
+                />
+              </div>
+            </div>
+
+            {/* Bảng Ma trận */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-700 font-bold">
+                    <th className="py-2.5 px-3 min-w-[120px]">Phân hệ / Module</th>
+                    <th className="py-2.5 px-3 min-w-[280px]">Hành vi / Quyền thực thi</th>
+                    <th className="py-2.5 px-2 text-center text-emerald-800 min-w-[70px]" title="Nhân viên An ninh Cổng">
+                      SEC_STAFF
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-emerald-900 min-w-[70px]" title="Trưởng bộ phận An ninh">
+                      SEC_LEAD
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-amber-800 min-w-[70px]" title="Nhân viên Thương vụ CCKB">
+                      PORT_STAFF
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-amber-900 min-w-[70px]" title="Trưởng bộ phận Thương vụ CCKB">
+                      PORT_LEAD
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-blue-800 min-w-[70px]" title="Nhân viên Điều phối Bãi">
+                      DIS_STAFF
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-blue-900 min-w-[70px]" title="Trưởng bộ phận Điều phối">
+                      DIS_LEAD
+                    </th>
+                    <th className="py-2.5 px-2 text-center text-purple-900 bg-purple-50/50 min-w-[70px]" title="Quản trị viên Hệ thống">
+                      SYS_ADMIN
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredPermissions.map((item) => {
+                    const checkPermission = (roleCode: string) => {
+                      // Kiểm tra từ state động trước, nếu trống fallback từ mã seed V5
+                      if (rolePermissionsList.length > 0) {
+                        return rolePermissionsList.some(p => p.role_code === roleCode && p.permission_code === item.code && p.is_enabled);
+                      }
+                      return (ROLE_PERMISSIONS_V5[roleCode as RoleCode] || []).includes(item.code);
+                    };
+
+                    const hasSecStaff = checkPermission('SEC_STAFF');
+                    const hasSecLead = checkPermission('SEC_LEAD');
+                    const hasPortStaff = checkPermission('PORT_STAFF');
+                    const hasPortLead = checkPermission('PORT_LEAD');
+                    const hasDisStaff = checkPermission('DIS_STAFF');
+                    const hasDisLead = checkPermission('DIS_LEAD');
+                    const hasSysAdmin = checkPermission('SYS_ADMIN');
+
+                    return (
+                      <tr key={item.code} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-3 py-2.5 font-semibold text-slate-600">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-[11px] font-mono">
+                            {item.module}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="font-bold text-slate-800 flex items-center gap-1.5 flex-wrap">
+                            <span>{item.action}</span>
+                            {item.risk === 'Tài chính' && (
+                              <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                Tài chính
+                              </span>
+                            )}
+                            {item.risk === 'Cao' && (
+                              <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                Rủi ro cao
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">{item.code}</div>
+                        </td>
+
+                        {/* CỘT SEC_STAFF */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('SEC_STAFF', item.code, hasSecStaff)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasSecStaff ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasSecStaff ? 'thu hồi' : 'cấp'} quyền này cho SEC_STAFF`}
+                          >
+                            {hasSecStaff ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT SEC_LEAD */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('SEC_LEAD', item.code, hasSecLead)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasSecLead ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasSecLead ? 'thu hồi' : 'cấp'} quyền này cho SEC_LEAD`}
+                          >
+                            {hasSecLead ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT PORT_STAFF */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('PORT_STAFF', item.code, hasPortStaff)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasPortStaff ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasPortStaff ? 'thu hồi' : 'cấp'} quyền này cho PORT_STAFF`}
+                          >
+                            {hasPortStaff ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT PORT_LEAD */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('PORT_LEAD', item.code, hasPortLead)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasPortLead ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasPortLead ? 'thu hồi' : 'cấp'} quyền này cho PORT_LEAD`}
+                          >
+                            {hasPortLead ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT DIS_STAFF */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('DIS_STAFF', item.code, hasDisStaff)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasDisStaff ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasDisStaff ? 'thu hồi' : 'cấp'} quyền này cho DIS_STAFF`}
+                          >
+                            {hasDisStaff ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT DIS_LEAD */}
+                        <td className="px-2 py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('DIS_LEAD', item.code, hasDisLead)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasDisLead ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasDisLead ? 'thu hồi' : 'cấp'} quyền này cho DIS_LEAD`}
+                          >
+                            {hasDisLead ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+
+                        {/* CỘT SYS_ADMIN */}
+                        <td className="px-2 py-2.5 text-center bg-purple-50/30">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePermission('SYS_ADMIN', item.code, hasSysAdmin)}
+                            className={`w-6 h-6 rounded flex items-center justify-center mx-auto transition-colors cursor-pointer ${
+                              hasSysAdmin ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                            }`}
+                            title={`Click để ${hasSysAdmin ? 'thu hồi' : 'cấp'} quyền này cho SYS_ADMIN`}
+                          >
+                            {hasSysAdmin ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '—'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -833,7 +1355,7 @@ export default function UsersAndRbacAdminPage() {
       {/* MODAL THÊM MỚI / CHỈNH SỬA & ĐỔI VAI TRÒ NHÂN SỰ                          */}
       {/* ========================================================================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -986,6 +1508,181 @@ export default function UsersAndRbacAdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL TẠO MỚI VAI TRÒ (ROLE) TRONG DATABASE                                */}
+      {/* ========================================================================= */}
+      {showCreateRoleModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-slate-300">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#223873]" />
+                <span>Thêm mới Vai trò (Role) trong CSDL</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCreateRoleModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {createRoleError && (
+              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{createRoleError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateRoleSubmit} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Mã Vai trò (Role Code) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: GATE_SUPERVISOR..."
+                  value={newRoleCode}
+                  onChange={(e) => setNewRoleCode(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono font-bold text-slate-900 uppercase focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                />
+                <span className="text-[10px] text-slate-400 mt-0.5 block">Viết hoa, không dấu, dùng dấu gạch dưới (VD: SEC_SPECIALIST)</span>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Tên Vai trò hiển thị <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: Giám sát Ca Cổng..."
+                  value={newRoleName}
+                  onChange={(e) => setNewRoleName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Bộ phận trực thuộc <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={newRoleDeptCode}
+                  onChange={(e) => setNewRoleDeptCode(e.target.value as DepartmentCode)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                >
+                  <option value="AN_NINH">Bộ phận An ninh & Bảo vệ (AN_NINH)</option>
+                  <option value="CCKB">Bộ phận Thương vụ & Cảng cạn CCKB (CCKB)</option>
+                  <option value="DIEU_PHOI">Bộ phận Điều phối & Hiện trường (DIEU_PHOI)</option>
+                  <option value="HE_THONG">Ban Quản trị & Công nghệ (HE_THONG)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Mô tả trách nhiệm vai trò</label>
+                <textarea
+                  rows={2}
+                  placeholder="Mô tả phạm vi trách nhiệm của vai trò mới này..."
+                  value={newRoleDescription}
+                  onChange={(e) => setNewRoleDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873] resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  disabled={isSubmittingRole}
+                  onClick={() => setShowCreateRoleModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRole}
+                  className="px-4 py-2 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
+                >
+                  {isSubmittingRole ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span>Lưu Vai trò vào CSDL</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL XEM CHI TIẾT QUYỀN CỦA TỪNG NHÂN SỰ                                 */}
+      {/* ========================================================================= */}
+      {viewPermsStaff && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-5 shadow-2xl space-y-3.5 border border-slate-300 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Chi tiết Quyền hạn: {viewPermsStaff.full_name}
+                  </h3>
+                  <span className="text-[11px] font-mono text-slate-500">
+                    Vai trò: {viewPermsStaff.role_code} — {ROLE_PERMISSIONS_V5[viewPermsStaff.role_code]?.length || 0} / 67 Quyền
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewPermsStaff(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="overflow-y-auto space-y-2 flex-1 pr-1 text-xs">
+              {(() => {
+                const grantedCodes = ROLE_PERMISSIONS_V5[viewPermsStaff.role_code] || [];
+                const grantedPerms = FULL_PERMISSIONS_V5.filter(p => grantedCodes.includes(p.code));
+
+                return grantedPerms.map((p, idx) => (
+                  <div key={p.code} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5">
+                    <span className="font-mono text-slate-400 font-bold shrink-0 text-[10px] mt-0.5">#{idx + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{p.action}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                          {p.module}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-blue-700 block mt-0.5">{p.code}</span>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+
+            <div className="pt-2 border-t border-slate-200 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewPermsStaff(null)}
+                className="px-4 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

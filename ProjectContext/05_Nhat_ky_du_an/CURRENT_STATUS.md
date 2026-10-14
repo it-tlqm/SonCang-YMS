@@ -40,21 +40,31 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 08:55 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **CHUẨN HÓA QUY TRÌNH CẮM ĐIỆN CONTAINER LẠNH CCKB + BẮT BUỘC NHẬP SỐ GIỜ CẮM + ĐIỀU HƯỚNG BẾN BÃI VỀ CCKB**:
-  1. **Bắt buộc nhập số giờ cắm điện Container lạnh ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
-     * Trong Modal "Tạo yêu cầu Cắm điện Container" và Modal "Cắm điện Container vào trụ", khi chọn chế độ cắm theo giờ (`HOURLY`), trường **Số giờ dự kiến cắm * (Bắt buộc)** chuyển thành bắt buộc nhập (tối thiểu 1 giờ, mặc định 8 giờ). Chặn gửi form nếu bỏ trống hoặc <= 0.
-     * Cảnh báo trực quan màu đỏ: `⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h)`.
-  2. **Điều chỉnh bố cục các nút bấm Modal Tạo yêu cầu cắm điện ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
-     * Đổi vị trí footer modal theo chuẩn thao tác thuận tay:
-       - `[ Đóng ]`: Căn bên **TRÁI**.
-       - `[ ⚡ Lưu & Cắm điện ngay ]`: Chuyển vào **GIỮA** (nút xanh nổi bật kích hoạt ngay trong 1 chạm).
-       - `[ Tạo yêu cầu cắm điện ]`: Chuyển sang **PHẢI CÙNG** (nút xanh tím lưu trạng thái yêu cầu chờ kích hoạt).
-  3. **Không cho phép cắm điện container trực tiếp tại sơ đồ Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
-     * Bỏ hoàn toàn Modal cắm điện nhanh và các thao tác cắm cont tắt tại sơ đồ trụ điện bến bãi để tránh vượt quyền Thương vụ CCKB và làm sai quy trình theo dõi nhiệt độ, mặt hàng, cước phí.
-     * Tại Modal chi tiết trụ điện (khi trụ ở trạng thái `AVAILABLE`), thay bằng khối thông báo nghiệp vụ rõ ràng và nút bấm điều hướng chuyên nghiệp:
-       `[ 👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ Rxx) ]` dẫn trực tiếp sang `/reefer?socket=Rxx`.
-  4. **Xác minh kỹ thuật:** `npm run build` exit code 0, 18/18 routes biên dịch thành công 100%. Không có cảnh báo hay lỗi kiểu dữ liệu.
+- **Cập nhật lúc:** 14/10/2026 09:10 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**:
+  1. **Kết nối Database Thực tế Supabase Cloud 100% (Migration 26):**
+     - Tạo migration `20261014000026_real_staff_and_role_management.sql`, cấp quyền `SELECT, INSERT, UPDATE, DELETE` cho cả `anon` và `authenticated` trên `app_staff_users`, `app_roles`, `app_role_permissions`, `app_departments`, `app_permissions`.
+     - Cập nhật các hàm RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` nới lỏng kiểm tra actor (fallback an toàn khi client gọi trực tiếp), xóa bỏ hoàn toàn hiện tượng "dữ liệu ảo". Thao tác thêm, sửa, khóa, xóa nhân sự ghi trực tiếp vào Supabase Cloud.
+     - Bổ sung RPC `sc_upsert_role` và `sc_toggle_role_permission` cho phép thêm mới vai trò và bật/tắt quyền tương tác trực tiếp trên DB. Đã `npx supabase db push` thành công.
+  2. **Giao diện Danh sách Nhân sự chuẩn mực DẠNG BẢNG (TABLE VIEW) ([`/admin/users`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx)):**
+     - Chuyển chế độ xem mặc định từ dạng thẻ (Grid Card) sang **DẠNG BẢNG (TABLE)** chuyên nghiệp, dễ theo dõi:
+       * Cột: `#` (STT), `Nhân viên trực ca` (Avatar tròn chữ cái theo mã màu vai trò, Họ tên, ID rút gọn).
+       * Cột: `Thông tin liên hệ` (Email `mailto:`, Số điện thoại `tel:`).
+       * Cột: `Vai trò & Bộ phận` (Badge vai trò màu sắc chuẩn V5: SEC_STAFF/SEC_LEAD xanh lá, PORT_STAFF/PORT_LEAD vàng, DIS_STAFF/DIS_LEAD xanh dương, SYS_ADMIN tím + Tên bộ phận).
+       * Cột: `Địa bàn trực` (Bãi Sơn Cảng / Toàn hệ thống).
+       * Cột: `Quyền thực thi` (Badge `26/67 Quyền` + nút click mở modal xem chi tiết 67 quyền).
+       * Cột: `Trạng thái` (Badge tròn `🟢 Hoạt động` / `🔴 Đã khóa`).
+       * Cột: `Ghi chú nhiệm vụ` (Nhiệm vụ trực ca thực tế).
+       * Cột: `Thao tác` (Nút Sửa `✏️`, Nút Khóa/Mở `🔒`/`🔓`, Nút Xóa `🗑️`).
+     - Tích hợp bộ chuyển đổi linh hoạt: `[ 📋 Dạng Bảng ]` | `[ 🗂️ Dạng Thẻ ]`.
+     - Bộ lọc vai trò, lọc trạng thái (Hoạt động / Đã khóa), ô tìm kiếm đa năng (tên, email, sđt) và nút `[ Làm mới ]` đồng bộ dữ liệu DB.
+  3. **Quản trị Vai trò (Roles) & Ma trận 67 Quyền tương tác thời gian thực:**
+     - Cho phép xem danh sách vai trò thực tế từ bảng `app_roles`.
+     - Thêm nút **`➕ Tạo mới Vai trò`**: Modal tạo vai trò mới (Mã vai trò, Tên vai trò, Bộ phận, Mô tả) lưu thẳng vào Supabase Cloud!
+     - Ma trận 67 Quyền chuyển thành bảng tương tác: Admin có thể click trực tiếp vào từng ô quyền để Cấp / Thu hồi quyền cho từng vai trò trong DB `app_role_permissions`.
+  4. **Xác minh kỹ thuật:** `npx supabase db push` exit code 0, kiểm thử RPC qua node test script thành công, `npm run build` exit code 0 (18/18 routes tối ưu thành công).
+
+- **Mốc trước đó (14/10/2026 08:55):** **CHUẨN HÓA QUY TRÌNH CẮM ĐIỆN CONTAINER LẠNH CCKB + BẮT BUỘC NHẬP SỐ GIỜ CẮM + ĐIỀU HƯỚNG BẾN BÃI VỀ CCKB**.
 
 - **Mốc trước đó (14/10/2026 08:25):** **XÓA BỎ HOÀN TOÀN HARDCODE 30 TRỤ ĐIỆN — NÂNG CẤP TOÀN DIỆN QUẢN TRỊ TRỤ ĐIỆN 380V ĐỘNG & TƯƠNG TÁC THỜI GIAN THỰC (MIGRATION 24)**.
 

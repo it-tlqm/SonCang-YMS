@@ -26,7 +26,9 @@ import {
   Customer,
   StaffUser,
   PowerSocket,
-  PowerSocketStatus
+  PowerSocketStatus,
+  AppRole,
+  AppRolePermission
 } from '@/types/domain.types';
 import { 
   IYardRepository, 
@@ -2424,6 +2426,97 @@ export class DemoRepository implements IYardRepository {
     }
     this.powerSockets[idx].updated_at = new Date().toISOString();
     this.persist();
+    return { success: true };
+  }
+
+  async getRoles(): Promise<AppRole[]> {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_roles');
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return [
+      { code: 'SEC_STAFF', name: 'Nhân viên An ninh Cổng', department_code: 'AN_NINH', description: 'Trực ca bốt cổng vào & cổng ra', is_active: true, permissions_count: 26 },
+      { code: 'SEC_LEAD', name: 'Trưởng bộ phận An ninh', department_code: 'AN_NINH', description: 'Giám sát ca trực an ninh, duyệt điều chỉnh', is_active: true, permissions_count: 31 },
+      { code: 'PORT_STAFF', name: 'Nhân viên Thương vụ CCKB', department_code: 'CCKB', description: 'Quản lý yêu cầu điện, thu tiền điện container', is_active: true, permissions_count: 31 },
+      { code: 'PORT_LEAD', name: 'Trưởng bộ phận CCKB', department_code: 'CCKB', description: 'Trưởng ca CCKB, phê duyệt công nợ và clearance', is_active: true, permissions_count: 38 },
+      { code: 'DIS_STAFF', name: 'Nhân viên Điều phối Bãi', department_code: 'DIEU_PHOI', description: 'Cập nhật tình trạng HÀNG/RỖNG hiện trường', is_active: true, permissions_count: 9 },
+      { code: 'DIS_LEAD', name: 'Trưởng bộ phận Điều phối', department_code: 'DIEU_PHOI', description: 'Trưởng ca điều phối bến bãi', is_active: true, permissions_count: 11 },
+      { code: 'SYS_ADMIN', name: 'Quản trị viên Hệ thống', department_code: 'HE_THONG', description: 'Toàn quyền cấu hình, tài khoản và audit logs', is_active: true, permissions_count: 60 }
+    ];
+  }
+
+  async createRole(role: { code: string; name: string; department_code: string; description?: string }): Promise<{ success: boolean; role?: AppRole; error?: string }> {
+    const list = await this.getRoles();
+    const cleanCode = role.code.toUpperCase().trim();
+    if (list.some(r => r.code === cleanCode)) {
+      return { success: false, error: `Mã vai trò "${cleanCode}" đã tồn tại!` };
+    }
+    const newRole: AppRole = {
+      code: cleanCode,
+      name: role.name.trim(),
+      department_code: role.department_code as any,
+      description: role.description || '',
+      is_active: true,
+      permissions_count: 0
+    };
+    list.push(newRole);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soncang_v5_roles', JSON.stringify(list));
+    }
+    return { success: true, role: newRole };
+  }
+
+  async updateRole(role: { code: string; name: string; department_code: string; description?: string; is_active?: boolean }): Promise<{ success: boolean; role?: AppRole; error?: string }> {
+    const list = await this.getRoles();
+    const idx = list.findIndex(r => r.code === role.code);
+    if (idx !== -1) {
+      list[idx] = {
+        ...list[idx],
+        name: role.name.trim(),
+        department_code: role.department_code as any,
+        description: role.description !== undefined ? role.description : list[idx].description,
+        is_active: role.is_active !== undefined ? role.is_active : list[idx].is_active
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('soncang_v5_roles', JSON.stringify(list));
+      }
+      return { success: true, role: list[idx] };
+    }
+    return { success: false, error: 'Không tìm thấy vai trò' };
+  }
+
+  async getRolePermissions(roleCode?: string): Promise<AppRolePermission[]> {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_role_perms');
+      if (saved) {
+        try {
+          const all: AppRolePermission[] = JSON.parse(saved);
+          return roleCode ? all.filter(p => p.role_code === roleCode) : all;
+        } catch {}
+      }
+    }
+    return [];
+  }
+
+  async toggleRolePermission(roleCode: string, permissionCode: string, isEnabled: boolean, scope: string = 'ALL'): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_role_perms');
+      let all: AppRolePermission[] = saved ? JSON.parse(saved) : [];
+      if (isEnabled) {
+        const existing = all.find(p => p.role_code === roleCode && p.permission_code === permissionCode);
+        if (existing) {
+          existing.is_enabled = true;
+          existing.scope = scope;
+        } else {
+          all.push({ role_code: roleCode, permission_code: permissionCode, scope, is_enabled: true });
+        }
+      } else {
+        all = all.filter(p => !(p.role_code === roleCode && p.permission_code === permissionCode));
+      }
+      localStorage.setItem('soncang_v5_role_perms', JSON.stringify(all));
+    }
     return { success: true };
   }
 

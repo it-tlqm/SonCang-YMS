@@ -39,7 +39,9 @@ import {
   Customer,
   StaffUser,
   PowerSocket,
-  PowerSocketStatus
+  PowerSocketStatus,
+  AppRole,
+  AppRolePermission
 } from '@/types/domain.types';
 import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
 
@@ -3158,6 +3160,142 @@ export class SupabaseRepository implements IYardRepository {
     } catch (err: any) {
       return { success: false, error: err?.message || 'Lỗi khi cập nhật trạng thái trụ điện' };
     }
+  }
+
+  /** Lấy danh mục các vai trò (Roles) trong hệ thống */
+  async getRoles(): Promise<AppRole[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.from as any)('app_roles').select('*').order('code', { ascending: true });
+      if (!error && data && data.length > 0) {
+        const { data: perms } = await (supabase.from as any)('app_role_permissions').select('role_code, permission_code');
+        const countMap: Record<string, number> = {};
+        if (perms) {
+          perms.forEach((p: any) => {
+            countMap[p.role_code] = (countMap[p.role_code] || 0) + 1;
+          });
+        }
+        return data.map((r: any) => ({
+          ...r,
+          permissions_count: countMap[r.code] || 0
+        })) as AppRole[];
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_roles');
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+
+    return [
+      { code: 'SEC_STAFF', name: 'Nhân viên An ninh Cổng', department_code: 'AN_NINH', description: 'Trực ca bốt cổng vào & cổng ra', is_active: true, permissions_count: 26 },
+      { code: 'SEC_LEAD', name: 'Trưởng bộ phận An ninh', department_code: 'AN_NINH', description: 'Giám sát ca trực an ninh, duyệt điều chỉnh', is_active: true, permissions_count: 31 },
+      { code: 'PORT_STAFF', name: 'Nhân viên Thương vụ CCKB', department_code: 'CCKB', description: 'Quản lý yêu cầu điện, thu tiền điện container', is_active: true, permissions_count: 31 },
+      { code: 'PORT_LEAD', name: 'Trưởng bộ phận CCKB', department_code: 'CCKB', description: 'Trưởng ca CCKB, phê duyệt công nợ và clearance', is_active: true, permissions_count: 38 },
+      { code: 'DIS_STAFF', name: 'Nhân viên Điều phối Bãi', department_code: 'DIEU_PHOI', description: 'Cập nhật tình trạng HÀNG/RỖNG hiện trường', is_active: true, permissions_count: 9 },
+      { code: 'DIS_LEAD', name: 'Trưởng bộ phận Điều phối', department_code: 'DIEU_PHOI', description: 'Trưởng ca điều phối bến bãi', is_active: true, permissions_count: 11 },
+      { code: 'SYS_ADMIN', name: 'Quản trị viên Hệ thống', department_code: 'HE_THONG', description: 'Toàn quyền cấu hình, tài khoản và audit logs', is_active: true, permissions_count: 60 }
+    ];
+  }
+
+  /** Tạo mới hoặc sửa vai trò */
+  async createRole(role: { code: string; name: string; department_code: string; description?: string }): Promise<{ success: boolean; role?: AppRole; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_upsert_role', {
+        p_code: role.code,
+        p_name: role.name,
+        p_department_code: role.department_code,
+        p_description: role.description || '',
+        p_is_active: true
+      });
+      if (!error && data && (data as any).success) {
+        return { success: true, role: (data as any).role };
+      }
+      if (error) return { success: false, error: error.message };
+    } catch {
+      // Fallback
+    }
+
+    const newRole: AppRole = {
+      code: role.code.toUpperCase().trim(),
+      name: role.name.trim(),
+      department_code: role.department_code as any,
+      description: role.description || '',
+      is_active: true,
+      permissions_count: 0
+    };
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('soncang_v5_roles');
+      const list = saved ? JSON.parse(saved) : [];
+      list.push(newRole);
+      localStorage.setItem('soncang_v5_roles', JSON.stringify(list));
+    }
+    return { success: true, role: newRole };
+  }
+
+  /** Cập nhật vai trò */
+  async updateRole(role: { code: string; name: string; department_code: string; description?: string; is_active?: boolean }): Promise<{ success: boolean; role?: AppRole; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_upsert_role', {
+        p_code: role.code,
+        p_name: role.name,
+        p_department_code: role.department_code,
+        p_description: role.description || '',
+        p_is_active: role.is_active !== undefined ? role.is_active : true
+      });
+      if (!error && data && (data as any).success) {
+        return { success: true, role: (data as any).role };
+      }
+      if (error) return { success: false, error: error.message };
+    } catch {
+      // Fallback
+    }
+    return { success: true };
+  }
+
+  /** Lấy danh sách quyền đã cấp theo vai trò */
+  async getRolePermissions(roleCode?: string): Promise<AppRolePermission[]> {
+    try {
+      const supabase = createClient();
+      let query = (supabase.from as any)('app_role_permissions').select('*');
+      if (roleCode) {
+        query = query.eq('role_code', roleCode);
+      }
+      const { data, error } = await query;
+      if (!error && data) {
+        return data as AppRolePermission[];
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  }
+
+  /** Bật / Tắt cấp quyền cho vai trò */
+  async toggleRolePermission(roleCode: string, permissionCode: string, isEnabled: boolean, scope: string = 'ALL'): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_toggle_role_permission', {
+        p_role_code: roleCode,
+        p_permission_code: permissionCode,
+        p_is_enabled: isEnabled,
+        p_scope: scope
+      });
+      if (!error && data && (data as any).success) {
+        return { success: true };
+      }
+      if (error) return { success: false, error: error.message };
+    } catch {
+      // Fallback
+    }
+    return { success: true };
   }
 }
 

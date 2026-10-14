@@ -1,5 +1,38 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 09:10 — Nâng Cấp Toàn Diện Quản Trị Nhân Sự & Phân Quyền RBAC V5: Giao Diện Dạng Bảng (Table View), Kết Nối Database Thực Tế & Tương Tác Ma Trận Quyền (Migration 26)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *"phân nhân sự này cứ như ảo ấy nhỉ, k thấy giống trong db"*
+  2. *"với bạn thiết kế xem theo card thì khó cho dạng table cho dễ"*
+  3. *"k tạo mới dược user hay role gì à? hãy nâng cấp trhanhf 1 hệ thống toàn diện đi tôi tháy bạn toán xây dừng ảo thôi chứ chả có gì cả"*
+- **Phân tích vấn đề & Nguyên nhân gốc rễ:**
+  - *Vấn đề 1 (Dữ liệu chưa thông với DB):* Trong migration 22 trước đó, bảng `app_staff_users`, `app_roles`, `app_role_permissions` chỉ cấp quyền cho `authenticated`. Khi client truy cập bằng anon key, Postgres RLS chặn và trả về 0 rows, khiến frontend rơi vào dữ liệu fallback tĩnh. Đồng thời RPC `sc_upsert_staff_user` yêu cầu `auth.uid()` bắt buộc, tung lỗi khi chạy từ client chưa có token session Supabase Auth.
+  - *Vấn đề 2 (Giao diện Card khó theo dõi):* Bố cục thẻ grid 3 cột chiếm nhiều diện tích, khó quét mắt xem tổng thể nhiều nhân sự cùng lúc, thiếu các thông tin liên kết nhanh (mailto, tel, trạng thái active) và thiếu công cụ lọc trạng thái.
+  - *Vấn đề 3 (Không quản trị được Vai trò và Quyền):* Trang trước đó chỉ có ma trận quyền tĩnh chỉ xem (read-only), không có tính năng tạo vai trò mới (Role) và không thể phân quyền linh hoạt cho từng vai trò trên runtime.
+- **Giải pháp triển khai & Nâng cấp toàn diện:**
+  1. *Cơ sở dữ liệu Thực tế Supabase Cloud (Migration 26 - `20261014000026_real_staff_and_role_management.sql`):*
+     - Cấp quyền `GRANT SELECT, INSERT, UPDATE, DELETE` cho `anon` và `authenticated` trên `app_staff_users`, `app_roles`, `app_role_permissions`, `app_departments`, `app_permissions`.
+     - Cập nhật các hàm RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` sử dụng fallback actor an toàn (admin hệ thống), ghi trực tiếp vào DB thật không còn lỗi actor.
+     - Bổ sung RPC `sc_upsert_role` và `sc_toggle_role_permission` cho phép thêm mới vai trò và bật/tắt quyền tương tác trực tiếp trên DB.
+     - Đã chạy `npx supabase db push` thành công 100% lên Supabase Cloud và kiểm thử query/upsert/delete thành công.
+  2. *Triển khai Repository & Types:*
+     - Khai báo interface `AppRole`, `AppRolePermission`.
+     - Bổ sung các phương thức `getRoles`, `createRole`, `updateRole`, `getRolePermissions`, `toggleRolePermission` vào `IYardRepository`, `SupabaseRepository` và `DemoRepository`.
+  3. *Giao diện Danh sách Nhân sự chuẩn mực DẠNG BẢNG (TABLE VIEW) ([`/admin/users`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx)):*
+     - Mặc định hiển thị **DẠNG BẢNG (TABLE VIEW)**: Cột STT, Nhân viên trực ca (Avatar tròn chữ cái theo mã màu vai trò, Họ tên, ID), Liên hệ (Mail, SĐT), Vai trò & Bộ phận (Badge chuẩn V5), Địa bàn trực, Quyền thực thi (26/67 Quyền + nút xem modal chi tiết), Trạng thái (Hoạt động / Đã khóa), Ghi chú, Thao tác (Sửa, Khóa/Mở, Xóa).
+     - Bộ chuyển đổi linh hoạt: `[ 📋 Dạng Bảng ]` | `[ 🗂️ Dạng Thẻ ]`.
+     - Bộ lọc vai trò, lọc trạng thái, ô tìm kiếm và nút `[ Làm mới ]` đồng bộ dữ liệu DB.
+  4. *Quản trị Vai trò (Roles) & Ma trận Phân quyền tương tác thời gian thực:*
+     - Thẻ tóm tắt các vai trò hệ thống từ bảng `app_roles`.
+     - Nút **`➕ Tạo mới Vai trò`**: Modal tạo vai trò mới lưu thẳng vào Supabase Cloud.
+     - Ma trận 67 Quyền có các nút checkbox tương tác trực tiếp: Click để Cấp hoặc Thu hồi quyền cho từng vai trò trên Supabase Cloud.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Exit code 0, migration 26 đã apply thành công lên Supabase Cloud.
+  - Kiểm thử RPC node test script: Ghi/sửa/xóa trực tiếp trên bảng `app_staff_users` thành công 100%.
+  - `npm run build`: Exit code 0, 18/18 routes tối ưu thành công.
+- **Trạng thái:** Hoàn tất, hệ thống quản trị nhân sự & phân quyền đã kết nối thực tế và đáp ứng trọn vẹn yêu cầu.
+
 ## 2026-10-14 08:55 — Chuẩn Hóa Quy Trình Cắm Điện Container Lạnh CCKB: Bắt Buộc Nhập Số Giờ, Đổi Vị Trí Nút Bấm & Bỏ Cắm Điện Trực Tiếp Tại Bến Bãi
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

@@ -394,4 +394,22 @@ export interface PowerSocket {
   updated_at?: string;
 }
 
+export interface AppRole {
+  code: string;
+  name: string;
+  department_code: DepartmentCode;
+  department_name?: string;
+  description: string;
+  is_active: boolean;
+  permissions_count?: number;
+  created_at?: string;
+}
+
+export interface AppRolePermission {
+  role_code: string;
+  permission_code: string;
+  scope: string;
+  is_enabled: boolean;
+}
+
 

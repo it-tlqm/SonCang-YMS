@@ -27,7 +27,9 @@ import {
   Customer,
   StaffUser,
   PowerSocket,
-  PowerSocketStatus
+  PowerSocketStatus,
+  AppRole,
+  AppRolePermission
 } from '@/types/domain.types';
 
 export interface CreateVehicleParams {
@@ -485,6 +487,21 @@ export interface IYardRepository {
     status: PowerSocketStatus,
     notes?: string
   ): Promise<{ success: boolean; error?: string }>;
+
+  /** Lấy danh mục các vai trò (Roles) trong hệ thống */
+  getRoles(): Promise<AppRole[]>;
+
+  /** Tạo mới hoặc sửa thông tin vai trò */
+  createRole(role: { code: string; name: string; department_code: string; description?: string }): Promise<{ success: boolean; role?: AppRole; error?: string }>;
+
+  /** Cập nhật vai trò */
+  updateRole(role: { code: string; name: string; department_code: string; description?: string; is_active?: boolean }): Promise<{ success: boolean; role?: AppRole; error?: string }>;
+
+  /** Lấy danh sách quyền đã cấp theo vai trò */
+  getRolePermissions(roleCode?: string): Promise<AppRolePermission[]>;
+
+  /** Bật / Tắt cấp quyền cho vai trò */
+  toggleRolePermission(roleCode: string, permissionCode: string, isEnabled: boolean, scope?: string): Promise<{ success: boolean; error?: string }>;
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;
