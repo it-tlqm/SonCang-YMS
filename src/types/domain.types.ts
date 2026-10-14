@@ -150,15 +150,17 @@ export interface ContainerVisit {
   yard_zone?: string | null;
   slot_code?: string | null;
   is_plugged?: boolean;
+  plug_socket_code?: string | null;
   notes?: string | null;
 }
 
 export interface YardZoneInfo {
   code: string;
   name: string;
-  description: string;
+  description?: string | null;
   capacity: number;
   has_power_outlets: boolean;
+  power_outlets_count?: number;
   color_badge: string;
 }
 
@@ -240,6 +242,7 @@ export interface ReeferRequest {
   status: ReeferRequestStatus;
   container_visit_id?: string | null;
   matched_container_visit_id?: string | null;
+  plug_socket_code?: string | null;
   notes?: string | null;
   created_by: string;
   created_by_name?: string;
@@ -255,6 +258,7 @@ export interface ReeferPowerSession {
   container_visit_id: string;
   container_no: string;
   power_status: ReeferPowerStatus;
+  plug_socket_code?: string | null;
   plugged_in_at: string;
   plugged_in_by: string;
   unplugged_at: string | null;

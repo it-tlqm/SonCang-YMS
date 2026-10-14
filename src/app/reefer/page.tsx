@@ -73,6 +73,7 @@ export default function ReeferMonitoringPage() {
   const [plugPowerMode, setPlugPowerMode] = useState<'HOURLY' | 'CONTINUOUS'>('HOURLY');
   const [plugExpectedHours, setPlugExpectedHours] = useState<number | ''>('');
   const [plugNotes, setPlugNotes] = useState<string>('');
+  const [plugSocketCode, setPlugSocketCode] = useState<string>('R01');
   const [plugError, setPlugError] = useState<string>('');
   const [linkingRequestId, setLinkingRequestId] = useState<string | null>(null);
 
@@ -689,6 +690,21 @@ export default function ReeferMonitoringPage() {
     const pad = (n: number) => n.toString().padStart(2, '0');
     const localIso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setPlugInTime(localIso);
+
+    // Tự động tìm giắc cắm điện trống đầu tiên trong 30 trụ điện Khu A
+    const busySockets = new Set(
+      sessions.filter(s => s.power_status === 'PLUGGED' && s.plug_socket_code).map(s => s.plug_socket_code)
+    );
+    let autoSocket = 'R01';
+    for (let i = 1; i <= 30; i++) {
+      const code = `R${String(i).padStart(2, '0')}`;
+      if (!busySockets.has(code)) {
+        autoSocket = code;
+        break;
+      }
+    }
+    setPlugSocketCode(autoSocket);
+
     setShowPlugModal(true);
   };
 
@@ -717,6 +733,24 @@ export default function ReeferMonitoringPage() {
     setPlugNotes(
       req.customer_name ? `Khách: ${req.customer_name}${req.notes ? ` | ${req.notes}` : ''}` : (req.notes || '')
     );
+
+    if (req.plug_socket_code) {
+      setPlugSocketCode(req.plug_socket_code);
+    } else {
+      const busySockets = new Set(
+        sessions.filter(s => s.power_status === 'PLUGGED' && s.plug_socket_code).map(s => s.plug_socket_code)
+      );
+      let autoSocket = 'R01';
+      for (let i = 1; i <= 30; i++) {
+        const code = `R${String(i).padStart(2, '0')}`;
+        if (!busySockets.has(code)) {
+          autoSocket = code;
+          break;
+        }
+      }
+      setPlugSocketCode(autoSocket);
+    }
+
     setShowPlugModal(true);
   };
 
@@ -746,6 +780,7 @@ export default function ReeferMonitoringPage() {
       containerVisitId: selectedContId,
       containerNo: targetCont.container_no_current,
       pluggedInAt: new Date(plugInTime).toISOString(),
+      plugSocketCode: plugSocketCode.trim(),
       operatorId: user?.id || '20000000-0000-0000-0000-000000000020',
       notes: finalNotes,
     });
@@ -1383,7 +1418,15 @@ export default function ReeferMonitoringPage() {
                       return (
                         <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
                           <td className="px-3.5 py-2.5 font-mono font-bold text-[#223873]">
-                            {s.container_no}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span>{s.container_no}</span>
+                              {s.plug_socket_code && (
+                                <span className="text-[10px] font-sans font-bold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                  <span>⚡ Trụ:</span>
+                                  <strong>{s.plug_socket_code}</strong>
+                                </span>
+                              )}
+                            </div>
                             {s.notes && s.notes.includes('Dự kiến') && (
                               <div className="text-[10px] font-sans text-amber-800 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-1 max-w-xs truncate" title={s.notes}>
                                 {s.notes.split('|')[0]?.trim()}
@@ -1663,6 +1706,43 @@ export default function ReeferMonitoringPage() {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* VỊ TRÍ TRỤ / GIẮC CẮM ĐIỆN 380V (KHU A REEFER) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Vị trí Trụ / Giắc cắm điện 380V (Khu A) <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                    30 Trụ 3 pha (R01 - R30)
+                  </span>
+                </div>
+                <select
+                  value={plugSocketCode}
+                  onChange={(e) => setPlugSocketCode(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-bold font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444] bg-white"
+                >
+                  {Array.from({ length: 30 }, (_, i) => {
+                    const code = `R${String(i + 1).padStart(2, '0')}`;
+                    const activeSession = sessions.find(
+                      (s) => s.power_status === 'PLUGGED' && s.plug_socket_code === code
+                    );
+                    const isBusy = Boolean(activeSession);
+                    return (
+                      <option 
+                        key={code} 
+                        value={code} 
+                        disabled={isBusy && activeSession?.container_visit_id !== selectedContId}
+                      >
+                        {code} — {isBusy ? `🔴 Bận (${activeSession?.container_no})` : '🟢 Trống — Sẵn sàng (380V)'}
+                      </option>
+                    );
+                  })}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Hệ thống kiểm soát chống cắm trùng giắc. Khi rút điện, giắc cắm sẽ tự động được giải phóng về trạng thái trống.
+                </p>
               </div>
 
               <div>

@@ -104,6 +104,7 @@ export interface PlugInReeferParams {
   containerVisitId: string;
   containerNo: string;
   pluggedInAt?: string;
+  plugSocketCode?: string;
   operatorId: string;
   notes?: string;
 }
@@ -196,6 +197,7 @@ export interface RecordCompletedReeferSessionParams {
   containerNo?: string;
   pluggedInAt: string;
   unpluggedAt: string;
+  plugSocketCode?: string;
   notes?: string;
   operatorId: string;
 }
@@ -216,6 +218,7 @@ export interface UpdateReeferRequestParams {
   customerPhone?: string;
   powerMode?: 'HOURLY' | 'CONTINUOUS';
   temperatureSetting?: string;
+  plugSocketCode?: string;
   status?: ReeferRequestStatus;
   notes?: string;
 }
@@ -268,6 +271,7 @@ export interface IYardRepository {
     expectedHours?: number;
     targetTemperature?: string;
     temperatureSetting?: string;
+    plugSocketCode?: string;
     notes?: string;
     operatorId?: string;
     createdBy?: string;

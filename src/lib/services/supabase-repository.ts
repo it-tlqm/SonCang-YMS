@@ -260,6 +260,11 @@ export class SupabaseRepository implements IYardRepository {
         storage_fee_amount: c.storage_fee_amount ?? 0,
         storage_fee_payment_status: c.storage_fee_payment_status as ContainerVisit['storage_fee_payment_status'],
         storage_nights_charged: c.storage_nights_charged ?? 0,
+        yard_zone: (c as any).yard_zone || null,
+        slot_code: (c as any).slot_code || null,
+        is_plugged: Boolean((c as any).is_plugged),
+        plug_socket_code: (c as any).plug_socket_code || null,
+        notes: (c as any).notes || null,
         created_at: c.created_at,
         created_by: c.created_by,
         number_changes_count: 0,
@@ -772,6 +777,7 @@ export class SupabaseRepository implements IYardRepository {
         container_visit_id: r.container_visit_id,
         container_no: contNoMap[r.container_visit_id] || '',
         power_status: r.power_status as ReeferPowerStatus,
+        plug_socket_code: (r as any).plug_socket_code || null,
         plugged_in_at: r.plugged_in_at,
         plugged_in_by: r.plugged_in_by,
         unplugged_at: r.unplugged_at,
@@ -811,6 +817,27 @@ export class SupabaseRepository implements IYardRepository {
         return { session: null, error: error?.message || 'Không thể cắm điện qua Supabase RPC.' };
       }
 
+      // Lưu mã giắc cắm điện và phân bổ cont vào Khu A Reefer
+      if (params.plugSocketCode) {
+        try {
+          await (supabase as any)
+            .from('app_reefer_power_sessions')
+            .update({ plug_socket_code: params.plugSocketCode.trim() })
+            .eq('id', sessionId);
+
+          await (supabase as any)
+            .from('app_container_visits')
+            .update({ 
+              plug_socket_code: params.plugSocketCode.trim(),
+              is_plugged: true,
+              yard_zone: 'KHU_A_REEFER',
+            })
+            .eq('id', params.containerVisitId);
+        } catch (sockErr) {
+          console.warn('Lỗi ghi nhận plug_socket_code:', sockErr);
+        }
+      }
+
       const { data: row, error: fetchErr } = await supabase
         .from('app_reefer_power_sessions')
         .select('*')
@@ -829,6 +856,7 @@ export class SupabaseRepository implements IYardRepository {
           container_visit_id: r.container_visit_id,
           container_no: params.containerNo,
           power_status: r.power_status as ReeferPowerStatus,
+          plug_socket_code: params.plugSocketCode?.trim() || (r as any).plug_socket_code || null,
           plugged_in_at: r.plugged_in_at,
           plugged_in_by: r.plugged_in_by,
           unplugged_at: r.unplugged_at,
@@ -877,6 +905,21 @@ export class SupabaseRepository implements IYardRepository {
 
       if (fetchErr || !row) {
         return { session: null, error: 'Rút điện thành công nhưng không thể đọc lại bản ghi.' };
+      }
+
+      // Giải phóng giắc cắm điện của container về trạng thái trống
+      try {
+        if ((row as any).container_visit_id) {
+          await (supabase as any)
+            .from('app_container_visits')
+            .update({ 
+              plug_socket_code: null,
+              is_plugged: false,
+            })
+            .eq('id', (row as any).container_visit_id);
+        }
+      } catch (clearErr) {
+        console.warn('Lỗi giải phóng plug_socket_code:', clearErr);
       }
 
       const r = row as unknown as ReeferSessionRow;
@@ -1254,17 +1297,32 @@ export class SupabaseRepository implements IYardRepository {
 
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from('app_tariffs')
-        .update({ amount })
-        .eq('code', code)
-        .select()
-        .single();
+      const { data, error } = await (supabase.rpc as any)('sc_update_tariff', {
+        p_code: code,
+        p_amount: amount,
+        p_reason: reason || 'Điều chỉnh đơn giá dịch vụ hệ thống',
+      });
+
+      if (!error && data && (data as any).success) {
+        return { success: true, tariff: (data as any).tariff as TariffItem };
+      }
 
       if (error) {
-        return { success: false, error: 'Lỗi cập nhật biểu phí Supabase: ' + error.message };
+        // Fallback update trực tiếp
+        const { data: fallbackData, error: fbErr } = await supabase
+          .from('app_tariffs')
+          .update({ amount })
+          .eq('code', code)
+          .select()
+          .single();
+
+        if (!fbErr && fallbackData) {
+          return { success: true, tariff: fallbackData as unknown as TariffItem };
+        }
+        return { success: false, error: 'Lỗi cập nhật biểu phí: ' + (error?.message || fbErr?.message) };
       }
-      return { success: true, tariff: data as unknown as TariffItem };
+
+      return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Lỗi kết nối máy chủ.' };
     }
@@ -1673,35 +1731,60 @@ export class SupabaseRepository implements IYardRepository {
       const supabase = createClient();
       const changes: VehiclePlateChange[] = [];
 
-      // 1. Thử đọc từ app_audit_logs nếu có dữ liệu
-      const { data: logs, error } = await (supabase as any)
-        .from('app_audit_logs')
+      // 1. Đọc từ bảng lưu trữ chuyên dụng app_vehicle_plate_changes
+      const { data: dbChanges, error: dbErr } = await (supabase as any)
+        .from('app_vehicle_plate_changes')
         .select('*')
-        .eq('entity_name', 'app_vehicle_visits')
-        .eq('entity_id', vehicleId)
-        .eq('event_type', 'vehicle.visit.update_basic')
-        .order('performed_at', { ascending: false });
+        .eq('vehicle_visit_id', vehicleId)
+        .order('changed_at', { ascending: false });
 
-      if (!error && logs && Array.isArray(logs) && logs.length > 0) {
-        logs.forEach((log: any, index: number) => {
-          const oldData = log.old_data as Record<string, unknown> | null;
-          const newData = log.new_data as Record<string, unknown> | null;
-          const oldPlate = String(oldData?.license_plate || '');
-          const newPlate = String(newData?.license_plate || '');
-          if (newPlate && newPlate !== oldPlate) {
-            changes.push({
-              id: log.id || `audit-${index}`,
-              vehicle_visit_id: vehicleId,
-              yard_id: log.yard_id || '',
-              old_plate: oldPlate || '—',
-              new_plate: newPlate,
-              reason: String(newData?.note || log.notes || 'Sửa biển số xe'),
-              changed_by: log.actor_id || '',
-              changed_by_name: log.actor_name || 'Nhân viên trực',
-              changed_at: log.performed_at,
-            });
-          }
+      if (!dbErr && dbChanges && Array.isArray(dbChanges) && dbChanges.length > 0) {
+        dbChanges.forEach((row: any) => {
+          changes.push({
+            id: row.id,
+            vehicle_visit_id: row.vehicle_visit_id,
+            yard_id: row.yard_id || '',
+            old_plate: row.old_license_plate || '—',
+            new_plate: row.new_license_plate,
+            reason: row.reason || 'Sửa biển số xe',
+            changed_by: row.changed_by || '',
+            changed_by_name: row.changed_by_name || 'Nhân viên trực',
+            changed_at: row.changed_at,
+          });
         });
+      }
+
+      // 2. Bổ sung từ app_audit_logs nếu chưa có
+      if (changes.length === 0) {
+        const { data: logs, error } = await (supabase as any)
+          .from('app_audit_logs')
+          .select('*')
+          .eq('entity_name', 'app_vehicle_visits')
+          .eq('entity_id', vehicleId)
+          .eq('event_type', 'vehicle.visit.update_basic')
+          .order('performed_at', { ascending: false });
+
+        if (!error && logs && Array.isArray(logs) && logs.length > 0) {
+          logs.forEach((log: any, index: number) => {
+            const oldData = log.old_data as Record<string, unknown> | null;
+            const newData = log.new_data as Record<string, unknown> | null;
+            const oldPlate = String(oldData?.license_plate || '');
+            const newPlate = String(newData?.license_plate || '');
+            if (newPlate && newPlate !== oldPlate) {
+              changes.push({
+                id: log.id || `audit-${index}`,
+                vehicle_visit_id: vehicleId,
+                yard_id: log.yard_id || '',
+                old_plate: oldPlate || '—',
+                new_plate: newPlate,
+                reason: String(newData?.note || log.notes || 'Sửa biển số xe'),
+                changed_by: log.actor_id || '',
+                changed_by_name: log.actor_name || 'Nhân viên trực',
+                changed_at: log.performed_at,
+              });
+            }
+          });
+        }
       }
 
       // 2. Bổ sung từ client cache (localStorage)
@@ -1788,7 +1871,24 @@ export class SupabaseRepository implements IYardRepository {
         return { success: false, error: rpcErr.message };
       }
 
-      // 3. Lưu lịch sử vào client storage để hiển thị tức thì
+      // 3. Ghi nhận vào bảng cơ sở dữ liệu thật app_vehicle_plate_changes
+      try {
+        await (supabase as any)
+          .from('app_vehicle_plate_changes')
+          .insert({
+            vehicle_visit_id: params.vehicleId,
+            yard_id: vehRow.yard_id,
+            old_license_plate: oldPlate,
+            new_license_plate: cleanNewPlate,
+            reason: params.reason.trim(),
+            changed_by: params.operatorId || null,
+            changed_by_name: params.operatorName || 'Nhân viên trực',
+          });
+      } catch (insertErr) {
+        console.warn('Lỗi ghi app_vehicle_plate_changes:', insertErr);
+      }
+
+      // 4. Lưu lịch sử vào client storage để hiển thị tức thì
       if (typeof window !== 'undefined') {
         const localKey = `soncang_v5_plate_changes_${params.vehicleId}`;
         const existingJson = localStorage.getItem(localKey);
@@ -2103,9 +2203,26 @@ export class SupabaseRepository implements IYardRepository {
   }
 
   /**
-   * Lấy danh mục các phân khu chức năng của bến bãi
+   * Lấy danh mục các phân khu chức năng của bến bãi (Bảng app_yard_zones trên Supabase)
    */
   async getYardZones(): Promise<YardZoneInfo[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase as any)
+        .from('app_yard_zones')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && data && Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(data));
+        }
+        return data as unknown as YardZoneInfo[];
+      }
+    } catch (err) {
+      console.warn('Lỗi tải app_yard_zones từ Supabase:', err);
+    }
+
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('soncang_v5_yard_zones');
       if (saved) {
@@ -2121,23 +2238,37 @@ export class SupabaseRepository implements IYardRepository {
    * Tạo phân khu bãi mới (Điều phối viên / SYS_ADMIN)
    */
   async createYardZone(zone: YardZoneInfo): Promise<{ success: boolean; error?: string }> {
-    const currentZones = await this.getYardZones();
     const cleanCode = zone.code.trim().toUpperCase();
     if (!cleanCode) {
       return { success: false, error: 'Mã phân khu không được để trống.' };
     }
-    if (currentZones.some(z => z.code === cleanCode)) {
-      return { success: false, error: `Mã phân khu "${cleanCode}" đã tồn tại.` };
-    }
-    currentZones.push({
-      ...zone,
+
+    const newZonePayload = {
       code: cleanCode,
       name: zone.name.trim(),
-      description: zone.description.trim(),
+      description: zone.description ? zone.description.trim() : '',
       capacity: Number(zone.capacity) || 0,
       has_power_outlets: Boolean(zone.has_power_outlets),
+      power_outlets_count: zone.has_power_outlets ? (Number(zone.power_outlets_count) || Number(zone.capacity) || 30) : 0,
       color_badge: zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300',
-    });
+    };
+
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase as any)
+        .from('app_yard_zones')
+        .insert(newZonePayload);
+
+      if (error) {
+        return { success: false, error: 'Lỗi máy chủ khi tạo phân khu: ' + error.message };
+      }
+    } catch (err: any) {
+      console.warn('Lỗi ghi app_yard_zones:', err);
+    }
+
+    // Cập nhật client cache
+    const currentZones = (await this.getYardZones()).filter(z => z.code !== cleanCode);
+    currentZones.push(newZonePayload);
     if (typeof window !== 'undefined') {
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
     }
@@ -2148,22 +2279,39 @@ export class SupabaseRepository implements IYardRepository {
    * Cập nhật thông tin phân khu bãi (Điều phối viên / SYS_ADMIN)
    */
   async updateYardZone(code: string, zoneUpdate: Partial<YardZoneInfo>): Promise<{ success: boolean; error?: string }> {
-    const currentZones = await this.getYardZones();
-    const idx = currentZones.findIndex(z => z.code === code);
-    if (idx === -1) {
-      return { success: false, error: `Không tìm thấy phân khu "${code}".` };
-    }
-    currentZones[idx] = {
-      ...currentZones[idx],
-      ...zoneUpdate,
-      name: zoneUpdate.name !== undefined ? zoneUpdate.name.trim() : currentZones[idx].name,
-      description: zoneUpdate.description !== undefined ? zoneUpdate.description.trim() : currentZones[idx].description,
-      capacity: zoneUpdate.capacity !== undefined ? (Number(zoneUpdate.capacity) || 0) : currentZones[idx].capacity,
-      has_power_outlets: zoneUpdate.has_power_outlets !== undefined ? Boolean(zoneUpdate.has_power_outlets) : currentZones[idx].has_power_outlets,
-      color_badge: zoneUpdate.color_badge !== undefined ? zoneUpdate.color_badge : currentZones[idx].color_badge,
+    const updatePayload: any = {
+      updated_at: new Date().toISOString(),
     };
+    if (zoneUpdate.name !== undefined) updatePayload.name = zoneUpdate.name.trim();
+    if (zoneUpdate.description !== undefined) updatePayload.description = zoneUpdate.description ? zoneUpdate.description.trim() : null;
+    if (zoneUpdate.capacity !== undefined) updatePayload.capacity = Number(zoneUpdate.capacity) || 0;
+    if (zoneUpdate.has_power_outlets !== undefined) {
+      updatePayload.has_power_outlets = Boolean(zoneUpdate.has_power_outlets);
+      updatePayload.power_outlets_count = zoneUpdate.has_power_outlets ? (Number(zoneUpdate.power_outlets_count) || Number(zoneUpdate.capacity) || 30) : 0;
+    }
+    if (zoneUpdate.color_badge !== undefined) updatePayload.color_badge = zoneUpdate.color_badge;
+
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase as any)
+        .from('app_yard_zones')
+        .update(updatePayload)
+        .eq('code', code);
+
+      if (error) {
+        return { success: false, error: 'Lỗi máy chủ khi cập nhật phân khu: ' + error.message };
+      }
+    } catch (err: any) {
+      console.warn('Lỗi update app_yard_zones:', err);
+    }
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
+      const currentZones = await this.getYardZones();
+      const idx = currentZones.findIndex(z => z.code === code);
+      if (idx !== -1) {
+        currentZones[idx] = { ...currentZones[idx], ...zoneUpdate };
+        localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));
+      }
     }
     return { success: true };
   }
@@ -2182,6 +2330,21 @@ export class SupabaseRepository implements IYardRepository {
         error: `Không thể xóa phân khu "${code}" vì vẫn còn ${hasVehicles ? 'xe' : ''} ${hasContainers ? 'container' : ''} đang đỗ tại phân khu này. Vui lòng chuyển vị trí trước khi xóa!` 
       };
     }
+
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase as any)
+        .from('app_yard_zones')
+        .delete()
+        .eq('code', code);
+
+      if (error) {
+        return { success: false, error: 'Lỗi máy chủ khi xóa phân khu: ' + error.message };
+      }
+    } catch (err: any) {
+      console.warn('Lỗi delete app_yard_zones:', err);
+    }
+
     const currentZones = (await this.getYardZones()).filter(z => z.code !== code);
     if (typeof window !== 'undefined') {
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(currentZones));

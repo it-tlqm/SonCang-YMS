@@ -876,6 +876,7 @@ export class DemoRepository implements IYardRepository {
       container_visit_id: params.containerVisitId,
       container_no: params.containerNo,
       power_status: 'PLUGGED',
+      plug_socket_code: (params as any).plugSocketCode?.trim() || null,
       plugged_in_at: params.pluggedInAt || new Date().toISOString(),
       plugged_in_by: params.operatorId,
       unplugged_at: null,
@@ -888,6 +889,14 @@ export class DemoRepository implements IYardRepository {
       notes: params.notes || null,
       created_at: new Date().toISOString(),
     };
+
+    // Cập nhật container liên kết
+    const cont = this.containers.find(c => c.id === params.containerVisitId);
+    if (cont) {
+      cont.is_plugged = true;
+      cont.plug_socket_code = (params as any).plugSocketCode?.trim() || null;
+      cont.yard_zone = 'KHU_A_REEFER';
+    }
 
     this.reeferSessions.unshift(newSession);
     return { session: newSession };
@@ -934,6 +943,13 @@ export class DemoRepository implements IYardRepository {
     session.billable_minutes = billableMinutes;
     session.total_power_amount = totalAmount;
     if (params.notes) session.notes = params.notes;
+
+    // Giải phóng container giắc cắm
+    const cont = this.containers.find(c => c.id === session.container_visit_id);
+    if (cont) {
+      cont.is_plugged = false;
+      cont.plug_socket_code = null;
+    }
 
     // Tự động tạo khoản phải thu tiền điện trong sổ cái
     const newCharge: ChargeItem = {
@@ -1826,7 +1842,7 @@ export class DemoRepository implements IYardRepository {
       ...zone,
       code: cleanCode,
       name: zone.name.trim(),
-      description: zone.description.trim(),
+      description: zone.description ? zone.description.trim() : '',
       capacity: Number(zone.capacity) || 0,
       has_power_outlets: Boolean(zone.has_power_outlets),
       color_badge: zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300',
@@ -1844,7 +1860,7 @@ export class DemoRepository implements IYardRepository {
       ...this.yardZones[idx],
       ...zoneUpdate,
       name: zoneUpdate.name !== undefined ? zoneUpdate.name.trim() : this.yardZones[idx].name,
-      description: zoneUpdate.description !== undefined ? zoneUpdate.description.trim() : this.yardZones[idx].description,
+      description: zoneUpdate.description !== undefined ? (zoneUpdate.description ? zoneUpdate.description.trim() : '') : this.yardZones[idx].description,
       capacity: zoneUpdate.capacity !== undefined ? (Number(zoneUpdate.capacity) || 0) : this.yardZones[idx].capacity,
       has_power_outlets: zoneUpdate.has_power_outlets !== undefined ? Boolean(zoneUpdate.has_power_outlets) : this.yardZones[idx].has_power_outlets,
       color_badge: zoneUpdate.color_badge !== undefined ? zoneUpdate.color_badge : this.yardZones[idx].color_badge,

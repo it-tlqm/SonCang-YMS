@@ -32,7 +32,8 @@ import {
   ChevronDown,
   Plus,
   Trash2,
-  Settings
+  Settings,
+  Zap
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -1972,6 +1973,112 @@ export default function YardMonitorPage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* BẢNG ĐIỀU KHIỂN & KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V (KHU A REEFER) */}
+          {/* ========================================================================= */}
+          <div className="bg-white rounded-lg border border-slate-300 p-4 shadow-2xs space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-500 fill-current" />
+                  <span>Kiểm soát 30 Giắc cắm điện Container Lạnh 380V (Khu A Reefer)</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Theo dõi thời gian thực tình trạng từng trụ điện 380V/32A. Nhận biết ngay trụ nào đang cấp điện cho cont nào, trụ nào đang trống.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {(() => {
+                  const pluggedCount = containers.filter(c => c.is_plugged).length;
+                  return (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="px-2.5 py-1 rounded bg-amber-50 border border-amber-300 font-bold text-amber-900 flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5 text-amber-600 fill-current" />
+                        <span>Đang cắm: <strong>{pluggedCount}</strong> / 30</span>
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-emerald-50 border border-emerald-300 font-bold text-emerald-900 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Trống: <strong>{Math.max(0, 30 - pluggedCount)}</strong></span>
+                      </span>
+                      <Link
+                        href="/reefer"
+                        className="px-2.5 py-1 rounded bg-[#223873] hover:bg-[#1a2c5a] text-white font-bold text-xs transition-colors flex items-center gap-1"
+                      >
+                        <span>Mở Quản lý cắm điện CCKB</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* LƯỚI 30 GIẮC CẮM ĐIỆN (R01 ĐẾN R30) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
+              {Array.from({ length: 30 }, (_, i) => {
+                const socketCode = `R${String(i + 1).padStart(2, '0')}`;
+                // Tìm container đang cắm vào giắc này
+                const pluggedCont = containers.find(
+                  (c) => c.is_plugged && (c.plug_socket_code === socketCode || c.slot_code === socketCode)
+                );
+
+                if (pluggedCont) {
+                  return (
+                    <div
+                      key={socketCode}
+                      className="p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/80 shadow-2xs space-y-1.5 transition-all hover:shadow-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-bold text-xs text-amber-950 bg-amber-200/80 px-1.5 py-0.5 rounded border border-amber-300">
+                          {socketCode}
+                        </span>
+                        <span className="text-[10px] font-bold text-amber-800 flex items-center gap-0.5 animate-pulse">
+                          <Zap className="w-3 h-3 fill-current text-amber-600" />
+                          <span>Đang cắm</span>
+                        </span>
+                      </div>
+                      <div>
+                        <div className="font-mono font-bold text-xs text-blue-950 truncate" title={pluggedCont.container_no_current}>
+                          {pluggedCont.container_no_current}
+                        </div>
+                        {pluggedCont.inbound_license_plate && (
+                          <div className="text-[10px] text-slate-600 font-semibold truncate">
+                            Xe: {pluggedCont.inbound_license_plate}
+                          </div>
+                        )}
+                        <div className="text-[10px] text-amber-900 font-medium mt-0.5 flex items-center justify-between">
+                          <span>{formatContainerSpec(pluggedCont.container_size, pluggedCont.container_type)}</span>
+                          <span className="font-bold">{pluggedCont.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={socketCode}
+                    className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-emerald-50/50 hover:border-emerald-300 transition-colors space-y-1.5 flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-xs text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
+                        {socketCode}
+                      </span>
+                      <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-0.5">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Trống</span>
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-medium">
+                      <span>380V / 3 pha</span>
+                      <div className="text-slate-400">Sẵn sàng cắm</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Chi tiết từng phân khu và danh sách xe / cont đang đỗ */}
