@@ -35,6 +35,9 @@ import {
   LayoutGrid,
   RefreshCw,
   Eye,
+  EyeOff,
+  Copy,
+  KeyRound,
   X,
   Database,
   Info
@@ -244,6 +247,16 @@ export default function UsersAndRbacAdminPage() {
 
   // Modal Xem Quyền Nhân sự
   const [viewPermsStaff, setViewPermsStaff] = useState<StaffUser | null>(null);
+
+  // Modal Đặt lại Mật khẩu Nhân sự
+  const [resetPwdStaff, setResetPwdStaff] = useState<StaffUser | null>(null);
+  const [newStaffPassword, setNewStaffPassword] = useState<string>('');
+  const [showNewStaffPassword, setShowNewStaffPassword] = useState<boolean>(false);
+  const [resetReason, setResetReason] = useState<string>('Admin cấp lại mật khẩu cho nhân viên trực ca');
+  const [mustChangePwd, setMustChangePwd] = useState<boolean>(true);
+  const [isSubmittingResetPwd, setIsSubmittingResetPwd] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [resetPwdError, setResetPwdError] = useState<string>('');
 
   // Form Fields Nhân sự
   const [formFullName, setFormFullName] = useState<string>('');
@@ -527,6 +540,72 @@ export default function UsersAndRbacAdminPage() {
     } catch (err) {
       await loadRolesAndPermissions();
       console.error('Lỗi toggle quyền:', err);
+    }
+  };
+
+  // Sinh mật khẩu ngẫu nhiên an toàn cho nhân sự
+  const handleGenerateRandomPassword = () => {
+    const prefixes = ['SonCang', 'TaLung', 'Yms', 'CangCan'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const specialChars = ['@', '#', '$', '!'];
+    const special = specialChars[Math.floor(Math.random() * specialChars.length)];
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const pwd = `${prefix}${special}${randomNum}`;
+    setNewStaffPassword(pwd);
+    setIsCopied(false);
+  };
+
+  // Sao chép mật khẩu vào bộ nhớ tạm
+  const handleCopyPassword = () => {
+    if (!newStaffPassword) return;
+    navigator.clipboard.writeText(newStaffPassword);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  // Mở modal đặt lại mật khẩu nhân viên
+  const handleOpenResetPasswordModal = (staff: StaffUser) => {
+    setResetPwdStaff(staff);
+    setResetPwdError('');
+    setIsCopied(false);
+    setResetReason('Admin cấp lại mật khẩu cho nhân viên trực ca');
+    setMustChangePwd(true);
+    handleGenerateRandomPassword();
+  };
+
+  // Xác nhận đặt lại mật khẩu nhân viên
+  const handleConfirmResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPwdStaff || !newStaffPassword) return;
+    if (newStaffPassword.length < 6) {
+      setResetPwdError('Mật khẩu mới phải có tối thiểu 6 ký tự.');
+      return;
+    }
+
+    setIsSubmittingResetPwd(true);
+    setResetPwdError('');
+    try {
+      const res = await repository.adminResetStaffPassword({
+        staffId: resetPwdStaff.id,
+        newPassword: newStaffPassword,
+        reason: resetReason,
+        mustChangePassword: mustChangePwd,
+      });
+
+      if (res.success) {
+        setSuccessMsg(`✓ Đã đặt lại mật khẩu cho [${resetPwdStaff.full_name}] thành công! Mật khẩu mới: ${newStaffPassword}`);
+        await loadStaffUsers();
+        setResetPwdStaff(null);
+        setNewStaffPassword('');
+        setTimeout(() => setSuccessMsg(''), 5000);
+      } else {
+        setResetPwdError(res.error || 'Lỗi khi đặt lại mật khẩu');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResetPwdError(msg);
+    } finally {
+      setIsSubmittingResetPwd(false);
     }
   };
 
@@ -926,6 +1005,15 @@ export default function UsersAndRbacAdminPage() {
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 type="button"
+                                onClick={() => handleOpenResetPasswordModal(acc)}
+                                title="Đặt lại mật khẩu cho nhân sự này"
+                                className="p-1.5 rounded-lg text-purple-700 hover:bg-purple-50 border border-transparent hover:border-purple-200 transition-colors cursor-pointer"
+                              >
+                                <KeyRound className="w-3.5 h-3.5" />
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => handleOpenEditModal(acc)}
                                 title="Sửa thông tin & vai trò"
                                 className="p-1.5 rounded-lg text-blue-700 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
@@ -1053,6 +1141,16 @@ export default function UsersAndRbacAdminPage() {
                       </button>
 
                       <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenResetPasswordModal(acc)}
+                          title="Đặt lại mật khẩu cho nhân sự"
+                          className="px-2 py-1 rounded-lg text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <KeyRound className="w-3 h-3" />
+                          <span>Đặt lại MK</span>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(acc)}
@@ -1683,6 +1781,176 @@ export default function UsersAndRbacAdminPage() {
                 Đóng
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: ĐẶT LẠI MẬT KHẨU NHÂN SỰ (RESET PASSWORD & AUDIT LOGGING)          */}
+      {/* ========================================================================= */}
+      {resetPwdStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* MODAL HEADER */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-purple-50/60">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-purple-100 text-purple-800">
+                  <KeyRound className="w-4 h-4 text-purple-700" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900">
+                    Đặt lại Mật khẩu Nhân sự
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Cấp mật khẩu mới và lưu vết kiểm toán (Audit Trail)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResetPwdStaff(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* FORM BODY */}
+            <form onSubmit={handleConfirmResetPassword} className="p-5 space-y-3.5 text-xs">
+              {resetPwdError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{resetPwdError}</span>
+                </div>
+              )}
+
+              {/* THÔNG TIN NHÂN SỰ ĐƯỢC CHỌN */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-xs">
+                    {resetPwdStaff.full_name}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-slate-200 text-purple-700 font-bold">
+                    {resetPwdStaff.role_code}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[11px]">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{resetPwdStaff.email}</span>
+                </div>
+                {resetPwdStaff.phone && (
+                  <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{resetPwdStaff.phone}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Ô NHẬP MẬT KHẨU MỚI & NÚT RANDOM / COPY */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700">
+                    Mật khẩu mới cấp <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={handleGenerateRandomPassword}
+                      className="text-[10px] font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200 transition-colors cursor-pointer flex items-center gap-1"
+                      title="Tự động tạo mật khẩu mạnh ngẫu nhiên"
+                    >
+                      <span>🎲 Tạo ngẫu nhiên</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyPassword}
+                      className="text-[10px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-md border border-slate-300 transition-colors cursor-pointer flex items-center gap-1"
+                      title="Sao chép mật khẩu gửi nhân sự"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>{isCopied ? 'Đã chép!' : 'Sao chép'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showNewStaffPassword ? 'text' : 'password'}
+                    value={newStaffPassword}
+                    onChange={(e) => setNewStaffPassword(e.target.value)}
+                    placeholder="Nhập hoặc tạo mật khẩu mới (tối thiểu 6 ký tự)..."
+                    className="w-full pl-3 pr-9 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-600 bg-purple-50/20"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewStaffPassword(!showNewStaffPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                    title={showNewStaffPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showNewStaffPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* LÝ DO ĐẶT LẠI MẬT KHẨU (GHI VẾT KIỂM TOÁN) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Lý do cấp lại mật khẩu <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={resetReason}
+                  onChange={(e) => setResetReason(e.target.value)}
+                  placeholder="Ví dụ: Nhân viên quên mật khẩu ca trực; Bàn giao tài khoản ca mới..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 bg-slate-50/50"
+                  required
+                />
+              </div>
+
+              {/* TÙY CHỌN: BẮT BUỘC ĐỔI MẬT KHẨU LẦN ĐĂNG NHẬP SAU */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="mustChangePwd"
+                  checked={mustChangePwd}
+                  onChange={(e) => setMustChangePwd(e.target.checked)}
+                  className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                />
+                <label htmlFor="mustChangePwd" className="text-slate-700 font-medium cursor-pointer">
+                  Yêu cầu nhân viên đổi mật khẩu ở lần đăng nhập tiếp theo
+                </label>
+              </div>
+
+              {/* MODAL ACTIONS */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setResetPwdStaff(null)}
+                  disabled={isSubmittingResetPwd}
+                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold cursor-pointer transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingResetPwd || !newStaffPassword || newStaffPassword.length < 6}
+                  className="px-4 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold cursor-pointer transition-colors shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSubmittingResetPwd ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang lưu...</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Xác nhận Đặt lại Mật khẩu</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

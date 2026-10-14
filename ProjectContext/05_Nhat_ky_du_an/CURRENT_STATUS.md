@@ -40,18 +40,29 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 09:55 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ NGHẼN MẠNG 60S & TREO ỨNG DỤNG TRÊN PRODUCTION VERCEL**:
-  1. **Tối ưu hóa Middleware Next.js 16 Proxy (`src/lib/supabase/middleware.ts`):**
-     - Loại bỏ hiện tượng nghẽn cổ chai: Kiểm tra cookie session trước khi gọi Supabase Auth. Nếu không có cookie auth của Supabase (`sb-*-auth-token`), trả về phản hồi tĩnh ngay lập tức trong 0ms thay vì gửi HTTP round-trip ra nước ngoài.
-     - Thiết lập timeout bảo vệ 2.5s với `Promise.race` và `try/catch` để nếu Supabase Auth server bị chậm hoặc rate limit, middleware tuyệt đối không bị treo 60s làm tê liệt Vercel Edge.
-  2. **Khắc phục vướng vòng lặp Spinner tải trang (`src/app/page.tsx` & `src/contexts/auth-context.tsx`):**
-     - Đặt timeout 2s cho `supabase.auth.getSession()` trong `initAuth`, tự động fallback sang vai trò ca trực nếu session mạng không khả dụng.
-     - Bổ sung safety timer 1.2s tại trang chủ `/` để tự động điều hướng sang `/login` hoặc dashboard, dứt điểm tình trạng người dùng bị kẹt spinner vô hạn.
-     - Mở khóa `switchDemoRole` để người dùng có thể chuyển đổi mượt mà giữa các vai trò 1-chạm bất kỳ lúc nào mà không bị chặn bởi session trước đó.
-  3. **Build & Triển khai Production:**
-     - Build `next build` thông suốt 18/18 routes tĩnh trong 1.5s, hoàn toàn không có cảnh báo hay lỗi cú pháp.
-     - Đã commit và push bản vá `eceddb9` lên `origin/main` để Vercel cập nhật tức thời.
+- **Cập nhật lúc:** 14/10/2026 10:10 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **BỔ SUNG TÍNH NĂNG ĐỔI MẬT KHẨU CÁ NHÂN & ĐẶT LẠI MẬT KHẨU CHO NHÂN SỰ TRỰC CA (MIGRATION 27)**:
+  1. **Quản trị Đặt lại Mật khẩu Nhân sự ([`/admin/users`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx)):**
+     - Thêm nút hành động Đặt lại mật khẩu (icon chìa khóa `KeyRound` màu tím) trên cả **Dạng Bảng (Table View)** và **Dạng Thẻ (Card View)**.
+     - Modal Đặt lại Mật khẩu Nhân sự chuyên nghiệp:
+       * Tự động sinh ngẫu nhiên mật khẩu mạnh (`🎲 Tạo ngẫu nhiên`, vd: `SonCang@2026!`).
+       * Nút sao chép 1 chạm (`📋 Sao chép`) gửi nhanh cho nhân viên qua Zalo/tin nhắn.
+       * Ô nhập lý do đặt lại mật khẩu bắt buộc để ghi vết kiểm toán (Audit Trail).
+       * Tùy chọn bắt buộc nhân viên đổi mật khẩu ở lần đăng nhập tiếp theo (`must_change_password`).
+     - Tích hợp Route Handler bảo mật server-side [`/api/admin/users/reset-password`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/api/admin/users/reset-password/route.ts) đồng bộ trực tiếp với Supabase Auth và bảng `app_staff_users`.
+  2. **Đổi Mật khẩu Cá nhân (AppShell & Modal):**
+     - Tạo Modal component [`ChangePasswordModal`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/modals/change-password-modal.tsx).
+     - Tích hợp nút "Đổi mật khẩu tài khoản" vào Menu Tài khoản (Top Navbar), Sidebar Footer và Mobile Drawer để người dùng có thể đổi mật khẩu từ bất kỳ trang nào.
+     - Hỗ trợ xem/ẩn mật khẩu, kiểm tra độ dài tối thiểu 6 ký tự, kiểm tra xác nhận khớp mật khẩu.
+     - Đồng bộ tự động với Supabase Auth (`supabase.auth.updateUser`) và ghi nhận vào `app_audit_events`.
+  3. **Backend Database & Audit Trail (Migration 27):**
+     - Đã `npx supabase db push` thành công migration `20261014000027_staff_password_management_and_audit.sql` lên Supabase Cloud.
+     - Bổ sung các cột `password_reset_at`, `must_change_password`, `temp_password_hint` vào bảng `app_staff_users`.
+     - Cung cấp 2 RPC: `sc_admin_reset_staff_password` và `sc_user_change_password_audit`.
+  4. **Nâng cấp Màn hình Đăng nhập ([`/login`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/login/page.tsx)):**
+     - Bổ sung nút Ẩn/Hiện mật khẩu trực quan tại ô nhập password.
+     - Thêm dòng hướng dẫn xin cấp lại mật khẩu ca trực qua Trưởng bộ phận hoặc Quản trị viên (SYS_ADMIN).
+  5. **Xác minh kỹ thuật:** `npm run build` thành công 100% cho 19 routes (18 static + 1 dynamic API).
 
 - **Mốc trước đó (14/10/2026 09:10):** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**.
   1. **Kết nối Database Thực tế Supabase Cloud 100% (Migration 26):**

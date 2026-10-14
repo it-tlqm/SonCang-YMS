@@ -1,6 +1,32 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-14 09:55 — Khắc Phục Triệt Để Nghẽn Mạng 60s & Treo Ứng Dụng Trên Production Vercel
+## 2026-10-14 10:10 — Bổ Sung Chức Năng Đổi Mật Khẩu Cá Nhân & Đặt Lại Mật Khẩu Cho Nhân Sự Trực Ca (Migration 27)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"Bổ sung thêm các chức năng như đổi MK, set lại mk cho nhân sự,.."*
+- **Phân tích yêu cầu & Thiết kế giải pháp:**
+  1. *Chức năng Đặt lại Mật khẩu Nhân sự (Admin Reset Password for Staff):*
+     - Dành cho Trưởng bộ phận và SYS_ADMIN tại trang Quản trị Nhân sự & Phân quyền (`/admin/users`).
+     - Cho phép cấp mật khẩu mới cho bất kỳ nhân sự nào trong danh sách.
+     - Hỗ trợ nút `🎲 Tạo ngẫu nhiên` sinh mật khẩu mạnh chuẩn bảo mật (chữ hoa, chữ thường, số, ký tự đặc biệt) và nút `📋 Sao chép` gửi nhanh cho nhân viên.
+     - Bắt buộc nhập lý do đặt lại mật khẩu để ghi vết kiểm toán (Audit Trail) bất biến vào bảng `app_audit_events`.
+     - Hỗ trợ cờ `must_change_password` yêu cầu nhân viên đổi mật khẩu ngay ở lần đăng nhập tới.
+     - Tạo Route Handler an toàn `/api/admin/users/reset-password` để nếu có cấu hình `SUPABASE_SERVICE_ROLE_KEY`, server tự động đồng bộ mật khẩu mới với `auth.users` hoặc tạo mới auth user nếu chưa có.
+  2. *Chức năng Đổi Mật khẩu Cá nhân (User Change Password):*
+     - Tạo component `ChangePasswordModal` tái sử dụng, tích hợp trực tiếp vào thanh AppShell (menu tài khoản Top Navbar, chân Sidebar, và Mobile Drawer).
+     - Cho phép mọi người dùng đổi mật khẩu cá nhân ở bất kỳ trang nào.
+     - Kiểm tra an toàn: độ dài >= 6 ký tự, kiểm tra mật khẩu xác nhận trùng khớp, nút xem/ẩn mật khẩu.
+     - Tự động gọi `supabase.auth.updateUser` (REAL mode) và ghi nhật ký kiểm toán với action `user.password.change`.
+  3. *Cơ sở dữ liệu & Migration 27 (`20261014000027_staff_password_management_and_audit.sql`):*
+     - Bổ sung các cột `password_reset_at`, `must_change_password`, `temp_password_hint` vào bảng `app_staff_users`.
+     - Tạo 2 hàm RPC: `sc_admin_reset_staff_password` và `sc_user_change_password_audit`.
+     - Đã chạy `npx supabase db push` thành công lên Supabase Cloud.
+  4. *Nâng cấp Màn hình Đăng nhập (`/login`):*
+     - Thêm nút Hiện/Ẩn mật khẩu (Eye/EyeOff) tại form đăng nhập email/mật khẩu.
+     - Thêm dòng ghi chú hướng dẫn liên hệ Trưởng ca/SYS_ADMIN để được cấp lại mật khẩu bến bãi.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, 19 routes (18 static + 1 dynamic API) biên dịch tối ưu thành công.
+- **Trạng thái:** Hoàn tất, sẵn sàng deploy và vận hành thực tế.
+
 
 - **Yêu cầu / nguồn:** Phản hồi khẩn cấp từ Chủ dự án: *"bị treo rồi"* sau khi gặp lỗi đăng nhập.
 - **Phân tích nguyên nhân gốc rễ (Root Cause Analysis):**

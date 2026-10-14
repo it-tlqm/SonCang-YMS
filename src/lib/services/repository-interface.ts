@@ -449,6 +449,17 @@ export interface IYardRepository {
   /** Xóa nhân sự / tài khoản khỏi hệ thống */
   deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }>;
 
+  /** Admin / Trưởng ca đặt lại mật khẩu cho nhân sự (lưu vết audit) */
+  adminResetStaffPassword(params: {
+    staffId: string;
+    newPassword: string;
+    reason: string;
+    mustChangePassword?: boolean;
+  }): Promise<{ success: boolean; message?: string; error?: string }>;
+
+  /** Ghi nhận audit log khi người dùng đổi mật khẩu cá nhân */
+  recordPasswordChangeAudit(email: string, reason?: string): Promise<{ success: boolean; error?: string }>;
+
   /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
   getPowerSockets(zoneCode?: string): Promise<PowerSocket[]>;
 

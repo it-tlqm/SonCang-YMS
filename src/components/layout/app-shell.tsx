@@ -28,7 +28,9 @@ import {
   PanelLeftOpen,
   Clock,
   Building2,
+  KeyRound,
 } from 'lucide-react';
+import { ChangePasswordModal } from '@/components/modals/change-password-modal';
 
 interface NavItem {
   name: string;
@@ -45,6 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
   const isRealWriteEnabled = process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true';
 
@@ -371,17 +374,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     {user?.roleName || 'Chưa phân vai trò'}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logout();
-                    window.location.href = '/login';
-                  }}
-                  className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer transition-colors"
-                  title="Đăng xuất"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="p-1.5 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer transition-colors"
+                    title="Đổi mật khẩu"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await logout();
+                      window.location.href = '/login';
+                    }}
+                    className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer transition-colors"
+                    title="Đăng xuất"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {isDemoMode && (
@@ -626,7 +639,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </div>
                   )}
 
-                  <div className="pt-1.5 border-t border-slate-100 px-3">
+                  <div className="pt-1.5 border-t border-slate-100 px-3 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRoleMenu(false);
+                        setIsChangePasswordOpen(true);
+                      }}
+                      className="w-full text-left py-1.5 text-xs text-slate-700 font-bold flex items-center gap-1.5 hover:text-emerald-700 hover:bg-slate-50 rounded-lg px-1 transition-colors cursor-pointer"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Đổi mật khẩu tài khoản</span>
+                    </button>
                     <button
                       type="button"
                       onClick={async () => {
@@ -634,7 +658,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         await logout();
                         window.location.href = '/login';
                       }}
-                      className="w-full text-left py-1.5 text-xs text-rose-600 font-bold flex items-center gap-1.5 hover:text-rose-700 cursor-pointer"
+                      className="w-full text-left py-1.5 text-xs text-rose-600 font-bold flex items-center gap-1.5 hover:text-rose-700 hover:bg-rose-50 rounded-lg px-1 transition-colors cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Đăng xuất khỏi hệ thống</span>
@@ -653,6 +677,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+
+      {/* MODAL ĐỔI MẬT KHẨU CÁ NHÂN */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </div>
   );
 }

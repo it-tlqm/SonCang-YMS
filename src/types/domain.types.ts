@@ -372,6 +372,9 @@ export interface StaffUser {
   yard_name?: string;
   is_active: boolean;
   notes?: string | null;
+  password_reset_at?: string | null;
+  must_change_password?: boolean;
+  temp_password_hint?: string | null;
   created_at?: string;
   updated_at?: string;
 }

@@ -2322,6 +2322,33 @@ export class DemoRepository implements IYardRepository {
     return { success: true };
   }
 
+  async adminResetStaffPassword(params: {
+    staffId: string;
+    newPassword: string;
+    reason: string;
+    mustChangePassword?: boolean;
+  }): Promise<{ success: boolean; message?: string; error?: string }> {
+    const user = this.staffUsers.find(u => u.id === params.staffId);
+    if (!user) {
+      return { success: false, error: 'Không tìm thấy nhân sự' };
+    }
+    user.password_reset_at = new Date().toISOString();
+    user.must_change_password = params.mustChangePassword !== false;
+    user.temp_password_hint = params.newPassword;
+    this.persist();
+    return { success: true, message: `Đã đặt lại mật khẩu cho ${user.full_name} thành công` };
+  }
+
+  async recordPasswordChangeAudit(email: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+    const user = this.staffUsers.find(u => u.email === email);
+    if (user) {
+      user.must_change_password = false;
+      user.temp_password_hint = undefined;
+      this.persist();
+    }
+    return { success: true };
+  }
+
   async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {
     if (!zoneCode || zoneCode === 'ALL') {
       return [...this.powerSockets];

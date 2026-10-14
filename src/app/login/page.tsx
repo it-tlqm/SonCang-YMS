@@ -14,7 +14,9 @@ import {
   Mail, 
   KeyRound, 
   Sparkles,
-  Database
+  Database,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -23,6 +25,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -227,13 +230,21 @@ export default function LoginPage() {
                 <div className="relative">
                   <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="block w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent font-mono"
+                    className="block w-full pl-8 pr-9 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent font-mono"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                    title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
                 </div>
               </div>
             </div>
@@ -246,6 +257,10 @@ export default function LoginPage() {
               <Lock className="w-3.5 h-3.5" />
               <span>{isSubmitting ? 'Đang xác thực Supabase...' : 'Đăng nhập bằng Mật khẩu'}</span>
             </button>
+
+            <p className="text-[11px] text-center text-slate-400 pt-1 leading-relaxed">
+              Quên hoặc cần cấp lại mật khẩu ca trực? Vui lòng liên hệ <strong>Trưởng bộ phận</strong> hoặc <strong>SYS_ADMIN</strong> để được đặt lại mật khẩu tức thì tại hệ thống.
+            </p>
           </form>
         </div>
       </div>
