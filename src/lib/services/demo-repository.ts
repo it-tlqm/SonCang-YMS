@@ -361,107 +361,9 @@ export const INITIAL_DEMO_CUSTOMERS: Customer[] = [
 
 export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
   {
-    id: '20000000-0000-0000-0000-000000000020',
-    full_name: 'Trần Quốc Bảo',
-    email: 'sec_gate_01@soncang.vn',
-    phone: '0981 123 456',
-    role_code: 'SEC_STAFF',
-    role_name: 'Nhân viên An ninh Cổng',
-    department_code: 'AN_NINH',
-    department_name: 'Bộ phận An ninh & Bảo vệ',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Trực ca bốt cổng vào & cổng ra'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000021',
-    full_name: 'Nguyễn Văn An',
-    email: 'sec_lead_01@soncang.vn',
-    phone: '0982 234 567',
-    role_code: 'SEC_LEAD',
-    role_name: 'Trưởng bộ phận An ninh',
-    department_code: 'AN_NINH',
-    department_name: 'Bộ phận An ninh & Bảo vệ',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Giám sát ca trực an ninh, duyệt điều chỉnh giờ xe'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000030',
-    full_name: 'Lê Thị Dung',
-    email: 'port_cckb_01@soncang.vn',
-    phone: '0983 345 678',
-    role_code: 'PORT_STAFF',
-    role_name: 'Nhân viên Thương vụ CCKB',
-    department_code: 'CCKB',
-    department_name: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Quản lý yêu cầu điện, thu tiền điện container'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000031',
-    full_name: 'Hoàng Minh Cường',
-    email: 'port_lead_01@soncang.vn',
-    phone: '0984 456 789',
-    role_code: 'PORT_LEAD',
-    role_name: 'Trưởng bộ phận CCKB',
-    department_code: 'CCKB',
-    department_name: 'Bộ phận Thương vụ & Cảng cạn CCKB',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Trưởng ca CCKB, phê duyệt công nợ và clearance'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000040',
-    full_name: 'Vũ Văn Giang',
-    email: 'dis_yard_01@soncang.vn',
-    phone: '0985 567 890',
-    role_code: 'DIS_STAFF',
-    role_name: 'Nhân viên Điều phối Bãi',
-    department_code: 'DIEU_PHOI',
-    department_name: 'Bộ phận Điều phối & Hiện trường',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Cập nhật tình trạng HÀNG/RỖNG hiện trường'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000041',
-    full_name: 'Phạm Đình Hải',
-    email: 'dis_lead_01@soncang.vn',
-    phone: '0986 678 901',
-    role_code: 'DIS_LEAD',
-    role_name: 'Trưởng bộ phận Điều phối',
-    department_code: 'DIEU_PHOI',
-    department_name: 'Bộ phận Điều phối & Hiện trường',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Trưởng ca điều phối bến bãi'
-  },
-  {
-    id: '20000000-0000-0000-0000-000000000050',
-    full_name: 'Bùi Thị Lan',
-    email: 'acc_01@soncang.vn',
-    phone: '0987 890 123',
-    role_code: 'ACCOUNTANT',
-    role_name: 'Kế toán Bến bãi',
-    department_code: 'KE_TOAN',
-    department_name: 'Bộ phận Kế toán - Tài chính',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    yard_name: 'Bãi Sơn Cảng',
-    is_active: true,
-    notes: 'Kế toán chốt thu tiền mặt hiện trường, quản lý hóa đơn MST/CCCD & sổ quỹ'
-  },
-  {
     id: '20000000-0000-0000-0000-000000000010',
-    full_name: 'Ban Quản trị Hệ thống TLQM',
-    email: 'admin_01@soncang.vn',
+    full_name: 'Ban Quản trị Hệ thống (Super Admin)',
+    email: 'sys_admin_uat@example.com',
     phone: '0988 888 999',
     role_code: 'SYS_ADMIN',
     role_name: 'Quản trị viên Hệ thống',
@@ -470,7 +372,7 @@ export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
     yard_id: null,
     yard_name: 'Toàn hệ thống',
     is_active: true,
-    notes: 'Toàn quyền cấu hình, tài khoản và audit logs'
+    notes: 'Toàn quyền cấu hình, tài khoản nhân sự, phân quyền và audit logs'
   }
 ];
 

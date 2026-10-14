@@ -1,5 +1,31 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 12:40 — Dọn Dẹp Toàn Bộ Nhân Sự Tạm, Chỉ Giữ Lại Duy Nhất Tài Khoản Super Admin
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án: *"xóa hết đi bạn ạ, chỉ giữ lại tôi super admin nhé để tooi tạo tk cho mng"*
+- **Phân tích yêu cầu & Thiết kế giải pháp:**
+  1. *Làm sạch người dùng trên Supabase Auth (`auth.users`):*
+     - Xóa toàn bộ 6 tài khoản UAT thử nghiệm: `sec_staff_uat@example.com`, `sec_lead_uat@example.com`, `cckb_staff_uat@example.com`, `cckb_lead_uat@example.com`, `dis_staff_uat@example.com`, `dis_lead_uat@example.com`.
+     - Giữ lại DUY NHẤT 1 tài khoản Super Admin: `sys_admin_uat@example.com` (User ID: `a4dbb64f-a8be-4fa1-995c-4e50423c840f`).
+  2. *Làm sạch phân quyền vai trò (`app_user_role_assignments`):*
+     - Xóa các bản ghi phân vai trò của 6 tài khoản UAT.
+     - Đảm bảo Super Admin (`a4dbb64f-a8be-4fa1-995c-4e50423c840f`) có vai trò `SYS_ADMIN`, phòng ban `HE_THONG`, trạng thái `is_active: true`.
+  3. *Làm sạch danh mục nhân sự (`app_staff_users`):*
+     - Xóa toàn bộ 7 nhân viên mẫu V1 (`sec_gate_01`, `sec_lead_01`, `port_cckb_01`, `port_lead_01`, `dis_yard_01`, `dis_lead_01`, `acc_01`).
+     - Ghi nhận duy nhất tài khoản Super Admin: "Ban Quản trị Hệ thống (Super Admin)" (`sys_admin_uat@example.com`, vai trò `SYS_ADMIN`, `is_active: true`, liên kết `auth_user_id = 'a4dbb64f-a8be-4fa1-995c-4e50423c840f'`).
+     - Đảm bảo người dùng khi truy cập trang Quản lý nhân sự (`/admin/users`) chỉ thấy tài khoản của mình và có thể tự do bấm "Thêm nhân viên" để tạo tài khoản thật cho nhân sự bến bãi.
+  4. *Đồng bộ mã nguồn:*
+     - Cập nhật `INITIAL_DEMO_STAFF_USERS` trong `src/lib/services/demo-repository.ts` chỉ chứa Super Admin duy nhất.
+- **Kiểm thử & Xác minh:**
+  - Thực thi script `scripts/clean_all_staff_keep_super_admin.sql` qua `npx supabase db query --linked`.
+  - Truy vấn xác nhận số lượng tài khoản còn lại:
+    * `auth.users`: Đúng **1** tài khoản (`sys_admin_uat@example.com`).
+    * `app_staff_users`: Đúng **1** nhân sự (`Ban Quản trị Hệ thống (Super Admin)`, `SYS_ADMIN`, `is_active = true`).
+    * `app_user_role_assignments`: Đúng **1** quyền `SYS_ADMIN` cho Super Admin.
+  - `npx tsc --noEmit`: 0 lỗi.
+  - `npm run build`: Thành công 20/20 routes.
+- **Trạng thái:** Hoàn tất 100%, sẵn sàng cho Super Admin thiết lập nhân sự thật.
+
 ## 2026-10-14 12:25 — Dọn Dẹp Toàn Bộ Dữ Liệu Tạm & Thử Nghiệm Chuẩn Bị Vận Hành Thực Tế
 
 - **Yêu cầu / nguồn:** Chỉ đạo từ Chủ dự án: *"OK xóa hết dữ liệu tạm chuẩn bị cho vận hành thực tế"*
