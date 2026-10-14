@@ -2026,10 +2026,57 @@ export class DemoRepository implements IYardRepository {
           ticketCharge.notes = `${ticketCharge.notes || ''} [HỦY VÉ/HOÀN TIỀN: ${params.refundReason || params.reason}]`.trim();
         }
       } else if (params.ticketPaymentStatus === 'PAID') {
-        const ticketCharge = this.charges.find(c => c.vehicle_visit_id === veh.id && c.charge_type === 'TICKET');
+        let ticketCharge = this.charges.find(c => c.vehicle_visit_id === veh.id && c.charge_type === 'TICKET');
+        const amount = params.ticketAmount !== undefined ? params.ticketAmount : (veh.ticket_amount || 250000);
+        const payMethod = params.paymentMethod || 'CASH';
+
         if (ticketCharge) {
           ticketCharge.status = 'PAID';
-          ticketCharge.paid_amount = ticketCharge.amount;
+          ticketCharge.amount = amount;
+          ticketCharge.paid_amount = amount;
+          ticketCharge.notes = `${ticketCharge.notes || ''} [Hiệu chỉnh ca trực: Thu vé (${payMethod}) bởi ${params.operatorName}]`.trim();
+        } else {
+          ticketCharge = {
+            id: `charge-ticket-${Date.now()}`,
+            yard_id: veh.yard_id,
+            charge_type: 'TICKET',
+            title: `Vé vào cổng phương tiện ${veh.license_plate || veh.vehicle_type}`,
+            vehicle_visit_id: veh.id,
+            container_visit_id: null,
+            container_no: null,
+            license_plate: veh.license_plate,
+            amount,
+            paid_amount: amount,
+            status: 'PAID',
+            notes: `Hiệu chỉnh ca trực: Thu vé (${payMethod}) bởi ${params.operatorName}`,
+            created_at: new Date().toISOString(),
+          };
+          this.charges.unshift(ticketCharge);
+        }
+
+        // Cập nhật hoặc tạo bản ghi sổ thu app_payments
+        const existingPayment = this.payments.find(p => p.charge_id === ticketCharge!.id);
+        if (existingPayment) {
+          existingPayment.payment_method = payMethod;
+          existingPayment.payment_amount = amount;
+          existingPayment.notes = `${existingPayment.notes || ''} [Đổi hình thức thu sang ${payMethod} bởi ${params.operatorName}]`.trim();
+        } else {
+          this.payments.unshift({
+            id: `pay-ticket-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            yard_id: veh.yard_id,
+            charge_id: ticketCharge.id,
+            payment_amount: amount,
+            payment_method: payMethod,
+            collected_by: params.operatorId,
+            collected_by_name: params.operatorName,
+            collector_dept: 'AN_NINH',
+            collected_at: new Date().toISOString(),
+            receipt_code: veh.ticket_code || `VE-${Date.now().toString().slice(-6)}`,
+            notes: `Thu vé cổng bởi ${params.operatorName} (Hiệu chỉnh ca trực)`,
+            charge_type: 'TICKET',
+            charge_title: ticketCharge.title,
+            license_plate: veh.license_plate,
+          });
         }
       }
     }

@@ -51,6 +51,58 @@ export interface YardPairItem {
   inboundVehicleHistory?: VehicleVisit | null;
 }
 
+/**
+ * Chuyển Date hoặc ISO string sang định dạng chuỗi chuẩn Việt Nam hh:mm dd/MM/yyyy (VD: 20:45 12/10/2026)
+ */
+function toVietnameseDateTimeString(d: Date | string | null | undefined): string {
+  if (!d) return '';
+  const dateObj = typeof d === 'string' ? new Date(d) : d;
+  if (isNaN(dateObj.getTime())) return '';
+  const hh = String(dateObj.getHours()).padStart(2, '0');
+  const mm = String(dateObj.getMinutes()).padStart(2, '0');
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+  const MM = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const yyyy = dateObj.getFullYear();
+  return `${hh}:${mm} ${dd}/${MM}/${yyyy}`;
+}
+
+/**
+ * Phân tích chuỗi "hh:mm dd/MM/yyyy" hoặc "hh:mm dd-MM-yyyy" thành Date hợp lệ
+ */
+function parseVietnameseDateTimeString(val: string): Date | null {
+  if (!val) return null;
+  const trimmed = val.trim();
+  const match = trimmed.match(/^(\d{1,2}):(\d{2})\s+(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (!match) return null;
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+  const month = parseInt(match[4], 10) - 1;
+  const year = parseInt(match[5], 10);
+
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  if (month < 0 || month > 11 || day < 1 || day > 31) return null;
+
+  const d = new Date(year, month, day, hours, minutes, 0, 0);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+/**
+ * Diễn giải bằng chữ tiếng Việt to, rõ ràng: "20:45 — Ngày 12 tháng 10 năm 2026"
+ */
+function describeVietnameseDateTime(d: Date | string | null | undefined): string {
+  if (!d) return '';
+  const dateObj = typeof d === 'string' ? parseVietnameseDateTimeString(d) || new Date(d) : d;
+  if (!dateObj || isNaN(dateObj.getTime())) return '';
+  const hh = String(dateObj.getHours()).padStart(2, '0');
+  const mm = String(dateObj.getMinutes()).padStart(2, '0');
+  const dd = dateObj.getDate();
+  const MM = dateObj.getMonth() + 1;
+  const yyyy = dateObj.getFullYear();
+  return `${hh}:${mm} — Ngày ${dd} tháng ${MM} năm ${yyyy}`;
+}
+
 export default function YardMonitorPage() {
   const { role, yardId, can, repository, user, authMode } = useAuth();
 
@@ -143,7 +195,7 @@ export default function YardMonitorPage() {
   const [singleCargoStatus, setSingleCargoStatus] = useState<CargoStatus>('CHUA_XAC_DINH');
   const [singleYardZone, setSingleYardZone] = useState<string>('KHU_A_REEFER');
   const [singleSlotCode, setSingleSlotCode] = useState<string>('');
-  const [singleInboundAt, setSingleInboundAt] = useState<string>('');
+  const [singleInboundAtText, setSingleInboundAtText] = useState<string>('');
   const [singleSource, setSingleSource] = useState<string>('Xe cẩu nội bộ / Thuê ngoài');
   const [singleNotes, setSingleNotes] = useState<string>('');
   const [singleContError, setSingleContError] = useState<string>('');
@@ -151,12 +203,13 @@ export default function YardMonitorPage() {
 
   // Modal Hiệu chỉnh Lượt xe (Backdate & Sửa sai ca trực cho SEC_LEAD / SYS_ADMIN)
   const [adjustingVehicle, setAdjustingVehicle] = useState<VehicleVisit | null>(null);
-  const [adjEntryAt, setAdjEntryAt] = useState<string>('');
-  const [adjExitAt, setAdjExitAt] = useState<string>('');
+  const [adjEntryAtText, setAdjEntryAtText] = useState<string>('');
+  const [adjExitAtText, setAdjExitAtText] = useState<string>('');
   const [adjStatus, setAdjStatus] = useState<VehicleVisitStatus>('IN_YARD');
   const [adjVehicleType, setAdjVehicleType] = useState<string>('CONT_LANH');
   const [adjTicketAmount, setAdjTicketAmount] = useState<number>(250000);
   const [adjTicketPaymentStatus, setAdjTicketPaymentStatus] = useState<TicketPaymentStatus>('UNPAID');
+  const [adjPaymentMethod, setAdjPaymentMethod] = useState<'CASH' | 'TRANSFER' | 'OTHER'>('CASH');
   const [adjRefundReason, setAdjRefundReason] = useState<string>('');
   const [adjDriverName, setAdjDriverName] = useState<string>('');
   const [adjDriverPhone, setAdjDriverPhone] = useState<string>('');
@@ -424,9 +477,7 @@ export default function YardMonitorPage() {
     setSingleCargoStatus('CHUA_XAC_DINH');
     setSingleYardZone(yardZones.length > 0 ? yardZones[0].code : 'KHU_A_REEFER');
     setSingleSlotCode('');
-    const now = new Date();
-    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    setSingleInboundAt(localIso);
+    setSingleInboundAtText(toVietnameseDateTimeString(new Date()));
     setSingleSource('Xe cẩu nội bộ / Thuê ngoài');
     setSingleNotes('');
     setSingleContError('');
@@ -434,8 +485,7 @@ export default function YardMonitorPage() {
 
   const setQuickSingleInboundHoursAgo = (hours: number) => {
     const d = new Date(Date.now() - hours * 3600 * 1000);
-    const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    setSingleInboundAt(localIso);
+    setSingleInboundAtText(toVietnameseDateTimeString(d));
   };
 
   const handleCreateSingleContainer = async (e: React.FormEvent) => {
@@ -462,7 +512,7 @@ export default function YardMonitorPage() {
         cargoStatus: singleCargoStatus,
         yardZone: singleYardZone,
         slotCode: singleSlotCode.trim().toUpperCase() || undefined,
-        inboundAt: singleInboundAt ? new Date(singleInboundAt).toISOString() : new Date().toISOString(),
+        inboundAt: (parseVietnameseDateTimeString(singleInboundAtText) || new Date()).toISOString(),
         licensePlate: singleSource.trim() || 'Xe cẩu nội bộ / Thuê ngoài',
         notes: singleNotes.trim() ? `[Tiếp nhận cont lẻ/hạ bãi] ${singleNotes.trim()}` : '[Tiếp nhận cont lẻ/hạ bãi]',
         operatorId: user?.id || 'lead-an-ninh',
@@ -708,17 +758,31 @@ export default function YardMonitorPage() {
   const handleOpenAdjustVehicleModal = (veh: VehicleVisit) => {
     setAdjustingVehicle(veh);
     const inDate = veh.entry_at ? new Date(veh.entry_at) : new Date();
-    setAdjEntryAt(new Date(inDate.getTime() - inDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+    setAdjEntryAtText(toVietnameseDateTimeString(inDate));
     if (veh.exit_at) {
-      const outDate = new Date(veh.exit_at);
-      setAdjExitAt(new Date(outDate.getTime() - outDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+      setAdjExitAtText(toVietnameseDateTimeString(new Date(veh.exit_at)));
     } else {
-      setAdjExitAt('');
+      setAdjExitAtText('');
     }
     setAdjStatus(veh.status || 'IN_YARD');
     setAdjVehicleType(veh.vehicle_type || 'CONT_LANH');
     setAdjTicketAmount(veh.ticket_amount ?? 250000);
     setAdjTicketPaymentStatus(veh.ticket_payment_status || 'UNPAID');
+
+    // Xác định hình thức thu tiền ban đầu nếu đã thu
+    let initialPayMethod: 'CASH' | 'TRANSFER' | 'OTHER' = 'CASH';
+    if (veh.note && (veh.note.includes('TRANSFER') || veh.note.includes('Chuyển khoản') || veh.note.includes('CK'))) {
+      initialPayMethod = 'TRANSFER';
+    }
+    setAdjPaymentMethod(initialPayMethod);
+    // Tra cứu nhanh từ app_payments nếu có
+    repository.getPayments({ yardId }).then(payments => {
+      const p = payments.find(pay => pay.license_plate === veh.license_plate || pay.charge_id === veh.id);
+      if (p?.payment_method) {
+        setAdjPaymentMethod(p.payment_method);
+      }
+    }).catch(() => {});
+
     setAdjRefundReason('');
     setAdjDriverName(veh.driver_name || '');
     setAdjDriverPhone(veh.driver_phone || '');
@@ -729,8 +793,13 @@ export default function YardMonitorPage() {
 
   const setQuickAdjEntryHoursAgo = (hours: number) => {
     const d = new Date(Date.now() - hours * 3600 * 1000);
-    const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    setAdjEntryAt(localIso);
+    setAdjEntryAtText(toVietnameseDateTimeString(d));
+  };
+
+  const setQuickAdjEntryShift = (hour: number) => {
+    const d = new Date();
+    d.setHours(hour, 0, 0, 0);
+    setAdjEntryAtText(toVietnameseDateTimeString(d));
   };
 
   const handleVehicleTypeChange = (newTypeCode: string) => {
@@ -758,6 +827,26 @@ export default function YardMonitorPage() {
       return;
     }
 
+    // Phân tích thời gian vào cổng định dạng Việt Nam hh:mm dd/MM/yyyy
+    const parsedEntry = parseVietnameseDateTimeString(adjEntryAtText);
+    if (!parsedEntry) {
+      setAdjError('Định dạng thời gian xe vào cổng không hợp lệ. Vui lòng nhập đúng định dạng hh:mm dd/MM/yyyy (Ví dụ: 20:45 12/10/2026).');
+      return;
+    }
+
+    let parsedExit: Date | null = null;
+    if (adjStatus === 'EXITED') {
+      if (!adjExitAtText.trim()) {
+        parsedExit = new Date();
+      } else {
+        parsedExit = parseVietnameseDateTimeString(adjExitAtText);
+        if (!parsedExit) {
+          setAdjError('Định dạng thời gian xe xuất bãi không hợp lệ. Vui lòng nhập đúng định dạng hh:mm dd/MM/yyyy (Ví dụ: 21:00 12/10/2026).');
+          return;
+        }
+      }
+    }
+
     // Kiểm tra nếu xe có cont đi kèm và đổi sang loại xe không chở cont
     const attachedConts = containers.filter(c => c.inbound_vehicle_visit_id === adjustingVehicle.id && c.status === 'IN_YARD');
     const isNewNonContType = adjVehicleType !== 'CONT_LANH';
@@ -773,12 +862,13 @@ export default function YardMonitorPage() {
         operatorName: user?.fullName || (role === 'SYS_ADMIN' ? 'Quản trị viên' : 'Ca trưởng An ninh'),
         operatorRole: role || 'SEC_LEAD',
         reason: adjReason.trim(),
-        entryAt: adjEntryAt ? new Date(adjEntryAt).toISOString() : undefined,
-        exitAt: adjStatus === 'IN_YARD' ? null : (adjExitAt ? new Date(adjExitAt).toISOString() : undefined),
+        entryAt: parsedEntry.toISOString(),
+        exitAt: adjStatus === 'IN_YARD' ? null : (parsedExit ? parsedExit.toISOString() : undefined),
         status: adjStatus,
         vehicleType: adjVehicleType,
         ticketAmount: adjTicketAmount,
         ticketPaymentStatus: adjTicketPaymentStatus,
+        paymentMethod: adjTicketPaymentStatus === 'PAID' ? adjPaymentMethod : undefined,
         refundReason: adjRefundReason.trim() || undefined,
         driverName: adjDriverName.trim() || undefined,
         driverPhone: adjDriverPhone.trim() || undefined,
@@ -3302,19 +3392,34 @@ export default function YardMonitorPage() {
                   </div>
                 </div>
                 <input
-                  type="datetime-local"
-                  value={singleInboundAt}
-                  onChange={(e) => setSingleInboundAt(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-medium bg-white focus:outline-none focus:border-[#0A9444]"
+                  type="text"
+                  value={singleInboundAtText}
+                  onChange={(e) => setSingleInboundAtText(e.target.value)}
+                  placeholder="hh:mm dd/MM/yyyy (Ví dụ: 20:45 12/10/2026)"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold bg-white focus:outline-none focus:border-[#0A9444]"
                 />
-                {singleInboundAt && (
-                  <p className="text-[11px] font-mono text-emerald-700 mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Định dạng đã chọn:</span>
-                    <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300">
-                      {formatDateTime(singleInboundAt)}
-                    </span>
-                  </p>
-                )}
+                {(() => {
+                  const parsed = parseVietnameseDateTimeString(singleInboundAtText);
+                  if (parsed) {
+                    return (
+                      <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
+                        <span>⏱️ Thời điểm: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                        <span className="bg-white text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                          {toVietnameseDateTimeString(parsed)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  if (singleInboundAtText.trim()) {
+                    return (
+                      <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <span>Vui lòng nhập định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>20:45 12/10/2026</strong>)</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div>
@@ -3395,20 +3500,27 @@ export default function YardMonitorPage() {
                 </div>
               </div>
 
-              {/* Sửa Ngày giờ vào cổng (Backdate) */}
+              {/* Sửa Ngày giờ vào cổng (Backdate) chuẩn hh:mm dd/MM/yyyy */}
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="font-bold text-slate-700 flex items-center space-x-1">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Thời gian xe vào cổng (hh:mm dd/MM/yyyy — Backdate nếu quên nhập):</span>
+                    <span>Thời gian xe vào cổng (hh:mm dd/MM/yyyy):</span>
                   </label>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1 flex-wrap justify-end">
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(0)}
                       className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
                     >
                       Hiện tại
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAdjEntryHoursAgo(1)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                    >
+                      -1h
                     </button>
                     <button
                       type="button"
@@ -3431,22 +3543,54 @@ export default function YardMonitorPage() {
                     >
                       -1 ngày
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAdjEntryShift(6)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-[#223873] border border-blue-200 cursor-pointer"
+                    >
+                      Ca sáng 06:00
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAdjEntryShift(18)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 cursor-pointer"
+                    >
+                      Ca tối 18:00
+                    </button>
                   </div>
                 </div>
                 <input
-                  type="datetime-local"
-                  value={adjEntryAt}
-                  onChange={(e) => setAdjEntryAt(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-medium bg-white focus:outline-none focus:border-indigo-500"
+                  type="text"
+                  value={adjEntryAtText}
+                  onChange={(e) => setAdjEntryAtText(e.target.value)}
+                  placeholder="hh:mm dd/MM/yyyy (Ví dụ: 20:45 12/10/2026)"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold text-sm text-[#223873] bg-white focus:outline-none focus:border-indigo-500 shadow-2xs"
                 />
-                {adjEntryAt && (
-                  <p className="text-[11px] font-mono text-indigo-700 mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Định dạng đã chọn:</span>
-                    <span className="bg-indigo-50 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-300">
-                      {formatDateTime(adjEntryAt)}
-                    </span>
-                  </p>
-                )}
+                {(() => {
+                  const parsed = parseVietnameseDateTimeString(adjEntryAtText);
+                  if (parsed) {
+                    return (
+                      <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>⏱️ Thời điểm xác nhận: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                        </span>
+                        <span className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                          {toVietnameseDateTimeString(parsed)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  if (adjEntryAtText.trim()) {
+                    return (
+                      <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>Vui lòng nhập đúng định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>20:45 12/10/2026</strong>)</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
                 <p className="text-[10px] text-slate-500 mt-0.5">
                   Đồng bộ tự động thời gian tiếp nhận bãi cho các container chở theo xe.
                 </p>
@@ -3568,7 +3712,7 @@ export default function YardMonitorPage() {
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Hình thức / Trạng thái thu vé:
+                    Trạng thái thanh toán vé:
                   </label>
                   <select
                     value={adjTicketPaymentStatus}
@@ -3576,6 +3720,8 @@ export default function YardMonitorPage() {
                     className={`w-full px-3 py-1.5 border rounded font-bold bg-white focus:outline-none focus:border-indigo-500 ${
                       adjTicketPaymentStatus === 'CANCELLED'
                         ? 'border-rose-400 text-rose-700 bg-rose-50/50'
+                        : adjTicketPaymentStatus === 'PAID'
+                        ? 'border-emerald-400 text-emerald-800 bg-emerald-50/30'
                         : 'border-slate-300 text-slate-800'
                     }`}
                   >
@@ -3586,6 +3732,65 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
               </div>
+
+              {/* KHỐI CHỌN / SỬA HÌNH THỨC THU TIỀN VÉ KHI VÉ LÀ ĐÃ THU (PAID) */}
+              {adjTicketPaymentStatus === 'PAID' && (
+                <div className="p-2.5 rounded bg-emerald-50 border border-emerald-300 space-y-2 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                      <span>💵 Hình thức / Phương thức thu tiền vé:</span>
+                      <span className="text-[10px] text-emerald-700 font-normal">(Bắt buộc chọn đúng thực tế đối soát ca)</span>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                      adjPaymentMethod === 'CASH'
+                        ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
+                        : 'bg-white text-slate-700 border-slate-300 hover:bg-emerald-50/50'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="adjPaymentMethod"
+                        value="CASH"
+                        checked={adjPaymentMethod === 'CASH'}
+                        onChange={() => setAdjPaymentMethod('CASH')}
+                        className="sr-only"
+                      />
+                      <span>💵 Tiền mặt</span>
+                    </label>
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                      adjPaymentMethod === 'TRANSFER'
+                        ? 'bg-[#223873] text-white border-blue-900 shadow-2xs ring-1 ring-blue-700'
+                        : 'bg-white text-slate-700 border-slate-300 hover:bg-blue-50/50'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="adjPaymentMethod"
+                        value="TRANSFER"
+                        checked={adjPaymentMethod === 'TRANSFER'}
+                        onChange={() => setAdjPaymentMethod('TRANSFER')}
+                        className="sr-only"
+                      />
+                      <span>🏦 Chuyển khoản</span>
+                    </label>
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                      adjPaymentMethod === 'OTHER'
+                        ? 'bg-slate-700 text-white border-slate-800 shadow-2xs ring-1 ring-slate-600'
+                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="adjPaymentMethod"
+                        value="OTHER"
+                        checked={adjPaymentMethod === 'OTHER'}
+                        onChange={() => setAdjPaymentMethod('OTHER')}
+                        className="sr-only"
+                      />
+                      <span>📝 Khác / Đối trừ</span>
+                    </label>
+                  </div>
+                </div>
+              )}
 
               {/* Khối cảnh báo đặc biệt khi chọn Hủy vé / Hoàn tiền */}
               {adjTicketPaymentStatus === 'CANCELLED' && (
@@ -3618,31 +3823,60 @@ export default function YardMonitorPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-bold text-slate-700">Thời gian xe xuất bãi (hh:mm dd/MM/yyyy):</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const now = new Date();
-                        setAdjExitAt(new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
-                      }}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
-                    >
-                      Giờ hiện tại
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdjExitAtText(toVietnameseDateTimeString(new Date()));
+                        }}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      >
+                        Giờ hiện tại
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const d = new Date(Date.now() - 3600 * 1000);
+                          setAdjExitAtText(toVietnameseDateTimeString(d));
+                        }}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      >
+                        -1h
+                      </button>
+                    </div>
                   </div>
                   <input
-                    type="datetime-local"
-                    value={adjExitAt}
-                    onChange={(e) => setAdjExitAt(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-medium bg-white focus:outline-none focus:border-indigo-500"
+                    type="text"
+                    value={adjExitAtText}
+                    onChange={(e) => setAdjExitAtText(e.target.value)}
+                    placeholder="hh:mm dd/MM/yyyy (Ví dụ: 21:00 12/10/2026)"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold text-sm text-[#223873] bg-white focus:outline-none focus:border-indigo-500 shadow-2xs"
                   />
-                  {adjExitAt && (
-                    <p className="text-[11px] font-mono text-indigo-700 mt-1 font-semibold flex items-center gap-1">
-                      <span>⏱️ Định dạng đã chọn:</span>
-                      <span className="bg-indigo-50 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-300">
-                        {formatDateTime(adjExitAt)}
-                      </span>
-                    </p>
-                  )}
+                  {(() => {
+                    const parsed = parseVietnameseDateTimeString(adjExitAtText);
+                    if (parsed) {
+                      return (
+                        <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>⏱️ Thời điểm xuất bãi: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                          </span>
+                          <span className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                            {toVietnameseDateTimeString(parsed)}
+                          </span>
+                        </div>
+                      );
+                    }
+                    if (adjExitAtText.trim()) {
+                      return (
+                        <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
+                          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                          <span>Vui lòng nhập đúng định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>21:00 12/10/2026</strong>)</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
 

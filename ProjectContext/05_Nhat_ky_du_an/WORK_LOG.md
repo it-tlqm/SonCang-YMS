@@ -1,5 +1,39 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 08:40 — Chỉnh Sửa Hình Thức Thu Tiền Vé (PAID), Chuẩn Hóa Định Dạng hh:mm dd/MM/yyyy & Cổng Ra Không Tự Điền Cont Lúc Vào (Migration 25)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *"Nếu đã thu vé thì hình thức thu cũng sửa được"*
+  2. *"với cái định dạng vẫn lỗi kìa bạn k đúng theo hh:mm dd/MM/yyyy"* (hiển thị `10/12/2026 08:45 PM` gây nhầm lẫn ngày 12 tháng 10 thành ngày 10 tháng 12)
+  3. *"ủa cont kéo ra tôi bảo phải xác nhận và k dc tự diền số cont lúc kéo vào mà? có nút gợi ý chọn nhanh thôi"*
+- **Phân tích vấn đề:**
+  - *Vấn đề 1 (Hình thức thu vé):* Modal Hiệu chỉnh lượt xe trước đây chỉ có dropdown trạng thái (`PAID`, `UNPAID`, `EXEMPT`, `CANCELLED`), thiếu ô chọn Phương thức thanh toán (`CASH` - Tiền mặt, `TRANSFER` - Chuyển khoản, `OTHER` - Khác). Khi chuyển sang `PAID` hoặc muốn sửa lại hình thức thu của ca trước bị nhầm, hệ thống không lưu được vào sổ thu `app_payments`.
+  - *Vấn đề 2 (Định dạng ngày giờ):* Thẻ native `<input type="datetime-local">` phụ thuộc vào region format của Windows/Chrome của máy khách (locale US `MM/dd/yyyy hh:mm a`), hiển thị `10/12/2026 08:45 PM` gây lộn ngược ngày và tháng, không tuân thủ quy định `hh:mm dd/MM/yyyy` của Việt Nam.
+  - *Vấn đề 3 (Cổng ra tự động điền cont):* Hàm `handleOpenUnifiedExit` trong `src/app/exit/page.tsx` tự động gán `selectedTrailingContId = matchedInboundCont.id`, vi phạm nguyên tắc an ninh đối soát hiện trường của Sơn Cảng.
+- **Giải pháp triển khai:**
+  1. *Cổng ra (`/exit`):*
+     - Đặt `selectedTrailingContId = ''` khi mở modal xuất bãi.
+     - Hiển thị thẻ gợi ý chọn nhanh nổi bật: `[📌 Cont lúc vào bãi: TLCU1234567]` kèm nút **`[👉 Chọn nhanh cont này]`**. Nhân viên chỉ bấm sau khi đã đối soát thực tế tại hiện trường, hoặc gõ tìm kiếm cont khác trong bãi.
+     - Nút "Xác nhận Xe & Cont Xuất bãi" tự động khóa nếu chưa chọn container kéo theo.
+  2. *Cơ sở dữ liệu & Backend (Migration 25 - `20261014000025_adjust_vehicle_visit_payment_method.sql`):*
+     - Cập nhật hàm RPC `sc_adjust_vehicle_visit` hỗ trợ tham số `p_payment_method text DEFAULT NULL`.
+     - Tự động tạo mới hoặc cập nhật bản ghi trong sổ thu bất biến `app_payments` và `app_charges`, lưu vết audit log ca trực.
+     - Đã chạy `npx supabase db push` thành công lên Supabase Cloud.
+  3. *Hiệu chỉnh Lượt xe (`/yard`):*
+     - Thêm state `adjPaymentMethod` ('CASH' | 'TRANSFER' | 'OTHER').
+     - Khi `adjTicketPaymentStatus === 'PAID'`, hiển thị nhóm 3 nút chọn trực quan: `💵 Tiền mặt`, `🏦 Chuyển khoản`, `📝 Khác / Đối trừ`.
+     - Lưu đầy đủ thông tin vào `app_payments` và `app_charges`.
+  4. *Chuẩn hóa định dạng Ngày giờ `hh:mm dd/MM/yyyy` (24h):*
+     - Loại bỏ thẻ native `datetime-local` gây đảo lộn locale.
+     - Thiết kế bộ nhập văn bản chuẩn `hh:mm dd/MM/yyyy` (VD: `20:45 12/10/2026`), tích hợp regex parser tự động.
+     - Các nút chọn nhanh tiện ích: `[Hiện tại]`, `[-1h]`, `[-2h]`, `[-6h]`, `[-1 ngày]`, `[Ca sáng 06:00]`, `[Ca tối 18:00]`.
+     - Hiển thị badge xác nhận bằng chữ tiếng Việt to, rõ: `⏱️ 20:45 — Ngày 12 tháng 10 năm 2026`.
+     - Áp dụng thống nhất cho cả Giờ vào cổng, Giờ xuất bãi và Tiếp nhận cont lẻ.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Exit code 0, đã áp dụng Migration 25 lên Supabase Cloud.
+  - `npm run build`: Exit code 0, 18/18 routes tối ưu thành công 100%.
+- **Trạng thái:** Hoàn tất, nghiệp vụ cổng ra và hiệu chỉnh ca trực hoạt động chính xác 100% theo yêu cầu.
+
 ## 2026-10-14 08:25 — Xóa Bỏ Hoàn Toàn Hardcode 30 Trụ Điện: Nâng Cấp Hệ Thống Quản Trị Trụ Điện & Giắc Cắm 380V Động (Migration 24)
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: *"chỗ này k quản lý được à???: sao bạn xây dựng lỏng lẻo thế nhỉ? quá nhiều thứ hardcord hay mockdata luon đấy. Kiểm soát 30 Giắc cắm điện Container Lạnh 380V (Khu A Reefer)..."*

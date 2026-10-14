@@ -40,23 +40,26 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 08:25 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **XÓA BỎ HOÀN TOÀN HARDCODE 30 TRỤ ĐIỆN — NÂNG CẤP TOÀN DIỆN QUẢN TRỊ TRỤ ĐIỆN 380V ĐỘNG & TƯƠNG TÁC THỜI GIAN THỰC (MIGRATION 24)**:
-  * **Cơ sở dữ liệu thực tế (Migration 24):** Tạo bảng `public.app_power_sockets` quản lý động toàn bộ danh mục trụ điện 380V/32A chuẩn 3 pha (socket_code, socket_name, zone_code, voltage, amperage, phase, status: AVAILABLE / IN_USE / MAINTENANCE / FAULTY, notes). Seed 30 trụ ban đầu và cung cấp RPC `sc_set_socket_status` bảo vệ audit log. Đã `npx supabase db push` thành công lên Supabase Cloud.
-  * **Xóa bỏ triệt để Hardcode & Mock Data:** Loại bỏ hoàn toàn vòng lặp tĩnh `Array.from({ length: 30 })` ở cả trang Bến bãi (`/yard`) và Thương vụ CCKB (`/reefer`). Dữ liệu tải động 100% từ Database catalog.
-  * **Trung tâm Quản trị Trụ điện Tương tác trên Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
-    - Click vào bất kỳ thẻ trụ nào trong lưới để mở **Modal Chi tiết & Tác vụ Trụ điện**:
-      + *Nếu Đang cắm (IN_USE):* Hiển thị Container nào đang cắm, xe chở, thời gian cắm; cung cấp nút **⚡ Rút điện ngay (CCKB)** để giải phóng trụ trực tiếp tại hiện trường và nút **⚠️ Báo sự cố**.
-      + *Nếu Trống (AVAILABLE):* Cung cấp nút **⚡ Cắm điện nhanh vào trụ này** (chọn container lạnh RF đang trong bãi chưa cắm để kích hoạt ngay), nút **🛠️ Đặt trạng thái Bảo trì**, nút **✏️ Sửa thông tin trụ**, nút **🗑️ Xóa trụ**.
-      + *Nếu Bảo trì / Khóa:* Hiển thị lý do sự cố (chập giắc, hỏng aptomat), cung cấp nút **✓ Hoàn tất bảo trì & Mở lại trụ**, nút **Sửa**, nút **Xóa**.
-    - Nút **➕ Thêm trụ điện mới**: Mở modal mở rộng thêm trụ mới (VD: R31, R32...), cấu hình điện áp, ampe và ghi chú kỹ thuật, lưu trực tiếp vào DB.
-    - Bộ lọc trạng thái thời gian thực: Tất cả | 🟢 Trống | ⚡ Đang cắm | 🛠️ Bảo trì / Hỏng kèm số lượng động.
-  * **Đồng bộ Trang Thương vụ CCKB ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
-    - Bộ chọn trụ điện tại Modal Cắm điện tải động từ DB; tự động khóa các trụ đang cắm hoặc đang bảo trì; tự động tìm và gợi ý trụ AVAILABLE đầu tiên.
-  * **Xác minh kỹ thuật:** `npx supabase db push` thành công 100%, `npm run build` exit code 0 không lỗi (18/18 routes).
+- **Cập nhật lúc:** 14/10/2026 08:40 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHỈNH SỬA HÌNH THỨC THU TIỀN VÉ (PAID) + CHUẨN HÓA ĐỊNH DẠNG HH:MM DD/MM/YYYY + BỎ TỰ ĐỘNG ĐIỀN CONT TẠI CỔNG RA (MIGRATION 25)**:
+  1. **Hiệu chỉnh Lượt xe & Hình thức thu tiền vé ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
+     * Khi vé xe ở trạng thái `Đã thu (PAID)`, Lead An ninh & Admin được phép chọn/chỉnh sửa **Hình thức thu tiền vé**: `💵 Tiền mặt (CASH)`, `🏦 Chuyển khoản (TRANSFER)`, `📝 Khác / Đối trừ (OTHER)`.
+     * Tự động đồng bộ hình thức thu vào bảng thực thu bất biến `app_payments` và `app_charges`.
+  2. **Migration 25 (`20261014000025_adjust_vehicle_visit_payment_method.sql`):**
+     * Cập nhật RPC `sc_adjust_vehicle_visit` hỗ trợ tham số `p_payment_method text DEFAULT NULL`.
+     * Tự động tạo hoặc cập nhật bản ghi trong sổ thu bất biến `app_payments` khi ca trưởng/admin hiệu chỉnh lượt xe đã thu vé, bảo vệ audit log ca trực. Đã `npx supabase db push` thành công lên Supabase Cloud.
+  3. **Chuẩn hóa triệt để định dạng Ngày giờ `hh:mm dd/MM/yyyy` (24h) chống lộn ngược locale:**
+     * Loại bỏ hoàn toàn native `<input type="datetime-local">` (vốn bị Windows/Chrome locale US lộn thành `10/12/2026 08:45 PM` gây nhầm lẫn ngày 12 tháng 10 thành ngày 10 tháng 12).
+     * Thay bằng bộ nhập thời gian trực quan định dạng văn bản chuẩn Việt Nam `hh:mm dd/MM/yyyy` (VD: `20:45 12/10/2026`), đi kèm các nút chọn nhanh: `[Hiện tại]`, `[-1h]`, `[-2h]`, `[-6h]`, `[-1 ngày]`, `[Ca sáng 06:00]`, `[Ca tối 18:00]`.
+     * Hiển thị badge xác nhận chữ tiếng Việt rõ ràng: `⏱️ 20:45 — Ngày 12 tháng 10 năm 2026 (12/10/2026)`.
+     * Áp dụng thống nhất cho cả Giờ vào cổng (Backdate), Giờ xuất bãi, và Tiếp nhận cont lẻ hạ bãi.
+  4. **Kiểm soát Xuất bãi Cổng ra ([`/exit`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/exit/page.tsx)) — Không tự động điền cont lúc vào:**
+     * Khi mở modal xuất bãi, hệ thống **không tự động gán container lúc vào bãi** (`selectedTrailingContId = ''`), bắt buộc nhân viên An ninh bốt cổng ra phải đối soát thực tế tại hiện trường.
+     * Hiển thị khối gợi ý nổi bật: `[📌 Cont lúc vào bãi: TLCU1234567]` kèm nút **`[👉 Chọn nhanh cont này]`**. Nhân viên chỉ bấm nút này sau khi đã đối soát đúng thực tế, hoặc có thể chọn/tìm cont khác trong bãi hoặc chọn xe lẻ không chở cont.
+     * Nút xuất bãi tự động khóa nếu xe có kéo cont nhưng chưa chọn container nào.
+  5. **Xác minh kỹ thuật:** `npx supabase db push` thành công, `npm run build` exit code 0 (18/18 routes tĩnh thành công 100%).
 
-- **Mốc trước đó (14/10/2026 08:10):** **ƯU TIÊN ĐẨY KHOẢN CHƯA THU (UNPAID) LÊN ĐẦU SỔ CÁI BẾN BÃI (`/billing`)**:
-  * **Trải nghiệm Thu ngân & Kế toán Ca trực:** Sắp xếp ưu tiên `UNPAID` lên trên cùng của bảng Sổ cái thu phí bến bãi, hỗ trợ thu gộp 1-chạm theo container và khách hàng.
+- **Mốc trước đó (14/10/2026 08:25):** **XÓA BỎ HOÀN TOÀN HARDCODE 30 TRỤ ĐIỆN — NÂNG CẤP TOÀN DIỆN QUẢN TRỊ TRỤ ĐIỆN 380V ĐỘNG & TƯƠNG TÁC THỜI GIAN THỰC (MIGRATION 24)**.
 
 - **Mốc trước đó (14/10/2026 07:50):** **NÂNG CẤP TRIỆT ĐỂ BẢNG PHÂN KHU DB THẬT, KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V & CẬP NHẬT BIỂU PHÍ (MIGRATION 23)**:
   * **Phân khu bãi (Yard Zones):** Tạo bảng thực tế `public.app_yard_zones` trên Supabase Cloud thay thế hoàn toàn localStorage. Hỗ trợ CRUD phân khu đầy đủ.

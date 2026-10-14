@@ -2545,6 +2545,7 @@ export class SupabaseRepository implements IYardRepository {
         p_driver_phone: params.driverPhone !== undefined ? params.driverPhone : null,
         p_container_action: params.containerAction || null,
         p_container_action_reason: params.containerActionReason || null,
+        p_payment_method: params.paymentMethod || null,
       });
 
       if (rpcErr) {

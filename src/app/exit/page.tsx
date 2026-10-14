@@ -262,14 +262,9 @@ export default function ExitClearancePage() {
     setHasTrailingContainer(isContVeh);
     setTrailingContSearch('');
 
-    // Tự động tìm container đi kèm lúc vào bãi (nếu còn trong bãi) để không bắt An ninh thao tác thủ công thừa
-    const matchedInboundCont = inYardContainers.find(c => c.inbound_vehicle_visit_id === veh.id);
-    if (isContVeh && matchedInboundCont) {
-      setSelectedTrailingContId(matchedInboundCont.id);
-      calculateFeeForContainer(matchedInboundCont.inbound_at);
-    } else {
-      setSelectedTrailingContId('');
-    }
+    // Nghiệp vụ Cổng ra: Không tự động điền cont lúc vào mà để An ninh đối soát thực tế tại hiện trường
+    setSelectedTrailingContId('');
+    setCalculatedStorage(null);
 
     setShowUnifiedExitModal(true);
   };
@@ -1480,33 +1475,62 @@ export default function ExitClearancePage() {
                           )}
                         </div>
                       ) : (
-                        /* Khi chưa chọn cont: Gõ lọc hoặc chọn trực tiếp */
-                        <div className="space-y-1.5">
-                          <input
-                            type="text"
-                            value={trailingContSearch}
-                            onChange={(e) => setTrailingContSearch(e.target.value)}
-                            placeholder="🔍 Gõ nhanh số container để lọc..."
-                            className="w-full px-2.5 py-1 border border-slate-300 rounded text-xs font-mono"
-                          />
-                          <select
-                            value={selectedTrailingContId}
-                            onChange={(e) => handleTrailingContChange(e.target.value)}
-                            className="w-full p-1.5 border border-amber-400 ring-1 ring-amber-300 rounded text-xs font-mono font-bold bg-white"
-                          >
-                            <option value="">-- Bấm chọn Container kéo ra --</option>
-                            {inYardContainers
-                              .filter(c => {
-                                if (!trailingContSearch.trim()) return true;
-                                const q = trailingContSearch.toLowerCase();
-                                return c.container_no_current.toLowerCase().includes(q) || (c.inbound_license_plate && c.inbound_license_plate.toLowerCase().includes(q));
-                              })
-                              .map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.container_no_current} ({c.container_type || 'RF'} - Vào: {new Date(c.inbound_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at).toLocaleDateString('vi-VN')})
-                                </option>
-                              ))}
-                          </select>
+                        /* Khi chưa chọn cont: Gợi ý cont lúc vào (nếu có) + Gõ lọc hoặc chọn trực tiếp */
+                        <div className="space-y-2">
+                          {/* Khối gợi ý chọn nhanh cont lúc vào xe (không tự động điền mà chờ bấm xác nhận) */}
+                          {attachedInboundCont && (
+                            <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-300 flex items-center justify-between gap-2 shadow-2xs">
+                              <div>
+                                <div className="text-xs text-amber-950 flex items-center gap-1.5">
+                                  <span className="text-slate-600 font-medium">Cont lúc vào bãi:</span>
+                                  <span className="font-mono font-bold text-sm text-[#223873] bg-white px-2 py-0.5 rounded border border-amber-200">
+                                    {attachedInboundCont.container_no_current}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] text-slate-600 mt-0.5">
+                                  Vào bãi: {new Date(attachedInboundCont.inbound_at).toLocaleTimeString('vi-VN')} {new Date(attachedInboundCont.inbound_at).toLocaleDateString('vi-VN')}
+                                  {' • '} Quy cách: <strong className="text-slate-800">{attachedInboundCont.container_type || 'RF'}</strong>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleTrailingContChange(attachedInboundCont.id)}
+                                className="px-3 py-1.5 bg-[#223873] hover:bg-[#1b2d5d] text-white rounded font-bold text-xs shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0 transition-transform hover:scale-[1.02]"
+                                title="Bấm để chọn nhanh container này sau khi đối soát đúng thực tế tại hiện trường"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>👉 Chọn nhanh cont này</span>
+                              </button>
+                            </div>
+                          )}
+
+                          <div className="space-y-1.5">
+                            <input
+                              type="text"
+                              value={trailingContSearch}
+                              onChange={(e) => setTrailingContSearch(e.target.value)}
+                              placeholder="🔍 Hoặc gõ tìm số container khác trong bãi..."
+                              className="w-full px-2.5 py-1 border border-slate-300 rounded text-xs font-mono"
+                            />
+                            <select
+                              value={selectedTrailingContId}
+                              onChange={(e) => handleTrailingContChange(e.target.value)}
+                              className="w-full p-1.5 border border-amber-400 ring-1 ring-amber-300 rounded text-xs font-mono font-bold bg-white"
+                            >
+                              <option value="">-- Bấm chọn Container kéo ra --</option>
+                              {inYardContainers
+                                .filter(c => {
+                                  if (!trailingContSearch.trim()) return true;
+                                  const q = trailingContSearch.toLowerCase();
+                                  return c.container_no_current.toLowerCase().includes(q) || (c.inbound_license_plate && c.inbound_license_plate.toLowerCase().includes(q));
+                                })
+                                .map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.container_no_current} ({c.container_type || 'RF'} - Vào: {new Date(c.inbound_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at).toLocaleDateString('vi-VN')})
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
                         </div>
                       )}
 
