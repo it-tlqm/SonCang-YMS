@@ -196,17 +196,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (savedMode === 'REAL' && supabase) {
         setIsLoading(true);
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const timeoutSession = new Promise<{ data: { session: null } }>((resolve) =>
+            setTimeout(() => resolve({ data: { session: null } }), 2000)
+          );
+          const { data: { session } } = await Promise.race([
+            supabase.auth.getSession(),
+            timeoutSession,
+          ]);
+
           if (session?.user && isMounted) {
             const profile = await fetchRealUserProfile(supabase, session.user);
             if (isMounted) setUser(profile);
           } else if (isMounted) {
-            localStorage.removeItem('soncang_v5_auth_mode');
-            setUser(null);
+            // Nếu không có session hợp lệ, chuyển về Demo để không bị kẹt
+            localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
+            const savedRole = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SEC_STAFF';
+            const account = DEMO_ACCOUNTS.find(a => a.roleCode === savedRole) || DEMO_ACCOUNTS[0];
+            setUser({
+              id: account.id,
+              email: account.email,
+              fullName: account.fullName,
+              roleCode: account.roleCode,
+              roleName: account.roleName,
+              departmentCode: account.departmentCode,
+              departmentName: account.departmentName,
+              yardId: DEFAULT_YARD_ID,
+              yardName: DEFAULT_YARD_NAME,
+              permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
+              authMode: 'DEMO',
+            });
           }
         } catch (err) {
           console.error('Lỗi khôi phục session thật:', err);
-          if (isMounted) setUser(null);
+          if (isMounted) {
+            localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
+            const account = DEMO_ACCOUNTS[0];
+            setUser({
+              id: account.id,
+              email: account.email,
+              fullName: account.fullName,
+              roleCode: account.roleCode,
+              roleName: account.roleName,
+              departmentCode: account.departmentCode,
+              departmentName: account.departmentName,
+              yardId: DEFAULT_YARD_ID,
+              yardName: DEFAULT_YARD_NAME,
+              permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
+              authMode: 'DEMO',
+            });
+          }
         } finally {
           if (isMounted) setIsLoading(false);
         }
@@ -233,15 +271,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Chuyển đổi vai trò trong Demo Mode
+  // Chuyển đổi vai trò trong Demo Mode (hoặc chuyển nhanh từ Real sang Demo)
   const switchDemoRole = (roleCode: RoleCode) => {
     if (!IS_DEMO_ENABLED) {
       console.warn('Demo Mode bị tắt trong cấu hình.');
       return;
     }
+
+    // Nếu đang có session thật, ngầm sign out và dọn dẹp để chuyển sang vai trò demo
     if (user?.authMode === 'REAL') {
-      console.warn('Không thể chuyển đổi vai trò demo khi đang đăng nhập tài khoản Supabase thật.');
-      return;
+      try {
+        const supabase = createClient();
+        supabase.auth.signOut().catch(() => {});
+      } catch {
+        // Bỏ qua lỗi sign out
+      }
     }
 
     const account = DEMO_ACCOUNTS.find(a => a.roleCode === roleCode);
@@ -262,6 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     setUser(newUser);
+    setIsLoading(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
       localStorage.setItem('soncang_v5_demo_role', roleCode);

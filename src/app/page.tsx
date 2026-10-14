@@ -9,30 +9,41 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!isLoading) {
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
 
-    if (!user) {
-      router.replace('/login');
-      return;
+      // Điều hướng theo vai trò nghiệp vụ V5
+      switch (role) {
+        case 'SEC_STAFF':
+        case 'SEC_LEAD':
+          router.replace('/entry');
+          break;
+        case 'SYS_ADMIN':
+        case 'PORT_LEAD':
+          router.replace('/dashboard');
+          break;
+        case 'DIS_STAFF':
+        case 'DIS_LEAD':
+        case 'PORT_STAFF':
+        default:
+          router.replace('/yard');
+          break;
+      }
     }
 
-    // Điều hướng theo vai trò nghiệp vụ V5
-    switch (role) {
-      case 'SEC_STAFF':
-      case 'SEC_LEAD':
-        router.replace('/entry');
-        break;
-      case 'SYS_ADMIN':
-      case 'PORT_LEAD':
+    // Fallback bảo hiểm sau 1200ms nếu state isLoading bị kẹt
+    const timer = setTimeout(() => {
+      if (!user) {
+        router.replace('/login');
+      } else {
         router.replace('/dashboard');
-        break;
-      case 'DIS_STAFF':
-      case 'DIS_LEAD':
-      case 'PORT_STAFF':
-      default:
-        router.replace('/yard');
-        break;
-    }
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
   }, [user, role, isLoading, router]);
 
   return (
