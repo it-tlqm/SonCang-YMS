@@ -6,6 +6,7 @@ export type RoleCode =
   | 'PORT_LEAD'
   | 'DIS_STAFF'
   | 'DIS_LEAD'
+  | 'ACCOUNTANT'
   | 'ACCOUNTING_FUTURE';
 
 export type DepartmentCode = 'AN_NINH' | 'CCKB' | 'DIEU_PHOI' | 'HE_THONG' | 'KE_TOAN';
@@ -97,6 +98,16 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
     departmentCode: 'DIEU_PHOI',
     departmentName: 'Bộ phận Điều phối & Hiện trường',
     description: 'Giám sát mặt bằng lưu bãi, điều phối ô đỗ, duyệt điều chỉnh tình trạng container',
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000050',
+    email: 'acc_01@soncang.vn',
+    roleCode: 'ACCOUNTANT',
+    roleName: 'Kế toán Bến bãi',
+    fullName: 'Bùi Thị Lan (Kế toán bến bãi)',
+    departmentCode: 'KE_TOAN',
+    departmentName: 'Bộ phận Kế toán - Tài chính',
+    description: 'Chốt thu tiền mặt hiện trường, quản lý xuất hóa đơn MST/CCCD, thu hồi công nợ và sổ quỹ',
   },
   {
     id: '20000000-0000-0000-0000-000000000010',

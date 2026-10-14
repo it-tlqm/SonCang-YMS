@@ -28,16 +28,24 @@ import {
   PowerSocket,
   PowerSocketStatus,
   AppRole,
-  AppRolePermission
+  AppRolePermission,
+  CashSettlement,
+  CashSettlementItem,
+  YardInvoice,
+  AccountingDebtItem,
+  InvoiceType
 } from '@/types/domain.types';
 import { 
   IYardRepository, 
   CreateVehicleParams, 
-  CreateContainerParams,
+  CreateContainerParams, 
   CollectPaymentParams,
   BatchCollectPaymentsParams,
   GetPaymentsFilter,
   ApproveClearanceParams,
+  ConfirmSettlementParams,
+  CreateInvoiceParams,
+  CollectAccountingDebtParams,
   ConfirmExitParams,
   ConfirmVehicleOnlyExitParams,
   CorrectContainerNumberParams,
@@ -437,6 +445,20 @@ export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
     notes: 'Trưởng ca điều phối bến bãi'
   },
   {
+    id: '20000000-0000-0000-0000-000000000050',
+    full_name: 'Bùi Thị Lan',
+    email: 'acc_01@soncang.vn',
+    phone: '0987 890 123',
+    role_code: 'ACCOUNTANT',
+    role_name: 'Kế toán Bến bãi',
+    department_code: 'KE_TOAN',
+    department_name: 'Bộ phận Kế toán - Tài chính',
+    yard_id: '20000000-0000-0000-0000-000000000001',
+    yard_name: 'Bãi Sơn Cảng',
+    is_active: true,
+    notes: 'Kế toán chốt thu tiền mặt hiện trường, quản lý hóa đơn MST/CCCD & sổ quỹ'
+  },
+  {
     id: '20000000-0000-0000-0000-000000000010',
     full_name: 'Ban Quản trị Hệ thống TLQM',
     email: 'admin_01@soncang.vn',
@@ -482,6 +504,9 @@ export class DemoRepository implements IYardRepository {
   private staffUsers: StaffUser[] = [...INITIAL_DEMO_STAFF_USERS];
   private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
   private powerSockets: PowerSocket[] = [...INITIAL_DEMO_POWER_SOCKETS];
+  private cashSettlements: CashSettlement[] = [];
+  private settlementItems: CashSettlementItem[] = [];
+  private yardInvoices: YardInvoice[] = [];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
     yard_id: '20000000-0000-0000-0000-000000000001',
@@ -556,6 +581,18 @@ export class DemoRepository implements IYardRepository {
       if (savedSockets) {
         try { this.powerSockets = JSON.parse(savedSockets); } catch {}
       }
+      const savedSettlements = localStorage.getItem('soncang_v5_cash_settlements');
+      if (savedSettlements) {
+        try { this.cashSettlements = JSON.parse(savedSettlements); } catch {}
+      }
+      const savedSetItems = localStorage.getItem('soncang_v5_settlement_items');
+      if (savedSetItems) {
+        try { this.settlementItems = JSON.parse(savedSetItems); } catch {}
+      }
+      const savedInvoices = localStorage.getItem('soncang_v5_yard_invoices');
+      if (savedInvoices) {
+        try { this.yardInvoices = JSON.parse(savedInvoices); } catch {}
+      }
     }
   }
 
@@ -574,6 +611,9 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
       localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
+      localStorage.setItem('soncang_v5_cash_settlements', JSON.stringify(this.cashSettlements));
+      localStorage.setItem('soncang_v5_settlement_items', JSON.stringify(this.settlementItems));
+      localStorage.setItem('soncang_v5_yard_invoices', JSON.stringify(this.yardInvoices));
     }
   }
 
@@ -2542,9 +2582,222 @@ export class DemoRepository implements IYardRepository {
       } else {
         all = all.filter(p => !(p.role_code === roleCode && p.permission_code === permissionCode));
       }
-      localStorage.setItem('soncang_v5_role_perms', JSON.stringify(all));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('soncang_v5_role_perms', JSON.stringify(all));
+      }
+      return { success: true };
     }
+    return { success: false, error: 'Chỉ hỗ trợ trên client' };
+  }
+
+  // ==============================================================================
+  // PHÂN HỆ KẾ TOÁN (ACCOUNTING SUB-SYSTEM) - DEMO MODE
+  // ==============================================================================
+
+  async getCashSettlements(): Promise<CashSettlement[]> {
+    return [...this.cashSettlements];
+  }
+
+  async getUnsettledCashPayments(dept?: string): Promise<PaymentRecord[]> {
+    const settledIds = new Set(this.settlementItems.map(i => i.payment_id));
+    return this.payments.filter(p => {
+      if (p.payment_method !== 'CASH') return false;
+      if (settledIds.has(p.id)) return false;
+      if (dept && dept !== 'ALL' && p.collector_dept !== dept) return false;
+      return true;
+    });
+  }
+
+  async confirmCashSettlement(params: ConfirmSettlementParams): Promise<{ success: boolean; settlement?: CashSettlement; error?: string }> {
+    const expectedPayments = await this.getUnsettledCashPayments(params.handoverDept);
+    const expectedCash = expectedPayments.reduce((sum, p) => sum + p.payment_amount, 0);
+    const transferPayments = this.payments.filter(p => 
+      p.payment_method !== 'CASH' && 
+      (params.handoverDept === 'ALL' || p.collector_dept === params.handoverDept) &&
+      new Date(p.collected_at) >= new Date(params.periodFrom) &&
+      new Date(p.collected_at) <= new Date(params.periodTo)
+    );
+    const totalTransfer = transferPayments.reduce((sum, p) => sum + p.payment_amount, 0);
+    const diff = params.totalCashCounted - expectedCash;
+
+    const code = `BB-${new Date().toISOString().substring(0, 10).replace(/-/g, '')}-${String(this.cashSettlements.length + 1).padStart(3, '0')}-${params.handoverDept}`;
+    const newSettlement: CashSettlement = {
+      id: `settle-${Date.now()}`,
+      settlement_code: code,
+      collector_name: 'Bùi Thị Lan (Kế toán)',
+      handover_dept: params.handoverDept,
+      period_from: params.periodFrom,
+      period_to: params.periodTo,
+      total_cash_expected: expectedCash,
+      total_cash_counted: params.totalCashCounted,
+      difference_amount: diff,
+      total_transfer_amount: totalTransfer,
+      difference_reason: params.differenceReason || null,
+      handover_person_name: params.handoverPersonName,
+      notes: params.notes || null,
+      status: 'COMPLETED',
+      created_at: new Date().toISOString(),
+      item_count: expectedPayments.length,
+    };
+
+    this.cashSettlements.unshift(newSettlement);
+
+    // Link items
+    for (const p of expectedPayments) {
+      this.settlementItems.push({
+        id: `item-${Date.now()}-${p.id}`,
+        settlement_id: newSettlement.id,
+        payment_id: p.id,
+        settled_amount: p.payment_amount,
+        payment_method: p.payment_method,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    this.persist();
+    return { success: true, settlement: newSettlement };
+  }
+
+  async getYardInvoices(status?: string): Promise<YardInvoice[]> {
+    if (status && status !== 'ALL') {
+      return this.yardInvoices.filter(inv => inv.status === status);
+    }
+    return [...this.yardInvoices];
+  }
+
+  async getInvoicableCharges(): Promise<ChargeItem[]> {
+    const uninvoiced = this.charges.filter(c => 
+      c.status === 'PAID' && 
+      (!c.invoice_status || c.invoice_status === 'UNINVOICED')
+    );
+    return uninvoiced.map(c => {
+      const veh = c.vehicle_visit_id ? this.vehicles.find(v => v.id === c.vehicle_visit_id) : undefined;
+      const cont = c.container_visit_id ? this.containers.find(ct => ct.id === c.container_visit_id) : undefined;
+      return {
+        ...c,
+        license_plate: veh?.license_plate || undefined,
+        container_no: cont?.container_no_current || undefined,
+        customer_name: veh?.driver_name || undefined
+      };
+    });
+  }
+
+  async createYardInvoice(params: CreateInvoiceParams): Promise<{ success: boolean; invoice?: YardInvoice; error?: string }> {
+    const selectedCharges = this.charges.filter(c => params.chargeIds.includes(c.id));
+    const totalAmount = selectedCharges.reduce((sum, c) => sum + c.amount, 0);
+    const vatRate = params.vatRate || 8;
+    const subtotal = Math.round(totalAmount / (1 + vatRate / 100));
+    const vat = totalAmount - subtotal;
+
+    const code = `HD-${new Date().toISOString().substring(0, 10).replace(/-/g, '')}-${String(this.yardInvoices.length + 1).padStart(4, '0')}`;
+    const newInvoice: YardInvoice = {
+      id: `inv-${Date.now()}`,
+      invoice_code: code,
+      invoice_type: params.invoiceType,
+      buyer_name: params.buyerName,
+      tax_code: params.taxCode || null,
+      id_card_no: params.idCardNo || null,
+      buyer_address: params.buyerAddress,
+      buyer_email: params.buyerEmail || null,
+      buyer_phone: params.buyerPhone || null,
+      vat_rate: vatRate,
+      subtotal_amount: subtotal,
+      vat_amount: vat,
+      total_amount: totalAmount,
+      status: 'PREPARED',
+      payment_status: 'PAID',
+      notes: params.notes || null,
+      created_by: params.createdBy || 'Bùi Thị Lan (Kế toán)',
+      charge_ids: params.chargeIds,
+      created_at: new Date().toISOString()
+    };
+
+    this.yardInvoices.unshift(newInvoice);
+
+    // Update charges
+    for (const c of selectedCharges) {
+      c.invoice_status = 'PREPARED';
+      c.invoice_id = newInvoice.id;
+    }
+
+    this.persist();
+    return { success: true, invoice: newInvoice };
+  }
+
+  async issueYardInvoice(invoiceId: string, eInvoiceNo: string, issuedAt?: string, notes?: string): Promise<{ success: boolean; error?: string }> {
+    const inv = this.yardInvoices.find(i => i.id === invoiceId);
+    if (!inv) return { success: false, error: 'Không tìm thấy hóa đơn' };
+
+    inv.status = 'INVOICED';
+    inv.e_invoice_no = eInvoiceNo;
+    inv.invoice_issued_at = issuedAt || new Date().toISOString();
+    if (notes) inv.notes = notes;
+
+    for (const cid of inv.charge_ids) {
+      const c = this.charges.find(ch => ch.id === cid);
+      if (c) c.invoice_status = 'INVOICED';
+    }
+
+    this.persist();
     return { success: true };
+  }
+
+  async getAccountingDebts(): Promise<AccountingDebtItem[]> {
+    const unpaidCharges = this.charges.filter(c => c.status === 'UNPAID' || c.status === 'PARTIALLY_PAID');
+    return unpaidCharges.map(c => {
+      const veh = c.vehicle_visit_id ? this.vehicles.find(v => v.id === c.vehicle_visit_id) : undefined;
+      const cont = c.container_visit_id ? this.containers.find(ct => ct.id === c.container_visit_id) : undefined;
+      const total = c.amount;
+      const paid = c.paid_amount || 0;
+      return {
+        id: c.id,
+        charge_id: c.id,
+        customer_name: veh?.driver_name || 'Khách hàng vãng lai',
+        customer_phone: veh?.driver_phone || null,
+        container_no: cont?.container_no_current || null,
+        license_plate: veh?.license_plate || null,
+        charge_type: c.charge_type,
+        charge_title: c.notes || 'Khoản nợ cước bến bãi',
+        total_amount: total,
+        paid_amount: paid,
+        debt_amount: total - paid,
+        cleared_at: c.created_at,
+        guarantor_name: 'Trưởng ca duyệt AP07',
+        notes: c.notes
+      };
+    });
+  }
+
+  async collectAccountingDebt(params: CollectAccountingDebtParams): Promise<{ success: boolean; paymentId?: string; error?: string }> {
+    const chg = this.charges.find(c => c.id === params.chargeId);
+    if (!chg) return { success: false, error: 'Không tìm thấy khoản nợ' };
+
+    const paymentId = `pay-acc-${Date.now()}`;
+    const newPayment: PaymentRecord = {
+      id: paymentId,
+      yard_id: chg.yard_id,
+      charge_id: chg.id,
+      payment_amount: params.amount,
+      payment_method: params.paymentMethod,
+      collected_by: '20000000-0000-0000-0000-000000000050',
+      collected_by_name: 'Bùi Thị Lan (Kế toán)',
+      collector_dept: 'KE_TOAN',
+      collected_at: new Date().toISOString(),
+      receipt_code: params.receiptCode || null,
+      notes: params.notes || 'Kế toán thu nợ bến bãi'
+    };
+
+    this.payments.unshift(newPayment);
+
+    chg.paid_amount = (chg.paid_amount || 0) + params.amount;
+    if (chg.paid_amount >= chg.amount) {
+      chg.status = 'PAID';
+    } else {
+      chg.status = 'PARTIALLY_PAID';
+    }
+
+    this.persist();
+    return { success: true, paymentId };
   }
 
   resetDemoData() {

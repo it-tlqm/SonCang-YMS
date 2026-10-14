@@ -29,7 +29,12 @@ import {
   PowerSocket,
   PowerSocketStatus,
   AppRole,
-  AppRolePermission
+  AppRolePermission,
+  CashSettlement,
+  CashSettlementItem,
+  YardInvoice,
+  AccountingDebtItem,
+  InvoiceType
 } from '@/types/domain.types';
 
 export interface CreateVehicleParams {
@@ -224,6 +229,39 @@ export interface UpdateReeferRequestParams {
   temperatureSetting?: string;
   plugSocketCode?: string;
   status?: ReeferRequestStatus;
+  notes?: string;
+}
+
+export interface ConfirmSettlementParams {
+  handoverDept: 'AN_NINH' | 'CCKB' | 'ALL';
+  periodFrom: string;
+  periodTo: string;
+  totalCashCounted: number;
+  handoverPersonName: string;
+  differenceReason?: string;
+  notes?: string;
+  paymentIds?: string[];
+}
+
+export interface CreateInvoiceParams {
+  invoiceType: 'COMPANY' | 'INDIVIDUAL';
+  buyerName: string;
+  buyerAddress: string;
+  taxCode?: string;
+  idCardNo?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  vatRate?: number;
+  chargeIds: string[];
+  notes?: string;
+  createdBy?: string;
+}
+
+export interface CollectAccountingDebtParams {
+  chargeId: string;
+  amount: number;
+  paymentMethod: 'CASH' | 'TRANSFER';
+  receiptCode?: string;
   notes?: string;
 }
 
@@ -513,6 +551,37 @@ export interface IYardRepository {
 
   /** Bật / Tắt cấp quyền cho vai trò */
   toggleRolePermission(roleCode: string, permissionCode: string, isEnabled: boolean, scope?: string): Promise<{ success: boolean; error?: string }>;
+
+  // ==============================================================================
+  // PHÂN HỆ KẾ TOÁN (ACCOUNTING SUB-SYSTEM)
+  // ==============================================================================
+
+  /** Lấy danh sách các đợt chốt & gom tiền mặt hiện trường */
+  getCashSettlements(): Promise<CashSettlement[]>;
+
+  /** Lấy danh sách phiếu thu tiền mặt chưa được Kế toán chốt thu về quỹ */
+  getUnsettledCashPayments(dept?: string): Promise<PaymentRecord[]>;
+
+  /** Xác nhận Kế toán chốt và thu tiền mặt hiện trường (tạo biên bản bàn giao) */
+  confirmCashSettlement(params: ConfirmSettlementParams): Promise<{ success: boolean; settlement?: CashSettlement; error?: string }>;
+
+  /** Lấy danh sách hóa đơn bến bãi (MST & CCCD) */
+  getYardInvoices(status?: string): Promise<YardInvoice[]>;
+
+  /** Lấy danh sách các khoản thu đã thanh toán sẵn sàng gom vào hóa đơn */
+  getInvoicableCharges(): Promise<ChargeItem[]>;
+
+  /** Lập hồ sơ đề nghị xuất hóa đơn GTGT (hỗ trợ Doanh nghiệp MST & Cá nhân CCCD 12 số) */
+  createYardInvoice(params: CreateInvoiceParams): Promise<{ success: boolean; invoice?: YardInvoice; error?: string }>;
+
+  /** Ghi nhận số HĐĐT chính thức đã phát hành */
+  issueYardInvoice(invoiceId: string, eInvoiceNo: string, issuedAt?: string, notes?: string): Promise<{ success: boolean; error?: string }>;
+
+  /** Lấy danh sách công nợ bến bãi chờ thu (theo khách hàng & lượt xe/cont) */
+  getAccountingDebts(): Promise<AccountingDebtItem[]>;
+
+  /** Kế toán trực tiếp thu hồi nợ cước bến bãi AP07 */
+  collectAccountingDebt(params: CollectAccountingDebtParams): Promise<{ success: boolean; paymentId?: string; error?: string }>;
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;

@@ -234,6 +234,16 @@ export const ROLE_PERMISSIONS_V5: Record<RoleCode, string[]> = {
     'tariff.change.request',
   ],
 
+  ACCOUNTANT: [
+    'accounting.shift_cash.collect',
+    'accounting.invoice.prepare',
+    'accounting.debt.manage',
+    'accounting.reports.view',
+    'report.revenue.read',
+    'report.revenue.export',
+    'audit.read',
+  ],
+
   ACCOUNTING_FUTURE: [],
 };
 

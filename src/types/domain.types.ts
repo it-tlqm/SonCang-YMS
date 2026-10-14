@@ -290,6 +290,8 @@ export interface ChargeItem {
   amount: number;
   paid_amount: number;
   status: ChargeStatus;
+  invoice_status?: 'UNINVOICED' | 'PREPARED' | 'INVOICED';
+  invoice_id?: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -302,7 +304,7 @@ export interface PaymentRecord {
   payment_method: 'CASH' | 'TRANSFER' | 'OTHER';
   collected_by: string;
   collected_by_name?: string;
-  collector_dept: 'AN_NINH' | 'CCKB';
+  collector_dept: 'AN_NINH' | 'CCKB' | 'KE_TOAN';
   collected_at: string;
   receipt_code: string | null;
   notes: string | null;
@@ -311,6 +313,7 @@ export interface PaymentRecord {
   charge_title?: string;
   license_plate?: string | null;
   container_no?: string | null;
+  customer_name?: string | null;
 }
 
 export type ShiftType = 'SHIFT_1' | 'SHIFT_2' | 'SHIFT_3' | 'SHIFT_12H_DAY' | 'SHIFT_12H_NIGHT' | 'CUSTOM';
@@ -414,5 +417,92 @@ export interface AppRolePermission {
   scope: string;
   is_enabled: boolean;
 }
+
+// ==============================================================================
+// PHÂN HỆ KẾ TOÁN BẾN BÃI (ACCOUNTING SUB-SYSTEM)
+// ==============================================================================
+
+export type SettlementHandoverDept = 'AN_NINH' | 'CCKB' | 'ALL';
+export type SettlementStatus = 'COMPLETED' | 'DRAFT' | 'CANCELLED';
+
+export interface CashSettlement {
+  id: string;
+  settlement_code: string;
+  yard_id?: string | null;
+  collector_id?: string | null;
+  collector_name: string;
+  handover_dept: SettlementHandoverDept;
+  period_from: string;
+  period_to: string;
+  total_cash_expected: number;
+  total_cash_counted: number;
+  difference_amount: number;
+  total_transfer_amount: number;
+  difference_reason?: string | null;
+  handover_person_name: string;
+  notes?: string | null;
+  status: SettlementStatus;
+  created_at: string;
+  updated_at?: string;
+  item_count?: number;
+}
+
+export interface CashSettlementItem {
+  id: string;
+  settlement_id: string;
+  payment_id: string;
+  settled_amount: number;
+  payment_method: string;
+  created_at: string;
+  payment?: PaymentRecord;
+}
+
+export type InvoiceType = 'COMPANY' | 'INDIVIDUAL';
+export type InvoiceStatus = 'PREPARED' | 'INVOICED' | 'CANCELLED';
+export type InvoicePaymentStatus = 'PAID' | 'UNPAID';
+
+export interface YardInvoice {
+  id: string;
+  invoice_code: string;
+  yard_id?: string | null;
+  invoice_type: InvoiceType;
+  buyer_name: string;
+  tax_code?: string | null;
+  id_card_no?: string | null;
+  buyer_address: string;
+  buyer_email?: string | null;
+  buyer_phone?: string | null;
+  vat_rate: number;
+  subtotal_amount: number;
+  vat_amount: number;
+  total_amount: number;
+  status: InvoiceStatus;
+  payment_status: InvoicePaymentStatus;
+  e_invoice_no?: string | null;
+  invoice_issued_at?: string | null;
+  notes?: string | null;
+  created_by: string;
+  charge_ids: string[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface AccountingDebtItem {
+  id: string;
+  charge_id: string;
+  customer_name: string;
+  customer_phone?: string | null;
+  container_no?: string | null;
+  license_plate?: string | null;
+  charge_type: ChargeType;
+  charge_title: string;
+  total_amount: number;
+  paid_amount: number;
+  debt_amount: number;
+  cleared_at: string;
+  guarantor_name?: string | null;
+  notes?: string | null;
+}
+
 
 

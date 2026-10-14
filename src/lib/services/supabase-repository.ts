@@ -41,8 +41,19 @@ import {
   PowerSocket,
   PowerSocketStatus,
   AppRole,
-  AppRolePermission
+  AppRolePermission,
+  CashSettlement,
+  CashSettlementItem,
+  YardInvoice,
+  AccountingDebtItem,
+  InvoiceType
 } from '@/types/domain.types';
+
+import {
+  ConfirmSettlementParams,
+  CreateInvoiceParams,
+  CollectAccountingDebtParams
+} from './repository-interface';
 import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
 
 import { Database } from '@/types/database.types';
@@ -3387,6 +3398,412 @@ export class SupabaseRepository implements IYardRepository {
       // Fallback
     }
     return { success: true };
+  }
+
+  // ==============================================================================
+  // PHÂN HỆ KẾ TOÁN (ACCOUNTING SUB-SYSTEM)
+  // ==============================================================================
+
+  /** Lấy danh sách các đợt chốt & gom tiền mặt hiện trường */
+  async getCashSettlements(): Promise<CashSettlement[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('app_cash_settlements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        return [];
+      }
+      return data as CashSettlement[];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Lấy danh sách phiếu thu tiền mặt chưa được Kế toán chốt thu về quỹ */
+  async getUnsettledCashPayments(dept?: string): Promise<PaymentRecord[]> {
+    try {
+      const supabase = createClient();
+      
+      // 1. Lấy danh sách payment_id đã được chốt hoàn tất
+      const { data: settledItems } = await supabase
+        .from('app_cash_settlement_items')
+        .select('payment_id');
+      
+      const settledPaymentIds = new Set((settledItems || []).map(item => item.payment_id));
+
+      // 2. Query payments tiền mặt
+      let query = supabase
+        .from('app_payments')
+        .select('*')
+        .eq('payment_method', 'CASH')
+        .order('collected_at', { ascending: false });
+
+      if (dept && dept !== 'ALL') {
+        query = query.eq('collector_dept', dept);
+      }
+
+      const { data: payments, error } = await query;
+      if (error || !payments) return [];
+
+      // 3. Lọc ra các khoản chưa được chốt
+      const unsettled = (payments as any[]).filter(p => !settledPaymentIds.has(p.id));
+      if (unsettled.length === 0) return [];
+
+      // 4. Lấy thông tin bổ sung từ charges, vehicle_visits, container_visits
+      const chargeIds = Array.from(new Set(unsettled.map(p => p.charge_id).filter(Boolean)));
+      const chargeMap: Record<string, { type: ChargeType; notes: string | null; vehId: string | null; contId: string | null; customerName: string | null }> = {};
+      const vehicleIds: string[] = [];
+      const containerIds: string[] = [];
+
+      if (chargeIds.length > 0) {
+        const { data: chgData } = await supabase
+          .from('app_charges')
+          .select('id, charge_type, notes, vehicle_visit_id, container_visit_id')
+          .in('id', chargeIds);
+
+        if (chgData) {
+          for (const c of chgData as any[]) {
+            chargeMap[c.id] = {
+              type: c.charge_type,
+              notes: c.notes,
+              vehId: c.vehicle_visit_id,
+              contId: c.container_visit_id,
+              customerName: null,
+            };
+            if (c.vehicle_visit_id) vehicleIds.push(c.vehicle_visit_id);
+            if (c.container_visit_id) containerIds.push(c.container_visit_id);
+          }
+        }
+      }
+
+      const vehPlateMap: Record<string, string> = {};
+      if (vehicleIds.length > 0) {
+        const { data: vehData } = await supabase
+          .from('app_vehicle_visits')
+          .select('id, license_plate')
+          .in('id', vehicleIds);
+        if (vehData) {
+          for (const v of vehData as any[]) {
+            vehPlateMap[v.id] = v.license_plate;
+          }
+        }
+      }
+
+      const contMap: Record<string, { no: string; custName?: string }> = {};
+      if (containerIds.length > 0) {
+        const { data: contData } = await supabase
+          .from('app_container_visits')
+          .select('id, container_no')
+          .in('id', containerIds);
+        if (contData) {
+          for (const c of contData as any[]) {
+            contMap[c.id] = { no: c.container_no };
+          }
+        }
+      }
+
+      return unsettled.map(p => {
+        const chg = chargeMap[p.charge_id];
+        return {
+          id: p.id,
+          yard_id: p.yard_id,
+          charge_id: p.charge_id,
+          payment_amount: Number(p.payment_amount),
+          payment_method: p.payment_method,
+          collected_by: p.collected_by,
+          collector_dept: p.collector_dept,
+          collected_at: p.collected_at,
+          receipt_code: p.receipt_code,
+          notes: p.notes,
+          charge_type: chg?.type,
+          charge_title: chg?.notes || undefined,
+          license_plate: chg?.vehId ? vehPlateMap[chg.vehId] : undefined,
+          container_no: chg?.contId ? contMap[chg.contId]?.no : undefined,
+          customer_name: chg?.customerName || undefined,
+        };
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  /** Xác nhận Kế toán chốt và thu tiền mặt hiện trường (tạo biên bản bàn giao) */
+  async confirmCashSettlement(params: ConfirmSettlementParams): Promise<{ success: boolean; settlement?: CashSettlement; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_confirm_cash_settlement', {
+        p_handover_dept: params.handoverDept,
+        p_period_from: params.periodFrom,
+        p_period_to: params.periodTo,
+        p_total_cash_counted: params.totalCashCounted,
+        p_handover_person_name: params.handoverPersonName,
+        p_difference_reason: params.differenceReason || null,
+        p_notes: params.notes || null,
+        p_payment_ids: params.paymentIds || []
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data && (data as any).settlement_id) {
+        const { data: setRow } = await supabase
+          .from('app_cash_settlements')
+          .select('*')
+          .eq('id', (data as any).settlement_id)
+          .single();
+        return { success: true, settlement: setRow as CashSettlement };
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /** Lấy danh sách hóa đơn bến bãi (MST & CCCD) */
+  async getYardInvoices(status?: string): Promise<YardInvoice[]> {
+    try {
+      const supabase = createClient();
+      let query = supabase
+        .from('app_invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status && status !== 'ALL') {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
+      if (error || !data) return [];
+      return data as YardInvoice[];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Lấy danh sách các khoản thu đã thanh toán sẵn sàng gom vào hóa đơn */
+  async getInvoicableCharges(): Promise<ChargeItem[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('app_charges')
+        .select('*')
+        .eq('status', 'PAID')
+        .or('invoice_status.is.null,invoice_status.eq.UNINVOICED')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) return [];
+
+      const rawCharges = data as any[];
+      if (rawCharges.length === 0) return [];
+
+      const vehicleIds = Array.from(new Set(rawCharges.map(c => c.vehicle_visit_id).filter(Boolean)));
+      const containerIds = Array.from(new Set(rawCharges.map(c => c.container_visit_id).filter(Boolean)));
+
+      const vehPlateMap: Record<string, string> = {};
+      if (vehicleIds.length > 0) {
+        const { data: vehData } = await supabase
+          .from('app_vehicle_visits')
+          .select('id, license_plate')
+          .in('id', vehicleIds);
+        if (vehData) {
+          for (const v of vehData as any[]) {
+            vehPlateMap[v.id] = v.license_plate;
+          }
+        }
+      }
+
+      const contMap: Record<string, { no: string; custName?: string }> = {};
+      if (containerIds.length > 0) {
+        const { data: contData } = await supabase
+          .from('app_container_visits')
+          .select('id, container_no')
+          .in('id', containerIds);
+        if (contData) {
+          for (const c of contData as any[]) {
+            contMap[c.id] = { no: c.container_no };
+          }
+        }
+      }
+
+      return rawCharges.map(c => ({
+        id: c.id,
+        yard_id: c.yard_id,
+        charge_type: c.charge_type,
+        title: c.notes || 'Khoản thu dịch vụ',
+        vehicle_visit_id: c.vehicle_visit_id,
+        container_visit_id: c.container_visit_id,
+        container_no: c.container_visit_id ? contMap[c.container_visit_id]?.no : undefined,
+        license_plate: c.vehicle_visit_id ? vehPlateMap[c.vehicle_visit_id] : undefined,
+        amount: Number(c.amount),
+        paid_amount: Number(c.paid_amount),
+        status: c.status,
+        invoice_status: c.invoice_status || 'UNINVOICED',
+        invoice_id: c.invoice_id,
+        notes: c.notes,
+        created_at: c.created_at,
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  /** Lập hồ sơ đề nghị xuất hóa đơn GTGT (hỗ trợ Doanh nghiệp MST & Cá nhân CCCD 12 số) */
+  async createYardInvoice(params: CreateInvoiceParams): Promise<{ success: boolean; invoice?: YardInvoice; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_create_or_update_invoice', {
+        p_invoice_type: params.invoiceType,
+        p_buyer_name: params.buyerName,
+        p_buyer_address: params.buyerAddress,
+        p_tax_code: params.taxCode || null,
+        p_id_card_no: params.idCardNo || null,
+        p_buyer_email: params.buyerEmail || null,
+        p_buyer_phone: params.buyerPhone || null,
+        p_vat_rate: params.vatRate || 8,
+        p_charge_ids: params.chargeIds,
+        p_notes: params.notes || null,
+        p_created_by: params.createdBy || 'Bùi Thị Lan (Kế toán)'
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data && (data as any).invoice_id) {
+        const { data: invRow } = await supabase
+          .from('app_invoices')
+          .select('*')
+          .eq('id', (data as any).invoice_id)
+          .single();
+        return { success: true, invoice: invRow as YardInvoice };
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /** Ghi nhận số HĐĐT chính thức đã phát hành */
+  async issueYardInvoice(invoiceId: string, eInvoiceNo: string, issuedAt?: string, notes?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_issue_invoice', {
+        p_invoice_id: invoiceId,
+        p_e_invoice_no: eInvoiceNo,
+        p_issued_at: issuedAt || new Date().toISOString(),
+        p_notes: notes || null
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /** Lấy danh sách công nợ bến bãi chờ thu (theo khách hàng & lượt xe/cont) */
+  async getAccountingDebts(): Promise<AccountingDebtItem[]> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('app_charges')
+        .select('*')
+        .in('status', ['UNPAID', 'PARTIALLY_PAID'])
+        .order('created_at', { ascending: false });
+
+      if (error || !data) return [];
+
+      const rawDebts = data as any[];
+      if (rawDebts.length === 0) return [];
+
+      const vehicleIds = Array.from(new Set(rawDebts.map(c => c.vehicle_visit_id).filter(Boolean)));
+      const containerIds = Array.from(new Set(rawDebts.map(c => c.container_visit_id).filter(Boolean)));
+
+      const vehPlateMap: Record<string, { plate: string; driver?: string; phone?: string }> = {};
+      if (vehicleIds.length > 0) {
+        const { data: vehData } = await supabase
+          .from('app_vehicle_visits')
+          .select('id, license_plate, driver_name, driver_phone')
+          .in('id', vehicleIds);
+        if (vehData) {
+          for (const v of vehData as any[]) {
+            vehPlateMap[v.id] = { plate: v.license_plate, driver: v.driver_name, phone: v.driver_phone };
+          }
+        }
+      }
+
+      const contMap: Record<string, string> = {};
+      if (containerIds.length > 0) {
+        const { data: contData } = await supabase
+          .from('app_container_visits')
+          .select('id, container_no')
+          .in('id', containerIds);
+        if (contData) {
+          for (const c of contData as any[]) {
+            contMap[c.id] = c.container_no;
+          }
+        }
+      }
+
+      return rawDebts.map(c => {
+        const veh = c.vehicle_visit_id ? vehPlateMap[c.vehicle_visit_id] : undefined;
+        const contNo = c.container_visit_id ? contMap[c.container_visit_id] : undefined;
+        const total = Number(c.amount);
+        const paid = Number(c.paid_amount || 0);
+
+        return {
+          id: c.id,
+          charge_id: c.id,
+          customer_name: veh?.driver || 'Khách hàng vãng lai',
+          customer_phone: veh?.phone || null,
+          container_no: contNo || null,
+          license_plate: veh?.plate || null,
+          charge_type: c.charge_type,
+          charge_title: c.notes || 'Khoản nợ cước bến bãi',
+          total_amount: total,
+          paid_amount: paid,
+          debt_amount: total - paid,
+          cleared_at: c.created_at,
+          guarantor_name: 'Trưởng ca duyệt AP07',
+          notes: c.notes
+        };
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  /** Kế toán trực tiếp thu hồi nợ cước bến bãi AP07 */
+  async collectAccountingDebt(params: CollectAccountingDebtParams): Promise<{ success: boolean; paymentId?: string; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_accounting_collect_debt', {
+        p_charge_id: params.chargeId,
+        p_payment_amount: params.amount,
+        p_payment_method: params.paymentMethod,
+        p_receipt_code: params.receiptCode || null,
+        p_notes: params.notes || null
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { 
+        success: true, 
+        paymentId: (data as any)?.payment_id 
+      };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
   }
 }
 
