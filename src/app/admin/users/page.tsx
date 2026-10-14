@@ -391,7 +391,7 @@ export default function UsersAndRbacAdminPage() {
           role_name: roleMeta?.name,
           department_code: formDepartmentCode,
           department_name: roleMeta?.deptName,
-          yard_id: formRoleCode === 'SYS_ADMIN' ? undefined : '20000000-0000-0000-0000-000000000001',
+          yard_id: undefined, // Để cơ sở dữ liệu Supabase tự động gán ID bãi thực tế (app_yards)
           yard_name: formYardName,
           is_active: formIsActive,
           notes: formNotes.trim() || undefined,
@@ -413,7 +413,7 @@ export default function UsersAndRbacAdminPage() {
           role_name: roleMeta?.name,
           department_code: formDepartmentCode,
           department_name: roleMeta?.deptName,
-          yard_id: formRoleCode === 'SYS_ADMIN' ? undefined : '20000000-0000-0000-0000-000000000001',
+          yard_id: undefined,
           yard_name: formYardName,
           is_active: formIsActive,
           notes: formNotes.trim() || undefined,

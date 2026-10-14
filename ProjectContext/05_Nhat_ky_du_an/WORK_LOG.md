@@ -1,5 +1,30 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 14:40 — Khắc Phục Lỗi Foreign Key Khi Tạo Nhân Sự Mới & Cập Nhật Giao Diện
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"sao ui báo thêm thành công anninh.talunglogistics@gmail.com rồi mà k thấy trong ds?"*
+- **Nguyên nhân gốc rễ (Root Cause Analysis):**
+  1. *Lỗi Khóa Ngoại Foreign Key (`yard_id`):*
+     - Trong `src/app/admin/users/page.tsx`, khi bấm "Thêm nhân viên", code truyền hardcode `yard_id = '20000000-0000-0000-0000-000000000001'`.
+     - Tuy nhiên, trong cơ sở dữ liệu Supabase Cloud thật (`app_yards`), bãi duy nhất có ID thật là `fe83bb2b-833e-412c-aed4-b9a781a6decd`.
+     - PostgreSQL báo lỗi `23503: insert or update on table "app_staff_users" violates foreign key constraint "app_staff_users_yard_id_fkey"`.
+  2. *Lỗi nuốt ngoại lệ (Silent Fallback):*
+     - Trong `src/lib/services/supabase-repository.ts`, hàm `createStaffUser` khi gặp lỗi RPC từ Supabase đã vô tình rơi vào khối `// Fallback LocalStorage` và trả về `{ success: true, user: fallbackUser }`.
+     - Do đó, UI thông báo thành công xanh, nhưng dữ liệu chưa được ghi vào Supabase Database thật. Khi gọi `loadStaffUsers()`, hàm đọc từ Supabase thật không thấy bản ghi mới nên danh sách không hiện nhân viên vừa thêm.
+- **Giải pháp xử lý triệt để:**
+  1. *Loại bỏ hardcode ID bãi giả lập:*
+     - Cập nhật `src/app/admin/users/page.tsx`: truyền `yard_id: undefined` khi tạo/sửa nhân viên, để RPC PostgreSQL `sc_upsert_staff_user` tự động fallback gán đúng ID bãi thực tế từ `app_yards` (`fe83bb2b-833e-412c-aed4-b9a781a6decd`).
+     - Đồng bộ `DEFAULT_YARD_ID` trong `src/contexts/auth-context.tsx`, `vehicle-duplicate/page.tsx`, `yard/page.tsx` và `demo-repository.ts` sang ID bãi thực tế.
+  2. *Báo lỗi minh bạch, loại bỏ fake success:*
+     - Sửa các hàm `createStaffUser`, `updateStaffUser`, `toggleStaffUserStatus`, `deleteStaffUser` trong `src/lib/services/supabase-repository.ts`: khi RPC gặp lỗi từ Supabase sẽ trả về `{ success: false, error: ... }`, không nuốt lỗi.
+  3. *Đồng bộ tài khoản `anninh.talunglogistics@gmail.com`:*
+     - Đã ghi nhận tài khoản `anninh.talunglogistics@gmail.com` (vai trò `SEC_STAFF`, phòng ban `AN_NINH`) vào bảng `public.app_staff_users` trên Supabase Cloud DEV.
+- **Kiểm thử & Xác minh:**
+  - `npx tsc --noEmit`: 0 lỗi.
+  - `npm run build`: Thành công 20/20 routes.
+  - Truy vấn Supabase: `public.app_staff_users` hiển thị đầy đủ 2 tài khoản: Super Admin và `anninh.talunglogistics@gmail.com`.
+- **Trạng thái:** Đã khắc phục triệt để.
+
 ## 2026-10-14 12:40 — Dọn Dẹp Toàn Bộ Nhân Sự Tạm, Chỉ Giữ Lại Duy Nhất Tài Khoản Super Admin
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án: *"xóa hết đi bạn ạ, chỉ giữ lại tôi super admin nhé để tooi tạo tk cho mng"*

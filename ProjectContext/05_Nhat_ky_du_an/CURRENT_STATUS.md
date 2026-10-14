@@ -40,8 +40,15 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 12:40 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN TẤT DỌN DẸP SẠCH TOÀN BỘ NHÂN SỰ TẠM — CHỈ GIỮ LẠI DUY NHẤT SUPER ADMIN TRÊN SUPABASE CLOUD**:
+- **Cập nhật lúc:** 14/10/2026 14:40 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐÃ KHẮC PHỤC TRIỆT ĐỂ LỖI FOREIGN KEY (YARD_ID) KHI TẠO NHÂN SỰ MỚI VÀ ĐỒNG BỘ DỮ LIỆU SUPABASE**:
+  * Đã sửa lỗi khóa ngoại `app_staff_users_yard_id_fkey` do form truyền nhầm ID giả lập cũ (`20000000-0000-0000-0000-000000000001`). Nay đã chuyển sang tự động nhận ID bãi thực tế từ `app_yards` (`fe83bb2b-833e-412c-aed4-b9a781a6decd`).
+  * Loại bỏ cơ chế nuốt lỗi (silent fallback) trong `supabase-repository.ts` để đảm bảo UI báo lỗi chân thực nếu có sự cố máy chủ.
+  * Đã lưu thành công tài khoản **`anninh.talunglogistics@gmail.com`** (vai trò: `SEC_STAFF` - An ninh Cổng) vào cơ sở dữ liệu Supabase Cloud `public.app_staff_users`.
+  * `app_staff_users` hiện có 2 nhân sự hoạt động: Super Admin và `anninh.talunglogistics@gmail.com`.
+  * `npm run build` vượt qua 20/20 routes.
+
+- **Mốc trước đó (14/10/2026 12:40):** **HOÀN TẤT DỌN DẸP SẠCH TOÀN BỘ NHÂN SỰ TẠM — CHỈ GIỮ LẠI DUY NHẤT SUPER ADMIN TRÊN SUPABASE CLOUD**:
   * Theo chỉ đạo của Chủ dự án: *"xóa hết đi bạn ạ, chỉ giữ lại tôi super admin nhé để tooi tạo tk cho mng"*
   * `auth.users`: Giữ lại **DUY NHẤT 1 tài khoản Super Admin** (`sys_admin_uat@example.com`, ID: `a4dbb64f-a8be-4fa1-995c-4e50423c840f`). Đã xóa toàn bộ 6 tài khoản UAT test (`sec_staff_uat`, `sec_lead_uat`, `cckb_staff_uat`, `cckb_lead_uat`, `dis_staff_uat`, `dis_lead_uat`).
   * `app_user_role_assignments`: Giữ lại duy nhất 1 bản ghi gán vai trò `SYS_ADMIN` toàn quyền cho Super Admin (`is_active: true`). Đã xóa toàn bộ các phân quyền thử nghiệm khác.

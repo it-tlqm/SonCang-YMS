@@ -2850,18 +2850,24 @@ export class SupabaseRepository implements IYardRepository {
 
     try {
       const supabase = createClient();
+      const validYardId = (user.yard_id && user.yard_id !== '20000000-0000-0000-0000-000000000001') ? user.yard_id : null;
       const { data, error } = await (supabase.rpc as any)('sc_upsert_staff_user', {
         p_full_name: fullName,
         p_email: email,
         p_phone: user.phone?.trim() || null,
         p_role_code: user.role_code || 'SEC_STAFF',
         p_department_code: user.department_code || 'AN_NINH',
-        p_yard_id: user.yard_id || null,
+        p_yard_id: validYardId,
         p_is_active: user.is_active !== undefined ? user.is_active : true,
         p_notes: user.notes?.trim() || null,
       });
 
-      if (!error && data && (data as any).success) {
+      if (error) {
+        console.error('Lỗi RPC sc_upsert_staff_user:', error);
+        return { success: false, error: `Lỗi lưu vào Supabase: ${error.message || error.details || 'Không thể tạo nhân sự'}` };
+      }
+
+      if (data && (data as any).success) {
         const newUser = (data as any).user as StaffUser;
         if (typeof window !== 'undefined') {
           const saved = localStorage.getItem('soncang_v5_staff_users');
@@ -2871,41 +2877,19 @@ export class SupabaseRepository implements IYardRepository {
         }
         return { success: true, user: newUser };
       }
-    } catch {
-      // Fallback
+
+      return { success: false, error: (data as any)?.error || 'Không thể tạo nhân sự trên Supabase' };
+    } catch (err: any) {
+      console.error('Lỗi ngoại lệ createStaffUser:', err);
+      return { success: false, error: err?.message || 'Lỗi kết nối khi tạo nhân sự' };
     }
-
-    // Fallback LocalStorage
-    const fallbackUser: StaffUser = {
-      id: user.id || `staff-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      full_name: fullName,
-      email: email,
-      phone: user.phone?.trim() || null,
-      role_code: user.role_code || 'SEC_STAFF',
-      role_name: user.role_name || `Vai trò ${user.role_code || 'SEC_STAFF'}`,
-      department_code: user.department_code || 'AN_NINH',
-      department_name: user.department_name || 'Bộ phận An ninh & Bảo vệ',
-      yard_id: user.yard_id || '20000000-0000-0000-0000-000000000001',
-      yard_name: user.yard_name || 'Bãi Sơn Cảng',
-      is_active: user.is_active !== undefined ? user.is_active : true,
-      notes: user.notes?.trim() || null,
-      created_at: new Date().toISOString()
-    };
-
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('soncang_v5_staff_users');
-      const list: StaffUser[] = saved ? JSON.parse(saved) : [...INITIAL_DEMO_STAFF_USERS];
-      list.unshift(fallbackUser);
-      localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
-    }
-
-    return { success: true, user: fallbackUser };
   }
 
   /** Cập nhật thông tin nhân sự / đổi vai trò / đổi bộ phận */
   async updateStaffUser(user: Partial<StaffUser> & { id: string }): Promise<{ success: boolean; user?: StaffUser; error?: string }> {
     try {
       const supabase = createClient();
+      const validYardId = (user.yard_id && user.yard_id !== '20000000-0000-0000-0000-000000000001') ? user.yard_id : null;
       const { data, error } = await (supabase.rpc as any)('sc_upsert_staff_user', {
         p_id: user.id,
         p_full_name: user.full_name?.trim() || '',
@@ -2913,12 +2897,17 @@ export class SupabaseRepository implements IYardRepository {
         p_phone: user.phone?.trim() || null,
         p_role_code: user.role_code || 'SEC_STAFF',
         p_department_code: user.department_code || 'AN_NINH',
-        p_yard_id: user.yard_id || null,
+        p_yard_id: validYardId,
         p_is_active: user.is_active !== undefined ? user.is_active : true,
         p_notes: user.notes?.trim() || null,
       });
 
-      if (!error && data && (data as any).success) {
+      if (error) {
+        console.error('Lỗi RPC updateStaffUser:', error);
+        return { success: false, error: `Lỗi cập nhật Supabase: ${error.message || error.details}` };
+      }
+
+      if (data && (data as any).success) {
         const updated = (data as any).user as StaffUser;
         if (typeof window !== 'undefined') {
           const saved = localStorage.getItem('soncang_v5_staff_users');
@@ -2933,84 +2922,81 @@ export class SupabaseRepository implements IYardRepository {
         }
         return { success: true, user: updated };
       }
-    } catch {
-      // Fallback
-    }
 
-    // Fallback LocalStorage
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('soncang_v5_staff_users');
-      if (saved) {
-        const list: StaffUser[] = JSON.parse(saved);
-        const idx = list.findIndex(u => u.id === user.id);
-        if (idx !== -1) {
-          list[idx] = {
-            ...list[idx],
-            full_name: user.full_name !== undefined ? user.full_name.trim() : list[idx].full_name,
-            email: user.email !== undefined ? user.email.trim().toLowerCase() : list[idx].email,
-            phone: user.phone !== undefined ? user.phone : list[idx].phone,
-            role_code: user.role_code || list[idx].role_code,
-            department_code: user.department_code || list[idx].department_code,
-            yard_id: user.yard_id !== undefined ? user.yard_id : list[idx].yard_id,
-            is_active: user.is_active !== undefined ? user.is_active : list[idx].is_active,
-            notes: user.notes !== undefined ? user.notes : list[idx].notes,
-            updated_at: new Date().toISOString()
-          };
-          localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
-          return { success: true, user: list[idx] };
-        }
-      }
+      return { success: false, error: (data as any)?.error || 'Không thể cập nhật nhân sự trên Supabase' };
+    } catch (err: any) {
+      console.error('Lỗi ngoại lệ updateStaffUser:', err);
+      return { success: false, error: err?.message || 'Lỗi kết nối khi cập nhật nhân sự' };
     }
-    return { success: false, error: 'Không tìm thấy nhân viên cần sửa' };
   }
 
   /** Khóa hoặc Mở khóa tài khoản nhân sự */
   async toggleStaffUserStatus(id: string, isActive: boolean): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      await (supabase.rpc as any)('sc_toggle_staff_user', {
+      const { data, error } = await (supabase.rpc as any)('sc_toggle_staff_user', {
         p_id: id,
         p_is_active: isActive,
       });
-    } catch {
-      // Fallback
-    }
 
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('soncang_v5_staff_users');
-      if (saved) {
-        const list: StaffUser[] = JSON.parse(saved);
-        const idx = list.findIndex(u => u.id === id);
-        if (idx !== -1) {
-          list[idx].is_active = isActive;
-          list[idx].updated_at = new Date().toISOString();
-          localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
-        }
+      if (error) {
+        console.error('Lỗi RPC sc_toggle_staff_user:', error);
+        return { success: false, error: `Lỗi cập nhật trạng thái: ${error.message || error.details}` };
       }
+
+      if (data && (data as any).success) {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_staff_users');
+          if (saved) {
+            const list: StaffUser[] = JSON.parse(saved);
+            const idx = list.findIndex(u => u.id === id);
+            if (idx !== -1) {
+              list[idx].is_active = isActive;
+              list[idx].updated_at = new Date().toISOString();
+              localStorage.setItem('soncang_v5_staff_users', JSON.stringify(list));
+            }
+          }
+        }
+        return { success: true };
+      }
+
+      return { success: false, error: (data as any)?.error || 'Không thể đổi trạng thái tài khoản' };
+    } catch (err: any) {
+      console.error('Lỗi ngoại lệ toggleStaffUserStatus:', err);
+      return { success: false, error: err?.message || 'Lỗi kết nối máy chủ' };
     }
-    return { success: true };
   }
 
   /** Xóa nhân sự / tài khoản khỏi hệ thống */
   async deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createClient();
-      await (supabase.rpc as any)('sc_delete_staff_user', {
+      const { data, error } = await (supabase.rpc as any)('sc_delete_staff_user', {
         p_id: id,
       });
-    } catch {
-      // Fallback
-    }
 
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('soncang_v5_staff_users');
-      if (saved) {
-        const list: StaffUser[] = JSON.parse(saved);
-        const filtered = list.filter(u => u.id !== id);
-        localStorage.setItem('soncang_v5_staff_users', JSON.stringify(filtered));
+      if (error) {
+        console.error('Lỗi RPC sc_delete_staff_user:', error);
+        return { success: false, error: `Lỗi xóa nhân sự: ${error.message || error.details}` };
       }
+
+      if (data && (data as any).success) {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('soncang_v5_staff_users');
+          if (saved) {
+            const list: StaffUser[] = JSON.parse(saved);
+            const filtered = list.filter(u => u.id !== id);
+            localStorage.setItem('soncang_v5_staff_users', JSON.stringify(filtered));
+          }
+        }
+        return { success: true };
+      }
+
+      return { success: false, error: (data as any)?.error || 'Không thể xóa nhân sự' };
+    } catch (err: any) {
+      console.error('Lỗi ngoại lệ deleteStaffUser:', err);
+      return { success: false, error: err?.message || 'Lỗi kết nối máy chủ' };
     }
-    return { success: true };
   }
 
   /** Admin / Trưởng ca đặt lại mật khẩu cho nhân sự (lưu vết audit) */

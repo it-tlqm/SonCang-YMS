@@ -499,7 +499,7 @@ export default function YardMonitorPage() {
 
     try {
       const res = await repository.createContainerEntry({
-        yardId: yardId || '20000000-0000-0000-0000-000000000001',
+        yardId: yardId || 'fe83bb2b-833e-412c-aed4-b9a781a6decd',
         containerNo: cleanNo,
         containerSize: singleContSize,
         containerType: singleContType,

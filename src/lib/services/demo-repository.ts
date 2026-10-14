@@ -2206,7 +2206,7 @@ export class DemoRepository implements IYardRepository {
       role_name: user.role_name || `Vai trò ${user.role_code || 'SEC_STAFF'}`,
       department_code: user.department_code || 'AN_NINH',
       department_name: user.department_name || 'Bộ phận An ninh & Bảo vệ',
-      yard_id: user.yard_id || '20000000-0000-0000-0000-000000000001',
+      yard_id: user.yard_id || 'fe83bb2b-833e-412c-aed4-b9a781a6decd',
       yard_name: user.yard_name || 'Bãi Sơn Cảng',
       is_active: user.is_active !== undefined ? user.is_active : true,
       notes: user.notes?.trim() || null,

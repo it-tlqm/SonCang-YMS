@@ -123,7 +123,7 @@ export default function VehicleDuplicateAdminPage() {
 
     try {
       const res = await repository.updateVehicleDuplicatePolicy({
-        yard_id: yardId || '20000000-0000-0000-0000-000000000001',
+        yard_id: yardId || 'fe83bb2b-833e-412c-aed4-b9a781a6decd',
         policy_mode: policyMode,
         cooldown_minutes: Number(cooldownMinutes) || 0,
         cooldown_action: cooldownAction,

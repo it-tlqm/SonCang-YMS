@@ -22,8 +22,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const DEFAULT_YARD_ID = '20000000-0000-0000-0000-000000000001';
-const DEFAULT_YARD_NAME = 'Bãi 1 — Cảng cạn Sơn Cảng';
+const DEFAULT_YARD_ID = 'fe83bb2b-833e-412c-aed4-b9a781a6decd';
+const DEFAULT_YARD_NAME = 'Bãi Sơn Cảng';
 
 // Cờ cho phép Demo Mode: Mặc định LUÔN BẬT trong giai đoạn vận hành thử nghiệm / UAT của Sơn Cảng
 // Cho phép nhân viên và ca trưởng đăng nhập 1 chạm theo vai trò kiểm thử quy trình
