@@ -1,5 +1,46 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 07:50 — Nâng Cấp Triệt Để Các Điểm Lưu Tạm & Hoàn Thiện Kiểm Soát 30 Giắc Cắm Điện 380V (Migration 23)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: "Còn chỗ nào bịa nữa không nâng cấp luôn đi" & yêu cầu về kiểm soát giắc cắm của container và mở tạo sửa xóa phân khu bãi.
+- **Rà soát & Phát hiện các điểm lưu tạm (mock / local storage / RPC chặn):**
+  1. *Phân khu bãi (Yard Zones):* Trước đây chỉ lưu vào `localStorage.getItem('soncang_v5_yard_zones')`, chưa có bảng cơ sở dữ liệu trên Supabase Cloud.
+  2. *Kiểm soát giắc cắm điện của container:* Chỉ có cờ boolean `is_plugged: true/false`, chưa có trường quản lý giắc cắm/ổ cắm (Socket Code), nhân viên không biết container đang cắm vào giắc số mấy trong 30 trụ điện 380V của Khu A, và không xem được giắc nào đang bận / giắc nào đang trống.
+  3. *Lịch sử sửa biển số xe:* Được lưu tạm vào `localStorage.getItem('soncang_v5_plate_changes_...')`, trong khi sửa số container thì đã có bảng database thật.
+  4. *Cập nhật biểu phí:* Hàm `updateTariff` gọi direct `.update()` trên bảng `app_tariffs` bị RLS chặn (vì bảng bị REVOKE UPDATE), khiến giá không lưu được vào máy chủ.
+- **Tập tin sửa đổi & Triển khai nâng cấp:**
+  - `supabase/migrations/20261014000023_yard_zones_plug_sockets_and_tariffs.sql` (Migration 23):
+    * Tạo bảng `public.app_yard_zones` (code, yard_id, name, description, capacity, has_power_outlets, power_outlets_count, color_badge) kèm RLS và seed 4 phân khu chuẩn.
+    * Bổ sung cột `plug_socket_code` (text) vào 3 bảng: `app_container_visits`, `app_reefer_power_sessions`, `app_reefer_requests`.
+    * Tạo bảng `public.app_vehicle_plate_changes` lưu lịch sử sửa biển số xe bất biến kèm RLS.
+    * Cung cấp RPC `public.sc_update_tariff(p_code, p_amount, p_reason)` với cờ `SECURITY DEFINER` kiểm tra quyền `admin.billing_settings.manage`, cập nhật giá và ghi audit log `sc_log_audit_event`.
+    * Đã chạy `npx supabase db push` thành công 100% lên Supabase Cloud (`Finished supabase db push`).
+  - `src/types/domain.types.ts`:
+    * Bổ sung `plug_socket_code?: string | null` vào `ContainerVisit`, `ReeferRequest`, `ReeferPowerSession`.
+    * Bổ sung `power_outlets_count?: number` và `description?: string | null` vào `YardZoneInfo`.
+  - `src/lib/services/repository-interface.ts`:
+    * Cập nhật `PlugInReeferParams`, `RecordCompletedReeferSessionParams`, `UpdateReeferRequestParams`, `createReeferRequest` nhận tham số `plugSocketCode`.
+  - `src/lib/services/supabase-repository.ts`:
+    * `getYardZones()`, `createYardZone()`, `updateYardZone()`, `deleteYardZone()`: Đọc và ghi trực tiếp bảng `app_yard_zones` trên Supabase Cloud.
+    * `getVehiclePlateChanges()`, `correctVehiclePlate()`: Lưu và truy vấn lịch sử sửa biển số từ bảng thật `app_vehicle_plate_changes`.
+    * `updateTariff()`: Chuyển sang gọi RPC `sc_update_tariff`.
+    * `plugInReefer()`: Tự động lưu `plug_socket_code` vào phiên điện và container, cập nhật `yard_zone = 'KHU_A_REEFER'`.
+    * `unplugReefer()`: Tự động giải phóng `plug_socket_code = null` và `is_plugged = false` cho container.
+    * `getContainers()`, `getReeferSessions()`: Map đầy đủ `plug_socket_code`, `yard_zone`, `slot_code`.
+  - `src/lib/services/demo-repository.ts`:
+    * Đồng bộ toàn bộ logic giắc cắm và phân khu cho môi trường demo / offline.
+  - `src/app/reefer/page.tsx`:
+    * Modal Cắm điện: Tích hợp ô chọn **Vị trí Trụ / Giắc cắm điện 380V (Khu A)** (từ R01 đến R30), tự động nhận diện và khóa các giắc đang bận, tự động gợi ý giắc trống đầu tiên.
+    * Bảng phiên cắm điện: Hiển thị badge `⚡ Trụ: Rxx` trực quan bên cạnh số container.
+  - `src/app/yard/page.tsx`:
+    * Tab Phân khu (`zones`): Bổ sung **BẢNG ĐIỀU KHIỂN & KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V (KHU A REEFER)** dạng lưới thời gian thực.
+    * Hiển thị trực quan từng trụ điện: Màu cam `⚡ Đang cắm` (kèm số cont, xe chở, quy cách) hoặc màu xanh lá `✓ Trống (380V)`.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Exit code 0, đã áp dụng thành công Migration 23 lên Supabase Cloud.
+  - `npm run build`: Exit code 0, Turbopack tối ưu 18/18 static routes, TypeScript pass 100% không lỗi.
+  - Mã nguồn đã được commit và push lên `origin/main` (commit `687b271`).
+- **Trạng thái:** Hoàn tất nâng cấp. Toàn bộ các chức năng phân khu, giắc cắm điện, sửa biển số xe và biểu phí đều chạy trên Database thật và RPC máy chủ an toàn.
+
 ## 2026-10-13 23:30 — Rà Soát Toàn Diện Tính Xác Thực & Độc Lập Kỹ Thuật (Audit Verification)
 
 - **Yêu cầu / nguồn:** Chủ dự án yêu cầu rà soát, kiểm chứng toàn diện xem các chức năng vừa phát triển (Thu vé cổng qua RPC, Quản trị khách hàng CRUD và Quản trị nhân sự động) có thực sự chạy được trên hệ thống thật hay chỉ là mô phỏng/bịa ("xây dựng ảo").

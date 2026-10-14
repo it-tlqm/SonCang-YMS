@@ -40,11 +40,13 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 13/10/2026 23:30 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **RÀ SOÁT TOÀN DIỆN TÍNH XÁC THỰC KỸ THUẬT & KIỂM CHỨNG HỆ THỐNG THẬT (AUDIT VERIFICATION)**:
-  * **Build verification:** `npm run build` hoàn thành 100% không lỗi (18/18 routes), đã tối ưu arbitary CSS `z-[60]` trong combobox.
-  * **Database & RPC verification:** Migration 21 (`sc_collect_vehicle_ticket`) và Migration 22 (`app_customers`, `app_staff_users`, `sc_upsert_staff_user`...) đã được đẩy lên Supabase Cloud thành công. Quyền hạn, RLS và sổ cái thanh toán được kích hoạt đầy đủ.
-  * **Quản trị Khách hàng & Nhân sự:** Hoạt động thực tế trên bảng database và RPC, loại bỏ dữ liệu fix cứng.
+- **Cập nhật lúc:** 14/10/2026 07:50 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **NÂNG CẤP TRIỆT ĐỂ BẢNG PHÂN KHU DB THẬT, KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V & CẬP NHẬT BIỂU PHÍ (MIGRATION 23)**:
+  * **Phân khu bãi (Yard Zones):** Tạo bảng thực tế `public.app_yard_zones` trên Supabase Cloud thay thế hoàn toàn localStorage. Hỗ trợ CRUD phân khu đầy đủ.
+  * **Kiểm soát giắc cắm điện:** Bổ sung cột `plug_socket_code` (R01 - R30) vào container và phiên điện. Cung cấp bộ chọn thông minh tại Modal Cắm điện (tự động nhận diện bận/trống) và bảng lưới kiểm soát 30 giắc cắm 380V trực quan thời gian thực tại tab Phân khu trang `/yard`.
+  * **Sửa biển số xe:** Lưu lịch sử vào bảng thực tế `public.app_vehicle_plate_changes` trên DB.
+  * **Cập nhật biểu phí:** Triển khai RPC `sc_update_tariff` giải quyết dứt điểm lỗi bị RLS chặn ghi khi chỉnh sửa đơn giá.
+  * **Xác minh:** `npx supabase db push` thành công 100%, `npm run build` exit code 0 không lỗi (18/18 routes).
   * **1. Quản lý Khách hàng / Chủ hàng:**
     - Khắc phục triệt để tình trạng "thêm nhầm không sửa được":
       + Cập nhật component `CustomerCombobox`: Mỗi dòng khách hàng có nút cây bút `✏️ Sửa`, mở Modal Sửa thông tin tức thì (Tên, SĐT, MST, Ghi chú, Trạng thái, và nút Xóa). Khi lưu, tự động cập nhật ngay trên form đang nhập mà không cần tải lại trang.
