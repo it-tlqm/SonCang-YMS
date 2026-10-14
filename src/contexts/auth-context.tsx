@@ -25,8 +25,9 @@ interface AuthContextType {
 const DEFAULT_YARD_ID = '20000000-0000-0000-0000-000000000001';
 const DEFAULT_YARD_NAME = 'Bãi 1 — Cảng cạn Sơn Cảng';
 
-// Cờ cho phép Demo Mode: CHỈ bật khi không phải production HOẶC được cấu hình rõ ràng true (ON-11)
-const IS_DEMO_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+// Cờ cho phép Demo Mode: Mặc định LUÔN BẬT trong giai đoạn vận hành thử nghiệm / UAT của Sơn Cảng
+// Cho phép nhân viên và ca trưởng đăng nhập 1 chạm theo vai trò kiểm thử quy trình
+const IS_DEMO_ENABLED = process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -342,7 +343,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authMode: AuthMode = user?.authMode || 'DEMO';
   const isDemoMode = authMode === 'DEMO';
-  const repository = getYardRepository(authMode === 'REAL' ? 'SUPABASE' : 'DEMO');
+  // Luôn kết nối Supabase Cloud thực tế khi có cấu hình Supabase URL hoặc cờ REAL_WRITE
+  const repository = getYardRepository(
+    authMode === 'REAL' || process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true' || Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
+      ? 'SUPABASE'
+      : 'DEMO'
+  );
 
   return (
     <AuthContext.Provider

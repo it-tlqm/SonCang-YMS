@@ -4,7 +4,18 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { DEMO_ACCOUNTS, RoleCode } from '@/types/auth.types';
-import { ArrowRight, UserCheck, AlertCircle, ShieldCheck } from 'lucide-react';
+import { 
+  ArrowRight, 
+  UserCheck, 
+  AlertCircle, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Lock, 
+  Mail, 
+  KeyRound, 
+  Sparkles,
+  Database
+} from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,126 +49,205 @@ export default function LoginPage() {
     loginDemo(roleCode);
     if (roleCode === 'SEC_STAFF' || roleCode === 'SEC_LEAD') {
       router.push('/entry');
+    } else if (roleCode === 'PORT_STAFF' || roleCode === 'PORT_LEAD') {
+      router.push('/reefer');
+    } else if (roleCode === 'SYS_ADMIN') {
+      router.push('/dashboard');
     } else {
       router.push('/yard');
     }
   };
 
+  // Màu sắc và nhãn theo từng nhóm vai trò V5
+  const getRoleVisual = (roleCode: RoleCode) => {
+    switch (roleCode) {
+      case 'SEC_STAFF':
+      case 'SEC_LEAD':
+        return {
+          border: 'border-emerald-200 hover:border-emerald-500',
+          bg: 'bg-emerald-50/40 hover:bg-emerald-50',
+          badge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+          tag: 'An ninh Cổng',
+          dot: 'bg-emerald-500',
+        };
+      case 'PORT_STAFF':
+      case 'PORT_LEAD':
+        return {
+          border: 'border-amber-200 hover:border-amber-500',
+          bg: 'bg-amber-50/40 hover:bg-amber-50',
+          badge: 'bg-amber-100 text-amber-800 border-amber-300',
+          tag: 'Thương vụ CCKB',
+          dot: 'bg-amber-500',
+        };
+      case 'DIS_STAFF':
+      case 'DIS_LEAD':
+        return {
+          border: 'border-blue-200 hover:border-blue-500',
+          bg: 'bg-blue-50/40 hover:bg-blue-50',
+          badge: 'bg-blue-100 text-blue-800 border-blue-300',
+          tag: 'Điều phối Bãi',
+          dot: 'bg-blue-500',
+        };
+      case 'SYS_ADMIN':
+      default:
+        return {
+          border: 'border-purple-200 hover:border-purple-500',
+          bg: 'bg-purple-50/40 hover:bg-purple-50',
+          badge: 'bg-purple-100 text-purple-800 border-purple-300',
+          tag: 'Quản trị viên',
+          dot: 'bg-purple-500',
+        };
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F5F8FA] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-[#F5F8FA] flex flex-col justify-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-2xl text-center space-y-1.5">
         {/* Logo & Header */}
         <div className="flex justify-center">
-          <div className="w-14 h-14 rounded bg-[#0A9444] flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
+          <div className="w-14 h-14 rounded-2xl bg-[#0A9444] flex items-center justify-center text-white font-black text-2xl shadow-md border-2 border-emerald-400">
             SC
           </div>
         </div>
-        <h2 className="mt-4 text-center text-2xl font-black tracking-tight text-[#223873]">
-          Quản lý bến bãi Sơn Cảng
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#223873]">
+          Phần mềm Quản lý Bến bãi Sơn Cảng
         </h2>
-        <p className="mt-1 text-center text-xs font-semibold text-slate-500">
-          Công ty Cổ phần Tà Lùng Quang Minh
+        <p className="text-xs font-semibold text-slate-500">
+          Công ty Cổ phần Tà Lùng Quang Minh — Hệ thống Vận hành Cảng cạn & Bến bãi V5
         </p>
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 mt-1">
+          <Database className="w-3 h-3 text-emerald-600" />
+          <span>Kết nối Trực tiếp Supabase Cloud Database (PostgreSQL RLS)</span>
+        </div>
       </div>
 
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md space-y-4">
-        {/* FORM 1: ĐĂNG NHẬP HỆ THỐNG */}
-        <div className="bg-white py-6 px-4 sm:px-8 shadow-sm rounded border border-[#E3E8EF] space-y-5">
-          <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
-            <ShieldCheck className="w-4 h-4 text-blue-700" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
-              Đăng nhập hệ thống vận hành
-            </h3>
+      <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-2xl space-y-4">
+        {/* KHỐI 1: ĐĂNG NHẬP NHANH THEO VAI TRÒ CA TRỰC (1-CHẠM) */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                  Đăng nhập nhanh theo Vai trò Ca trực (1 chạm)
+                </h3>
+                <span className="text-[11px] text-slate-500">
+                  Chọn vị trí làm việc để hệ thống tự động phân quyền chuẩn RBAC V5:
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full shrink-0">
+              UAT / Vận hành
+            </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            {DEMO_ACCOUNTS.map((acc) => {
+              const visual = getRoleVisual(acc.roleCode);
+
+              return (
+                <button
+                  key={acc.roleCode}
+                  type="button"
+                  onClick={() => handleSelectDemo(acc.roleCode)}
+                  className={`flex flex-col text-left p-3 rounded-xl border transition-all cursor-pointer group shadow-2xs ${visual.border} ${visual.bg}`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${visual.dot}`}></span>
+                      <span className="font-bold text-xs text-slate-900 group-hover:text-[#0A9444]">
+                        {acc.roleName}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${visual.badge}`}>
+                      {acc.roleCode}
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] font-semibold text-slate-700 mt-1">
+                    {acc.fullName}
+                  </span>
+
+                  <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1 italic">
+                    {acc.description}
+                  </p>
+
+                  <div className="flex items-center justify-between w-full pt-1.5 mt-1 border-t border-slate-200/50 text-[10px] text-slate-400 group-hover:text-[#0A9444]">
+                    <span>{visual.tag}</span>
+                    <span className="flex items-center gap-0.5 font-bold">
+                      Vào việc ngay <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* KHỐI 2: ĐĂNG NHẬP BẰNG TÀI KHOẢN CÔNG VỤ (EMAIL & MẬT KHẨU) */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3.5">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-700" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Hoặc Đăng nhập bằng Mật khẩu (Supabase Auth)
+              </h3>
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">Bảo mật SSL</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
             {errorMsg && (
-              <div className="p-3 rounded bg-rose-50 border border-rose-200 flex items-start space-x-2 text-xs text-rose-700 font-medium animate-in fade-in">
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start space-x-2 text-xs text-rose-700 font-medium animate-in fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700">Email công vụ</label>
-              <div className="mt-1">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ví dụ: user@soncang.vn"
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent"
-                  required
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email công vụ</label>
+                <div className="relative">
+                  <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ví dụ: sec_gate_01@soncang.vn"
+                    className="block w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent font-mono"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700">Mật khẩu</label>
-              <div className="mt-1">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent"
-                  required
-                />
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
+                <div className="relative">
+                  <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="block w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A9444] focus:border-transparent font-mono"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center py-2.5 px-4 rounded text-xs font-bold text-white bg-[#087C3C] hover:bg-[#0A9444] transition-colors focus:outline-none shadow-xs disabled:opacity-50 cursor-pointer"
+              className="w-full flex justify-center items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] transition-colors focus:outline-none shadow-xs disabled:opacity-50 cursor-pointer"
             >
-              {isSubmitting ? 'Đang xác thực...' : 'Đăng nhập vào hệ thống'}
+              <Lock className="w-3.5 h-3.5" />
+              <span>{isSubmitting ? 'Đang xác thực Supabase...' : 'Đăng nhập bằng Mật khẩu'}</span>
             </button>
           </form>
-
-          <div className="text-[11px] text-slate-400 text-center leading-relaxed pt-1">
-            Đăng nhập theo tài khoản công vụ được cấp. Phân quyền tự động theo vị trí công tác.
-          </div>
         </div>
-
-        {/* FORM 2: KHU VỰC TRẢI NGHIỆM GIAO DIỆN (CHẾ ĐỘ MÔ PHỎNG) */}
-        {isDemoEnabled && (
-          <div className="bg-amber-50/60 p-4 sm:p-5 rounded border border-amber-200/80 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-amber-700" />
-                Chế độ mô phỏng vận hành
-              </span>
-              <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded border border-amber-300">
-                Dùng thử
-              </span>
-            </div>
-            <p className="text-[11px] text-amber-900 leading-relaxed">
-              Dành cho việc trải nghiệm trực quan giao diện theo từng vị trí ca trực. Dữ liệu thử nghiệm an toàn trên thiết bị:
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.roleCode}
-                  type="button"
-                  onClick={() => handleSelectDemo(acc.roleCode)}
-                  className="flex flex-col text-left p-2.5 rounded border border-amber-200 bg-white hover:border-[#0A9444] hover:bg-emerald-50/50 transition-all cursor-pointer group shadow-2xs"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="font-bold text-xs text-slate-900 group-hover:text-[#0A9444]">
-                      {acc.roleName}
-                    </span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-[#0A9444] group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                  <span className="text-[10px] text-slate-500 mt-1 line-clamp-1">
-                    {acc.fullName}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

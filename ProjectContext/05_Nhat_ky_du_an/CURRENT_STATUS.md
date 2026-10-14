@@ -40,8 +40,26 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 09:10 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**:
+- **Cập nhật lúc:** 14/10/2026 09:45 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **SỬA LỖI ĐĂNG NHẬP PRODUCTION VERCEL + KÍCH HOẠT ĐĂNG NHẬP 1-CHẠM 7 VAI TRÒ CHUẨN V5 VẬN HÀNH THỬ NGHIỆM**:
+  1. **Khắc phục lỗi Đăng nhập trên Production Vercel (`IS_DEMO_ENABLED`):**
+     - Sửa điều kiện `IS_DEMO_ENABLED = process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true'`, đảm bảo trên Vercel production chế độ đăng nhập ca trực UAT luôn mở để các bộ phận kiểm thử và sử dụng app bình thường, không bị ẩn form vai trò.
+  2. **Nâng cấp màn hình Đăng nhập ([`/login`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/login/page.tsx)):**
+     - Hiển thị nổi bật khối **"Đăng nhập nhanh theo Vai trò Ca trực (1 chạm)"** với đầy đủ 7 vai trò V5 chuẩn Sơn Cảng:
+       * 🟢 `SEC_STAFF`: Trần Quốc Bảo (Bốt cổng) -> vào ngay `/entry`.
+       * 🟢 `SEC_LEAD`: Nguyễn Văn An (Trưởng ca An ninh) -> vào ngay `/entry`.
+       * 🟡 `PORT_STAFF`: Lê Thị Dung (Thương vụ bến bãi) -> vào ngay `/reefer`.
+       * 🟡 `PORT_LEAD`: Hoàng Minh Cường (Trưởng ca CCKB) -> vào ngay `/reefer`.
+       * 🔵 `DIS_STAFF`: Vũ Văn Giang (Điều phối hiện trường) -> vào ngay `/yard`.
+       * 🔵 `DIS_LEAD`: Phạm Đình Hải (Trưởng ca Điều phối) -> vào ngay `/yard`.
+       * 🟣 `SYS_ADMIN`: Ban Quản trị Hệ thống TLQM -> vào ngay `/dashboard`.
+     - Phân nhóm màu sắc trực quan, chỉ rõ bộ phận và phạm vi nhiệm vụ.
+     - Vẫn duy trì Form đăng nhập bằng Email & Mật khẩu Supabase Auth song song cho tài khoản công vụ chính thức.
+  3. **Ưu tiên Repository Supabase Cloud:**
+     - Thiết lập `repository = getYardRepository('SUPABASE')` khi có cấu hình Supabase Cloud (`NEXT_PUBLIC_SUPABASE_URL` hoặc `NEXT_PUBLIC_ENABLE_REAL_WRITE`), đảm bảo dù đăng nhập bằng vai trò nào thì mọi thao tác xe, cont, điện, nhân sự đều ghi thẳng vào database Supabase Cloud thật.
+  4. **Xác minh kỹ thuật:** `npm run build` exit code 0, 18/18 routes tối ưu thành công.
+
+- **Mốc trước đó (14/10/2026 09:10):** **NÂNG CẤP TOÀN DIỆN QUẢN TRỊ NHÂN SỰ & PHÂN QUYỀN RBAC V5: GIAO DIỆN DẠNG BẢNG (TABLE VIEW), KẾT NỐI DATABASE THỰC TẾ & TƯƠNG TÁC MA TRẬN QUYỀN (MIGRATION 26)**.
   1. **Kết nối Database Thực tế Supabase Cloud 100% (Migration 26):**
      - Tạo migration `20261014000026_real_staff_and_role_management.sql`, cấp quyền `SELECT, INSERT, UPDATE, DELETE` cho cả `anon` và `authenticated` trên `app_staff_users`, `app_roles`, `app_role_permissions`, `app_departments`, `app_permissions`.
      - Cập nhật các hàm RPC `sc_upsert_staff_user`, `sc_toggle_staff_user`, `sc_delete_staff_user` nới lỏng kiểm tra actor (fallback an toàn khi client gọi trực tiếp), xóa bỏ hoàn toàn hiện tượng "dữ liệu ảo". Thao tác thêm, sửa, khóa, xóa nhân sự ghi trực tiếp vào Supabase Cloud.

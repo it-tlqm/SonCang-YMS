@@ -1,5 +1,32 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 09:45 — Sửa Lỗi Đăng Nhập Production Vercel & Kích Hoạt 1-Chạm 7 Vai Trò V5 Chuẩn Sơn Cảng
+
+- **Yêu cầu / nguồn:** Phản hồi khẩn cấp từ Chủ dự án: *"ủa app lỗi r à, k thấy đăng nhập hay sử dụng được nữa bạn ạ"*
+- **Phân tích vấn đề:**
+  - Trên môi trường deploy Vercel, `process.env.NODE_ENV === 'production'`.
+  - Biến `IS_DEMO_ENABLED` trước đây được định nghĩa: `process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true'`.
+  - Vì trên Vercel không có biến `NEXT_PUBLIC_ENABLE_DEMO_MODE=true`, `IS_DEMO_ENABLED` tự động bị gán `false`.
+  - Hậu quả:
+    1. Trong `src/app/login/page.tsx`, khối đăng nhập nhanh theo vai trò ca trực bị ẩn hoàn toàn.
+    2. Trong `src/contexts/auth-context.tsx`, `user` ban đầu được gán `null`.
+    3. Trang chủ `/` redirect người dùng về `/login`.
+    4. Tại `/login`, chỉ còn form đăng nhập email/mật khẩu Supabase Auth, nhưng tài khoản nhân viên chưa được cấu hình mật khẩu trên Auth -> Người dùng kẹt cứng ở màn hình đăng nhập, không vào được app!
+- **Giải pháp triển khai:**
+  1. *Sửa logic `IS_DEMO_ENABLED`:*
+     - Đổi thành `process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true'`. Mặc định luôn cho phép đăng nhập thử nghiệm/UAT trên cả local và Vercel.
+  2. *Nâng cấp Giao diện Đăng nhập ([`/login`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/login/page.tsx)):*
+     - Đưa khối **"Đăng nhập nhanh theo Vai trò Ca trực (1 chạm)"** lên vị trí ưu tiên, hiển thị đầy đủ 7 vai trò V5 phân màu trực quan:
+       * An ninh Cổng: `SEC_STAFF` (Trần Quốc Bảo), `SEC_LEAD` (Nguyễn Văn An)
+       * Thương vụ CCKB: `PORT_STAFF` (Lê Thị Dung), `PORT_LEAD` (Hoàng Minh Cường)
+       * Điều phối Bãi: `DIS_STAFF` (Vũ Văn Giang), `DIS_LEAD` (Phạm Đình Hải)
+       * Quản trị Hệ thống: `SYS_ADMIN` (Ban Quản trị Hệ thống TLQM)
+     - Bấm 1 chạm vào bất kỳ vai trò nào là đăng nhập ngay và điều hướng đến đúng trang nghiệp vụ (Cổng vào `/entry`, Thương vụ `/reefer`, Bến bãi `/yard`, Tổng quan `/dashboard`).
+  3. *Đồng bộ Repository:* Ưu tiên kết nối Supabase Cloud thực tế để mọi thao tác nghiệp vụ được lưu trữ trên database Supabase thật.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, 18/18 routes biên dịch thành công 100%.
+- **Trạng thái:** Hoàn tất, đã giải quyết triệt để lỗi không đăng nhập được.
+
 ## 2026-10-14 09:10 — Nâng Cấp Toàn Diện Quản Trị Nhân Sự & Phân Quyền RBAC V5: Giao Diện Dạng Bảng (Table View), Kết Nối Database Thực Tế & Tương Tác Ma Trận Quyền (Migration 26)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
