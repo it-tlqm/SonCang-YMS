@@ -15,21 +15,25 @@ export default function HomePage() {
         return;
       }
 
-      // Điều hướng theo vai trò nghiệp vụ V5
       switch (role) {
         case 'SEC_STAFF':
         case 'SEC_LEAD':
           router.replace('/entry');
           break;
-        case 'SYS_ADMIN':
+        case 'PORT_STAFF':
         case 'PORT_LEAD':
-          router.replace('/dashboard');
+          router.replace('/reefer');
+          break;
+        case 'ACCOUNTANT':
+          router.replace('/accounting');
           break;
         case 'DIS_STAFF':
         case 'DIS_LEAD':
-        case 'PORT_STAFF':
-        default:
           router.replace('/yard');
+          break;
+        case 'SYS_ADMIN':
+        default:
+          router.replace('/dashboard');
           break;
       }
     }

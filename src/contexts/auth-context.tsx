@@ -18,7 +18,7 @@ interface AuthContextType {
   can: (permissionCode: string) => boolean;
   switchDemoRole: (roleCode: RoleCode) => void;
   loginDemo: (roleCode: RoleCode) => void;
-  loginWithPassword: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithPassword: (email: string, pass: string) => Promise<{ success: boolean; error?: string; roleCode?: RoleCode }>;
   logout: () => Promise<void>;
 }
 
@@ -40,11 +40,12 @@ async function fetchRealUserProfile(
 ): Promise<UserProfile> {
   let resolvedRole: RoleCode | null = null;
   let resolvedRoleName = 'Chưa phân vai trò';
-  let resolvedYardId = '';
-  let resolvedYardName = 'Bãi Sơn Cảng';
+  let resolvedYardId = DEFAULT_YARD_ID;
+  let resolvedYardName = DEFAULT_YARD_NAME;
   let resolvedDepartmentCode: DepartmentCode | null = null;
-  const resolvedDepartmentName = 'Chưa phân bộ phận';
+  let resolvedDepartmentName = 'Chưa phân bộ phận';
   let resolvedPermissions: string[] = [];
+  let resolvedFullName = (authUser.user_metadata?.full_name as string) || '';
 
   try {
     // 1. Tìm bãi Sơn Cảng thực tế làm mặc định hệ thống cho tài khoản
@@ -58,20 +59,9 @@ async function fetchRealUserProfile(
     if (defaultYard) {
       resolvedYardId = defaultYard.id;
       resolvedYardName = defaultYard.name;
-    } else {
-      const { data: firstActiveYard } = await supabase
-        .from('app_yards')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (firstActiveYard) {
-        resolvedYardId = firstActiveYard.id;
-        resolvedYardName = firstActiveYard.name;
-      }
     }
 
+    // 2. Tra cứu phân quyền trong app_user_role_assignments
     const { data: assignments } = await supabase
       .from('app_user_role_assignments')
       .select('role_code, yard_id, department_code, is_active')
@@ -83,47 +73,67 @@ async function fetchRealUserProfile(
       const first = list[0];
       resolvedRole = first.role_code as RoleCode;
       resolvedRoleName = `Vai trò: ${first.role_code}`;
-      
-      // Nếu có yard_id cụ thể trong phân quyền, sử dụng yard_id đó
-      if (first.yard_id) {
-        resolvedYardId = first.yard_id;
-        const { data: specificYard } = await supabase
-          .from('app_yards')
-          .select('name')
-          .eq('id', first.yard_id)
-          .maybeSingle();
-        if (specificYard?.name) {
-          resolvedYardName = specificYard.name;
-        }
-      }
-      // Nếu first.yard_id là null (như SYS_ADMIN phạm vi ALL), resolvedYardId đã được gán là bãi Sơn Cảng thật ở trên
-      
+      if (first.yard_id) resolvedYardId = first.yard_id;
       if (first.department_code) resolvedDepartmentCode = first.department_code as DepartmentCode;
+    }
 
-      // Lấy danh sách quyền thực tế bằng RPC sc_my_permissions() chính thức theo SC-R3-07
-      const { data: permsRpc, error: rpcError } = await supabase.rpc('sc_my_permissions');
-      if (rpcError) {
-        console.error('Lỗi gọi sc_my_permissions:', rpcError);
-        resolvedPermissions = [];
-      } else if (permsRpc && Array.isArray(permsRpc)) {
-        resolvedPermissions = Array.from(
-          new Set(
-            (permsRpc as { permission_code: string }[])
-              .map((p) => p.permission_code)
-              .filter(Boolean)
-          )
-        );
+    // 3. Nếu chưa có vai trò từ assignments, tra cứu trực tiếp trong app_staff_users
+    const cleanEmail = (authUser.email || '').toLowerCase().trim();
+    const { data: staffData } = await supabase
+      .from('app_staff_users')
+      .select('*')
+      .or(`auth_user_id.eq.${authUser.id},email.eq.${cleanEmail}`)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (staffData) {
+      if (!resolvedRole) {
+        resolvedRole = staffData.role_code as RoleCode;
+        resolvedRoleName = `Vai trò: ${staffData.role_code}`;
       }
+      if (!resolvedDepartmentCode && staffData.department_code) {
+        resolvedDepartmentCode = staffData.department_code as DepartmentCode;
+      }
+      if (!resolvedFullName && staffData.full_name) {
+        resolvedFullName = staffData.full_name;
+      }
+      if (staffData.yard_id) {
+        resolvedYardId = staffData.yard_id;
+      }
+    }
+
+    // 4. Lấy danh sách quyền thực tế bằng RPC sc_my_permissions() chính thức theo SC-R3-07
+    const { data: permsRpc, error: rpcError } = await supabase.rpc('sc_my_permissions');
+    if (!rpcError && permsRpc && Array.isArray(permsRpc) && permsRpc.length > 0) {
+      resolvedPermissions = Array.from(
+        new Set(
+          (permsRpc as { permission_code: string }[])
+            .map((p) => p.permission_code)
+            .filter(Boolean)
+        )
+      );
+    } else if (resolvedRole) {
+      // Fallback sang ma trận chuẩn V5
+      resolvedPermissions = ROLE_PERMISSIONS_V5[resolvedRole] || [];
     }
   } catch (assignErr) {
     console.warn('Không thể đọc assignments/permissions từ database:', assignErr);
-    resolvedPermissions = [];
+    if (resolvedRole) {
+      resolvedPermissions = ROLE_PERMISSIONS_V5[resolvedRole] || [];
+    }
   }
+
+  // Tên bộ phận hiển thị
+  if (resolvedDepartmentCode === 'AN_NINH') resolvedDepartmentName = 'Bộ phận An ninh & Bảo vệ';
+  else if (resolvedDepartmentCode === 'CCKB') resolvedDepartmentName = 'Bộ phận Thương vụ & Cảng cạn CCKB';
+  else if (resolvedDepartmentCode === 'DIEU_PHOI') resolvedDepartmentName = 'Bộ phận Điều phối & Hiện trường';
+  else if (resolvedDepartmentCode === 'KE_TOAN') resolvedDepartmentName = 'Bộ phận Kế toán - Tài chính';
+  else if (resolvedDepartmentCode === 'HE_THONG') resolvedDepartmentName = 'Ban Quản trị & Công nghệ';
 
   return {
     id: authUser.id,
     email: authUser.email || '',
-    fullName: (authUser.user_metadata?.full_name as string) || authUser.email?.split('@')[0] || 'Nhân viên',
+    fullName: resolvedFullName || authUser.email?.split('@')[0] || 'Nhân viên',
     roleCode: resolvedRole,
     roleName: resolvedRoleName,
     departmentCode: resolvedDepartmentCode,
@@ -138,23 +148,10 @@ async function fetchRealUserProfile(
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(() => {
     if (typeof window === 'undefined') {
-      const account = DEMO_ACCOUNTS[0];
-      return {
-        id: account.id,
-        email: account.email,
-        fullName: account.fullName,
-        roleCode: account.roleCode,
-        roleName: account.roleName,
-        departmentCode: account.departmentCode,
-        departmentName: account.departmentName,
-        yardId: DEFAULT_YARD_ID,
-        yardName: DEFAULT_YARD_NAME,
-        permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
-        authMode: 'DEMO',
-      };
+      return null;
     }
 
-    const savedMode = (localStorage.getItem('soncang_v5_auth_mode') as AuthMode) || 'DEMO';
+    const savedMode = (localStorage.getItem('soncang_v5_auth_mode') as AuthMode) || (IS_DEMO_ENABLED ? 'DEMO' : 'REAL');
     
     // Nếu ở Demo Mode và Demo Mode được kích hoạt
     if (savedMode === 'DEMO' && IS_DEMO_ENABLED) {
@@ -178,7 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   });
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Khôi phục session thật sau khi tải lại trang và lắng nghe thay đổi session (SC-R3-07)
   useEffect(() => {
@@ -187,29 +184,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       supabase = createClient();
     } catch {
-      // Bỏ qua nếu thiếu biến môi trường trong môi trường build/test tĩnh
+      setIsLoading(false);
       return;
     }
 
     const initAuth = async () => {
-      const savedMode = (localStorage.getItem('soncang_v5_auth_mode') as AuthMode) || 'DEMO';
-      if (savedMode === 'REAL' && supabase) {
-        setIsLoading(true);
-        try {
-          const timeoutSession = new Promise<{ data: { session: null } }>((resolve) =>
-            setTimeout(() => resolve({ data: { session: null } }), 2000)
-          );
-          const { data: { session } } = await Promise.race([
-            supabase.auth.getSession(),
-            timeoutSession,
-          ]);
+      if (!supabase) return;
+      setIsLoading(true);
+      try {
+        const timeoutSession = new Promise<{ data: { session: null } }>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 3000)
+        );
+        const { data: { session } } = await Promise.race([
+          supabase.auth.getSession(),
+          timeoutSession,
+        ]);
 
-          if (session?.user && isMounted) {
-            const profile = await fetchRealUserProfile(supabase, session.user);
-            if (isMounted) setUser(profile);
-          } else if (isMounted) {
-            // Nếu không có session hợp lệ, chuyển về Demo để không bị kẹt
-            localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
+        if (session?.user && isMounted) {
+          const profile = await fetchRealUserProfile(supabase, session.user);
+          if (isMounted) setUser(profile);
+        } else if (isMounted) {
+          if (IS_DEMO_ENABLED) {
             const savedRole = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SEC_STAFF';
             const account = DEMO_ACCOUNTS.find(a => a.roleCode === savedRole) || DEMO_ACCOUNTS[0];
             setUser({
@@ -225,11 +220,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
               authMode: 'DEMO',
             });
+          } else {
+            setUser(null);
           }
-        } catch (err) {
-          console.error('Lỗi khôi phục session thật:', err);
-          if (isMounted) {
-            localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
+        }
+      } catch (err) {
+        console.error('Lỗi khôi phục session thật:', err);
+        if (isMounted) {
+          if (IS_DEMO_ENABLED) {
             const account = DEMO_ACCOUNTS[0];
             setUser({
               id: account.id,
@@ -244,23 +242,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
               authMode: 'DEMO',
             });
+          } else {
+            setUser(null);
           }
-        } finally {
-          if (isMounted) setIsLoading(false);
         }
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const savedMode = localStorage.getItem('soncang_v5_auth_mode');
-      if (savedMode === 'REAL' && supabase) {
-        if (event === 'SIGNED_OUT' || !session) {
-          if (isMounted) setUser(null);
-        } else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session.user) {
+      if (event === 'SIGNED_OUT' || !session) {
+        if (isMounted) {
+          setUser(null);
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('soncang_v5_auth_mode');
+            localStorage.removeItem('soncang_v5_demo_role');
+          }
+        }
+      } else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session.user) {
+        if (supabase) {
           const profile = await fetchRealUserProfile(supabase, session.user);
-          if (isMounted) setUser(profile);
+          if (isMounted) {
+            setUser(profile);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('soncang_v5_auth_mode', 'REAL');
+            }
+          }
         }
       }
     });
@@ -322,7 +332,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * TUYỆT ĐỐI KHÔNG FALLBACK bypass mật khẩu sang tài khoản Demo!
    * Tải roles và permissions từ Backend V5 thật qua RPC sc_my_permissions().
    */
-  const loginWithPassword = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
+  const loginWithPassword = async (email: string, pass: string): Promise<{ success: boolean; error?: string; roleCode?: RoleCode }> => {
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -348,7 +358,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('soncang_v5_demo_role');
       }
       setIsLoading(false);
-      return { success: true };
+      return { success: true, roleCode: realUser.roleCode || undefined };
     } catch (err: unknown) {
       setIsLoading(false);
       const msg = err instanceof Error ? err.message : 'Lỗi kết nối máy chủ Supabase';

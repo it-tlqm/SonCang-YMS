@@ -1,5 +1,41 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 18:15 — Chuyển Đổi Sang Supabase Auth Thực Tế & Loại Bỏ Hoàn Toàn Tài Khoản Tạm Tại Màn Hình Đăng Nhập
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"bỏ các tk tạm ở phần đăng nhạp đi check rõ luồng đăng nhạp đăn xuất, xem lại đúng tk cho tôi tại 1 tk admin it@talunglogistics.com SC"*
+- **Phân tích yêu cầu & Thiết kế giải pháp:**
+  1. *Loại bỏ toàn bộ các nút đăng nhập tạm (1-chạm) trên `/login`:*
+     - Loại bỏ hoàn toàn container `KHỐI 1: ĐĂNG NHẬP NHANH THEO VAI TRÒ CA TRỰC (1-CHẠM)`.
+     - Loại bỏ toàn bộ danh sách `DEMO_ACCOUNTS` khỏi màn hình đăng nhập.
+     - Thiết kế lại trang đăng nhập `/login` thành một giao diện đăng nhập bảo mật doanh nghiệp duy nhất, nhận Email công vụ và Mật khẩu, kết nối trực tiếp Supabase Cloud PostgreSQL RLS.
+  2. *Thiết lập tài khoản Super Admin chính thức (`it@talunglogistics.com`):*
+     - Tạo user trong `auth.users` với email: `it@talunglogistics.com`, mật khẩu: `SonCang@2026!IT` (User ID: `43c984eb-096b-4efb-a99f-76fefbd79635`).
+     - Gắn nhân sự trong `app_staff_users`: Full Name: `Ban Quản trị Hệ thống (IT Admin)`, vai trò `SYS_ADMIN`, bộ phận `HE_THONG`.
+     - Gắn phân quyền trong `app_user_role_assignments`: vai trò `SYS_ADMIN`, `is_active: true`.
+     - Xác thực đăng nhập qua Supabase Auth: Đạt 200 OK, cấp đầy đủ 63 permissions V5 qua RPC `sc_my_permissions()`.
+  3. *Thiết lập tài khoản An ninh Bốt Cổng (`anninh.talunglogistics@gmail.com`):*
+     - Khắc phục lỗi "Invalid login credentials": Do tài khoản trước đó mới chỉ tồn tại ở bảng `app_staff_users` mà chưa có bản ghi trong `auth.users`.
+     - Tạo bản ghi trong `auth.users` với email: `anninh.talunglogistics@gmail.com`, mật khẩu: `AnNinh@2026!SC` (User ID: `ffdbbd4d-4939-4594-901d-c0c30d162594`).
+     - Cập nhật liên kết `auth_user_id` trong `app_staff_users` và gán vai trò `SEC_STAFF` trong `app_user_role_assignments`.
+     - Xác thực đăng nhập qua Supabase Auth: Đạt 200 OK, cấp 26 permissions An ninh Cổng.
+  4. *Dọn dẹp tài khoản tạm:*
+     - Xóa triệt để tài khoản tạm `sys_admin_uat@example.com` khỏi `auth.users`, `app_staff_users`, và `app_user_role_assignments`.
+     - Thiết lập cờ môi trường `NEXT_PUBLIC_DISABLE_DEMO_MODE=true` trong `.env.local`.
+  5. *Củng cố luồng Điều hướng & Đăng xuất:*
+     - Cập nhật `loginWithPassword` trả về `roleCode` của tài khoản sau khi xác thực để `/login` tự động điều hướng đúng phân hệ:
+       * `SEC_STAFF` / `SEC_LEAD` -> `/entry` (Bốt cổng)
+       * `PORT_STAFF` / `PORT_LEAD` -> `/reefer` (Thương vụ cắm điện cont)
+       * `DIS_STAFF` / `DIS_LEAD` -> `/yard` (Điều phối bãi)
+       * `ACCOUNTANT` -> `/accounting` (Kế toán bến bãi)
+       * `SYS_ADMIN` -> `/dashboard` (Quản trị hệ thống)
+     - Cập nhật `AppShell`: Chặn người dùng chưa đăng nhập truy cập các trang nội bộ và tự động điều hướng về `/login`.
+     - Cập nhật `logout`: Xóa session trên Supabase Auth, xóa token local, gửi lệnh dọn cache tới Service Worker và chuyển hướng sạch về `/login`.
+- **Kiểm thử & Xác minh:**
+  - `node scripts/setup_real_auth_accounts.mjs`: Cả 2 tài khoản `it@talunglogistics.com` và `anninh.talunglogistics@gmail.com` đăng nhập thành công 100% với AccessToken hợp lệ.
+  - `npx tsc --noEmit`: 0 lỗi.
+  - `npm run build`: Thành công 20/20 routes (18 static + 2 dynamic/proxy).
+- **Trạng thái:** Hoàn thành 100%.
+
 ## 2026-10-14 14:40 — Khắc Phục Lỗi Foreign Key Khi Tạo Nhân Sự Mới & Cập Nhật Giao Diện
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"sao ui báo thêm thành công anninh.talunglogistics@gmail.com rồi mà k thấy trong ds?"*

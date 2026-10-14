@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { RoleCode, DEMO_ACCOUNTS } from '@/types/auth.types';
 import { 
@@ -43,14 +43,22 @@ interface NavItem {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, role, isDemoMode, switchDemoRole, logout, can } = useAuth();
+  const { user, role, isDemoMode, switchDemoRole, logout, can, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
   const isRealWriteEnabled = process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true';
+
+  // Điều hướng người dùng chưa đăng nhập về trang /login
+  useEffect(() => {
+    if (!isLoading && !user && pathname !== '/login') {
+      router.replace('/login');
+    }
+  }, [isLoading, user, pathname, router]);
 
   // Đồng hồ thời gian thực ca trực
   useEffect(() => {
@@ -90,6 +98,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Không hiển thị shell trên trang /login
   if (pathname === '/login') {
     return <>{children}</>;
+  }
+
+  // Màn hình chờ xác thực phiên đăng nhập
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F8FA]">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-10 h-10 border-4 border-[#0A9444] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-bold text-slate-600">Đang đồng bộ phiên làm việc Sơn Cảng...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Chặn hiển thị nội dung nội bộ nếu chưa đăng nhập thành công
+  if (!user) {
+    return null;
   }
 
   // Navigation Items chuẩn hóa theo Action Permissions V5 (R2-04 & ON-11) phân chia 3 nhóm nghiệp vụ

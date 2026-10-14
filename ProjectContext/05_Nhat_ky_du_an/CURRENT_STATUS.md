@@ -40,8 +40,25 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 14:40 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ĐÃ KHẮC PHỤC TRIỆT ĐỂ LỖI FOREIGN KEY (YARD_ID) KHI TẠO NHÂN SỰ MỚI VÀ ĐỒNG BỘ DỮ LIỆU SUPABASE**:
+- **Cập nhật lúc:** 14/10/2026 18:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH CHUYỂN ĐỔI SANG SUPABASE AUTH THỰC TẾ & LOẠI BỎ TOÀN BỘ TÀI KHOẢN TẠM TẠI MÀN HÌNH ĐĂNG NHẬP**:
+  * **Loại bỏ giao diện Đăng nhập tạm (1-chạm):** Đã xóa toàn bộ khối demo chọn vai trò 1-chạm trên `/login`, chuyển sang màn hình đăng nhập chuẩn doanh nghiệp với Email công vụ + Mật khẩu (bảo mật SSL, tích hợp trực tiếp Supabase Cloud PostgreSQL RLS).
+  * **Thiết lập tài khoản Super Admin chính thức:**
+    - Email: `it@talunglogistics.com` | Mật khẩu: `SonCang@2026!IT`
+    - Vai trò: `SYS_ADMIN` (Ban Quản trị & Công nghệ), đầy đủ 63 permissions V5.
+    - Đã xác thực thành công qua RPC `sc_my_permissions()` và `signInWithPassword`.
+  * **Thiết lập tài khoản An ninh Bốt Cổng:**
+    - Email: `anninh.talunglogistics@gmail.com` | Mật khẩu: `AnNinh@2026!SC`
+    - Vai trò: `SEC_STAFF` (Bộ phận An ninh & Bảo vệ), gắn trực tiếp bãi Sơn Cảng.
+    - Đã tạo bản ghi `auth.users`, liên kết `app_staff_users` và `app_user_role_assignments`.
+  * **Dọn dẹp triệt để:** Đã xóa tài khoản tạm cũ `sys_admin_uat@example.com` khỏi hệ thống; cấu hình `NEXT_PUBLIC_DISABLE_DEMO_MODE=true`.
+  * **Cải tiến luồng Điều hướng & Đăng xuất:**
+    - Đăng nhập thành công sẽ tự động điều hướng đúng vị trí làm việc (An ninh -> `/entry`, Thương vụ -> `/reefer`, Hiện trường -> `/yard`, Kế toán -> `/accounting`, Quản trị -> `/dashboard`).
+    - `AppShell` tự động bảo vệ route và đẩy người dùng chưa đăng nhập về `/login`.
+    - Đăng xuất (`logout`) giải phóng toàn bộ session Supabase và điều hướng sạch về `/login`.
+  * **Kiểm thử & Build:** `npx tsc --noEmit` đạt 0 lỗi; `npm run build` thành công 20/20 static & dynamic routes.
+
+- **Mốc trước đó (14/10/2026 14:40):** **ĐÃ KHẮC PHỤC TRIỆT ĐỂ LỖI FOREIGN KEY (YARD_ID) KHI TẠO NHÂN SỰ MỚI VÀ ĐỒNG BỘ DỮ LIỆU SUPABASE**:
   * Đã sửa lỗi khóa ngoại `app_staff_users_yard_id_fkey` do form truyền nhầm ID giả lập cũ (`20000000-0000-0000-0000-000000000001`). Nay đã chuyển sang tự động nhận ID bãi thực tế từ `app_yards` (`fe83bb2b-833e-412c-aed4-b9a781a6decd`).
   * Loại bỏ cơ chế nuốt lỗi (silent fallback) trong `supabase-repository.ts` để đảm bảo UI báo lỗi chân thực nếu có sự cố máy chủ.
   * Đã lưu thành công tài khoản **`anninh.talunglogistics@gmail.com`** (vai trò: `SEC_STAFF` - An ninh Cổng) vào cơ sở dữ liệu Supabase Cloud `public.app_staff_users`.
