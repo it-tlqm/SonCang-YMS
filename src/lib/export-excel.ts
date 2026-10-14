@@ -6,8 +6,17 @@
  */
 
 import ExcelJS from 'exceljs';
-import { ChargeItem, PaymentRecord, VehicleVisit, ContainerVisit, ReeferPowerSession } from '@/types/domain.types';
-import { getVehicleTypeName } from './display-formatters';
+import { 
+  ChargeItem, 
+  PaymentRecord, 
+  VehicleVisit, 
+  ContainerVisit, 
+  ReeferPowerSession,
+  CashSettlement,
+  YardInvoice,
+  AccountingDebtItem
+} from '@/types/domain.types';
+import { getVehicleTypeName, formatDateTime } from './display-formatters';
 
 export interface ColumnDefinition {
   label: string;
@@ -1008,6 +1017,289 @@ export async function exportExitedVehiclesToExcel(exitedVehicles: VehicleVisit[]
 }
 
 // ============================================================================
+// BÁO CÁO KẾ TOÁN BẾN BÃI ĐA SHEET (ACCOUNTING SUB-SYSTEM)
+// ============================================================================
+export async function exportAccountingReportExcel(params: {
+  settlements: CashSettlement[];
+  invoices: YardInvoice[];
+  debts: AccountingDebtItem[];
+  payments: PaymentRecord[];
+  dateRangeStr?: string;
+}): Promise<void> {
+  const { settlements, invoices, debts, payments, dateRangeStr } = params;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Phòng Kế toán — Bến bãi Sơn Cảng';
+  wb.created = new Date();
+
+  const subTitle = dateRangeStr || `Kỳ báo cáo đến ngày ${new Date().toLocaleDateString('vi-VN')}`;
+
+  // --------------------------------------------------------------------------
+  // SHEET 1: DOANH THU & DÒNG TIỀN (SỔ QUỸ)
+  // --------------------------------------------------------------------------
+  const sheet1Cols: ColumnDefinition[] = [
+    { label: 'STT', align: 'center', isNumber: true, minWidth: 6 },
+    { label: 'Mã phiếu / Giao dịch', align: 'left', minWidth: 20 },
+    { label: 'Thời gian thu', align: 'center', minWidth: 18 },
+    { label: 'Bộ phận thu', align: 'left', minWidth: 16 },
+    { label: 'Nhân viên thu', align: 'left', minWidth: 22 },
+    { label: 'Hình thức TT', align: 'center', minWidth: 16 },
+    { label: 'Số tiền (VNĐ)', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Ghi chú / Đối soát', align: 'left', minWidth: 30 }
+  ];
+
+  let sumPaymentAmount = 0;
+  const sheet1Rows = payments.map((p, idx) => {
+    sumPaymentAmount += p.payment_amount;
+    const deptStr = p.collector_dept === 'AN_NINH' ? 'An ninh cổng' : p.collector_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Kế toán';
+    const methodStr = p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản (VietQR)';
+    return [
+      idx + 1,
+      p.receipt_code || p.id.substring(0, 12),
+      formatDateTime(p.collected_at),
+      deptStr,
+      p.collected_by_name || 'Nhân viên',
+      methodStr,
+      p.payment_amount,
+      p.notes || ''
+    ];
+  });
+
+  const sheet1Summary = [
+    'TỔNG CỘNG DOANH THU THU VỀ:',
+    `${payments.length} giao dịch`,
+    '',
+    '',
+    '',
+    '',
+    sumPaymentAmount,
+    ''
+  ];
+
+  createStyledReportSheet(
+    wb,
+    'Doanh_Thu_Dong_Tien',
+    'BÁO CÁO DOANH THU & DÒNG TIỀN BẾN BÃI SƠN CẢNG',
+    sheet1Cols,
+    sheet1Rows,
+    subTitle,
+    sheet1Summary
+  );
+
+  // --------------------------------------------------------------------------
+  // SHEET 2: BẢNG KÊ CHỐT TIỀN MẶT HIỆN TRƯỜNG
+  // --------------------------------------------------------------------------
+  const sheet2Cols: ColumnDefinition[] = [
+    { label: 'STT', align: 'center', isNumber: true, minWidth: 6 },
+    { label: 'Mã biên bản chốt', align: 'left', minWidth: 24 },
+    { label: 'Thời gian chốt', align: 'center', minWidth: 18 },
+    { label: 'Bộ phận bàn giao', align: 'left', minWidth: 18 },
+    { label: 'Người giao (Hiện trường)', align: 'left', minWidth: 24 },
+    { label: 'Người nhận (Kế toán)', align: 'left', minWidth: 22 },
+    { label: 'Tiền sổ sách (VNĐ)', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Tiền thực đếm (VNĐ)', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Chênh lệch (VNĐ)', align: 'right', isCurrency: true, minWidth: 16 },
+    { label: 'Chuyển khoản đối soát', align: 'right', isCurrency: true, minWidth: 20 },
+    { label: 'Lý do chênh lệch', align: 'left', minWidth: 26 },
+    { label: 'Trạng thái', align: 'center', minWidth: 14 }
+  ];
+
+  let sumCashExpected = 0;
+  let sumCashCounted = 0;
+  let sumDiff = 0;
+  let sumTransferSettle = 0;
+
+  const sheet2Rows = settlements.map((s, idx) => {
+    sumCashExpected += s.total_cash_expected;
+    sumCashCounted += s.total_cash_counted;
+    sumDiff += s.difference_amount;
+    sumTransferSettle += s.total_transfer_amount;
+    const deptStr = s.handover_dept === 'AN_NINH' ? 'An ninh cổng' : s.handover_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Toàn bãi';
+
+    return [
+      idx + 1,
+      s.settlement_code,
+      formatDateTime(s.created_at),
+      deptStr,
+      s.handover_person_name,
+      s.collector_name,
+      s.total_cash_expected,
+      s.total_cash_counted,
+      s.difference_amount,
+      s.total_transfer_amount,
+      s.difference_reason || 'Khớp 100%',
+      s.status === 'COMPLETED' ? 'Đã nộp quỹ' : s.status
+    ];
+  });
+
+  const sheet2Summary = [
+    'TỔNG CỘNG CHỐT TIỀN:',
+    `${settlements.length} đợt chốt`,
+    '',
+    '',
+    '',
+    '',
+    sumCashExpected,
+    sumCashCounted,
+    sumDiff,
+    sumTransferSettle,
+    '',
+    ''
+  ];
+
+  createStyledReportSheet(
+    wb,
+    'Bang_Ke_Chot_Tien_Mat',
+    'BẢNG KÊ CHỐT VÀ THU TIỀN MẶT HIỆN TRƯỜNG VỀ QUỸ',
+    sheet2Cols,
+    sheet2Rows,
+    subTitle,
+    sheet2Summary
+  );
+
+  // --------------------------------------------------------------------------
+  // SHEET 3: SỔ HÓA ĐƠN GTGT (MST & CCCD)
+  // --------------------------------------------------------------------------
+  const sheet3Cols: ColumnDefinition[] = [
+    { label: 'STT', align: 'center', isNumber: true, minWidth: 6 },
+    { label: 'Mã đề xuất', align: 'left', minWidth: 18 },
+    { label: 'Số HĐĐT', align: 'left', minWidth: 16 },
+    { label: 'Đối tượng', align: 'center', minWidth: 16 },
+    { label: 'Người mua hàng / Đơn vị', align: 'left', minWidth: 26 },
+    { label: 'Mã số thuế / CCCD (12 số)', align: 'left', minWidth: 20 },
+    { label: 'Địa chỉ người mua', align: 'left', minWidth: 32 },
+    { label: 'Thuế suất', align: 'center', minWidth: 12 },
+    { label: 'Doanh thu trước thuế', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Tiền thuế VAT', align: 'right', isCurrency: true, minWidth: 16 },
+    { label: 'Tổng tiền thanh toán', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Trạng thái HĐ', align: 'center', minWidth: 16 },
+    { label: 'Ngày phát hành', align: 'center', minWidth: 16 }
+  ];
+
+  let sumSubtotal = 0;
+  let sumVat = 0;
+  let sumInvoiceTotal = 0;
+
+  const sheet3Rows = invoices.map((inv, idx) => {
+    sumSubtotal += inv.subtotal_amount;
+    sumVat += inv.vat_amount;
+    sumInvoiceTotal += inv.total_amount;
+
+    return [
+      idx + 1,
+      inv.invoice_code,
+      inv.e_invoice_no || 'Chờ xuất',
+      inv.invoice_type === 'COMPANY' ? 'Doanh nghiệp (MST)' : 'Cá nhân (CCCD)',
+      inv.buyer_name,
+      inv.tax_code || inv.id_card_no || '',
+      inv.buyer_address,
+      `${inv.vat_rate}%`,
+      inv.subtotal_amount,
+      inv.vat_amount,
+      inv.total_amount,
+      inv.status === 'INVOICED' ? 'Đã xuất HĐĐT' : 'Chờ xuất HĐ',
+      inv.invoice_issued_at ? formatDateTime(inv.invoice_issued_at) : '---'
+    ];
+  });
+
+  const sheet3Summary = [
+    'TỔNG CỘNG HÓA ĐƠN:',
+    `${invoices.length} hóa đơn`,
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    sumSubtotal,
+    sumVat,
+    sumInvoiceTotal,
+    '',
+    ''
+  ];
+
+  createStyledReportSheet(
+    wb,
+    'So_Hoa_Don_GTGT',
+    'SỔ THEO DÕI PHÁT HÀNH HÓA ĐƠN GTGT (MST & CCCD 12 SỐ)',
+    sheet3Cols,
+    sheet3Rows,
+    subTitle,
+    sheet3Summary
+  );
+
+  // --------------------------------------------------------------------------
+  // SHEET 4: SỔ THEO DÕI CÔNG NỢ BẾN BÃI (AP07)
+  // --------------------------------------------------------------------------
+  const sheet4Cols: ColumnDefinition[] = [
+    { label: 'STT', align: 'center', isNumber: true, minWidth: 6 },
+    { label: 'Mã khoản nợ', align: 'left', minWidth: 16 },
+    { label: 'Khách hàng / Chủ cont', align: 'left', minWidth: 24 },
+    { label: 'Số điện thoại', align: 'center', minWidth: 14 },
+    { label: 'Số Container', align: 'left', minWidth: 16 },
+    { label: 'Biển số xe', align: 'left', minWidth: 14 },
+    { label: 'Loại phí nợ', align: 'left', minWidth: 18 },
+    { label: 'Người duyệt AP07', align: 'left', minWidth: 20 },
+    { label: 'Tổng tiền nợ (VNĐ)', align: 'right', isCurrency: true, minWidth: 16 },
+    { label: 'Đã thu (VNĐ)', align: 'right', isCurrency: true, minWidth: 16 },
+    { label: 'Dư nợ còn lại (VNĐ)', align: 'right', isCurrency: true, minWidth: 18 },
+    { label: 'Ghi chú', align: 'left', minWidth: 24 }
+  ];
+
+  let sumDebtTotal = 0;
+  let sumDebtPaid = 0;
+  let sumDebtRemaining = 0;
+
+  const sheet4Rows = debts.map((d, idx) => {
+    sumDebtTotal += d.total_amount;
+    sumDebtPaid += d.paid_amount;
+    sumDebtRemaining += d.debt_amount;
+
+    return [
+      idx + 1,
+      d.charge_id.substring(0, 10),
+      d.customer_name,
+      d.customer_phone || '',
+      d.container_no || '',
+      d.license_plate || '',
+      d.charge_title,
+      d.guarantor_name || 'Trưởng ca',
+      d.total_amount,
+      d.paid_amount,
+      d.debt_amount,
+      d.notes || ''
+    ];
+  });
+
+  const sheet4Summary = [
+    'TỔNG CỘNG CÔNG NỢ:',
+    `${debts.length} khoản nợ`,
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    sumDebtTotal,
+    sumDebtPaid,
+    sumDebtRemaining,
+    ''
+  ];
+
+  createStyledReportSheet(
+    wb,
+    'So_Theo_Doi_Cong_No',
+    'SỔ THEO DÕI CÔNG NỢ BẾN BÃI XUẤT TRƯỚC TRẢ SAU (AP07)',
+    sheet4Cols,
+    sheet4Rows,
+    subTitle,
+    sheet4Summary
+  );
+
+  const cleanDate = new Date().toISOString().slice(0, 10);
+  await downloadWorkbook(wb, `Bao_Cao_Ke_Toan_Son_Cang_${cleanDate}.xlsx`);
+}
+
+// ============================================================================
 // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY ALIASES)
 // ============================================================================
 export const exportShiftPaymentsToCsv = exportShiftPaymentsToExcel;
@@ -1015,3 +1307,4 @@ export const exportChargesToCsv = exportChargesToExcel;
 export const exportYardVehiclesToCsv = exportYardVehiclesToExcel;
 export const exportYardContainersToCsv = exportYardContainersToExcel;
 export const exportManagementReportToCsv = exportManagementReportToExcel;
+

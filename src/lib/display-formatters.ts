@@ -66,6 +66,14 @@ export function getTicketPaymentStatusLabel(status: string | null | undefined): 
 }
 
 /**
+ * Định dạng số tiền VNĐ (Ví dụ: 250.000 đ)
+ */
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined || isNaN(amount)) return '0 đ';
+  return `${Math.round(amount).toLocaleString('vi-VN')} đ`;
+}
+
+/**
  * Đọc số tiền thành chữ tiếng Việt chuẩn hóa cho biên lai / phiếu thu
  */
 export function formatMoneyInWords(amount: number): string {

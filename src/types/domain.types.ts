@@ -296,12 +296,14 @@ export interface ChargeItem {
   created_at: string;
 }
 
+export type PaymentMethod = 'CASH' | 'TRANSFER' | 'OTHER';
+
 export interface PaymentRecord {
   id: string;
   yard_id: string;
   charge_id: string;
   payment_amount: number;
-  payment_method: 'CASH' | 'TRANSFER' | 'OTHER';
+  payment_method: PaymentMethod;
   collected_by: string;
   collected_by_name?: string;
   collector_dept: 'AN_NINH' | 'CCKB' | 'KE_TOAN';
