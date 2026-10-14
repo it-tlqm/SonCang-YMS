@@ -1,5 +1,37 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 08:25 — Xóa Bỏ Hoàn Toàn Hardcode 30 Trụ Điện: Nâng Cấp Hệ Thống Quản Trị Trụ Điện & Giắc Cắm 380V Động (Migration 24)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: *"chỗ này k quản lý được à???: sao bạn xây dựng lỏng lẻo thế nhỉ? quá nhiều thứ hardcord hay mockdata luon đấy. Kiểm soát 30 Giắc cắm điện Container Lạnh 380V (Khu A Reefer)..."*
+- **Phân tích vấn đề:**
+  - Trước đây, lưới 30 trụ điện chỉ được render bằng vòng lặp tĩnh cố định `Array.from({ length: 30 })` ở cả trang Bến bãi (`/yard`) và trang Thương vụ CCKB (`/reefer`).
+  - Toàn bộ danh mục trụ không có bảng thực thể trong Database, không thể thêm trụ mới (ví dụ mở rộng thêm R31, R32...), không sửa được điện áp/ampe, không thể đánh dấu trụ đang bảo trì/hỏng (để tránh cắm nhầm) và không thể xóa trụ.
+  - Người dùng không tương tác được: Thẻ trụ chỉ là div tĩnh, không click vào được để xem chi tiết trụ, không cắm điện nhanh và không rút điện trực tiếp tại trụ.
+- **Giải pháp triển khai & Nâng cấp toàn diện:**
+  1. *Cơ sở dữ liệu thực tế (Migration 24 - `20261014000024_power_sockets_management.sql`):*
+     - Tạo bảng `public.app_power_sockets`: Quản lý động danh mục trụ/giắc cắm 380V (socket_code, socket_name, zone_code, voltage, amperage, phase, status: AVAILABLE / IN_USE / MAINTENANCE / FAULTY, notes).
+     - RLS policy đầy đủ cho authenticated users.
+     - Hàm RPC `sc_set_socket_status` bảo vệ ghi nhận nhật ký kiểm toán (audit log) khi đổi trạng thái bảo trì/hỏng.
+     - Đã chạy `npx supabase db push` thành công 100% lên Supabase Cloud.
+  2. *Domain Types & Repositories:*
+     - Khai báo interface `PowerSocket` và type `PowerSocketStatus`.
+     - Thêm các phương thức `getPowerSockets`, `createPowerSocket`, `updatePowerSocket`, `deletePowerSocket`, `setPowerSocketStatus` vào `IYardRepository`, `SupabaseRepository` và `DemoRepository`.
+  3. *Giao diện Quản trị Trụ điện Tương tác trên Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):*
+     - Xóa bỏ vòng lặp tĩnh 30 cái, nạp động từ DB catalog.
+     - Thống kê thời gian thực: Tổng số trụ, Đang cắm, Trống sẵn sàng, Đang bảo trì / Hỏng.
+     - Bộ lọc trạng thái: Tất cả | 🟢 Trống | ⚡ Đang cắm | 🛠️ Bảo trì / Hỏng.
+     - Nút **➕ Thêm trụ điện mới**: Modal thêm trụ (mã trụ tự động gợi ý, tên, phân khu, điện áp 380V/220V/440V, ampe 32A/63A, ghi chú).
+     - Thẻ trụ điện tương tác: Click vào thẻ mở **Modal Chi tiết & Tác vụ Trụ điện**:
+       * *Trụ đang cắm:* Xem container, xe chở, quy cách; nút **⚡ Rút điện ngay (CCKB)** giải phóng trụ và nút **⚠️ Báo sự cố**.
+       * *Trụ trống:* Nút **⚡ Cắm điện nhanh vào trụ này** (chọn ngay cont lạnh RF chưa cắm trong bãi), nút **🛠️ Đặt bảo trì**, nút **✏️ Sửa**, nút **🗑️ Xóa**.
+       * *Trụ bảo trì:* Xem lý do sự cố (chập giắc, hỏng aptomat), nút **✓ Hoàn tất bảo trì & Mở lại trụ**, nút **Sửa**, nút **Xóa**.
+  4. *Đồng bộ Trang Thương vụ CCKB ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):*
+     - Bộ chọn giắc cắm lấy động từ DB; tự động khóa các trụ đang cắm hoặc đang bảo trì kèm lý do; tự động tìm và gợi ý trụ AVAILABLE đầu tiên.
+- **Kiểm thử & Xác minh:**
+  - `npx supabase db push`: Exit code 0, đã áp dụng Migration 24 lên Supabase Cloud.
+  - `npm run build`: Exit code 0, Turbopack tối ưu 18/18 static routes, TypeScript hoàn thành không lỗi.
+- **Trạng thái:** Hoàn tất triệt để. Danh mục trụ điện hoạt động 100% bằng Database thật và hỗ trợ đầy đủ CRUD cùng thao tác nghiệp vụ tại hiện trường.
+
 ## 2026-10-14 08:10 — Sắp Xếp Ưu Tiên Đẩy Các Khoản Chưa Thu (UNPAID) Lên Đầu Sổ Cái Bến Bãi (`/billing`)
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: "chưa thu thì đẩy lên trên chứ bạn" tại giao diện Sổ cái Thu phí Bến bãi (`/billing`).

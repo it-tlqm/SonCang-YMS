@@ -25,7 +25,9 @@ import {
   YardZoneInfo,
   ReeferTemperatureLog,
   Customer,
-  StaffUser
+  StaffUser,
+  PowerSocket,
+  PowerSocketStatus
 } from '@/types/domain.types';
 
 export interface CreateVehicleParams {
@@ -444,6 +446,45 @@ export interface IYardRepository {
 
   /** Xóa nhân sự / tài khoản khỏi hệ thống */
   deleteStaffUser(id: string): Promise<{ success: boolean; error?: string }>;
+
+  /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
+  getPowerSockets(zoneCode?: string): Promise<PowerSocket[]>;
+
+  /** Tạo mới trụ điện / giắc cắm 380V */
+  createPowerSocket(params: {
+    socketCode: string;
+    socketName: string;
+    zoneCode?: string;
+    voltage?: string;
+    amperage?: string;
+    phase?: string;
+    notes?: string;
+  }): Promise<{ success: boolean; socket?: PowerSocket; error?: string }>;
+
+  /** Cập nhật thông tin trụ điện / giắc cắm */
+  updatePowerSocket(
+    socketCode: string,
+    params: Partial<{
+      socketName: string;
+      zoneCode: string;
+      voltage: string;
+      amperage: string;
+      phase: string;
+      status: PowerSocketStatus;
+      notes: string;
+      isActive: boolean;
+    }>
+  ): Promise<{ success: boolean; socket?: PowerSocket; error?: string }>;
+
+  /** Xóa trụ điện / giắc cắm */
+  deletePowerSocket(socketCode: string): Promise<{ success: boolean; error?: string }>;
+
+  /** Cập nhật trạng thái trụ điện (Sẵn sàng / Đang cắm / Bảo trì / Hỏng) */
+  setPowerSocketStatus(
+    socketCode: string,
+    status: PowerSocketStatus,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }>;
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;

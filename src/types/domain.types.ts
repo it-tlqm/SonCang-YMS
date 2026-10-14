@@ -376,4 +376,22 @@ export interface StaffUser {
   updated_at?: string;
 }
 
+export type PowerSocketStatus = 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'FAULTY';
+
+export interface PowerSocket {
+  id: string;
+  socket_code: string;
+  socket_name: string;
+  zone_code: string;
+  yard_id?: string | null;
+  voltage: string;
+  amperage: string;
+  phase: string;
+  status: PowerSocketStatus;
+  notes?: string | null;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 

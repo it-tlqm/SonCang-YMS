@@ -40,11 +40,23 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 08:10 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ƯU TIÊN ĐẨY KHOẢN CHƯA THU (UNPAID) LÊN ĐẦU SỔ CÁI BẾN BÃI (`/billing`)**:
-  * **Trải nghiệm Thu ngân & Kế toán Ca trực:** Trong bảng Sổ cái thu phí bến bãi, tất cả các khoản nợ / chưa thanh toán (`UNPAID`) được sắp xếp ưu tiên hiển thị lên trên cùng, sau đó mới đến các khoản đã hoàn tất (`PAID`). Trong cùng nhóm trạng thái, các khoản phát sinh mới nhất được sắp xếp lên trước.
-  * Giúp thu ngân nhận diện ngay công nợ chưa thu, sử dụng thao tác 1-chạm: "Chọn/Bỏ tất cả khoản chưa thu", "Gom tất cả của cont này", "Gom tất cả của khách này" để thu gộp nhanh chóng.
-  * **Xác minh kỹ thuật:** `npm run build` exit code 0 thành công 100% (18/18 routes, Turbopack).
+- **Cập nhật lúc:** 14/10/2026 08:25 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **XÓA BỎ HOÀN TOÀN HARDCODE 30 TRỤ ĐIỆN — NÂNG CẤP TOÀN DIỆN QUẢN TRỊ TRỤ ĐIỆN 380V ĐỘNG & TƯƠNG TÁC THỜI GIAN THỰC (MIGRATION 24)**:
+  * **Cơ sở dữ liệu thực tế (Migration 24):** Tạo bảng `public.app_power_sockets` quản lý động toàn bộ danh mục trụ điện 380V/32A chuẩn 3 pha (socket_code, socket_name, zone_code, voltage, amperage, phase, status: AVAILABLE / IN_USE / MAINTENANCE / FAULTY, notes). Seed 30 trụ ban đầu và cung cấp RPC `sc_set_socket_status` bảo vệ audit log. Đã `npx supabase db push` thành công lên Supabase Cloud.
+  * **Xóa bỏ triệt để Hardcode & Mock Data:** Loại bỏ hoàn toàn vòng lặp tĩnh `Array.from({ length: 30 })` ở cả trang Bến bãi (`/yard`) và Thương vụ CCKB (`/reefer`). Dữ liệu tải động 100% từ Database catalog.
+  * **Trung tâm Quản trị Trụ điện Tương tác trên Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
+    - Click vào bất kỳ thẻ trụ nào trong lưới để mở **Modal Chi tiết & Tác vụ Trụ điện**:
+      + *Nếu Đang cắm (IN_USE):* Hiển thị Container nào đang cắm, xe chở, thời gian cắm; cung cấp nút **⚡ Rút điện ngay (CCKB)** để giải phóng trụ trực tiếp tại hiện trường và nút **⚠️ Báo sự cố**.
+      + *Nếu Trống (AVAILABLE):* Cung cấp nút **⚡ Cắm điện nhanh vào trụ này** (chọn container lạnh RF đang trong bãi chưa cắm để kích hoạt ngay), nút **🛠️ Đặt trạng thái Bảo trì**, nút **✏️ Sửa thông tin trụ**, nút **🗑️ Xóa trụ**.
+      + *Nếu Bảo trì / Khóa:* Hiển thị lý do sự cố (chập giắc, hỏng aptomat), cung cấp nút **✓ Hoàn tất bảo trì & Mở lại trụ**, nút **Sửa**, nút **Xóa**.
+    - Nút **➕ Thêm trụ điện mới**: Mở modal mở rộng thêm trụ mới (VD: R31, R32...), cấu hình điện áp, ampe và ghi chú kỹ thuật, lưu trực tiếp vào DB.
+    - Bộ lọc trạng thái thời gian thực: Tất cả | 🟢 Trống | ⚡ Đang cắm | 🛠️ Bảo trì / Hỏng kèm số lượng động.
+  * **Đồng bộ Trang Thương vụ CCKB ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
+    - Bộ chọn trụ điện tại Modal Cắm điện tải động từ DB; tự động khóa các trụ đang cắm hoặc đang bảo trì; tự động tìm và gợi ý trụ AVAILABLE đầu tiên.
+  * **Xác minh kỹ thuật:** `npx supabase db push` thành công 100%, `npm run build` exit code 0 không lỗi (18/18 routes).
+
+- **Mốc trước đó (14/10/2026 08:10):** **ƯU TIÊN ĐẨY KHOẢN CHƯA THU (UNPAID) LÊN ĐẦU SỔ CÁI BẾN BÃI (`/billing`)**:
+  * **Trải nghiệm Thu ngân & Kế toán Ca trực:** Sắp xếp ưu tiên `UNPAID` lên trên cùng của bảng Sổ cái thu phí bến bãi, hỗ trợ thu gộp 1-chạm theo container và khách hàng.
 
 - **Mốc trước đó (14/10/2026 07:50):** **NÂNG CẤP TRIỆT ĐỂ BẢNG PHÂN KHU DB THẬT, KIỂM SOÁT 30 GIẮC CẮM ĐIỆN 380V & CẬP NHẬT BIỂU PHÍ (MIGRATION 23)**:
   * **Phân khu bãi (Yard Zones):** Tạo bảng thực tế `public.app_yard_zones` trên Supabase Cloud thay thế hoàn toàn localStorage. Hỗ trợ CRUD phân khu đầy đủ.

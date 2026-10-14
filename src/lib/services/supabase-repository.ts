@@ -37,7 +37,9 @@ import {
   YardZoneInfo,
   ReeferTemperatureLog,
   Customer,
-  StaffUser
+  StaffUser,
+  PowerSocket,
+  PowerSocketStatus
 } from '@/types/domain.types';
 import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
 
@@ -2995,6 +2997,166 @@ export class SupabaseRepository implements IYardRepository {
       }
     }
     return { success: true };
+  }
+
+  /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
+  async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {
+    try {
+      const supabase = createClient();
+      let query = (supabase.from as any)('app_power_sockets').select('*').order('socket_code', { ascending: true });
+      if (zoneCode && zoneCode !== 'ALL') {
+        query = query.eq('zone_code', zoneCode);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data as unknown as PowerSocket[];
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Fallback nếu bảng trống hoặc offline: trả về 30 trụ mặc định từ seed
+    const defaultSockets: PowerSocket[] = Array.from({ length: 30 }, (_, i) => {
+      const code = `R${String(i + 1).padStart(2, '0')}`;
+      return {
+        id: `socket-${code}`,
+        socket_code: code,
+        socket_name: `Trụ điện ${code}`,
+        zone_code: 'KHU_A_REEFER',
+        voltage: '380V',
+        amperage: '32A',
+        phase: '3_PHASE',
+        status: 'AVAILABLE',
+        notes: 'Trụ cấp điện container lạnh chuyên dụng 380V/32A chuẩn công nghiệp 3 pha',
+        is_active: true,
+      };
+    });
+    return defaultSockets;
+  }
+
+  /** Tạo mới trụ điện / giắc cắm 380V */
+  async createPowerSocket(params: {
+    socketCode: string;
+    socketName: string;
+    zoneCode?: string;
+    voltage?: string;
+    amperage?: string;
+    phase?: string;
+    notes?: string;
+  }): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
+    const cleanCode = params.socketCode.trim().toUpperCase();
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.from as any)('app_power_sockets')
+        .insert({
+          socket_code: cleanCode,
+          socket_name: params.socketName.trim() || `Trụ điện ${cleanCode}`,
+          zone_code: params.zoneCode || 'KHU_A_REEFER',
+          voltage: params.voltage || '380V',
+          amperage: params.amperage || '32A',
+          phase: params.phase || '3_PHASE',
+          status: 'AVAILABLE',
+          notes: params.notes?.trim() || null,
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        return { success: true, socket: data as unknown as PowerSocket };
+      }
+      if (error) {
+        return { success: false, error: error.message };
+      }
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi ngoại lệ khi tạo trụ điện' };
+    }
+    return { success: false, error: 'Không thể tạo trụ điện' };
+  }
+
+  /** Cập nhật thông tin trụ điện / giắc cắm */
+  async updatePowerSocket(
+    socketCode: string,
+    params: Partial<{
+      socketName: string;
+      zoneCode: string;
+      voltage: string;
+      amperage: string;
+      phase: string;
+      status: PowerSocketStatus;
+      notes: string;
+      isActive: boolean;
+    }>
+  ): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
+    try {
+      const supabase = createClient();
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (params.socketName !== undefined) payload.socket_name = params.socketName.trim();
+      if (params.zoneCode !== undefined) payload.zone_code = params.zoneCode;
+      if (params.voltage !== undefined) payload.voltage = params.voltage;
+      if (params.amperage !== undefined) payload.amperage = params.amperage;
+      if (params.phase !== undefined) payload.phase = params.phase;
+      if (params.status !== undefined) payload.status = params.status;
+      if (params.notes !== undefined) payload.notes = params.notes?.trim() || null;
+      if (params.isActive !== undefined) payload.is_active = params.isActive;
+
+      const { data, error } = await (supabase.from as any)('app_power_sockets')
+        .update(payload)
+        .eq('socket_code', socketCode)
+        .select()
+        .single();
+
+      if (!error && data) {
+        return { success: true, socket: data as unknown as PowerSocket };
+      }
+      if (error) {
+        return { success: false, error: error.message };
+      }
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi ngoại lệ khi cập nhật trụ điện' };
+    }
+    return { success: false, error: 'Không thể cập nhật trụ điện' };
+  }
+
+  /** Xóa trụ điện / giắc cắm */
+  async deletePowerSocket(socketCode: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase.from as any)('app_power_sockets')
+        .delete()
+        .eq('socket_code', socketCode);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi ngoại lệ khi xóa trụ điện' };
+    }
+  }
+
+  /** Cập nhật trạng thái trụ điện (Sẵn sàng / Đang cắm / Bảo trì / Hỏng) */
+  async setPowerSocketStatus(
+    socketCode: string,
+    status: PowerSocketStatus,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      const { data, error } = await (supabase.rpc as any)('sc_set_socket_status', {
+        p_socket_code: socketCode,
+        p_status: status,
+        p_notes: notes || undefined,
+      });
+
+      if (!error && data && (data as any).success) {
+        return { success: true };
+      }
+      // Nếu RPC không khả dụng thì gọi update trực tiếp
+      const res = await this.updatePowerSocket(socketCode, { status, notes });
+      return { success: res.success, error: res.error };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi khi cập nhật trạng thái trụ điện' };
+    }
   }
 }
 

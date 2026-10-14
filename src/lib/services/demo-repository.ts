@@ -24,7 +24,9 @@ import {
   YardZoneInfo,
   ReeferTemperatureLog,
   Customer,
-  StaffUser
+  StaffUser,
+  PowerSocket,
+  PowerSocketStatus
 } from '@/types/domain.types';
 import { 
   IYardRepository, 
@@ -448,6 +450,22 @@ export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
   }
 ];
 
+export const INITIAL_DEMO_POWER_SOCKETS: PowerSocket[] = Array.from({ length: 30 }, (_, i) => {
+  const code = `R${String(i + 1).padStart(2, '0')}`;
+  return {
+    id: `socket-${code}`,
+    socket_code: code,
+    socket_name: `Trụ điện ${code}`,
+    zone_code: 'KHU_A_REEFER',
+    voltage: '380V',
+    amperage: '32A',
+    phase: '3_PHASE',
+    status: 'AVAILABLE',
+    notes: 'Trụ cấp điện container lạnh chuyên dụng 380V/32A chuẩn công nghiệp 3 pha',
+    is_active: true,
+  };
+});
+
 export class DemoRepository implements IYardRepository {
   readonly mode = 'DEMO' as const;
 
@@ -461,6 +479,7 @@ export class DemoRepository implements IYardRepository {
   private customers: Customer[] = [...INITIAL_DEMO_CUSTOMERS];
   private staffUsers: StaffUser[] = [...INITIAL_DEMO_STAFF_USERS];
   private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
+  private powerSockets: PowerSocket[] = [...INITIAL_DEMO_POWER_SOCKETS];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
     yard_id: '20000000-0000-0000-0000-000000000001',
@@ -531,6 +550,10 @@ export class DemoRepository implements IYardRepository {
       if (savedYZ) {
         try { this.yardZones = JSON.parse(savedYZ); } catch {}
       }
+      const savedSockets = localStorage.getItem('soncang_v5_power_sockets');
+      if (savedSockets) {
+        try { this.powerSockets = JSON.parse(savedSockets); } catch {}
+      }
     }
   }
 
@@ -548,6 +571,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_staff_users', JSON.stringify(this.staffUsers));
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
+      localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
     }
   }
 
@@ -2249,6 +2273,113 @@ export class DemoRepository implements IYardRepository {
     return { success: true };
   }
 
+  async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {
+    if (!zoneCode || zoneCode === 'ALL') {
+      return [...this.powerSockets];
+    }
+    return this.powerSockets.filter(s => s.zone_code === zoneCode);
+  }
+
+  async createPowerSocket(params: {
+    socketCode: string;
+    socketName: string;
+    zoneCode?: string;
+    voltage?: string;
+    amperage?: string;
+    phase?: string;
+    notes?: string;
+  }): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
+    const cleanCode = params.socketCode.trim().toUpperCase();
+    if (this.powerSockets.some(s => s.socket_code === cleanCode)) {
+      return { success: false, error: `Mã trụ điện ${cleanCode} đã tồn tại` };
+    }
+    const newSocket: PowerSocket = {
+      id: `socket-${Date.now()}-${cleanCode}`,
+      socket_code: cleanCode,
+      socket_name: params.socketName.trim() || `Trụ điện ${cleanCode}`,
+      zone_code: params.zoneCode || 'KHU_A_REEFER',
+      voltage: params.voltage || '380V',
+      amperage: params.amperage || '32A',
+      phase: params.phase || '3_PHASE',
+      status: 'AVAILABLE',
+      notes: params.notes?.trim() || null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.powerSockets.push(newSocket);
+    this.powerSockets.sort((a, b) => a.socket_code.localeCompare(b.socket_code));
+    this.persist();
+    return { success: true, socket: newSocket };
+  }
+
+  async updatePowerSocket(
+    socketCode: string,
+    params: Partial<{
+      socketName: string;
+      zoneCode: string;
+      voltage: string;
+      amperage: string;
+      phase: string;
+      status: PowerSocketStatus;
+      notes: string;
+      isActive: boolean;
+    }>
+  ): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
+    const idx = this.powerSockets.findIndex(s => s.socket_code === socketCode);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy trụ điện ${socketCode}` };
+    }
+    const cur = this.powerSockets[idx];
+    const updated: PowerSocket = {
+      ...cur,
+      socket_name: params.socketName !== undefined ? params.socketName.trim() : cur.socket_name,
+      zone_code: params.zoneCode || cur.zone_code,
+      voltage: params.voltage || cur.voltage,
+      amperage: params.amperage || cur.amperage,
+      phase: params.phase || cur.phase,
+      status: params.status || cur.status,
+      notes: params.notes !== undefined ? params.notes?.trim() || null : cur.notes,
+      is_active: params.isActive !== undefined ? params.isActive : cur.is_active,
+      updated_at: new Date().toISOString(),
+    };
+    this.powerSockets[idx] = updated;
+    this.persist();
+    return { success: true, socket: updated };
+  }
+
+  async deletePowerSocket(socketCode: string): Promise<{ success: boolean; error?: string }> {
+    const idx = this.powerSockets.findIndex(s => s.socket_code === socketCode);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy trụ điện ${socketCode}` };
+    }
+    // Không cho xóa trụ đang cắm điện
+    if (this.powerSockets[idx].status === 'IN_USE') {
+      return { success: false, error: `Không thể xóa trụ ${socketCode} vì đang có container cắm điện!` };
+    }
+    this.powerSockets.splice(idx, 1);
+    this.persist();
+    return { success: true };
+  }
+
+  async setPowerSocketStatus(
+    socketCode: string,
+    status: PowerSocketStatus,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const idx = this.powerSockets.findIndex(s => s.socket_code === socketCode);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy trụ điện ${socketCode}` };
+    }
+    this.powerSockets[idx].status = status;
+    if (notes !== undefined) {
+      this.powerSockets[idx].notes = notes;
+    }
+    this.powerSockets[idx].updated_at = new Date().toISOString();
+    this.persist();
+    return { success: true };
+  }
+
   resetDemoData() {
     this.vehicles = [...INITIAL_DEMO_VEHICLES];
     this.containers = [...INITIAL_DEMO_CONTAINERS];
@@ -2258,6 +2389,7 @@ export class DemoRepository implements IYardRepository {
     this.temperatureLogs = [...INITIAL_DEMO_TEMP_LOGS];
     this.customers = [...INITIAL_DEMO_CUSTOMERS];
     this.staffUsers = [...INITIAL_DEMO_STAFF_USERS];
+    this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
     this.persist();
   }
 }

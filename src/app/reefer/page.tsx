@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { DEMO_ACCOUNTS } from '@/types/auth.types';
-import { ContainerVisit, ReeferPowerSession, ReeferRequest, ReeferRequestStatus, ReeferPowerStatus, TariffItem, ReeferTemperatureLog } from '@/types/domain.types';
+import { ContainerVisit, ReeferPowerSession, ReeferRequest, ReeferRequestStatus, ReeferPowerStatus, TariffItem, ReeferTemperatureLog, PowerSocket } from '@/types/domain.types';
 import { validateContainerNumber } from '@/lib/container-validator';
 import { 
   Zap, 
@@ -164,6 +164,7 @@ export default function ReeferMonitoringPage() {
 
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string>('');
   const [tariffs, setTariffs] = useState<TariffItem[]>([]);
+  const [powerSockets, setPowerSockets] = useState<PowerSocket[]>([]);
   const [currentTimeMs, setCurrentTimeMs] = useState<number>(0);
 
   // Đồng hồ thời gian thực tự động cập nhật Live Ticker các cont đang cắm mỗi 15 giây
@@ -184,14 +185,16 @@ export default function ReeferMonitoringPage() {
       repository.getReeferRequests(yardId),
       repository.getTariffs(),
       repository.getReeferTemperatureLogs(),
+      repository.getPowerSockets(),
     ])
-      .then(([sessionList, containerList, requestList, tariffList, tempLogs]) => {
+      .then(([sessionList, containerList, requestList, tariffList, tempLogs, socketList]) => {
         if (isMounted) {
           setSessions(sessionList);
           setContainers(containerList);
           setRequests(requestList);
           setTariffs(tariffList);
           setTemperatureLogs(tempLogs);
+          setPowerSockets(socketList);
           setIsLoading(false);
         }
       })
@@ -211,13 +214,15 @@ export default function ReeferMonitoringPage() {
       repository.getReeferRequests(yardId),
       repository.getTariffs(),
       repository.getReeferTemperatureLogs(),
+      repository.getPowerSockets(),
     ])
-      .then(([sessionList, containerList, requestList, tariffList, tempLogs]) => {
+      .then(([sessionList, containerList, requestList, tariffList, tempLogs, socketList]) => {
         setSessions(sessionList);
         setContainers(containerList);
         setRequests(requestList);
         setTariffs(tariffList);
         setTemperatureLogs(tempLogs);
+        setPowerSockets(socketList);
       })
       .catch((err) => {
         console.error('Lỗi tải dữ liệu điện container:', err);
@@ -691,18 +696,14 @@ export default function ReeferMonitoringPage() {
     const localIso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setPlugInTime(localIso);
 
-    // Tự động tìm giắc cắm điện trống đầu tiên trong 30 trụ điện Khu A
+    // Tự động tìm giắc cắm điện trống (AVAILABLE) đầu tiên từ danh sách quản trị
     const busySockets = new Set(
       sessions.filter(s => s.power_status === 'PLUGGED' && s.plug_socket_code).map(s => s.plug_socket_code)
     );
-    let autoSocket = 'R01';
-    for (let i = 1; i <= 30; i++) {
-      const code = `R${String(i).padStart(2, '0')}`;
-      if (!busySockets.has(code)) {
-        autoSocket = code;
-        break;
-      }
-    }
+    const availableSocket = powerSockets.find(
+      s => s.status === 'AVAILABLE' && !busySockets.has(s.socket_code)
+    );
+    const autoSocket = availableSocket?.socket_code || (powerSockets[0]?.socket_code || 'R01');
     setPlugSocketCode(autoSocket);
 
     setShowPlugModal(true);
@@ -1715,7 +1716,7 @@ export default function ReeferMonitoringPage() {
                     Vị trí Trụ / Giắc cắm điện 380V (Khu A) <span className="text-rose-500">*</span>
                   </label>
                   <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
-                    30 Trụ 3 pha (R01 - R30)
+                    {powerSockets.length} Trụ 3 pha
                   </span>
                 </div>
                 <select
@@ -1723,19 +1724,22 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setPlugSocketCode(e.target.value)}
                   className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-bold font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444] bg-white"
                 >
-                  {Array.from({ length: 30 }, (_, i) => {
-                    const code = `R${String(i + 1).padStart(2, '0')}`;
+                  {powerSockets.map((socket) => {
+                    const code = socket.socket_code;
                     const activeSession = sessions.find(
                       (s) => s.power_status === 'PLUGGED' && s.plug_socket_code === code
                     );
-                    const isBusy = Boolean(activeSession);
+                    const isBusy = Boolean(activeSession) || socket.status === 'IN_USE';
+                    const isMaintenance = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
+                    const isDisabled = (isBusy && activeSession?.container_visit_id !== selectedContId) || isMaintenance;
+
                     return (
                       <option 
                         key={code} 
                         value={code} 
-                        disabled={isBusy && activeSession?.container_visit_id !== selectedContId}
+                        disabled={isDisabled}
                       >
-                        {code} — {isBusy ? `🔴 Bận (${activeSession?.container_no})` : '🟢 Trống — Sẵn sàng (380V)'}
+                        {code} — {isMaintenance ? `⚠️ Đang bảo trì / Khóa (${socket.notes || 'Sự cố'})` : isBusy ? `🔴 Bận (${activeSession?.container_no || 'Đang cắm'})` : `🟢 Trống (${socket.voltage || '380V'} / ${socket.amperage || '32A'})`}
                       </option>
                     );
                   })}
