@@ -40,8 +40,24 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 12:00 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TRIỂN KHAI HOÀN THIỆN PHÂN HỆ KẾ TOÁN BẾN BÃI SƠN CẢNG (`/accounting`), BÀN GIAO TIỀN MẶT HIỆN TRƯỜNG, XUẤT HÓA ĐƠN GTGT DOANH NGHIỆP (MST) & CÁ NHÂN (CCCD 12 SỐ), THU HỒI CÔNG NỢ AP07 VÀ BÁO CÁO EXCEL ĐA SHEET (MIGRATION 28)**:
+- **Cập nhật lúc:** 14/10/2026 12:25 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN TẤT DỌN DẸP SẠCH TOÀN BỘ DỮ LIỆU TẠM & THỬ NGHIỆM TRÊN SUPABASE CLOUD — SẴN SÀNG VẬN HÀNH THỰC TẾ 100%**:
+  * Đã thực thi script dọn dẹp sạch toàn bộ các bảng giao dịch vận hành thử nghiệm trên Supabase Cloud DEV (`son-cang-yms-dev`):
+    - `app_vehicle_visits`: **0** xe
+    - `app_container_visits`: **0** cont
+    - `app_reefer_power_sessions`: **0** phiên điện
+    - `app_reefer_requests`: **0** yêu cầu cắm điện
+    - `app_charges`: **0** khoản thu
+    - `app_payments`: **0** phiếu thu (sổ cái sạch 100%)
+    - `app_cash_settlements` & `app_cash_settlement_items`: **0** đợt chốt
+    - `app_invoices`: **0** hóa đơn
+    - `app_vehicle_plate_changes` & `app_container_number_changes`: **0** lịch sử thay đổi
+    - `app_approval_requests`: **0** yêu cầu ngoại lệ
+    - `app_power_sockets`: **30/30 giắc cắm điện** đã được reset về trạng thái SẴN SÀNG (`AVAILABLE`).
+    - `app_audit_events`: Khởi tạo sự kiện `SYSTEM_INIT_REAL_RUN` xác nhận hệ thống bước vào giai đoạn vận hành bến bãi thực tế.
+  * **Bảo toàn 100% Master Data:** Toàn bộ danh mục nhân sự chuẩn V5 (`app_staff_users`), 9 biểu phí niêm yết (`app_tariffs`), 4 phân khu bãi (`app_yard_zones`), 7 loại xe (`app_vehicle_types`), vai trò (`app_roles`), quyền (`app_permissions`, `app_role_permissions`), khách hàng (`app_customers`) và cấu hình bãi (`app_yards`) được giữ nguyên vẹn.
+
+- **Mốc trước đó (14/10/2026 12:00):** **TRIỂN KHAI HOÀN THIỆN PHÂN HỆ KẾ TOÁN BẾN BÃI SƠN CẢNG (`/accounting`), BÀN GIAO TIỀN MẶT HIỆN TRƯỜNG, XUẤT HÓA ĐƠN GTGT DOANH NGHIỆP (MST) & CÁ NHÂN (CCCD 12 SỐ), THU HỒI CÔNG NỢ AP07 VÀ BÁO CÁO EXCEL ĐA SHEET (MIGRATION 28)**.
   1. **Backend Database & Security (Migration 28):**
      - Đã `npx supabase db push` thành công migration `20261014000028_accounting_settlement_and_invoicing.sql` lên Supabase Cloud DEV (`son-cang-yms-dev`).
      - Khởi tạo bộ phận `KE_TOAN` và vai trò `ACCOUNTANT` (Kế toán Bến bãi).

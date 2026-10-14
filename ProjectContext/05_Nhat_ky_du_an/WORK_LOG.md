@@ -1,5 +1,43 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 12:25 — Dọn Dẹp Toàn Bộ Dữ Liệu Tạm & Thử Nghiệm Chuẩn Bị Vận Hành Thực Tế
+
+- **Yêu cầu / nguồn:** Chỉ đạo từ Chủ dự án: *"OK xóa hết dữ liệu tạm chuẩn bị cho vận hành thực tế"*
+- **Phân tích yêu cầu & Thiết kế giải pháp:**
+  1. *Phân loại dữ liệu cần dọn dẹp (Operational Transactional Data):*
+     - Toàn bộ dữ liệu giao dịch phát sinh trong quá trình dev/test/UAT cần được đưa về 0 để khi bến bãi bắt đầu vận hành thật sẽ bắt đầu từ xe đầu tiên, cont đầu tiên, hóa đơn đầu tiên.
+     - Vô hiệu hóa tạm thời các trigger bảo vệ bất biến: `trg_payment_immutable` (trên `app_payments`) và `trg_sc_audit_immutable` (trên `app_audit_events`).
+     - Xóa các bảng giao dịch theo thứ tự ràng buộc khóa ngoại (Foreign Keys):
+       * Bảng con kế toán: `app_cash_settlement_items` -> `app_cash_settlements`, `app_invoices`
+       * Sổ cái thanh toán: `app_payments` -> `app_charges`
+       * Điện container: `app_reefer_power_sessions` -> `app_reefer_requests`
+       * Container & Phương tiện: `app_container_number_changes` -> `app_container_visits` -> `app_vehicle_plate_changes` -> `app_vehicle_visits`
+       * Ngoại lệ & Audit: `app_approval_requests` -> `app_audit_events`
+     - Đặt lại toàn bộ 30 giắc cắm điện `app_power_sockets` về trạng thái `AVAILABLE`.
+     - Kích hoạt lại toàn bộ các trigger bảo vệ bất biến.
+     - Tạo bản ghi audit event `SYSTEM_INIT_REAL_RUN` đánh dấu mốc khởi đầu vận hành thực tế.
+  2. *Bảo toàn 100% Master Data (Không được xóa):*
+     - `app_staff_users`: 8 nhân viên chuẩn V5
+     - `app_tariffs`: 9 biểu phí niêm yết
+     - `app_power_sockets`: 30 giắc cắm
+     - `app_yard_zones`: 4 phân khu bãi
+     - `app_vehicle_types`: 7 loại xe
+     - `app_roles`, `app_permissions`, `app_role_permissions`, `app_departments`, `app_yards`, `app_customers`.
+- **Kiểm thử & Xác minh:**
+  - Thực thi script SQL an toàn qua `npx supabase db query --linked -f scripts/clear_data.sql`.
+  - Kiểm tra lại bằng `scripts/count_data.sql`:
+    * `app_vehicle_visits`: **0**
+    * `app_container_visits`: **0**
+    * `app_reefer_power_sessions`: **0**
+    * `app_reefer_requests`: **0**
+    * `app_charges`: **0**
+    * `app_payments`: **0**
+    * `app_cash_settlements`: **0**
+    * `app_invoices`: **0**
+    * `app_power_sockets`: **30 AVAILABLE**
+    * `app_audit_events`: **1** (`SYSTEM_INIT_REAL_RUN`)
+- **Trạng thái:** Hoàn tất, cơ sở dữ liệu đã sạch 100%, sẵn sàng bàn giao vận hành thực tế.
+
 ## 2026-10-14 12:00 — Triển Khai Hoàn Thiện Phân Hệ Kế Toán Bến Bãi Sơn Cảng (/accounting) Kèm Bàn Giao Tiền Mặt, Xuất Hóa Đơn MST/CCCD 12 Số, Thu Nợ AP07 và Excel 4 Sheet (Migration 28)
 
 - **Yêu cầu / nguồn:** Phê duyệt từ Chủ dự án kèm file đối soát thực tế kế toán Ánh Bé: *"Phương án A (Cho phép xuất hóa đơn trước)... cái này OK... Phương án B (Bắt buộc trả nợ xong mới xuất HĐ)... chuẩn rồi... tôi gửi b file kế toán đang theo dõi nhé... ok triển khai đ"*
