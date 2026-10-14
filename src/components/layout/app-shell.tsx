@@ -29,6 +29,7 @@ import {
   Clock,
   Building2,
   KeyRound,
+  Landmark,
 } from 'lucide-react';
 import { ChangePasswordModal } from '@/components/modals/change-password-modal';
 
@@ -150,6 +151,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       section: 'FINANCE',
     },
     {
+      name: 'Kế toán & Hóa đơn',
+      href: '/accounting',
+      icon: Landmark,
+      permissionsAny: [
+        'accounting.shift_cash.collect',
+        'accounting.invoice.prepare',
+        'accounting.debt.manage',
+        'accounting.reports.view',
+        'admin.roles.manage'
+      ],
+      badge: 'Quỹ / HĐ',
+      section: 'FINANCE',
+    },
+    {
       name: 'Thống kê & Báo cáo',
       href: '/reports',
       icon: BarChart3,
@@ -226,6 +241,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         return 'bg-amber-100 text-amber-800 border-amber-300';
       case 'SYS_ADMIN':
         return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'ACCOUNTANT':
+        return 'bg-teal-100 text-teal-800 border-teal-300';
       default:
         return 'bg-slate-100 text-slate-800 border-slate-300';
     }
