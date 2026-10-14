@@ -40,24 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 08:40 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **CHỈNH SỬA HÌNH THỨC THU TIỀN VÉ (PAID) + CHUẨN HÓA ĐỊNH DẠNG HH:MM DD/MM/YYYY + BỎ TỰ ĐỘNG ĐIỀN CONT TẠI CỔNG RA (MIGRATION 25)**:
-  1. **Hiệu chỉnh Lượt xe & Hình thức thu tiền vé ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
-     * Khi vé xe ở trạng thái `Đã thu (PAID)`, Lead An ninh & Admin được phép chọn/chỉnh sửa **Hình thức thu tiền vé**: `💵 Tiền mặt (CASH)`, `🏦 Chuyển khoản (TRANSFER)`, `📝 Khác / Đối trừ (OTHER)`.
-     * Tự động đồng bộ hình thức thu vào bảng thực thu bất biến `app_payments` và `app_charges`.
-  2. **Migration 25 (`20261014000025_adjust_vehicle_visit_payment_method.sql`):**
-     * Cập nhật RPC `sc_adjust_vehicle_visit` hỗ trợ tham số `p_payment_method text DEFAULT NULL`.
-     * Tự động tạo hoặc cập nhật bản ghi trong sổ thu bất biến `app_payments` khi ca trưởng/admin hiệu chỉnh lượt xe đã thu vé, bảo vệ audit log ca trực. Đã `npx supabase db push` thành công lên Supabase Cloud.
-  3. **Chuẩn hóa triệt để định dạng Ngày giờ `hh:mm dd/MM/yyyy` (24h) chống lộn ngược locale:**
-     * Loại bỏ hoàn toàn native `<input type="datetime-local">` (vốn bị Windows/Chrome locale US lộn thành `10/12/2026 08:45 PM` gây nhầm lẫn ngày 12 tháng 10 thành ngày 10 tháng 12).
-     * Thay bằng bộ nhập thời gian trực quan định dạng văn bản chuẩn Việt Nam `hh:mm dd/MM/yyyy` (VD: `20:45 12/10/2026`), đi kèm các nút chọn nhanh: `[Hiện tại]`, `[-1h]`, `[-2h]`, `[-6h]`, `[-1 ngày]`, `[Ca sáng 06:00]`, `[Ca tối 18:00]`.
-     * Hiển thị badge xác nhận chữ tiếng Việt rõ ràng: `⏱️ 20:45 — Ngày 12 tháng 10 năm 2026 (12/10/2026)`.
-     * Áp dụng thống nhất cho cả Giờ vào cổng (Backdate), Giờ xuất bãi, và Tiếp nhận cont lẻ hạ bãi.
-  4. **Kiểm soát Xuất bãi Cổng ra ([`/exit`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/exit/page.tsx)) — Không tự động điền cont lúc vào:**
-     * Khi mở modal xuất bãi, hệ thống **không tự động gán container lúc vào bãi** (`selectedTrailingContId = ''`), bắt buộc nhân viên An ninh bốt cổng ra phải đối soát thực tế tại hiện trường.
-     * Hiển thị khối gợi ý nổi bật: `[📌 Cont lúc vào bãi: TLCU1234567]` kèm nút **`[👉 Chọn nhanh cont này]`**. Nhân viên chỉ bấm nút này sau khi đã đối soát đúng thực tế, hoặc có thể chọn/tìm cont khác trong bãi hoặc chọn xe lẻ không chở cont.
-     * Nút xuất bãi tự động khóa nếu xe có kéo cont nhưng chưa chọn container nào.
-  5. **Xác minh kỹ thuật:** `npx supabase db push` thành công, `npm run build` exit code 0 (18/18 routes tĩnh thành công 100%).
+- **Cập nhật lúc:** 14/10/2026 08:55 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHUẨN HÓA QUY TRÌNH CẮM ĐIỆN CONTAINER LẠNH CCKB + BẮT BUỘC NHẬP SỐ GIỜ CẮM + ĐIỀU HƯỚNG BẾN BÃI VỀ CCKB**:
+  1. **Bắt buộc nhập số giờ cắm điện Container lạnh ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
+     * Trong Modal "Tạo yêu cầu Cắm điện Container" và Modal "Cắm điện Container vào trụ", khi chọn chế độ cắm theo giờ (`HOURLY`), trường **Số giờ dự kiến cắm * (Bắt buộc)** chuyển thành bắt buộc nhập (tối thiểu 1 giờ, mặc định 8 giờ). Chặn gửi form nếu bỏ trống hoặc <= 0.
+     * Cảnh báo trực quan màu đỏ: `⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h)`.
+  2. **Điều chỉnh bố cục các nút bấm Modal Tạo yêu cầu cắm điện ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):**
+     * Đổi vị trí footer modal theo chuẩn thao tác thuận tay:
+       - `[ Đóng ]`: Căn bên **TRÁI**.
+       - `[ ⚡ Lưu & Cắm điện ngay ]`: Chuyển vào **GIỮA** (nút xanh nổi bật kích hoạt ngay trong 1 chạm).
+       - `[ Tạo yêu cầu cắm điện ]`: Chuyển sang **PHẢI CÙNG** (nút xanh tím lưu trạng thái yêu cầu chờ kích hoạt).
+  3. **Không cho phép cắm điện container trực tiếp tại sơ đồ Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):**
+     * Bỏ hoàn toàn Modal cắm điện nhanh và các thao tác cắm cont tắt tại sơ đồ trụ điện bến bãi để tránh vượt quyền Thương vụ CCKB và làm sai quy trình theo dõi nhiệt độ, mặt hàng, cước phí.
+     * Tại Modal chi tiết trụ điện (khi trụ ở trạng thái `AVAILABLE`), thay bằng khối thông báo nghiệp vụ rõ ràng và nút bấm điều hướng chuyên nghiệp:
+       `[ 👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ Rxx) ]` dẫn trực tiếp sang `/reefer?socket=Rxx`.
+  4. **Xác minh kỹ thuật:** `npm run build` exit code 0, 18/18 routes biên dịch thành công 100%. Không có cảnh báo hay lỗi kiểu dữ liệu.
 
 - **Mốc trước đó (14/10/2026 08:25):** **XÓA BỎ HOÀN TOÀN HARDCODE 30 TRỤ ĐIỆN — NÂNG CẤP TOÀN DIỆN QUẢN TRỊ TRỤ ĐIỆN 380V ĐỘNG & TƯƠNG TÁC THỜI GIAN THỰC (MIGRATION 24)**.
 

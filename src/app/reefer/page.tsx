@@ -730,7 +730,7 @@ export default function ReeferMonitoringPage() {
     const localIso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setPlugInTime(localIso);
     setPlugPowerMode(req.power_mode || 'HOURLY');
-    setPlugExpectedHours(req.expected_hours || '');
+    setPlugExpectedHours(req.expected_hours || 8);
     setPlugNotes(
       req.customer_name ? `Khách: ${req.customer_name}${req.notes ? ` | ${req.notes}` : ''}` : (req.notes || '')
     );
@@ -760,6 +760,11 @@ export default function ReeferMonitoringPage() {
     e.preventDefault();
     if (!selectedContId) {
       setPlugError('Vui lòng chọn container cần cắm điện.');
+      return;
+    }
+
+    if (plugPowerMode === 'HOURLY' && (!plugExpectedHours || Number(plugExpectedHours) <= 0)) {
+      setPlugError('Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1 giờ) khi chọn chế độ cắm theo giờ!');
       return;
     }
 
@@ -945,7 +950,7 @@ export default function ReeferMonitoringPage() {
     setReqCargo('');
     setReqTemp('-18°C');
     setReqMode('HOURLY');
-    setReqExpectedHours('');
+    setReqExpectedHours(8);
     setReqNotes('');
     setReqContFilterQuery('');
     setShowCreateReqModal(true);
@@ -965,6 +970,12 @@ export default function ReeferMonitoringPage() {
       setReqError('Container được chọn không còn trong bãi hoặc đã cắm điện.');
       return;
     }
+
+    if (reqMode === 'HOURLY' && (!reqExpectedHours || Number(reqExpectedHours) <= 0)) {
+      setReqError('Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1 giờ) khi chọn chế độ cắm theo giờ!');
+      return;
+    }
+
     const cleanCont = yardCont.container_no_current;
     const matchedYardContId = yardCont.id;
 
@@ -1007,6 +1018,11 @@ export default function ReeferMonitoringPage() {
     const matchedYardCont = unpluggedContainersInYard.find((c) => c.id === reqSelectedYardContId);
     if (!matchedYardCont) {
       setReqError('Vui lòng chọn container đang trong bãi!');
+      return;
+    }
+
+    if (reqMode === 'HOURLY' && (!reqExpectedHours || Number(reqExpectedHours) <= 0)) {
+      setReqError('Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1 giờ) khi chọn chế độ cắm theo giờ!');
       return;
     }
 
@@ -1826,7 +1842,7 @@ export default function ReeferMonitoringPage() {
                 <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold text-amber-950">
-                      Số giờ dự kiến cắm (Nhập nhanh / Tùy chọn)
+                      Số giờ dự kiến cắm * (Bắt buộc)
                     </label>
                     <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 font-mono">
                       Đơn giá {reeferHourlyRate.toLocaleString('vi-VN')} đ/h
@@ -1836,6 +1852,7 @@ export default function ReeferMonitoringPage() {
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
+                      required={plugPowerMode === 'HOURLY'}
                       min={1}
                       max={168}
                       value={plugExpectedHours}
@@ -1843,7 +1860,7 @@ export default function ReeferMonitoringPage() {
                         const v = e.target.value;
                         setPlugExpectedHours(v === '' ? '' : Math.max(1, parseInt(v) || 1));
                       }}
-                      placeholder="Tùy chọn"
+                      placeholder="VD: 8"
                       className="w-24 px-2.5 py-1 border border-amber-300 rounded text-sm font-bold bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
                     />
                     <div className="flex items-center gap-1 flex-wrap">
@@ -1880,8 +1897,8 @@ export default function ReeferMonitoringPage() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-amber-800 italic pt-1 border-t border-amber-200">
-                      Chưa nhập số giờ dự kiến (hệ thống sẽ chốt cước chính xác khi thực hiện thao tác rút điện).
+                    <p className="text-[11px] text-rose-700 font-semibold pt-1 border-t border-amber-200 flex items-center gap-1">
+                      <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
                 </div>
@@ -2928,12 +2945,12 @@ export default function ReeferMonitoringPage() {
                 </div>
               </div>
 
-              {/* KHI CHỌN CẮM THEO GIỜ: ĐIỀN SỐ GIỜ DỰ KIẾN (TÙY CHỌN) */}
+              {/* KHI CHỌN CẮM THEO GIỜ: ĐIỀN SỐ GIỜ DỰ KIẾN (BẮT BUỘC) */}
               {reqMode === 'HOURLY' && (
                 <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2.5 animate-in fade-in">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold text-amber-950">
-                      Số giờ dự kiến cắm (Nhập nhanh / Tùy chọn)
+                      Số giờ dự kiến cắm * (Bắt buộc)
                     </label>
                     <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 font-mono">
                       Biểu phí {reeferHourlyRate.toLocaleString('vi-VN')} đ/h
@@ -2943,6 +2960,7 @@ export default function ReeferMonitoringPage() {
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
+                      required={reqMode === 'HOURLY'}
                       min={1}
                       max={168}
                       value={reqExpectedHours}
@@ -2950,7 +2968,7 @@ export default function ReeferMonitoringPage() {
                         const v = e.target.value;
                         setReqExpectedHours(v === '' ? '' : Math.max(1, parseInt(v) || 1));
                       }}
-                      placeholder="Tùy chọn"
+                      placeholder="VD: 8"
                       className="w-24 px-2.5 py-1 border border-amber-300 rounded text-sm font-bold bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
                     />
                     <div className="flex items-center gap-1 flex-wrap">
@@ -2985,8 +3003,8 @@ export default function ReeferMonitoringPage() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-amber-800 italic pt-1 border-t border-amber-200">
-                      Chưa nhập số giờ dự kiến (hệ thống sẽ tính cước chuẩn khi thực hiện rút điện).
+                    <p className="text-[11px] text-rose-700 font-semibold pt-1 border-t border-amber-200 flex items-center gap-1">
+                      <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
                 </div>
@@ -3005,33 +3023,36 @@ export default function ReeferMonitoringPage() {
                 />
               </div>
 
-              <div className="flex justify-end items-center gap-2 pt-2 border-t border-slate-200 flex-wrap">
+              {/* THỨ TỰ CÁC NÚT: ĐÓNG (TRÁI) -> LƯU & CẮM ĐIỆN NGAY (GIỮA) -> TẠO YÊU CẦU CẮM ĐIỆN (PHẢI CÙNG) */}
+              <div className="flex justify-between items-center gap-2 pt-2 border-t border-slate-200 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setShowCreateReqModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
                 >
                   Đóng
                 </button>
-                <button
-                  type="submit"
-                  disabled={unpluggedContainersInYard.length === 0}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] disabled:bg-slate-300 rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Tạo yêu cầu cắm điện</span>
-                </button>
-                {unpluggedContainersInYard.length > 0 && canPlugIn && (
+                <div className="flex items-center gap-2">
+                  {unpluggedContainersInYard.length > 0 && canPlugIn && (
+                    <button
+                      type="button"
+                      onClick={handleSaveAndPlugImmediately}
+                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      title="Tạo yêu cầu và kích hoạt cắm điện ngay trong 1 chạm"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-current" />
+                      <span>⚡ Lưu & Cắm điện ngay</span>
+                    </button>
+                  )}
                   <button
-                    type="button"
-                    onClick={handleSaveAndPlugImmediately}
-                    className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
-                    title="Tạo yêu cầu và kích hoạt cắm điện ngay trong 1 chạm"
+                    type="submit"
+                    disabled={unpluggedContainersInYard.length === 0}
+                    className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] disabled:bg-slate-300 rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
                   >
-                    <Zap className="w-3.5 h-3.5 fill-current" />
-                    <span>⚡ Lưu & Cắm điện ngay</span>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Tạo yêu cầu cắm điện</span>
                   </button>
-                )}
+                </div>
               </div>
             </form>
           </div>

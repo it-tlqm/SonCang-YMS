@@ -36,7 +36,8 @@ import {
   Zap,
   Wrench,
   PowerOff,
-  Check
+  Check,
+  Info
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -248,13 +249,6 @@ export default function YardMonitorPage() {
   const [socketActionError, setSocketActionError] = useState<string>('');
   const [isSubmittingSocket, setIsSubmittingSocket] = useState<boolean>(false);
   const [socketFilterStatus, setSocketFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'FAULTY'>('ALL');
-
-  // Modal cắm điện nhanh vào trụ đang chọn
-  const [isQuickPlugModalOpen, setIsQuickPlugModalOpen] = useState<boolean>(false);
-  const [quickPlugContId, setQuickPlugContId] = useState<string>('');
-  const [quickPlugHours, setQuickPlugHours] = useState<number | ''>('');
-  const [quickPlugNotes, setQuickPlugNotes] = useState<string>('');
-  const [isSubmittingQuickPlug, setIsSubmittingQuickPlug] = useState<boolean>(false);
 
   // Tự động đóng Action Dropdown khi click ra ngoài
   useEffect(() => {
@@ -664,54 +658,6 @@ export default function YardMonitorPage() {
       handleReload();
     } catch (err: any) {
       alert(err?.message || 'Lỗi ngoại lệ khi cập nhật trạng thái.');
-    }
-  };
-
-  const handleOpenQuickPlugModal = (socket: PowerSocket) => {
-    setSelectedSocket(socket);
-    // Tìm các cont lạnh trong bãi chưa cắm
-    const unplugged = containers.filter(c => c.container_type === 'RF' && !c.is_plugged && c.status === 'IN_YARD');
-    setQuickPlugContId(unplugged[0]?.id || '');
-    setQuickPlugHours(8);
-    setQuickPlugNotes(`Cắm điện tại trụ ${socket.socket_code}`);
-    setIsQuickPlugModalOpen(true);
-  };
-
-  const handleConfirmQuickPlug = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSocket || !quickPlugContId) {
-      alert('Vui lòng chọn container lạnh cần cắm điện.');
-      return;
-    }
-    const cont = containers.find(c => c.id === quickPlugContId);
-    if (!cont) return;
-
-    setIsSubmittingQuickPlug(true);
-    try {
-      const res = await repository.plugInReefer({
-        yardId: yardId || '20000000-0000-0000-0000-000000000001',
-        containerVisitId: cont.id,
-        containerNo: cont.container_no_current,
-        pluggedInAt: new Date().toISOString(),
-        plugSocketCode: selectedSocket.socket_code,
-        notes: quickPlugNotes.trim() ? `[Dự kiến: ${quickPlugHours || 8}h] ${quickPlugNotes.trim()}` : `[Dự kiến: ${quickPlugHours || 8}h] Cắm tại trụ ${selectedSocket.socket_code}`,
-        operatorId: user?.id || 'lead-cckb',
-      });
-
-      if (res.error) {
-        alert(res.error);
-        setIsSubmittingQuickPlug(false);
-        return;
-      }
-
-      await repository.setPowerSocketStatus(selectedSocket.socket_code, 'IN_USE');
-      setIsQuickPlugModalOpen(false);
-      setSelectedSocket(null);
-      handleReload();
-    } catch (err: any) {
-      alert(err?.message || 'Lỗi khi cắm điện container.');
-    } finally {
-      setIsSubmittingQuickPlug(false);
     }
   };
 
@@ -4075,7 +4021,7 @@ export default function YardMonitorPage() {
       )}
 
       {/* MODAL 1: CHI TIẾT & THAO TÁC TRỤ ĐIỆN 380V (POWER SOCKET) */}
-      {selectedSocket && !isQuickPlugModalOpen && !isEditSocketModalOpen && (
+      {selectedSocket && !isEditSocketModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
           <div className="bg-white rounded-lg max-w-lg w-full p-5 border border-slate-300 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
@@ -4188,25 +4134,24 @@ export default function YardMonitorPage() {
             {/* TRƯỜNG HỢP TRỤ TRỐNG */}
             {selectedSocket.status === 'AVAILABLE' && (
               <div className="space-y-3 pt-1">
-                <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-300 text-xs text-emerald-900 flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-amber-50 rounded-lg border border-amber-300 text-xs text-amber-900 flex items-start gap-2">
+                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Trụ điện sẵn sàng phục vụ container lạnh</span>
-                    <p className="text-[11px] text-emerald-800 mt-0.5">
-                      Bạn có thể chọn nhanh container lạnh đang có mặt trong bãi để cắm điện vào trụ này.
+                    <span className="font-bold">Quy trình cắm điện Container Lạnh</span>
+                    <p className="text-[11px] text-amber-800 mt-0.5">
+                      Theo quy trình chuẩn Sơn Cảng, thao tác lập phiếu cắm điện, quản lý nhiệt độ và tính cước được thực hiện tại phân hệ <b>Thương vụ CCKB</b>.
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenQuickPlugModal(selectedSocket)}
-                    className="py-2 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shadow-2xs col-span-2"
+                  <Link
+                    href={`/reefer?socket=${encodeURIComponent(selectedSocket.socket_code)}`}
+                    className="py-2 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shadow-2xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
-                    <span>⚡ Cắm điện Container vào trụ này</span>
-                  </button>
+                    <span>👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
+                  </Link>
 
                   <button
                     type="button"
@@ -4499,109 +4444,6 @@ export default function YardMonitorPage() {
         </div>
       )}
 
-      {/* MODAL 4: CẮM ĐIỆN NHANH CONTAINER VÀO TRỤ ĐANG CHỌN */}
-      {isQuickPlugModalOpen && selectedSocket && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-amber-100 text-amber-800">
-                  <Zap className="w-4 h-4 fill-current text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Cắm điện Container vào trụ {selectedSocket.socket_code}
-                  </h3>
-                  <span className="text-[10px] text-slate-500">{selectedSocket.socket_name} (380V/32A)</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsQuickPlugModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleConfirmQuickPlug} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Chọn Container lạnh đang trong bãi *
-                </label>
-                {(() => {
-                  const unplugged = containers.filter(c => c.container_type === 'RF' && !c.is_plugged && c.status === 'IN_YARD');
-                  if (unplugged.length === 0) {
-                    return (
-                      <div className="p-2.5 bg-rose-50 text-rose-700 rounded border border-rose-200 font-semibold">
-                        Không còn container lạnh nào chưa cắm điện trong bãi!
-                      </div>
-                    );
-                  }
-                  return (
-                    <select
-                      value={quickPlugContId}
-                      onChange={(e) => setQuickPlugContId(e.target.value)}
-                      required
-                      className="w-full px-3 py-2 border border-slate-300 rounded font-mono font-bold text-xs bg-white focus:outline-none focus:border-[#0A9444]"
-                    >
-                      {unplugged.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.container_no_current} — {formatContainerSpec(c.container_size, c.container_type)} ({c.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}) {c.inbound_license_plate ? `[Xe: ${c.inbound_license_plate}]` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  );
-                })()}
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Số giờ dự kiến cắm (Tùy chọn)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={168}
-                  value={quickPlugHours}
-                  onChange={(e) => setQuickPlugHours(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
-                  placeholder="VD: 8, 12, 24 giờ..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold bg-white focus:outline-none focus:border-[#0A9444]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Ghi chú hiện trường</label>
-                <textarea
-                  rows={2}
-                  value={quickPlugNotes}
-                  onChange={(e) => setQuickPlugNotes(e.target.value)}
-                  placeholder="Tình trạng máy lạnh, nhiệt độ cài đặt..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#0A9444] bg-white resize-none"
-                />
-              </div>
-
-              <div className="pt-2 flex space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsQuickPlugModalOpen(false)}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingQuickPlug}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50 flex items-center justify-center gap-1"
-                >
-                  <Zap className="w-4 h-4 fill-current" />
-                  <span>{isSubmittingQuickPlug ? 'Đang kích hoạt...' : 'Xác nhận cắm điện'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,5 +1,32 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-14 08:55 — Chuẩn Hóa Quy Trình Cắm Điện Container Lạnh CCKB: Bắt Buộc Nhập Số Giờ, Đổi Vị Trí Nút Bấm & Bỏ Cắm Điện Trực Tiếp Tại Bến Bãi
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *"k đc cắm ngay tại đây Cắm điện Container vào trụ R26"* (trên sơ đồ bãi /yard không cho cắm tắt cont trực tiếp vào trụ).
+  2. *"chỗ số giờ bắt buộc nhập:"* (Modal Tạo yêu cầu cắm điện & Cắm điện container ở /reefer: bắt buộc nhập số giờ cắm khi chọn tính theo giờ HOURLY).
+  3. *"Tạo yêu cầu cắm điện -> chuyển nút này sang phải cùng | ⚡ Lưu & Cắm điện ngay -> chuyển nút này vào giữa"* (sắp xếp lại thứ tự các nút bấm ở Modal tạo yêu cầu cắm điện /reefer).
+- **Phân tích vấn đề & Nghiệp vụ Sơn Cảng:**
+  - *Vấn đề 1 (Bến bãi không được cắm điện tắt):* Nghiệp vụ Sơn Cảng quy định cắm điện container lạnh gắn liền với trách nhiệm thương vụ CCKB (chủ hàng, nhiệt độ cài đặt, giám sát mặt hàng đông lạnh, đơn giá và tính cước điện). Nếu để nút cắm tắt container tại trang Bến bãi (`/yard`) sẽ vi phạm phân quyền và bỏ qua các trường thông tin thương vụ quan trọng.
+  - *Vấn đề 2 (Bắt buộc số giờ cắm):* Khi cắm theo giờ thực tế (`HOURLY`), nhân viên phải nhập số giờ dự kiến để hệ thống ước tính cước và hỗ trợ điều phối ca trực theo dõi thời điểm cần rút điện hoặc gia hạn.
+  - *Vấn đề 3 (Thứ tự nút bấm footer):* Nút "Đóng" bên trái, nút "⚡ Lưu & Cắm điện ngay" ở giữa và nút "Tạo yêu cầu cắm điện" ở phải cùng giúp luồng thao tác logic và thuận mắt.
+- **Giải pháp triển khai:**
+  1. *Thương vụ CCKB ([`/reefer`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/reefer/page.tsx)):*
+     - Bắt buộc nhập `reqExpectedHours` và `plugExpectedHours` (validation `min={1}`, `required={mode === 'HOURLY'}`, mặc định 8h).
+     - Đổi nhãn thành `Số giờ dự kiến cắm * (Bắt buộc)`.
+     - Thêm cảnh báo trực quan: `⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h)`.
+     - Bố trí lại 3 nút footer theo đúng yêu cầu:
+       * `[ Đóng ]`: Căn bên TRÁI.
+       - `[ ⚡ Lưu & Cắm điện ngay ]`: Chuyển vào GIỮA (nút xanh lá nổi bật).
+       - `[ Tạo yêu cầu cắm điện ]`: Chuyển sang PHẢI CÙNG (nút xanh tím).
+  2. *Sơ đồ Bến bãi ([`/yard`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx)):*
+     - Loại bỏ hoàn toàn Modal cắm điện nhanh và các state/handlers cắm cont tắt tại `/yard`.
+     - Tại Modal chi tiết trụ điện (khi trụ trống `AVAILABLE`), thay bằng hộp thông báo quy trình: *"Theo quy trình chuẩn Sơn Cảng, thao tác lập phiếu cắm điện, quản lý nhiệt độ và tính cước được thực hiện tại phân hệ Thương vụ CCKB"*.
+     - Thêm nút liên kết điều hướng trực tiếp: `[ 👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ Rxx) ]` dẫn sang `/reefer?socket=Rxx`.
+- **Kiểm thử & Xác minh:**
+  - `npm run build`: Exit code 0, 18/18 routes tối ưu thành công 100%, không phát sinh lỗi TypeScript.
+- **Trạng thái:** Hoàn tất, nghiệp vụ phân hệ CCKB và Bến bãi chuẩn hóa theo đúng quy trình.
+
 ## 2026-10-14 08:40 — Chỉnh Sửa Hình Thức Thu Tiền Vé (PAID), Chuẩn Hóa Định Dạng hh:mm dd/MM/yyyy & Cổng Ra Không Tự Điền Cont Lúc Vào (Migration 25)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
