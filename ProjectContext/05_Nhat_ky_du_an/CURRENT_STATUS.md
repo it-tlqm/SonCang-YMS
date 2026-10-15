@@ -40,8 +40,34 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 07:25 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH RÀ SOÁT TOÀN DIỆN & NÂNG CẤP ĐỒNG BỘ 100% CÁC MÀN HÌNH SANG MODERN ENTERPRISE WORKSPACE (DS-02)**:
+- **Cập nhật lúc:** 15/10/2026 11:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH TỐI ƯU HÓA VÀ ĐỒNG BỘ TRIỆT ĐỂ GIAO DIỆN 4 MÀN HÌNH VẬN HÀNH (THU PHÍ, CẮM ĐIỆN, BẾN BÃI, CỔNG RA) THEO CHUẨN DS-02**:
+  * **Hạng mục tối ưu & đồng bộ:**
+    1. **Sổ cái Thu phí & Công nợ (`/billing`):**
+       - Loại bỏ hoàn toàn khối 3 thẻ KPI lặp dư thừa trong tab SỔ CÁI; thanh chỉ số 4 KPI phía trên là nguồn duy nhất.
+       - Mở rộng bảng Sổ cái ra toàn màn hình (`w-full`), chấm dứt tình trạng chèn ép bảng bởi cột Biểu phí bến bãi.
+       - Tích hợp biểu phí dịch vụ và quy tắc phân công thu tiền vào khối thu gọn tương tác (`<details>`), bảo toàn 100% tài liệu nghiệp vụ mà không làm chật chội bảng kê.
+       - Chuẩn hóa bộ lọc, tìm kiếm và sửa badge nhãn `Xe lẻ` chính xác theo từng loại vé.
+    2. **Theo dõi Cắm rút điện Container (`/reefer`):**
+       - Chấm dứt tình trạng xếp chồng 2 bảng dữ liệu ("Cont sẵn sàng cắm điện" đè lên "Theo dõi cắm rút điện").
+       - Nâng cấp tab `Sẵn sàng cắm điện` thành tab độc lập ngang hàng trong `WorkspaceTabs`.
+       - Thêm banner thông báo 1 dòng trang nhã trên tab phiên cắm điện khi có cont chưa cắm kèm nút chuyển nhanh 1-chạm.
+       - Hiện thực hóa đầy đủ bảng dữ liệu DS-02 cho tất cả các tab `Sẵn sàng cắm điện`, `Yêu cầu dịch vụ`, `Nhật ký nhiệt độ`.
+    3. **Quản lý Bến bãi & Container (`/yard`):**
+       - Loại bỏ hoàn toàn icon emoji thô ráp (⏱️, ⚠️, 🚨), thay thế bằng Lucide icon SVG chuẩn xác.
+       - Chuẩn hóa các chip badge `HÀNG`, `RỖNG`, `CHƯA XÁC ĐỊNH` và `Thời gian lưu bãi` theo token viền pastel DS-02.
+       - Cập nhật toàn bộ bảng Cặp xe-cont, Bảng Container và Bảng Phương tiện với container viền `#E5E9F0`, nền header `#F8F9FB`.
+    4. **Kiểm soát Xuất bãi & Cổng ra (`/exit`):**
+       - Tối ưu hóa triệt để cột "Container liên kết": loại bỏ việc xếp chồng 2 huy hiệu trùng lặp ("Đã rút điện/Chưa cắm" cùng "✓ Không cắm điện (Miễn duyệt)"). Cont thường/khô hiển thị huy hiệu `Không dùng điện` tinh tế; Cont lạnh hiển thị rõ trạng thái điện và duyệt CCKB.
+       - Tối ưu hóa cột "Điều kiện xuất bãi": tinh gọn các hộp viền dày cộm thành 1 huy hiệu tổng quan (`Sẵn sàng xuất bãi` / `Chưa đủ điều kiện`) cùng dòng checklist trực quan nhỏ gọn (`Vé: ✓ • Điện: ✓ • CCKB: ✓`).
+       - Đồng bộ toàn diện bảng An ninh Cổng ra, Thương vụ CCKB và Lịch sử xe xuất bãi theo bảng màu và viền DS-02.
+  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
+    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+    - Giữ nguyên 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+  * **Bước tiếp theo:** Báo cáo kết quả tối ưu tới Chủ dự án và hỗ trợ kiểm thử nghiệp vụ thực tế.
+
+- **Mốc trước đó (15/10/2026 07:25):** **HOÀN THÀNH RÀ SOÁT TOÀN DIỆN & NÂNG CẤP ĐỒNG BỘ 100% CÁC MÀN HÌNH SANG MODERN ENTERPRISE WORKSPACE (DS-02)**:
   * **Hạng mục rà soát & nâng cấp bổ sung:**
     1. **Màn hình Thống kê & Báo cáo (`/reports`):** Tái cấu trúc hoàn chỉnh theo chuẩn DS-02 5 vùng làm việc (Secondary Panel chọn khoảng thời gian & bộ phận thực thu, Main Workspace với 4 tab chuyên sâu: Doanh thu & Dòng tiền, Lưu lượng xe & 7 loại xe, Container & Điện lạnh, Phân khu & Công suất bãi; Right Context Inspector tổng hợp chỉ số điều hành trọng yếu; Modal xem trước bản in chuẩn hành chính).
     2. **Màn hình Đăng nhập Công vụ (`/login`):** Thiết kế lại giao diện tối giản Enterprise, chuẩn hóa bảng màu DS-02 (nền `#F8F9FB`, viền `#E5E9F0`, nhận diện thương hiệu `#0A9444`), loại bỏ hoàn toàn các thuật ngữ kỹ thuật nội bộ (Supabase, Database, PostgreSQL RLS) khỏi nhãn hiển thị và chip bảo mật.
@@ -52,7 +78,6 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
     - Server Production thử nghiệm: Chạy ổn định trên cổng 3005 (`task-1184`), phản hồi **HTTP 200 OK trên toàn bộ 15 routes**.
     - An toàn nghiệp vụ: Bảo toàn nguyên vẹn RBAC V5, schema database, migrations 001–028, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
     - Chuẩn hóa ngôn ngữ: Sử dụng danh xưng nghiệp vụ **Phần mềm quản lý bến bãi/cảng cạn**, không sử dụng từ "BOS".
-  * **Bước tiếp theo:** Bàn giao giao diện hoàn thiện và tiếp nhận ý kiến đóng góp từ Chủ dự án.
 
 - **Mốc trước đó (14/10/2026 18:15):** **HOÀN THÀNH CHUYỂN ĐỔI SANG SUPABASE AUTH THỰC TẾ & LOẠI BỎ TOÀN BỘ TÀI KHOẢN TẠM TẠI MÀN HÌNH ĐĂNG NHẬP**:
   * **Loại bỏ giao diện Đăng nhập tạm (1-chạm):** Đã xóa toàn bộ khối demo chọn vai trò 1-chạm trên `/login`, chuyển sang màn hình đăng nhập chuẩn doanh nghiệp với Email công vụ + Mật khẩu (bảo mật SSL, tích hợp trực tiếp Supabase Cloud PostgreSQL RLS).

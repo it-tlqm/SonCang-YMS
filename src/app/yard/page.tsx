@@ -944,30 +944,30 @@ export default function YardMonitorPage() {
 
   // Badge cảnh báo thời gian lưu bãi (Dwell Time Heatmap Badge)
   const renderDwellBadge = (entryAt: string) => {
-    if (!entryAt) return <span className="text-slate-400">—</span>;
+    if (!entryAt) return <span className="text-[#98A2B3]">—</span>;
     const hours = getDwellHours(entryAt);
     const durationText = formatDurationInYard(entryAt);
 
     if (hours >= 48) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 border border-rose-300 text-rose-800 animate-pulse shadow-2xs" title={`Đã lưu ${durationText} - Cảnh báo tồn bãi quá 48h!`}>
-          <span className="h-1.5 w-1.5 rounded-full bg-rose-600"></span>
-          🚨 {durationText} (≥48h)
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20]" title={`Đã lưu ${durationText} - Cảnh báo tồn bãi quá 48h!`}>
+          <AlertCircle className="w-3 h-3 text-[#D92D20]" />
+          <span>{durationText} (≥48h)</span>
         </span>
       );
     }
     if (hours >= 24) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 border border-amber-300 text-amber-900 shadow-2xs" title={`Đã lưu ${durationText} - Cần theo dõi tồn bãi (≥24h)`}>
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-          ⚠️ {durationText} (≥24h)
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] border border-[#FEDF89] text-[#B54708]" title={`Đã lưu ${durationText} - Cần theo dõi tồn bãi (≥24h)`}>
+          <AlertTriangle className="w-3 h-3 text-[#B54708]" />
+          <span>{durationText} (≥24h)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 border border-emerald-200 text-emerald-800" title={`Đã lưu ${durationText}`}>
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-        ⏱️ {durationText}
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] border border-[#E5E9F0] text-[#667085]" title={`Đã lưu ${durationText}`}>
+        <Clock className="w-3 h-3 text-[#667085]" />
+        <span>{durationText}</span>
       </span>
     );
   };
@@ -1213,20 +1213,20 @@ export default function YardMonitorPage() {
     switch (status) {
       case 'HANG':
         return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
             HÀNG
           </span>
         );
       case 'RONG':
         return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
             RỖNG
           </span>
         );
       case 'CHUA_XAC_DINH':
       default:
         return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
             Chưa xác định
           </span>
         );
@@ -1533,9 +1533,9 @@ export default function YardMonitorPage() {
 
         <div className="p-4 sm:p-5 space-y-4">
           {/* Search Box & Filters */}
-          <div className="flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-between gap-2">
+          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-between gap-2">
             <div className="relative flex-1 sm:w-64 min-w-[200px]">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+              <Search className="w-4 h-4 text-[#98A2B3] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
@@ -1547,30 +1547,29 @@ export default function YardMonitorPage() {
                     ? 'Tìm số container, xe vào...'
                     : 'Tìm biển số xe, tài xế...'
                 }
-                className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded focus:outline-none focus:border-[#0A9444] bg-white"
+                className="w-full pl-9 pr-3 py-1.5 text-xs font-mono border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
               />
             </div>
 
             {/* Bộ lọc cho Tab Tổng hợp */}
             {activeTab === 'pairs' && (
               <>
-                <div className="flex items-center space-x-1 border border-slate-300 rounded px-2 py-1 bg-white text-xs">
-                  <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <div className="flex items-center space-x-1.5">
                   <select
                     value={filterPairType}
                     onChange={(e) => setFilterPairType(e.target.value)}
-                    className="bg-transparent text-slate-700 font-bold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
                   >
                     <option value="ALL">Tất cả xe & cont</option>
                     <option value="PAIRED">Xe chở Container</option>
                     <option value="NO_CONT">Xe lẻ không Cont</option>
                   </select>
                 </div>
-                <div className="flex items-center space-x-1 border border-slate-300 rounded px-2 py-1 bg-white text-xs">
+                <div className="flex items-center space-x-1.5">
                   <select
                     value={filterCargo}
                     onChange={(e) => setFilterCargo(e.target.value)}
-                    className="bg-transparent text-slate-700 font-bold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
                   >
                     <option value="ALL">Mọi loại hàng</option>
                     <option value="HANG">Có HÀNG</option>
@@ -1583,14 +1582,13 @@ export default function YardMonitorPage() {
 
             {/* Bộ lọc cho Tab Container */}
             {activeTab === 'containers' && (
-              <div className="flex items-center space-x-1 border border-slate-300 rounded px-2 py-1 bg-white text-xs">
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <div className="flex items-center space-x-1.5">
                 <select
                   value={filterCargo}
                   onChange={(e) => setFilterCargo(e.target.value)}
-                  className="bg-transparent text-slate-700 font-bold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
                 >
-                  <option value="ALL">Tất cả</option>
+                  <option value="ALL">Tất cả loại hàng</option>
                   <option value="HANG">Có HÀNG</option>
                   <option value="RONG">RỖNG</option>
                   <option value="CHUA_XAC_DINH">Chưa XĐ</option>
@@ -1600,17 +1598,16 @@ export default function YardMonitorPage() {
 
             {/* Bộ lọc Dwell Time cho các tab (Pairs, Containers, Vehicles) */}
             {activeTab !== 'zones' && (
-              <div className="flex items-center space-x-1 border border-slate-300 rounded px-2 py-1 bg-white text-xs">
-                <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <div className="flex items-center space-x-1.5">
                 <select
                   value={filterDwell}
                   onChange={(e) => setFilterDwell(e.target.value as 'ALL' | 'OVER_24H' | 'OVER_48H')}
-                  className="bg-transparent text-slate-700 font-bold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
                   title="Lọc nhanh xe & container theo thời gian lưu bãi"
                 >
                   <option value="ALL">Mọi thời gian lưu bãi</option>
-                  <option value="OVER_24H">⚠️ Lưu bãi ≥ 24h</option>
-                  <option value="OVER_48H">🚨 Tồn bãi ≥ 48h (Quá hạn)</option>
+                  <option value="OVER_24H">Lưu bãi ≥ 24h</option>
+                  <option value="OVER_48H">Tồn bãi ≥ 48h (Quá hạn)</option>
                 </select>
               </div>
             )}
@@ -1618,15 +1615,15 @@ export default function YardMonitorPage() {
 
       {/* 3. BẢNG TỔNG HỢP XE — CONTAINER (CẶP GHÉP MAPPING BẾN BÃI) */}
       {activeTab === 'pairs' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
           {filteredPairs.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs font-semibold">
+            <div className="p-8 text-center text-[#98A2B3] text-xs font-medium">
               Không tìm thấy cặp xe — container nào phù hợp điều kiện tìm kiếm.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="px-3.5 py-2.5">Phương tiện vào</th>
                     <th className="px-3.5 py-2.5">Container đi kèm</th>
@@ -1636,20 +1633,20 @@ export default function YardMonitorPage() {
                     <th className="px-3.5 py-2.5 text-right">Tác vụ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 font-medium">
+                <tbody className="divide-y divide-[#E5E9F0]">
                   {filteredPairs.map((item) => {
                     const v = item.vehicle;
                     const c = item.container;
                     const entryTime = v?.entry_at || c?.inbound_at || '';
 
                     return (
-                      <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={item.id} className="hover:bg-[#F8F9FB] transition-colors">
                         {/* 1. Phương tiện vào */}
                         <td className="px-3.5 py-2.5">
                           {v ? (
-                            <div className="space-y-0.5">
-                              <div className="flex items-center space-x-1.5">
-                                <span className="font-mono font-bold text-slate-900 text-sm">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-1.5 flex-wrap">
+                                <span className="font-mono font-bold text-[#17202E] text-sm">
                                   {v.license_plate}
                                 </span>
                                 {(v.plate_changes_count || 0) > 0 && (
@@ -1657,32 +1654,31 @@ export default function YardMonitorPage() {
                                     type="button"
                                     onClick={() => handleOpenVehHistoryModal(v)}
                                     title="Xem lịch sử đổi biển số xe"
-                                    className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors cursor-pointer border border-amber-300"
+                                    className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors cursor-pointer border border-[#FEDF89]"
                                   >
                                     <History className="w-2.5 h-2.5" />
                                     <span>{v.plate_changes_count} lần đổi</span>
                                   </button>
                                 )}
                               </div>
-                              <div className="text-[11px] text-slate-600 font-medium">
-                                {getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}
-                              </div>
-                              <div className="flex items-center space-x-1.5 pt-0.5">
-                                <span className="font-mono font-bold text-[#0A9444] text-[11px]">
+                              <div className="flex items-center space-x-2 text-[11px] text-[#667085] flex-wrap">
+                                <span>{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</span>
+                                <span>•</span>
+                                <span className="font-mono font-semibold text-[#17202E]">
                                   {v.ticket_amount !== null
                                     ? `${v.ticket_amount.toLocaleString('vi-VN')} đ`
                                     : 'Chưa có giá'}
                                 </span>
                                 {v.ticket_payment_status === 'EXEMPT' ? (
-                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
                                     Miễn phí
                                   </span>
                                 ) : v.ticket_payment_status === 'PAID' ? (
-                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                                     Đã thu
                                   </span>
                                 ) : (
-                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
                                     Chưa thu
                                   </span>
                                 )}
@@ -1696,17 +1692,17 @@ export default function YardMonitorPage() {
                                 return (
                                   <div className="space-y-0.5">
                                     <div className="flex items-center space-x-1.5 flex-wrap">
-                                      <span className="font-mono font-bold text-slate-900 text-sm bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
+                                      <span className="font-mono font-bold text-[#17202E] text-sm bg-[#F5F7FA] px-2 py-0.5 rounded border border-[#E5E9F0]">
                                         {inboundPlate}
                                       </span>
-                                      <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                      <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
                                         Xe kéo vào (Đã ra)
                                       </span>
                                     </div>
-                                    <div className="text-[11px] text-slate-600 font-medium">
+                                    <div className="text-[11px] text-[#667085] font-medium">
                                       {histVeh ? getVehicleTypeName(histVeh.vehicle_type_name || histVeh.vehicle_type) : 'Xe chở lúc vào cổng'}
                                     </div>
-                                    <div className="text-[10px] text-slate-500 font-mono">
+                                    <div className="text-[10px] text-[#98A2B3] font-mono">
                                       {histVeh?.exit_at ? (
                                         <span>Rời: {new Date(histVeh.exit_at).toLocaleTimeString('vi-VN')} {new Date(histVeh.exit_at).toLocaleDateString('vi-VN')}</span>
                                       ) : (
@@ -1718,10 +1714,10 @@ export default function YardMonitorPage() {
                               }
                               return (
                                 <div className="space-y-0.5">
-                                  <div className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
+                                  <div className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
                                     <span>Tồn bãi (Chưa rõ xe kéo)</span>
                                   </div>
-                                  <div className="text-[10px] text-slate-400 italic">
+                                  <div className="text-[10px] text-[#98A2B3] italic">
                                     Hạ bãi trước ca trực
                                   </div>
                                 </div>
@@ -1735,11 +1731,11 @@ export default function YardMonitorPage() {
                           {c ? (
                             <div className="space-y-1">
                               <div className="flex items-center space-x-1.5 flex-wrap gap-1">
-                                <span className="font-mono font-bold text-blue-900 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-300 text-xs">
+                                <span className="font-mono font-bold text-[#326DD8] bg-[#EFF8FF] px-2 py-0.5 rounded border border-[#B2DDFF] text-xs">
                                   {c.container_no_current}
                                 </span>
                                 {item.totalPairedConts && item.totalPairedConts > 1 && (
-                                  <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded border border-purple-200">
+                                  <span className="text-[10px] bg-[#F5F7FA] text-[#667085] font-semibold px-1.5 py-0.5 rounded border border-[#E5E9F0]">
                                     Cont #{item.pairIndex}/{item.totalPairedConts} (Cặp 20ft)
                                   </span>
                                 )}
@@ -1748,29 +1744,30 @@ export default function YardMonitorPage() {
                                     type="button"
                                     onClick={() => handleOpenHistoryModal(c)}
                                     title="Xem lịch sử đổi số container"
-                                    className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors cursor-pointer border border-amber-300"
+                                    className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors cursor-pointer border border-[#FEDF89]"
                                   >
                                     <History className="w-2.5 h-2.5" />
                                     <span>{c.number_changes_count} lần đổi</span>
                                   </button>
                                 )}
                               </div>
-                              <div className="flex items-center space-x-2 text-[11px] text-slate-600 font-medium flex-wrap">
+                              <div className="flex items-center space-x-2 text-[11px] text-[#667085] flex-wrap">
                                 <span>{formatContainerSpec(c.container_size, c.container_type)}</span>
                                 {c.is_plugged && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                                    ⚡ {c.slot_code ? `Giắc: ${c.slot_code}` : 'Đang cắm điện'}
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                    <Zap className="w-3 h-3 text-[#B54708]" />
+                                    <span>{c.slot_code ? `Giắc: ${c.slot_code}` : 'Đang cắm điện'}</span>
                                   </span>
                                 )}
                                 {!c.is_plugged && c.slot_code && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
                                     Ô/Giắc: {c.slot_code}
                                   </span>
                                 )}
                               </div>
                             </div>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200 italic">
+                            <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
                               Không mang cont (Xe lẻ)
                             </span>
                           )}
@@ -1778,17 +1775,17 @@ export default function YardMonitorPage() {
 
                         {/* 3. Tình trạng Hàng hóa */}
                         <td className="px-3.5 py-2.5">
-                          {c ? renderCargoBadge(c.cargo_status) : <span className="text-slate-300">—</span>}
+                          {c ? renderCargoBadge(c.cargo_status) : <span className="text-[#98A2B3]">—</span>}
                         </td>
 
                         {/* 4. Thời gian vào & Lưu bãi */}
                         <td className="px-3.5 py-2.5">
-                          <div className="space-y-0.5">
-                            <div className="text-slate-700 text-[11px] font-mono">
+                          <div className="space-y-1">
+                            <div className="text-[#667085] text-xs font-mono">
                               {entryTime ? new Date(entryTime).toLocaleTimeString('vi-VN') : '—'} {entryTime ? new Date(entryTime).toLocaleDateString('vi-VN') : ''}
                             </div>
                             {entryTime && (
-                              <div className="pt-0.5">
+                              <div>
                                 {renderDwellBadge(entryTime)}
                               </div>
                             )}
@@ -1798,36 +1795,40 @@ export default function YardMonitorPage() {
                         {/* 5. Tài xế & CCCD / Ghi chú */}
                         <td className="px-3.5 py-2.5">
                           {v ? (
-                            <div className="space-y-0.5 text-[11px]">
-                              <div className="font-bold text-slate-800">
-                                {v.driver_name || 'Chưa có tên'} {v.driver_phone ? `— ${v.driver_phone}` : ''}
+                            <div className="space-y-0.5 text-xs">
+                              <div className="font-semibold text-[#17202E]">
+                                {v.driver_name ? (
+                                  <span>{v.driver_name} {v.driver_phone ? `— ${v.driver_phone}` : ''}</span>
+                                ) : (
+                                  <span className="text-[#98A2B3] italic">Chưa cập nhật</span>
+                                )}
                               </div>
                               {v.note && (
-                                <div className="text-slate-500 text-[10px] max-w-xs truncate" title={v.note}>
+                                <div className="text-[#667085] text-[11px] max-w-xs truncate" title={v.note}>
                                   {v.note}
                                 </div>
                               )}
                             </div>
                           ) : item.inboundVehicleHistory?.driver_name ? (
-                            <div className="space-y-0.5 text-[11px]">
-                              <div className="font-bold text-slate-800">
+                            <div className="space-y-0.5 text-xs">
+                              <div className="font-semibold text-[#17202E]">
                                 {item.inboundVehicleHistory.driver_name} {item.inboundVehicleHistory.driver_phone ? `— ${item.inboundVehicleHistory.driver_phone}` : ''}
                               </div>
-                              <div className="text-slate-500 text-[10px]">
+                              <div className="text-[#667085] text-[11px]">
                                 (Lái xe đã chở cont vào bãi)
                               </div>
                               {item.inboundVehicleHistory.note && (
-                                <div className="text-slate-500 text-[10px] max-w-xs truncate" title={item.inboundVehicleHistory.note}>
+                                <div className="text-[#667085] text-[11px] max-w-xs truncate" title={item.inboundVehicleHistory.note}>
                                   {item.inboundVehicleHistory.note}
                                 </div>
                               )}
                             </div>
                           ) : c?.notes ? (
-                            <div className="text-slate-600 text-[11px] max-w-xs truncate" title={c.notes}>
+                            <div className="text-[#667085] text-xs max-w-xs truncate" title={c.notes}>
                               {c.notes}
                             </div>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-[#98A2B3]">—</span>
                           )}
                         </td>
 
@@ -2030,15 +2031,15 @@ export default function YardMonitorPage() {
 
       {/* 4. BẢNG CONTAINER */}
       {activeTab === 'containers' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
           {filteredContainers.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs font-semibold">
+            <div className="p-8 text-center text-[#98A2B3] text-xs font-medium">
               Không tìm thấy container nào trong bãi phù hợp điều kiện lọc.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="px-3.5 py-2.5">Số Container</th>
                     <th className="px-3.5 py-2.5">Kích cỡ / Loại</th>
@@ -2048,12 +2049,12 @@ export default function YardMonitorPage() {
                     <th className="px-3.5 py-2.5 text-right">Tác vụ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 font-medium">
+                <tbody className="divide-y divide-[#E5E9F0]">
                   {filteredContainers.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center space-x-2">
-                          <span className="font-mono font-bold text-slate-900 text-sm">
+                          <span className="font-mono font-bold text-[#17202E] text-sm">
                             {c.container_no_current}
                           </span>
                           {(c.number_changes_count || 0) > 0 && (
@@ -2061,7 +2062,7 @@ export default function YardMonitorPage() {
                               type="button"
                               onClick={() => handleOpenHistoryModal(c)}
                               title="Xem lịch sử đổi số container"
-                              className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors cursor-pointer border border-amber-300"
+                              className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors cursor-pointer border border-[#FEDF89]"
                             >
                               <History className="w-2.5 h-2.5" />
                               <span>{c.number_changes_count} lần đổi</span>
@@ -2069,7 +2070,7 @@ export default function YardMonitorPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-slate-700 font-medium">
+                      <td className="px-3.5 py-2.5 text-[#667085] font-medium">
                         {formatContainerSpec(c.container_size, c.container_type)}
                       </td>
                       <td className="px-3.5 py-2.5">
@@ -2078,22 +2079,22 @@ export default function YardMonitorPage() {
                       <td className="px-3.5 py-2.5">
                         {c.inbound_license_plate ? (
                           <div className="space-y-0.5">
-                            <span className="font-mono font-bold text-slate-900 text-xs bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
+                            <span className="font-mono font-bold text-[#17202E] text-xs bg-[#F5F7FA] px-1.5 py-0.5 rounded border border-[#E5E9F0]">
                               {c.inbound_license_plate}
                             </span>
                             {allVehicleMap.get(c.inbound_vehicle_visit_id || '')?.status === 'EXITED' && (
-                              <span className="text-[10px] text-amber-700 block font-semibold">
+                              <span className="text-[10px] text-[#B54708] block font-semibold">
                                 (Xe đã rời bãi)
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-slate-500 italic text-[11px]">Tồn bãi (Chưa rõ xe)</span>
+                          <span className="text-[#98A2B3] italic text-[11px]">Tồn bãi (Chưa rõ xe)</span>
                         )}
                       </td>
                       <td className="px-3.5 py-2.5">
                         <div className="space-y-1">
-                          <div className="text-slate-600 font-mono text-[11px]">
+                          <div className="text-[#667085] font-mono text-[11px]">
                             {new Date(c.inbound_at).toLocaleString('vi-VN')}
                           </div>
                           <div>{renderDwellBadge(c.inbound_at)}</div>
@@ -2105,7 +2106,7 @@ export default function YardMonitorPage() {
                             <button
                               type="button"
                               onClick={() => handleOpenCorrectionModal(c)}
-                              className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors font-bold text-[11px] cursor-pointer border border-amber-300"
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors font-semibold text-xs cursor-pointer border border-[#FEDF89]"
                             >
                               <Edit3 className="w-3 h-3" />
                               <span>Sửa số</span>
@@ -2115,14 +2116,14 @@ export default function YardMonitorPage() {
                             <button
                               type="button"
                               onClick={() => handleOpenCargoModal(c)}
-                              className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors font-bold text-[11px] cursor-pointer border border-blue-300"
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#EFF8FF] text-[#326DD8] hover:bg-[#D1E9FF] transition-colors font-semibold text-xs cursor-pointer border border-[#B2DDFF]"
                             >
                               <Edit3 className="w-3 h-3" />
                               <span>HÀNG/RỖNG</span>
                             </button>
                           )}
                           {!canCorrectContainer && !canUpdateCargo && (
-                            <span className="text-[11px] text-slate-400 font-semibold italic">
+                            <span className="text-[11px] text-[#98A2B3] font-medium italic">
                               Chỉ xem
                             </span>
                           )}
@@ -2139,15 +2140,15 @@ export default function YardMonitorPage() {
 
       {/* 4. BẢNG PHƯƠNG TIỆN */}
       {activeTab === 'vehicles' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
           {filteredVehicles.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs font-semibold">
+            <div className="p-8 text-center text-[#98A2B3] text-xs font-medium">
               Không tìm thấy phương tiện nào đang trong bãi.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="px-3.5 py-2.5">Biển số xe</th>
                     <th className="px-3.5 py-2.5">Loại xe</th>
@@ -2159,10 +2160,10 @@ export default function YardMonitorPage() {
                     <th className="px-3.5 py-2.5 text-right">Tác vụ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 font-medium">
+                <tbody className="divide-y divide-[#E5E9F0]">
                   {filteredVehicles.map((v) => (
-                    <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-3.5 py-2.5 font-mono font-bold text-slate-900 text-sm">
+                    <tr key={v.id} className="hover:bg-[#F8F9FB] transition-colors">
+                      <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E] text-sm">
                         <div className="flex items-center space-x-1.5">
                           <span>{v.license_plate}</span>
                           {(v.plate_changes_count || 0) > 0 && (
@@ -2170,7 +2171,7 @@ export default function YardMonitorPage() {
                               type="button"
                               onClick={() => handleOpenVehHistoryModal(v)}
                               title="Xem lịch sử đổi biển số xe"
-                              className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors cursor-pointer border border-amber-300 font-sans"
+                              className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors cursor-pointer border border-[#FEDF89] font-sans"
                             >
                               <History className="w-2.5 h-2.5" />
                               <span>{v.plate_changes_count} lần đổi</span>
@@ -2178,7 +2179,7 @@ export default function YardMonitorPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-slate-700 font-medium">
+                      <td className="px-3.5 py-2.5 text-[#667085] font-medium">
                         <div>{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</div>
                         {(() => {
                           const vPlate = v.license_plate?.trim().toUpperCase();
@@ -2193,7 +2194,7 @@ export default function YardMonitorPage() {
                               {attachedConts.map((c, idx) => (
                                 <span
                                   key={c.id || idx}
-                                  className="font-mono text-[10px] font-bold text-blue-900 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200"
+                                  className="font-mono text-[10px] font-semibold text-[#326DD8] bg-[#EFF8FF] px-1.5 py-0.2 rounded border border-[#B2DDFF]"
                                 >
                                   {attachedConts.length > 1 ? `#${idx + 1}: ` : ''}
                                   {c.container_no_current} ({c.container_size || '40'}ft)
@@ -2203,33 +2204,33 @@ export default function YardMonitorPage() {
                           );
                         })()}
                       </td>
-                      <td className="px-3.5 py-2.5 font-mono text-[11px] text-slate-600">
+                      <td className="px-3.5 py-2.5 font-mono text-[11px] text-[#667085]">
                         {v.ticket_code || '—'}
                       </td>
-                      <td className="px-3.5 py-2.5 font-mono font-bold text-[#0A9444]">
+                      <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E]">
                         {v.ticket_amount !== null ? `${v.ticket_amount.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
                       </td>
                       <td className="px-3.5 py-2.5">
                         {v.ticket_payment_status === 'EXEMPT' ? (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
                             Miễn phí
                           </span>
                         ) : v.ticket_payment_status === 'PAID' ? (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                             Đã thu
                           </span>
                         ) : (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
                             Chưa thu
                           </span>
                         )}
                       </td>
-                      <td className="px-3.5 py-2.5 text-slate-700">
+                      <td className="px-3.5 py-2.5 text-[#17202E]">
                         {v.driver_name || '—'} {v.driver_phone ? `(${v.driver_phone})` : ''}
                       </td>
                       <td className="px-3.5 py-2.5">
                         <div className="space-y-1">
-                          <div className="text-slate-600 font-mono text-[11px]">
+                          <div className="text-[#667085] font-mono text-[11px]">
                             {new Date(v.entry_at).toLocaleString('vi-VN')}
                           </div>
                           <div>{renderDwellBadge(v.entry_at)}</div>
@@ -2240,7 +2241,7 @@ export default function YardMonitorPage() {
                           {v.ticket_payment_status === 'UNPAID' && canCollectTicket && (
                             <Link
                               href="/billing"
-                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors shrink-0"
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-semibold text-xs shadow-2xs transition-colors shrink-0"
                               title="Chuyển sang thu phí vé cổng"
                             >
                               <span>Thu phí</span>
@@ -2255,7 +2256,7 @@ export default function YardMonitorPage() {
                                 e.stopPropagation();
                                 setOpenActionDropdownId(openActionDropdownId === v.id ? null : v.id);
                               }}
-                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-colors cursor-pointer"
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-[#F8F9FB] text-[#17202E] font-medium text-xs border border-[#E5E9F0] shadow-2xs transition-colors cursor-pointer"
                               title="Mở menu thao tác phương tiện"
                             >
                               <span>Thao tác</span>

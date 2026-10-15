@@ -913,35 +913,35 @@ export default function ExitClearancePage() {
       {/* TAB 1: AN NINH CỔNG RA VẬT LÝ — KIỂM SOÁT XUẤT BÃI THEO TỪNG XE          */}
       {/* ========================================================================= */}
       {activeTab === 'GATE_EXIT' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
-          <div className="p-3 border-b border-slate-300 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+          <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#0A9444]" />
               An ninh Cổng ra: Phương tiện đang trong bãi
             </h2>
-            <span className="text-[11px] text-slate-500 font-medium">
+            <span className="text-[11px] text-[#667085] font-medium">
               Kiểm soát theo xe: Xác nhận xe rời bãi, đối soát cont kéo ra, tiền điện & phí lưu bãi
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>
-                  <th className="px-3 py-2.5">Biển số xe / Mã vé</th>
-                  <th className="px-3 py-2.5">Loại phương tiện</th>
-                  <th className="px-3 py-2.5">Thời gian vào bãi</th>
-                  <th className="px-3 py-2.5">Tài xế / SĐT</th>
-                  <th className="px-3 py-2.5">Vé vào cổng</th>
-                  <th className="px-3 py-2.5">Container liên kết</th>
-                  <th className="px-3 py-2.5">Điều kiện xuất bãi</th>
-                  <th className="px-3 py-2.5 text-right">Thao tác</th>
+                  <th className="px-3.5 py-2.5">Biển số xe / Mã vé</th>
+                  <th className="px-3.5 py-2.5">Loại phương tiện</th>
+                  <th className="px-3.5 py-2.5">Thời gian vào bãi</th>
+                  <th className="px-3.5 py-2.5">Tài xế / SĐT</th>
+                  <th className="px-3.5 py-2.5">Vé vào cổng</th>
+                  <th className="px-3.5 py-2.5">Container liên kết</th>
+                  <th className="px-3.5 py-2.5">Điều kiện xuất bãi</th>
+                  <th className="px-3.5 py-2.5 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-[#E5E9F0]">
                 {filteredVehicles.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                    <td colSpan={8} className="px-4 py-8 text-center text-[#98A2B3] text-xs font-medium">
                       Không có phương tiện nào đang ở trong bãi phù hợp với tìm kiếm.
                     </td>
                   </tr>
@@ -965,47 +965,47 @@ export default function ExitClearancePage() {
                     const isReadyForExit = isTicketOk && isPowerOk && isClearanceOk;
 
                     return (
-                      <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-3 py-2.5">
-                          <div className="font-mono font-bold text-slate-900 tracking-tight text-sm">{v.license_plate || 'Không biển số'}</div>
+                      <tr key={v.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5">
+                          <div className="font-mono font-bold text-[#17202E] tracking-tight text-sm">{v.license_plate || 'Không biển số'}</div>
                           {v.ticket_code && (
-                            <div className="text-[11px] text-slate-500 font-mono">Vé: {v.ticket_code}</div>
+                            <div className="text-[11px] text-[#667085] font-mono">Vé: {v.ticket_code}</div>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold border border-slate-200">
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <span className="px-2 py-0.5 rounded bg-[#F5F7FA] text-[#17202E] font-medium border border-[#E5E9F0]">
                             {getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-slate-600 font-mono">
+                        <td className="px-3.5 py-2.5 text-xs text-[#667085] font-mono">
                           {inDate.toLocaleTimeString('vi-VN')} {inDate.toLocaleDateString('vi-VN')}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
-                          <div className="font-semibold text-slate-800">{v.driver_name || 'Chưa cập nhật'}</div>
-                          <div className="text-slate-500 font-mono text-[11px]">{v.driver_phone || ''}</div>
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <div className="font-medium text-[#17202E]">{v.driver_name || 'Chưa cập nhật'}</div>
+                          <div className="text-[#667085] font-mono text-[11px]">{v.driver_phone || ''}</div>
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
+                        <td className="px-3.5 py-2.5 text-xs">
                           {v.ticket_payment_status === 'PAID' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-300">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                               <Check className="w-3 h-3" /> Đã thu ({v.ticket_amount?.toLocaleString() || 0}đ)
                             </span>
                           )}
                           {v.ticket_payment_status === 'EXEMPT' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-blue-50 text-blue-800 border border-blue-300">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
                               <Check className="w-3 h-3" /> Miễn phí (0đ)
                             </span>
                           )}
                           {v.ticket_payment_status === 'UNPAID' && (
                             <div className="space-y-1">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-amber-50 text-amber-800 border border-amber-300">
-                                <AlertTriangle className="w-3 h-3 text-amber-600" /> Chưa thu ({v.ticket_amount?.toLocaleString() || 0}đ)
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <AlertTriangle className="w-3 h-3 text-[#B54708]" /> Chưa thu ({v.ticket_amount?.toLocaleString() || 0}đ)
                               </span>
                               {canCollectTicket && (v.ticket_amount || 0) > 0 && (
                                 <div>
                                   <button
                                     type="button"
                                     onClick={() => handleOpenQuickCollectTicket(v)}
-                                    className="px-2 py-0.5 rounded text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-700 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                    className="px-2 py-0.5 rounded text-[10px] font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                                   >
                                     <CreditCard className="w-3 h-3" />
                                     <span>Thu vé ngay</span>
@@ -1015,104 +1015,98 @@ export default function ExitClearancePage() {
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
+                        <td className="px-3.5 py-2.5 text-xs">
                           {attachedCont ? (
-                            (() => {
-                              return (
-                                <div className="space-y-1">
-                                  <div className="font-mono font-bold text-slate-900 flex items-center gap-1.5">
-                                    <span>{attachedCont.container_no_current}</span>
-                                    <span className="text-[10px] px-1 py-0.5 bg-slate-100 rounded text-slate-600 font-sans font-semibold border border-slate-200">
-                                      {attachedCont.container_type || 'RF'}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    {isContPlugged ? (
-                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300 animate-pulse">
-                                        <Zap className="w-3 h-3 fill-rose-500 text-rose-500" /> Đang cắm điện
+                            <div className="space-y-1">
+                              <div className="font-mono font-bold text-[#17202E] flex items-center gap-1.5">
+                                <span>{attachedCont.container_no_current}</span>
+                                <span className="text-[10px] px-1.5 py-0.2 bg-[#F5F7FA] rounded text-[#667085] font-sans font-medium border border-[#E5E9F0]">
+                                  {attachedCont.container_type || 'RF'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1 flex-wrap">
+                                {isContPlugged ? (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] text-[#D92D20] border border-[#FECDCA] animate-pulse">
+                                    <Zap className="w-3 h-3 text-[#D92D20]" /> Đang cắm điện
+                                  </span>
+                                ) : isAttachedContReefer ? (
+                                  <>
+                                    <span className="text-[10px] text-[#667085] font-medium">Đã rút điện</span>
+                                    {attachedCont.clearance_status === 'CLEARED' && (
+                                      <span className="text-[10px] text-[#0A9444] font-semibold bg-[#ECFDF3] px-1.5 py-0.5 rounded border border-[#A6F4C5]">
+                                        ✓ Đã duyệt
                                       </span>
-                                    ) : (
-                                      <span className="text-[10px] text-slate-500 font-medium">Đã rút điện/Chưa cắm</span>
                                     )}
-                                    {!isAttachedContReefer ? (
-                                      <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-300">
-                                        ✓ Không cắm điện (Miễn duyệt)
+                                    {attachedCont.clearance_status === 'CLEARED_WITH_DEBT' && (
+                                      <span className="text-[10px] text-[#B54708] font-semibold bg-[#FFFAEB] px-1.5 py-0.5 rounded border border-[#FEDF89]">
+                                        Duyệt nợ
                                       </span>
-                                    ) : (
-                                      <>
-                                        {attachedCont.clearance_status === 'CLEARED' && (
-                                          <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-300">
-                                            ✓ Đã duyệt
-                                          </span>
-                                        )}
-                                        {attachedCont.clearance_status === 'CLEARED_WITH_DEBT' && (
-                                          <span className="text-[10px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300">
-                                            Duyệt nợ
-                                          </span>
-                                        )}
-                                        {(!attachedCont.clearance_status || attachedCont.clearance_status === 'PENDING') && (
-                                          <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300 font-semibold">
-                                            Chờ CCKB duyệt
-                                          </span>
-                                        )}
-                                      </>
                                     )}
-                                  </div>
-                                </div>
-                              );
-                            })()
+                                    {(!attachedCont.clearance_status || attachedCont.clearance_status === 'PENDING') && (
+                                      <span className="text-[10px] text-[#B54708] bg-[#FFFAEB] px-1.5 py-0.5 rounded border border-[#FEDF89] font-medium">
+                                        Chờ CCKB duyệt
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="text-[10px] text-[#667085] bg-[#F5F7FA] px-1.5 py-0.5 rounded border border-[#E5E9F0]">
+                                    Không dùng điện
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           ) : (
-                            <span className="text-slate-400 italic">Không mang cont</span>
+                            <span className="text-[#98A2B3] italic text-xs">Không mang cont</span>
                           )}
                         </td>
                         {/* Cột Điều kiện xuất bãi trực quan */}
-                        <td className="px-3 py-2.5 text-xs">
+                        <td className="px-3.5 py-2.5 text-xs">
                           <div className="space-y-1">
                             {isReadyForExit ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                                 <CheckCircle2 className="w-3 h-3 text-[#0A9444]" />
                                 <span>Sẵn sàng xuất bãi</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <AlertTriangle className="w-3 h-3 text-[#B54708]" />
                                 <span>Chưa đủ điều kiện</span>
                               </span>
                             )}
-                            <div className="flex items-center gap-1 flex-wrap text-[10px]">
-                              <span className={`px-1.5 py-0.2 rounded font-medium border ${
-                                isTicketOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200 font-bold'
-                              }`}>
+                            <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-[#667085]">
+                              <span className={isTicketOk ? 'text-[#0A9444] font-medium' : 'text-[#D92D20] font-semibold'}>
                                 Vé: {isTicketOk ? '✓' : 'Chưa thu'}
                               </span>
                               {attachedCont && (
-                                <span className={`px-1.5 py-0.2 rounded font-medium border ${
-                                  !isContPlugged ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200 font-bold animate-pulse'
-                                }`}>
-                                  Điện: {!isContPlugged ? '✓' : '⚡Cắm'}
-                                </span>
+                                <>
+                                  <span>•</span>
+                                  <span className={!isContPlugged ? 'text-[#0A9444] font-medium' : 'text-[#D92D20] font-semibold animate-pulse'}>
+                                    Điện: {!isContPlugged ? '✓' : '⚡Cắm'}
+                                  </span>
+                                </>
                               )}
                               {attachedCont && isAttachedContReefer && (
-                                <span className={`px-1.5 py-0.2 rounded font-medium border ${
-                                  isClearanceOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200 font-bold'
-                                }`}>
-                                  CCKB: {isClearanceOk ? '✓' : 'Chờ'}
-                                </span>
+                                <>
+                                  <span>•</span>
+                                  <span className={isClearanceOk ? 'text-[#0A9444] font-medium' : 'text-[#B54708] font-semibold'}>
+                                    CCKB: {isClearanceOk ? '✓' : 'Chờ duyệt'}
+                                  </span>
+                                </>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-2.5 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                           {canExitConfirm ? (
                             <button
                               onClick={() => handleOpenUnifiedExit(v)}
-                              className="px-2.5 py-1 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                              className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
                             >
                               <LogOut className="w-3.5 h-3.5" />
                               <span>Kiểm soát xuất bãi</span>
                             </button>
                           ) : (
-                            <span className="text-xs text-slate-400 italic">Chờ An ninh</span>
+                            <span className="text-xs text-[#98A2B3] italic">Chờ An ninh</span>
                           )}
                         </td>
                       </tr>
@@ -1129,33 +1123,33 @@ export default function ExitClearancePage() {
       {/* TAB 2: THƯƠNG VỤ CCKB DUYỆT ĐIỀU KIỆN XUẤT BÃI (CLEARANCE)               */}
       {/* ========================================================================= */}
       {activeTab === 'CLEARANCE' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
-          <div className="p-3 border-b border-slate-300 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+          <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-[#223873]" />
               Thương vụ CCKB: Kiểm soát tài chính & Duyệt xuất bãi Container
             </h2>
-            <span className="text-[11px] text-slate-500 font-medium">
+            <span className="text-[11px] text-[#667085] font-medium">
               Kiểm tra cước điện lạnh, công nợ, duyệt bảo lãnh trước khi container ra cổng
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>
-                  <th className="px-3 py-2.5">Số Container</th>
-                  <th className="px-3 py-2.5">Loại / Hàng</th>
-                  <th className="px-3 py-2.5">Thời gian vào bãi</th>
-                  <th className="px-3 py-2.5">Điều kiện xuất bãi</th>
-                  <th className="px-3 py-2.5">Phí lưu bãi tạm tính</th>
-                  <th className="px-3 py-2.5 text-right">Thao tác CCKB</th>
+                  <th className="px-3.5 py-2.5">Số Container</th>
+                  <th className="px-3.5 py-2.5">Loại / Hàng</th>
+                  <th className="px-3.5 py-2.5">Thời gian vào bãi</th>
+                  <th className="px-3.5 py-2.5">Điều kiện xuất bãi</th>
+                  <th className="px-3.5 py-2.5">Phí lưu bãi tạm tính</th>
+                  <th className="px-3.5 py-2.5 text-right">Thao tác CCKB</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-[#E5E9F0]">
                 {filteredContainers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                    <td colSpan={6} className="px-4 py-8 text-center text-[#98A2B3] text-xs font-medium">
                       Không có container nào đang ở trong bãi phù hợp.
                     </td>
                   </tr>
@@ -1169,74 +1163,74 @@ export default function ExitClearancePage() {
                     const isCleared = c.clearance_status === 'CLEARED' || c.clearance_status === 'CLEARED_WITH_DEBT';
 
                     return (
-                      <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-3 py-2.5">
-                          <div className="font-mono font-bold text-slate-900 tracking-tight text-sm">{c.container_no_current}</div>
+                      <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5">
+                          <div className="font-mono font-bold text-[#17202E] tracking-tight text-sm">{c.container_no_current}</div>
                           {c.inbound_license_plate && (
-                            <div className="text-[11px] text-slate-500 font-mono">Xe vào: {c.inbound_license_plate}</div>
+                            <div className="text-[11px] text-[#667085] font-mono">Xe vào: {c.inbound_license_plate}</div>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200 mr-1 text-[10px]">
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <span className="px-1.5 py-0.5 rounded bg-[#F5F7FA] text-[#667085] font-medium border border-[#E5E9F0] mr-1 text-[10px]">
                             {c.container_type || 'RF'}
                           </span>
-                          <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] border ${
+                          <span className={`px-1.5 py-0.5 rounded font-semibold text-[10px] border ${
                             c.cargo_status === 'HANG' 
-                              ? 'bg-amber-50 text-amber-800 border-amber-300' 
+                              ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]' 
                               : c.cargo_status === 'RONG'
-                              ? 'bg-blue-50 text-blue-800 border-blue-300'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                              ? 'bg-[#EFF8FF] text-[#326DD8] border-[#B2DDFF]'
+                              : 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
                           }`}>
                             {c.cargo_status === 'HANG' ? 'HÀNG' : c.cargo_status === 'RONG' ? 'RỖNG' : 'CHƯA RÕ'}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-slate-600 font-mono">
+                        <td className="px-3.5 py-2.5 text-xs text-[#667085] font-mono">
                           {inDate.toLocaleTimeString('vi-VN')} {inDate.toLocaleDateString('vi-VN')}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
+                        <td className="px-3.5 py-2.5 text-xs">
                           {(() => {
                             const isContReefer = reeferSessions.some(s => s.container_visit_id === c.id) ||
                               charges.some(ch => ch.container_visit_id === c.id && ch.charge_type === 'REEFER');
                             if (!isContReefer) {
                               return (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-300">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                                   <CheckCircle2 className="w-3 h-3" /> Không cắm điện (Miễn duyệt)
                                 </span>
                               );
                             }
                             if (c.clearance_status === 'CLEARED') {
                               return (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-300">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                                   <CheckCircle2 className="w-3 h-3" /> Đã duyệt (Đủ ĐK)
                                 </span>
                               );
                             }
                             if (c.clearance_status === 'CLEARED_WITH_DEBT') {
                               return (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-amber-50 text-amber-800 border border-amber-300" title={c.clearance_notes || ''}>
-                                  <AlertTriangle className="w-3 h-3 text-amber-600" /> Duyệt công nợ
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]" title={c.clearance_notes || ''}>
+                                  <AlertTriangle className="w-3 h-3 text-[#B54708]" /> Duyệt công nợ
                                 </span>
                               );
                             }
                             return (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-amber-50 text-amber-800 border border-amber-300">
-                                <Clock className="w-3 h-3 text-amber-600" /> Chờ CCKB duyệt
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-semibold text-[10px] bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <Clock className="w-3 h-3 text-[#B54708]" /> Chờ CCKB duyệt
                               </span>
                             );
                           })()}
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
-                          <span className="font-mono font-bold text-slate-800">
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <span className="font-mono font-bold text-[#17202E]">
                             {estFee === 0 ? '0 đ (Đêm đầu miễn)' : `${estFee.toLocaleString('vi-VN')} đ (${chargedNights} đêm)`}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                           {(() => {
                             const isContReefer = reeferSessions.some(s => s.container_visit_id === c.id) ||
                               charges.some(ch => ch.container_visit_id === c.id && ch.charge_type === 'REEFER');
                             if (!isContReefer) {
                               return (
-                                <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
+                                <span className="text-[10px] text-[#0A9444] font-semibold bg-[#ECFDF3] px-2 py-0.5 rounded border border-[#A6F4C5]">
                                   Miễn duyệt CCKB
                                 </span>
                               );
@@ -1245,15 +1239,15 @@ export default function ExitClearancePage() {
                               return canClearanceIssue ? (
                                 <button
                                   onClick={() => handleOpenClearance(c)}
-                                  className="px-2.5 py-1 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5b] rounded shadow-2xs transition-colors cursor-pointer"
+                                  className="px-3 py-1.5 text-xs font-semibold text-white bg-[#223873] hover:bg-[#1a2c5b] rounded-lg shadow-2xs transition-colors cursor-pointer"
                                 >
                                   Duyệt xuất bãi
                                 </button>
                               ) : (
-                                <span className="text-xs text-slate-400 italic">Chờ CCKB duyệt</span>
+                                <span className="text-xs text-[#98A2B3] italic">Chờ CCKB duyệt</span>
                               );
                             }
-                            return <span className="text-xs text-emerald-800 font-bold">✓ Đã duyệt</span>;
+                            return <span className="text-xs text-[#0A9444] font-semibold">✓ Đã duyệt</span>;
                           })()}
                         </td>
                       </tr>
@@ -1270,51 +1264,51 @@ export default function ExitClearancePage() {
       {/* TAB 3: LỊCH SỬ PHƯƠNG TIỆN ĐÃ XUẤT BÃI TRONG NGÀY                         */}
       {/* ========================================================================= */}
       {activeTab === 'EXITED_HISTORY' && (
-        <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
-          <div className="p-3 border-b border-slate-300 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+          <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-600" />
+              <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#0A9444]" />
                 Lịch sử Phương tiện đã rời bãi qua Cổng ra
               </h2>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+              <p className="text-[11px] text-[#667085] font-medium mt-0.5">
                 Tra cứu đối soát lượt xe đã hoàn tất thủ tục xuất bãi, thời gian lưu bãi và in lại biên lai
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded border border-emerald-300">
+              <span className="text-[11px] font-semibold px-2.5 py-1 bg-[#ECFDF3] text-[#0A9444] rounded-lg border border-[#A6F4C5]">
                 Tổng cộng: {exitedVehicles.length} lượt xe
               </span>
               <button
                 type="button"
                 onClick={() => exportExitedVehiclesToExcel(exitedVehicles)}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-blue-900 bg-blue-50 border border-blue-300 rounded font-bold hover:bg-blue-100 transition-colors cursor-pointer shadow-2xs"
+                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-[#17202E] bg-white border border-[#E5E9F0] rounded-lg font-medium hover:bg-[#F8F9FB] transition-colors cursor-pointer shadow-2xs"
                 title="Xuất Báo cáo Lịch sử xe xuất bãi sang file Excel (.xlsx)"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-3.5 h-3.5 text-[#326DD8]" />
                 <span>Xuất XLSX ({exitedVehicles.length})</span>
               </button>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>
-                  <th className="px-3 py-2.5">STT</th>
-                  <th className="px-3 py-2.5">Biển số xe / Loại xe</th>
-                  <th className="px-3 py-2.5">Thời gian vào bãi</th>
-                  <th className="px-3 py-2.5">Thời gian xuất bãi</th>
-                  <th className="px-3 py-2.5">Vé vào cổng</th>
-                  <th className="px-3 py-2.5">Cán bộ xác nhận</th>
-                  <th className="px-3 py-2.5">Ghi chú xuất bãi</th>
-                  <th className="px-3 py-2.5 text-right">Tác vụ</th>
+                  <th className="px-3.5 py-2.5">STT</th>
+                  <th className="px-3.5 py-2.5">Biển số xe / Loại xe</th>
+                  <th className="px-3.5 py-2.5">Thời gian vào bãi</th>
+                  <th className="px-3.5 py-2.5">Thời gian xuất bãi</th>
+                  <th className="px-3.5 py-2.5">Vé vào cổng</th>
+                  <th className="px-3.5 py-2.5">Cán bộ xác nhận</th>
+                  <th className="px-3.5 py-2.5">Ghi chú xuất bãi</th>
+                  <th className="px-3.5 py-2.5 text-right">Tác vụ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-[#E5E9F0]">
                 {exitedVehicles.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-xs text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-xs text-[#98A2B3] font-medium">
                       Chưa có phương tiện nào xuất bãi trong ca trực này.
                     </td>
                   </tr>
@@ -1330,26 +1324,26 @@ export default function ExitClearancePage() {
                       : `${Math.floor(durationMins / 60)}h ${durationMins % 60}p`;
 
                     return (
-                      <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-3 py-2.5 text-slate-400 font-mono">{idx + 1}</td>
-                        <td className="px-3 py-2.5">
-                          <div className="font-mono font-bold text-sm text-slate-900 tracking-tight">{v.license_plate}</div>
-                          <div className="text-[11px] text-slate-500">{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</div>
+                      <tr key={v.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5 text-[#98A2B3] font-mono">{idx + 1}</td>
+                        <td className="px-3.5 py-2.5">
+                          <div className="font-mono font-bold text-sm text-[#17202E] tracking-tight">{v.license_plate}</div>
+                          <div className="text-[11px] text-[#667085]">{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</div>
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-slate-600 font-mono">
+                        <td className="px-3.5 py-2.5 text-xs text-[#667085] font-mono">
                           {inDate.toLocaleTimeString('vi-VN')} {inDate.toLocaleDateString('vi-VN')}
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-emerald-800 font-mono font-semibold">
+                        <td className="px-3.5 py-2.5 text-xs text-[#0A9444] font-mono font-semibold">
                           {outDate ? `${outDate.toLocaleTimeString('vi-VN')} ${outDate.toLocaleDateString('vi-VN')}` : '—'}
-                          <div className="text-[10px] text-slate-500 font-normal">Đã đỗ: {durationDisplay}</div>
+                          <div className="text-[10px] text-[#667085] font-normal">Đã đỗ: {durationDisplay}</div>
                         </td>
-                        <td className="px-3 py-2.5 text-xs">
-                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] border ${
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <span className={`px-2 py-0.5 rounded font-semibold text-[10px] border ${
                             v.ticket_payment_status === 'PAID' 
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                              ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]' 
                               : v.ticket_payment_status === 'EXEMPT' 
-                              ? 'bg-blue-50 text-blue-800 border-blue-300' 
-                              : 'bg-amber-50 text-amber-800 border-amber-300'
+                              ? 'bg-[#EFF8FF] text-[#326DD8] border-[#B2DDFF]' 
+                              : 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
                           }`}>
                             {v.ticket_payment_status === 'PAID' 
                               ? `Đã thu (${v.ticket_amount?.toLocaleString() || 0}đ)` 
@@ -1358,13 +1352,13 @@ export default function ExitClearancePage() {
                               : `Chưa thu (${v.ticket_amount?.toLocaleString() || 0}đ)`}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-slate-700">
+                        <td className="px-3.5 py-2.5 text-xs text-[#17202E]">
                           {v.entry_by_name || (v as any).collected_by_name || 'An ninh Cổng'}
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-slate-600 max-w-xs truncate" title={v.note || undefined}>
+                        <td className="px-3.5 py-2.5 text-xs text-[#667085] max-w-xs truncate" title={v.note || undefined}>
                           {v.note || '—'}
                         </td>
-                        <td className="px-3 py-2.5 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                           <button
                             onClick={() => {
                               const receiptNo = `PLB-${v.id.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase()}`;
@@ -1380,10 +1374,10 @@ export default function ExitClearancePage() {
                                 notes: v.note || 'Biên lai lưu trữ đối soát',
                               });
                             }}
-                            className="px-2 py-1 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 flex items-center gap-1 cursor-pointer ml-auto shadow-2xs"
+                            className="px-2.5 py-1 text-xs font-medium text-[#17202E] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] flex items-center gap-1 cursor-pointer ml-auto shadow-2xs transition-colors"
                             title="In lại biên lai / phiếu xác nhận xuất bãi"
                           >
-                            <Printer className="w-3.5 h-3.5 text-slate-600" />
+                            <Printer className="w-3.5 h-3.5 text-[#667085]" />
                             <span>In phiếu</span>
                           </button>
                         </td>

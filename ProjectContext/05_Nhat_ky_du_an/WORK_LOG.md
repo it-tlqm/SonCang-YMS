@@ -1,5 +1,37 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 11:15 — Tối Ưu Hóa & Đồng Bộ Triệt Để Giao Diện 4 Màn Hình Vận Hành (Thu Phí, Cắm Điện, Bến Bãi, Cổng Ra)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"1 số chỗ vẫn chưa thực sự tối ưu tôi và đồng bộ lại ui bạn ạ... nói chung còn nhiều chỗ lắm"* kèm trích dẫn dữ liệu thực tế tại 4 màn hình: Sổ cái thu phí (`/billing`), Cắm điện container (`/reefer`), Quản lý bãi & cont (`/yard`), Kiểm soát xuất bãi (`/exit`).
+- **Phân tích hiện trạng & Vấn đề tồn đọng:**
+  1. `/billing`: Khối 3 thẻ KPI bị lặp 2 lần; bảng Sổ cái bị ép hẹp chỉ còn 3/4 chiều rộng do nhồi nhét cột biểu phí tĩnh 1/4 màn hình; nhãn `Xe lẻ (không cont)` hiển thị sai lệch; viền bảng còn dùng slate xám cũ.
+  2. `/reefer`: Xếp chồng 2 bảng dữ liệu cồng kềnh ("Container đang trong bãi — Sẵn sàng cắm điện" đặt ngay trên "Theo dõi cắm rút điện"), gây rối mắt khi thao tác.
+  3. `/yard`: Còn sử dụng raw emojis (⏱️, ⚠️, 🚨) làm icon; các chip HÀNG/RỖNG/Lưu bãi thiếu đồng bộ màu DS-02; bảng danh sách containers và vehicles chưa chuẩn hóa viền `#E5E9F0`.
+  4. `/exit`: Cột "Container liên kết" hiển thị 2 huy hiệu trùng lặp đè nhau ("Đã rút điện/Chưa cắm" cùng "✓ Không cắm điện (Miễn duyệt)"); cột "Điều kiện xuất bãi" nhồi nhét 4 huy hiệu hộp viền dày cộm làm vỡ layout dòng; nút thao tác chưa đồng bộ.
+- **Các giải pháp & Hạng mục đã triển khai thực tế:**
+  1. *Sổ cái Thu phí & Công nợ (`src/app/billing/page.tsx`):*
+     - Loại bỏ hoàn toàn khối 3 thẻ KPI lặp lại bên trong tab SỔ CÁI. Thanh KPI 4 chỉ số trên đỉnh là nguồn dữ liệu duy nhất.
+     - Mở rộng bảng Sổ cái ra `w-full`, tăng độ thoáng và trải nghiệm đối soát cho cả 7 cột nghiệp vụ.
+     - Chuyển toàn bộ Biểu phí dịch vụ 9 mục và Quy tắc phân công thu tiền vào khối `<details>` thu gọn tinh tế dưới đáy bảng.
+     - Cập nhật bộ lọc và tìm kiếm theo chuẩn DS-02 (`#F8F9FB`, `#E5E9F0`), chuẩn hóa điều kiện hiển thị badge `Xe lẻ`.
+  2. *Theo dõi Cắm rút điện Container (`src/app/reefer/page.tsx`):*
+     - Chấm dứt hoàn toàn bố cục xếp chồng 2 bảng; bổ sung tab `Sẵn sàng cắm điện` vào `WorkspaceTabs` ngang hàng với `Phiên cắm điện`, `Yêu cầu dịch vụ`, `Nhật ký nhiệt độ`.
+     - Thêm thanh thông báo compact 1 dòng trên tab Phiên cắm điện khi phát hiện cont chưa cắm điện trong bãi kèm nút chuyển tab 1-chạm.
+     - Triển khai giao diện bảng DS-02 hoàn chỉnh cho cả 4 tab con.
+  3. *Quản lý Bến bãi & Container (`src/app/yard/page.tsx`):*
+     - Thay thế 100% emojis (⏱️, ⚠️, 🚨) bằng Lucide SVG icons (`Clock`, `AlertTriangle`, `AlertCircle`).
+     - Tinh chỉnh `renderCargoBadge` và `renderDwellBadge` sang bảng màu pastel có viền theo design tokens DS-02.
+     - Đồng bộ toàn diện khung bảng, header xám nhạt `#F8F9FB` và viền `#E5E9F0` cho cả 3 tab `Cặp xe - cont`, `Container` và `Phương tiện`.
+  4. *Kiểm soát Xuất bãi & Cổng ra (`src/app/exit/page.tsx`):*
+     - Tinh gọn cột "Container liên kết": Cont khô/thường chỉ hiển thị huy hiệu `Không dùng điện` thanh thoát; Cont lạnh hiển thị trạng thái cắm điện (`Đang cắm` / `Đã rút`) + trạng thái duyệt CCKB (`Đã duyệt` / `Chờ CCKB duyệt`).
+     - Tinh gọn cột "Điều kiện xuất bãi": 1 huy hiệu tổng quan (`Sẵn sàng xuất bãi` / `Chưa đủ điều kiện`) + 1 dòng checklist nhỏ gọn (`Vé: ✓ • Điện: ✓ • CCKB: ✓`).
+     - Đồng bộ bảng An ninh Cổng ra, Thương vụ CCKB và Lịch sử xe xuất bãi theo chuẩn DS-02.
+- **Kiểm thử & Xác minh kỹ thuật:**
+  * `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+  * `npm run build`: **100% PASS** (20/20 routes biên dịch thành công, Next.js 16.4.0 Turbopack).
+  * Bảo toàn tuyệt đối: Supabase Auth, PostgreSQL RLS, RBAC V5 permissions, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+- **Trạng thái:** Hoàn tất, sẵn sàng bàn giao cho người dùng kiểm tra thực tế.
+
 ## 2026-10-15 07:25 — Rà Soát Toàn Diện Hệ Thống & Nâng Cấp Hoàn Chỉnh Màn Hình Báo Cáo, Đăng Nhập, Làm Sạch Ngôn Ngữ
 
 - **Yêu cầu / nguồn:** Chỉ đạo của Chủ dự án: *"Ok rà soát lại và nâng cấp"*.

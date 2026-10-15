@@ -54,7 +54,7 @@ export default function ReeferMonitoringPage() {
   const canApproveAmendment = can('reefer.session.amendment.approve'); // TBP duyệt điều chỉnh
   const canRecordTemp = can('reefer.field_work.note'); // An ninh / Kỹ thuật đo nhiệt độ hiện trường
 
-  const [activeTab, setActiveTab] = useState<'SESSIONS' | 'REQUESTS' | 'TEMP_LOGS'>('SESSIONS');
+  const [activeTab, setActiveTab] = useState<'SESSIONS' | 'UNPLUGGED' | 'REQUESTS' | 'TEMP_LOGS'>('SESSIONS');
 
   const [sessions, setSessions] = useState<ReeferPowerSession[]>([]);
   const [containers, setContainers] = useState<ContainerVisit[]>([]);
@@ -1329,6 +1329,12 @@ export default function ReeferMonitoringPage() {
               icon: Zap,
             },
             {
+              id: 'UNPLUGGED',
+              label: 'Sẵn sàng cắm điện',
+              count: unpluggedContainersInYard.length,
+              icon: Truck,
+            },
+            {
               id: 'REQUESTS',
               label: 'Yêu cầu cắm điện CCKB',
               count: requests.length,
@@ -1347,165 +1353,49 @@ export default function ReeferMonitoringPage() {
 
         <div className="p-4 sm:p-5 space-y-4">
 
-      {/* KHỐI CHUYÊN DỤNG: CONTAINER ĐANG TRONG BÃI — SẴN SÀNG CẮM ĐIỆN & TẠO YÊU CẦU CCKB */}
-      <div className="bg-white rounded border border-slate-300 shadow-2xs overflow-hidden">
-        <div className="bg-slate-50 px-3.5 py-2.5 border-b border-slate-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 text-[#223873]" />
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wide">
-              Container đang trong bãi — Sẵn sàng cắm điện ({unpluggedContainersInYard.length})
-            </h2>
-            <span className="text-[10px] bg-blue-100 text-[#223873] font-bold px-1.5 py-0.5 rounded border border-blue-200">
-              CCKB & An ninh
-            </span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] text-slate-500 hidden md:inline">
-              {unpluggedContainersInYard.length > 0 
-                ? 'Chọn cont để lập yêu cầu cắm điện' 
-                : 'Tất cả cont lạnh trong bãi đã được cấp nguồn'}
-            </span>
-            {canCreateRequest && unpluggedContainersInYard.length > 0 && (
-              <button
-                type="button"
-                onClick={() => handleOpenCreateReqModal()}
-                className="text-xs font-bold text-[#223873] hover:text-[#1a2c5a] bg-white hover:bg-slate-100 px-2.5 py-1 rounded border border-slate-300 transition-colors cursor-pointer inline-flex items-center gap-1 shadow-2xs"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Tạo yêu cầu cắm điện</span>
-              </button>
-            )}
-          </div>
-        </div>
+      {/* ========================================================================= */}
+      {/* TAB 1: PHIÊN CẮM ĐIỆN THỰC TẾ (SESSIONS)                                  */}
+      {/* ========================================================================= */}
+      {activeTab === 'SESSIONS' && (
+        <div className="space-y-4">
+          {/* Banner thông báo cont chờ cắm điện nếu có */}
+          {unpluggedContainersInYard.length > 0 && (
+            <div className="p-3 rounded-xl bg-[#EFF8FF] border border-[#B2DDFF] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#17202E]">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-[#326DD8] shrink-0" />
+                <span>Có <strong>{unpluggedContainersInYard.length}</strong> container lạnh trong bãi sẵn sàng cắm điện.</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('UNPLUGGED')}
+                  className="text-xs font-semibold text-[#326DD8] hover:underline cursor-pointer"
+                >
+                  Xem danh sách cont chờ →
+                </button>
+                {canCreateRequest && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCreateReqModal()}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#326DD8] text-white hover:bg-[#2857AE] transition-colors cursor-pointer"
+                  >
+                    + Tạo yêu cầu
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
-        {unpluggedContainersInYard.length === 0 ? (
-          <div className="p-4 text-center text-xs text-slate-500 bg-slate-50/50 flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Hiện tại không có container nào trong bãi đang chờ cắm điện.</span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100/90 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
-                <tr>
-                  <th className="px-3.5 py-2">Số Container</th>
-                  <th className="px-3.5 py-2">Xe chở vào</th>
-                  <th className="px-3.5 py-2">Thời điểm vào bãi</th>
-                  <th className="px-3.5 py-2">Tình trạng Yêu cầu CCKB</th>
-                  <th className="px-3.5 py-2 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {unpluggedContainersInYard.map((c) => {
-                  const matchedReq = requests.find(
-                    (r) =>
-                      (r.container_no === c.container_no_current || r.container_visit_id === c.id) &&
-                      (r.status === 'CONTAINER_ARRIVED' || r.status === 'PLANNED')
-                  );
-                  return (
-                    <tr key={c.id} className="hover:bg-blue-50/40 transition-colors">
-                      <td className="px-3.5 py-2 font-mono font-bold text-sm text-[#223873]">
-                        {c.container_no_current}
-                      </td>
-                      <td className="px-3.5 py-2 font-mono text-slate-800">
-                        {c.inbound_license_plate ? (
-                          <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-bold">
-                            {c.inbound_license_plate}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 italic">Tồn bãi</span>
-                        )}
-                      </td>
-                      <td className="px-3.5 py-2 font-mono text-slate-600 text-[11px]">
-                        {new Date(c.inbound_at || c.created_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at || c.created_at).toLocaleDateString('vi-VN')}
-                      </td>
-                      <td className="px-3.5 py-2">
-                        {matchedReq ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                              <Zap className="w-3 h-3 text-amber-600" />
-                              Đã có yêu cầu{matchedReq.expected_hours ? ` (${matchedReq.expected_hours}h)` : ''}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic text-[11px]">Chưa tạo yêu cầu cắm điện</span>
-                        )}
-                      </td>
-                      <td className="px-3.5 py-2 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {matchedReq ? (
-                            <>
-                              {canPlugIn && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenPlugModal(c.id, matchedReq.id)}
-                                  className="px-2.5 py-1 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                                  title="Cắm điện container theo yêu cầu đã lập"
-                                >
-                                  <Zap className="w-3.5 h-3.5 fill-current" />
-                                  <span>⚡ Cắm điện ngay</span>
-                                </button>
-                              )}
-                              {canUpdateRequest && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenEditReqModal(matchedReq)}
-                                  className="px-2 py-1 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded transition-colors cursor-pointer flex items-center gap-1"
-                                  title="Chỉnh sửa thông tin yêu cầu cắm điện"
-                                >
-                                  <Pencil className="w-3 h-3 text-slate-500" />
-                                  <span>Sửa yêu cầu</span>
-                                </button>
-                              )}
-                            </>
-                          ) : (
-                            canCreateRequest ? (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenCreateReqModal(c.id)}
-                                className="px-2.5 py-1 text-xs font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors cursor-pointer flex items-center gap-1"
-                                title="Tạo yêu cầu cắm điện cho container này"
-                              >
-                                <Layers className="w-3.5 h-3.5 text-[#223873]" />
-                                <span>Tạo yêu cầu cắm điện</span>
-                              </button>
-                            ) : (
-                              <span className="text-[11px] text-slate-400 italic">Chỉ xem hiện trường</span>
-                            )
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* TIÊU ĐỀ KHỐI THEO DÕI */}
-      <div className="flex items-center justify-between border-b border-slate-300 pb-2">
-        <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-500" />
-          <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wide">
-            Theo dõi cắm rút điện container ({sessions.length})
-          </h2>
-        </div>
-      </div>
-
-      {/* NỘI DUNG THEO DÕI: PHIÊN CẮM ĐIỆN THỰC TẾ */}
-      <div className="space-y-3.5">
           {/* Bộ lọc và Tìm kiếm */}
-          <div className="bg-white p-3 rounded border border-slate-300 shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
               <input
                 type="text"
                 placeholder="Tìm theo số container..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#223873] bg-white font-mono"
+                className="w-full pl-9 pr-3 py-1.5 border border-[#E5E9F0] rounded-lg text-xs sm:text-sm font-mono focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
               />
             </div>
 
@@ -1514,10 +1404,10 @@ export default function ReeferMonitoringPage() {
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded transition-colors whitespace-nowrap cursor-pointer border ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap cursor-pointer border ${
                     statusFilter === st
-                      ? 'bg-[#223873] text-white border-[#223873]'
-                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                      ? 'bg-[#EAF1FD] text-[#326DD8] border-[#B2DDFF]'
+                      : 'bg-white text-[#667085] border-[#E5E9F0] hover:bg-[#F8F9FB]'
                   }`}
                 >
                   {st === 'ALL' && 'Tất cả'}
@@ -1530,10 +1420,10 @@ export default function ReeferMonitoringPage() {
           </div>
 
           {/* Danh sách phiên cắm điện */}
-          <div className="bg-white rounded border border-slate-300 shadow-2xs overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
                     <th className="px-3.5 py-2.5">Số Container</th>
                     <th className="px-3.5 py-2.5">Chủ hàng</th>
@@ -1545,7 +1435,7 @@ export default function ReeferMonitoringPage() {
                     <th className="px-3.5 py-2.5 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-[#E5E9F0]">
                   {filteredSessions.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
@@ -1658,19 +1548,19 @@ export default function ReeferMonitoringPage() {
                           </td>
                           <td className="px-3.5 py-2.5">
                             {s.power_status === 'PLUGGED' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                <Zap className="w-3 h-3 text-amber-500" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <Zap className="w-3 h-3 text-[#B54708]" />
                                 Đang cắm điện
                               </span>
                             )}
                             {s.power_status === 'UNPLUGGED' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-300">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
                                 Đã rút điện
                               </span>
                             )}
                             {s.power_status === 'PENDING_REVIEW' && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300">
-                                <AlertTriangle className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] text-[#D92D20] border border-[#FECDCA]">
+                                <AlertTriangle className="w-3 h-3 text-[#D92D20]" />
                                 Chờ CCKB duyệt (0s)
                               </span>
                             )}
@@ -1681,27 +1571,28 @@ export default function ReeferMonitoringPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenVerifyModal(s)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 rounded border border-blue-300 cursor-pointer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#326DD8] bg-[#EFF8FF] hover:bg-[#EAF1FD] rounded-lg border border-[#B2DDFF] cursor-pointer"
                                   title="CCKB kiểm tra ảnh/video timestamp và điều chỉnh cắm/rút thực tế hoặc dự kiến"
                                 >
-                                  <Pencil className="w-3 h-3 text-blue-600" />
+                                  <Pencil className="w-3 h-3 text-[#326DD8]" />
                                   <span>Sửa / Khớp</span>
                                 </button>
                               )}
                               {isPlugged && canUnplug && (
                                 <button
+                                  type="button"
                                   onClick={() => handleOpenUnplugModal(s)}
-                                  className="px-2.5 py-1 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded transition-colors cursor-pointer border border-amber-300"
+                                  className="px-2.5 py-1 text-xs font-semibold text-white bg-[#D92D20] hover:bg-[#B42318] rounded-lg transition-colors cursor-pointer shadow-2xs"
                                 >
                                   Rút điện & Tính cước
                                 </button>
                               )}
                               {isPlugged && !canUnplug && (
-                                <span className="text-xs text-slate-400 italic">Đang cắm điện</span>
+                                <span className="text-xs text-[#98A2B3] italic">Đang cắm điện</span>
                               )}
                               {!isPlugged && s.payment_status === 'PAID' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+                                  <CheckCircle2 className="w-3 h-3 text-[#0A9444]" />
                                   Đã thu tiền
                                 </span>
                               )}
@@ -1709,20 +1600,20 @@ export default function ReeferMonitoringPage() {
                                 can('reefer.payment.collect') ? (
                                   <Link
                                     href="/billing"
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded transition-colors shadow-2xs"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg transition-colors shadow-2xs"
                                     title="Chuyển sang Sổ cái để thu tiền điện"
                                   >
                                     <span>Thu tiền điện</span>
                                     <ExternalLink className="w-3 h-3" />
                                   </Link>
                                 ) : (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="Chỉ CCKB được thu tiền điện theo chuẩn V5">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]" title="Chỉ CCKB được thu tiền điện theo chuẩn V5">
                                     Chờ CCKB thu
                                   </span>
                                 )
                               )}
                               {!(canEditSessionTime || canApproveAmendment) && !(isPlugged && canUnplug) && isPlugged && (
-                                <span className="text-[11px] text-slate-400 italic">Chỉ xem</span>
+                                <span className="text-[11px] text-[#98A2B3] italic">Chỉ xem</span>
                               )}
                             </div>
                           </td>
@@ -1733,8 +1624,348 @@ export default function ReeferMonitoringPage() {
                 </tbody>
               </table>
             </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 2: CONTAINER SẴN SÀNG CẮM ĐIỆN (UNPLUGGED)                           */}
+      {/* ========================================================================= */}
+      {activeTab === 'UNPLUGGED' && (
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+          <div className="bg-[#F8F9FB] px-4 py-3 border-b border-[#E5E9F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-[#326DD8]" />
+              <h2 className="text-xs sm:text-sm font-semibold text-[#17202E] uppercase tracking-wide">
+                Container đang trong bãi — Sẵn sàng cắm điện ({unpluggedContainersInYard.length})
+              </h2>
+              <span className="text-[10px] bg-[#EFF8FF] text-[#326DD8] font-semibold px-2 py-0.5 rounded border border-[#B2DDFF]">
+                CCKB & An ninh
+              </span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] text-[#667085] hidden md:inline">
+                {unpluggedContainersInYard.length > 0 
+                  ? 'Chọn container để lập yêu cầu cắm điện' 
+                  : 'Tất cả container lạnh trong bãi đã được cấp nguồn'}
+              </span>
+              {canCreateRequest && unpluggedContainersInYard.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateReqModal()}
+                  className="text-xs font-semibold text-[#326DD8] bg-white hover:bg-[#F8F9FB] px-3 py-1.5 rounded-lg border border-[#E5E9F0] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Tạo yêu cầu cắm điện</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {unpluggedContainersInYard.length === 0 ? (
+            <div className="p-8 text-center text-xs text-[#667085] bg-[#F8F9FB]/50 flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span>Hiện tại không có container nào trong bãi đang chờ cắm điện.</span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
+                  <tr>
+                    <th className="px-3.5 py-2.5">Số Container</th>
+                    <th className="px-3.5 py-2.5">Xe chở vào</th>
+                    <th className="px-3.5 py-2.5">Thời điểm vào bãi</th>
+                    <th className="px-3.5 py-2.5">Tình trạng Yêu cầu CCKB</th>
+                    <th className="px-3.5 py-2.5 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E9F0]">
+                  {unpluggedContainersInYard.map((c) => {
+                    const matchedReq = requests.find(
+                      (r) =>
+                        (r.container_no === c.container_no_current || r.container_visit_id === c.id) &&
+                        (r.status === 'CONTAINER_ARRIVED' || r.status === 'PLANNED')
+                    );
+                    return (
+                      <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5 font-mono font-bold text-sm text-[#17202E]">
+                          {c.container_no_current}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono text-[#17202E]">
+                          {c.inbound_license_plate ? (
+                            <span className="bg-[#F5F7FA] px-2 py-0.5 rounded text-xs font-semibold text-[#17202E] border border-[#E5E9F0]">
+                              {c.inbound_license_plate}
+                            </span>
+                          ) : (
+                            <span className="text-[#98A2B3] italic">Tồn bãi</span>
+                          )}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono text-[#667085] text-xs">
+                          {new Date(c.inbound_at || c.created_at).toLocaleTimeString('vi-VN')} {new Date(c.inbound_at || c.created_at).toLocaleDateString('vi-VN')}
+                        </td>
+                        <td className="px-3.5 py-2.5">
+                          {matchedReq ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <Zap className="w-3 h-3 text-[#B54708]" />
+                                Đã có yêu cầu{matchedReq.expected_hours ? ` (${matchedReq.expected_hours}h)` : ''}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[#98A2B3] italic text-xs">Chưa tạo yêu cầu cắm điện</span>
+                          )}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {matchedReq ? (
+                              <>
+                                {canPlugIn && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenPlugModal(c.id, matchedReq.id)}
+                                    className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                    title="Cắm điện container theo yêu cầu đã lập"
+                                  >
+                                    <Zap className="w-3.5 h-3.5 fill-current" />
+                                    <span>Cắm điện ngay</span>
+                                  </button>
+                                )}
+                                {canUpdateRequest && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditReqModal(matchedReq)}
+                                    className="px-2.5 py-1.5 text-xs font-medium text-[#667085] bg-white hover:bg-[#F8F9FB] border border-[#E5E9F0] rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                                    title="Chỉnh sửa thông tin yêu cầu cắm điện"
+                                  >
+                                    <Pencil className="w-3 h-3 text-[#667085]" />
+                                    <span>Sửa yêu cầu</span>
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              canCreateRequest ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenCreateReqModal(c.id)}
+                                  className="px-3 py-1.5 text-xs font-semibold text-[#326DD8] bg-[#EFF8FF] hover:bg-[#EAF1FD] border border-[#B2DDFF] rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                                  title="Tạo yêu cầu cắm điện cho container này"
+                                >
+                                  <Layers className="w-3.5 h-3.5 text-[#326DD8]" />
+                                  <span>Tạo yêu cầu cắm điện</span>
+                                </button>
+                              ) : (
+                                <span className="text-xs text-[#98A2B3] italic">Chỉ xem hiện trường</span>
+                              )
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 3: YÊU CẦU CẮM ĐIỆN CCKB (REQUESTS)                                  */}
+      {/* ========================================================================= */}
+      {activeTab === 'REQUESTS' && (
+        <div className="space-y-4">
+          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
+              <input
+                type="text"
+                placeholder="Tìm yêu cầu theo cont, khách hàng..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 border border-[#E5E9F0] rounded-lg text-xs sm:text-sm font-mono focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              {canCreateRequest && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateReqModal()}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Tạo yêu cầu mới</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
+                  <tr>
+                    <th className="px-3.5 py-2.5">Số Container</th>
+                    <th className="px-3.5 py-2.5">Chủ hàng</th>
+                    <th className="px-3.5 py-2.5">Xe dự kiến</th>
+                    <th className="px-3.5 py-2.5">Chế độ cắm</th>
+                    <th className="px-3.5 py-2.5">Giờ dự kiến</th>
+                    <th className="px-3.5 py-2.5">Trạng thái</th>
+                    <th className="px-3.5 py-2.5 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E9F0]">
+                  {filteredRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-[#98A2B3]">
+                        Không có yêu cầu cắm điện nào phù hợp.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRequests.map((r) => (
+                      <tr key={r.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E]">
+                          {r.container_no}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-xs text-[#17202E]">
+                          {r.customer_name || <span className="text-[#98A2B3] italic">—</span>}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono text-xs text-[#667085]">
+                          {r.expected_license_plate || <span className="text-[#98A2B3] italic">—</span>}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-xs">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+                            {r.power_mode === 'CONTINUOUS' ? 'Cắm thông 24/7' : 'Theo giờ'}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-xs font-mono text-[#667085]">
+                          {r.expected_hours ? `${r.expected_hours} giờ` : '—'}
+                        </td>
+                        <td className="px-3.5 py-2.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            r.status === 'PLUGGED'
+                              ? 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
+                              : r.status === 'COMPLETED'
+                              ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]'
+                              : 'bg-[#EFF8FF] text-[#326DD8] border-[#B2DDFF]'
+                          }`}>
+                            {r.status === 'PLANNED' && 'Kế hoạch'}
+                            {r.status === 'CONTAINER_ARRIVED' && 'Cont đã vào bãi'}
+                            {r.status === 'PLUGGED' && 'Đang cắm điện'}
+                            {r.status === 'COMPLETED' && 'Hoàn tất'}
+                            {r.status === 'CANCELLED' && 'Đã hủy'}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {canUpdateRequest && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditReqModal(r)}
+                                className="px-2.5 py-1 text-xs font-medium text-[#667085] hover:text-[#17202E] bg-white hover:bg-[#F8F9FB] border border-[#E5E9F0] rounded-lg transition-colors cursor-pointer"
+                              >
+                                Sửa
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: NHẬT KÝ KIỂM TRA NHIỆT ĐỘ (TEMP_LOGS)                             */}
+      {/* ========================================================================= */}
+      {activeTab === 'TEMP_LOGS' && (
+        <div className="space-y-4">
+          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Thermometer className="w-4 h-4 text-[#326DD8]" />
+              <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                Nhật ký kiểm tra nhiệt độ container lạnh ({temperatureLogs.length})
+              </h2>
+            </div>
+            {canRecordTemp && (
+              <button
+                type="button"
+                onClick={() => handleOpenTempModal()}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Ghi nhận nhiệt độ</span>
+              </button>
+            )}
+          </div>
+
+          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
+                  <tr>
+                    <th className="px-3.5 py-2.5">Thời gian kiểm tra</th>
+                    <th className="px-3.5 py-2.5">Số Container</th>
+                    <th className="px-3.5 py-2.5">Nhiệt độ (°C)</th>
+                    <th className="px-3.5 py-2.5">Trạng thái máy</th>
+                    <th className="px-3.5 py-2.5">Ghi chú</th>
+                    <th className="px-3.5 py-2.5">Người kiểm tra</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E9F0]">
+                  {temperatureLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-[#98A2B3]">
+                        Chưa có bản ghi kiểm tra nhiệt độ nào trong ca trực.
+                      </td>
+                    </tr>
+                  ) : (
+                    temperatureLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-3.5 py-2.5 font-mono text-xs text-[#667085]">
+                          {new Date(log.logged_at).toLocaleString('vi-VN')}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E]">
+                          {log.container_no || log.container_visit_id}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono font-bold text-sm text-[#326DD8]">
+                          {log.temperature_celsius}°C
+                        </td>
+                        <td className="px-3.5 py-2.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            log.cooling_status === 'RUNNING_NORMAL'
+                              ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]'
+                              : log.cooling_status === 'TEMP_WARNING' || log.cooling_status === 'TEMPERATURE_WARNING'
+                              ? 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
+                              : 'bg-[#FEF3F2] text-[#D92D20] border-[#FECDCA]'
+                          }`}>
+                            {log.cooling_status === 'RUNNING_NORMAL' && 'Chạy bình thường'}
+                            {(log.cooling_status === 'TEMP_WARNING' || log.cooling_status === 'TEMPERATURE_WARNING') && 'Cảnh báo nhiệt độ'}
+                            {log.cooling_status === 'POWER_TRIP' && 'Mất nguồn / Nhảy CB'}
+                            {log.cooling_status === 'DEFROST' && 'Đang xả đá (Defrost)'}
+                            {log.cooling_status === 'POWER_OFF' && 'Tắt nguồn'}
+                            {log.cooling_status === 'SYSTEM_ERROR' && 'Lỗi hệ thống'}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-xs text-[#667085]">
+                          {log.notes || '—'}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-xs text-[#17202E]">
+                          {log.logged_by_name || log.logged_by || 'Nhân viên trực'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
         </div>
       </div>
 

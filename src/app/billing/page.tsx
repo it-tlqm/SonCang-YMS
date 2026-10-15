@@ -917,92 +917,28 @@ export default function CashierBillingPage() {
       {/* ========================================================================= */}
       {activeTab === 'LEDGER' && (
         <div className="space-y-4">
-          {/* KPI Tóm tắt tài chính */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">
-                  {isCCKBRole ? 'Cước điện chưa thu' : isSecurityRole ? 'Vé xe chưa thu' : 'Công nợ / Chưa thanh toán'}
-                </p>
-                <p className="text-xl font-bold font-mono text-rose-600 mt-0.5">{totalUnpaid.toLocaleString()} đ</p>
-              </div>
-              <div className="p-2 bg-rose-50 rounded border border-rose-200">
-                <AlertTriangle className="w-5 h-5 text-rose-500" />
-              </div>
-            </div>
-
-            <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-bold text-[#0A9444] uppercase tracking-wider">
-                  {isCCKBRole ? 'Cước điện đã thực thu' : isSecurityRole ? 'Vé xe đã thực thu' : 'Đã thực thu'}
-                </p>
-                <p className="text-xl font-bold font-mono text-[#0A9444] mt-0.5">{totalPaid.toLocaleString()} đ</p>
-              </div>
-              <div className="p-2 bg-emerald-50 rounded border border-emerald-200">
-                <DollarSign className="w-5 h-5 text-[#0A9444]" />
-              </div>
-            </div>
-
-            <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-              <div>
-                {isCCKBRole ? (
-                  <>
-                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Container cắm điện</p>
-                    <p className="text-xl font-bold font-mono text-amber-800 mt-0.5">
-                      {availableContainers.length} cont <span className="text-xs font-normal text-slate-500">({availableCustomers.length} khách)</span>
-                    </p>
-                  </>
-                ) : isSecurityRole ? (
-                  <>
-                    <p className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Lịch sử lưu bãi cổng ra</p>
-                    <p className="text-xl font-bold font-mono text-purple-800 mt-0.5">
-                      {roleScopedCharges
-                        .filter(c => c.charge_type === 'STORAGE' && c.status === 'PAID')
-                        .reduce((sum, c) => sum + c.paid_amount, 0)
-                        .toLocaleString()} đ
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Biểu phí hiệu lực</p>
-                    <p className="text-xl font-bold font-mono text-[#223873] mt-0.5">{tariffs.length} mục giá</p>
-                  </>
-                )}
-              </div>
-              <div className="p-2 bg-blue-50 rounded border border-blue-200">
-                {isCCKBRole ? (
-                  <Zap className="w-5 h-5 text-amber-500" />
-                ) : isSecurityRole ? (
-                  <Clock className="w-5 h-5 text-purple-500" />
-                ) : (
-                  <Tag className="w-5 h-5 text-[#223873]" />
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Bộ lọc và Tìm kiếm */}
-          <div className="bg-white p-3 rounded-lg border border-slate-300 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="relative w-full md:w-72">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
               <input
                 type="text"
                 placeholder="Tìm cont, khách hàng, biển số xe..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#223873] bg-white"
+                className="w-full pl-9 pr-3 py-1.5 border border-[#E5E9F0] rounded-lg text-xs sm:text-sm font-mono focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {/* Dropdown lọc theo Container (dành cho CCKB và Admin) */}
               {(isCCKBRole || isAdminRole) && availableContainers.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Cont:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase">Cont:</span>
                   <select
                     value={contFilter}
                     onChange={(e) => setContFilter(e.target.value)}
-                    className="px-2 py-1 border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none"
+                    className="px-2.5 py-1 border border-[#E5E9F0] rounded-lg text-xs font-mono font-semibold text-[#17202E] bg-white focus:outline-none focus:border-[#326DD8]"
                   >
                     <option value="ALL">Tất cả container ({availableContainers.length})</option>
                     {availableContainers.map((cn) => (
@@ -1016,12 +952,12 @@ export default function CashierBillingPage() {
 
               {/* Dropdown lọc theo Khách hàng (dành cho CCKB và Admin) */}
               {(isCCKBRole || isAdminRole) && availableCustomers.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Khách:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase">Khách:</span>
                   <select
                     value={customerFilter}
                     onChange={(e) => setCustomerFilter(e.target.value)}
-                    className="px-2 py-1 border border-slate-300 rounded text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none max-w-[170px] truncate"
+                    className="px-2.5 py-1 border border-[#E5E9F0] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:border-[#326DD8] max-w-[170px] truncate"
                   >
                     <option value="ALL">Tất cả khách ({availableCustomers.length})</option>
                     {availableCustomers.map((cust) => (
@@ -1043,10 +979,10 @@ export default function CashierBillingPage() {
                     <button
                       key={t}
                       onClick={() => setTypeFilter(t)}
-                      className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors border cursor-pointer ${
                         typeFilter === t
-                          ? 'bg-[#223873] text-white border-[#223873]'
-                          : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                          ? 'bg-[#EAF1FD] text-[#326DD8] border-[#B2DDFF]'
+                          : 'bg-white text-[#667085] border-[#E5E9F0] hover:bg-[#F8F9FB]'
                       }`}
                     >
                       {t === 'ALL' && 'Tất cả loại'}
@@ -1058,7 +994,7 @@ export default function CashierBillingPage() {
                 </div>
               )}
 
-              <span className="text-slate-300 hidden sm:inline">|</span>
+              <span className="text-[#E5E9F0] hidden sm:inline">|</span>
 
               {/* Lọc trạng thái */}
               <div className="flex items-center gap-1">
@@ -1066,10 +1002,10 @@ export default function CashierBillingPage() {
                   <button
                     key={st}
                     onClick={() => setStatusFilter(st)}
-                    className={`px-2.5 py-1 text-xs font-bold rounded transition-colors border cursor-pointer ${
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors border cursor-pointer ${
                       statusFilter === st
-                        ? 'bg-[#0A9444] text-white border-[#0A9444]'
-                        : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                        ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]'
+                        : 'bg-white text-[#667085] border-[#E5E9F0] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     {st === 'ALL' && 'Tất cả'}
@@ -1131,266 +1067,260 @@ export default function CashierBillingPage() {
             </div>
           )}
 
-          {/* Layout 2 cột: Danh sách khoản thu (trái) và Biểu phí tham khảo V5 (phải) */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Danh sách khoản thu */}
-            <div className="lg:col-span-3 bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
-              <div className="p-3 border-b border-slate-300 bg-slate-50 flex items-center justify-between">
-                <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-[#223873]" />
-                  Sổ cái các khoản thu ({filteredCharges.length})
-                </h2>
-                <div className="text-xs flex items-center gap-2">
-                  <button
-                    onClick={handleSelectAllUnpaid}
-                    className="text-xs text-[#223873] hover:underline font-bold cursor-pointer"
-                  >
-                    Chọn/Bỏ tất cả khoản chưa thu
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
-                    <tr>
-                      <th className="px-3 py-2.5 w-10 text-center">
-                        <input
-                          type="checkbox"
-                          checked={
-                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').length > 0 &&
-                            filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').every(c => selectedChargeIds.includes(c.id))
-                          }
-                          onChange={handleSelectAllUnpaid}
-                          className="rounded border-slate-300 text-[#223873] focus:ring-[#223873]"
-                          title="Chọn các khoản chưa thu thuộc quyền hạn của bạn"
-                        />
-                      </th>
-                      <th className="px-3 py-2.5">Loại phí</th>
-                      <th className="px-3.5 py-2.5">Nội dung / Đối tượng</th>
-                      <th className="px-3.5 py-2.5">Số tiền</th>
-                      <th className="px-3.5 py-2.5">Trạng thái</th>
-                      <th className="px-3.5 py-2.5">Thời gian tạo</th>
-                      <th className="px-3.5 py-2.5 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {filteredCharges.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                          Không có khoản thu nào phù hợp.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredCharges.map((c) => {
-                        const isPaid = c.status === 'PAID';
-                        const isReefer = c.charge_type === 'REEFER';
-                        const isStorage = c.charge_type === 'STORAGE';
-                        const isTicket = c.charge_type === 'TICKET';
-                        const isSelected = selectedChargeIds.includes(c.id);
-
-                        const isForbidden = !canCollectCharge(c);
-                        let forbiddenReason = '';
-                        if (isForbidden) {
-                          if (isReefer) forbiddenReason = 'Khoản thu điện lạnh thuộc thẩm quyền Thương vụ CCKB';
-                          else if (isStorage) forbiddenReason = 'Phí lưu bãi container chỉ thu tại Cổng ra (/exit)';
-                          else if (isTicket) forbiddenReason = 'Khoản thu vé xe cổng thuộc phân hệ An ninh';
-                        }
-
-                        return (
-                          <tr 
-                            key={c.id} 
-                            className={`hover:bg-slate-50/80 transition-colors ${
-                              isSelected ? 'bg-blue-50/60' : ''
-                            }`}
-                          >
-                            <td className="px-3 py-2.5 text-center">
-                              {!isPaid && !isForbidden && !isStorage ? (
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() => handleToggleSelectCharge(c.id)}
-                                  className="rounded border-slate-300 text-[#223873] focus:ring-[#223873]"
-                                />
-                              ) : (
-                                <span className="text-slate-300">•</span>
-                              )}
-                            </td>
-                            <td className="px-3 py-2.5 text-xs">
-                              {isTicket && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-[#223873] border border-blue-200">
-                                  <Truck className="w-3 h-3" /> Vé xe
-                                </span>
-                              )}
-                              {isReefer && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                  <Zap className="w-3 h-3 text-amber-500" /> Tiền điện
-                                </span>
-                              )}
-                              {isStorage && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-300">
-                                  <Clock className="w-3 h-3 text-purple-500" /> Lưu bãi
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-xs">
-                              <p className="font-bold text-slate-900">{c.title}</p>
-                              
-                              {/* Thông tin đối tượng rõ ràng: Container, Khách hàng, Xe chở vào */}
-                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                                {c.container_no ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 text-[#223873] border border-blue-200">
-                                    📦 Cont: {c.container_no}
-                                  </span>
-                                ) : (
-                                  isTicket && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-slate-500 bg-slate-100 border border-slate-200">
-                                      Xe lẻ (không cont)
-                                    </span>
-                                  )
-                                )}
-
-                                {c.customer_name && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300">
-                                    👤 Khách: {c.customer_name} {c.customer_phone ? `(${c.customer_phone})` : ''}
-                                  </span>
-                                )}
-
-                                {c.license_plate && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300">
-                                    🚛 Xe: {c.license_plate}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Thao tác gom nhanh 1-chạm nếu là cước điện hoặc vé xe chưa thu */}
-                              {!isPaid && !isStorage && (
-                                <div className="flex items-center gap-2 mt-1.5 pt-1 border-t border-slate-100">
-                                  {c.container_no && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleSelectAllOfContainer(c.container_no!)}
-                                      className="text-[11px] font-semibold text-[#223873] hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
-                                      title={`Tích chọn tất cả các khoản nợ của container ${c.container_no}`}
-                                    >
-                                      ⚡ Gom tất cả của cont này
-                                    </button>
-                                  )}
-                                  {c.customer_name && (
-                                    <>
-                                      <span className="text-slate-300 text-[10px]">•</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleSelectAllOfCustomer(c.customer_name!)}
-                                        className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 cursor-pointer"
-                                        title={`Tích chọn tất cả các khoản nợ của khách hàng ${c.customer_name}`}
-                                      >
-                                        👤 Gom tất cả của khách này
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-3.5 py-2.5 font-bold font-mono text-xs sm:text-sm text-slate-900">
-                              {c.amount.toLocaleString()} đ
-                            </td>
-                            <td className="px-3.5 py-2.5">
-                              {isPaid ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  <CheckCircle2 className="w-3 h-3" /> Đã thu
-                                </span>
-                              ) : isStorage ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                  <Clock className="w-3 h-3" /> Chốt tại Cổng ra
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300">
-                                  <AlertTriangle className="w-3 h-3" /> Chưa thu
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-xs text-slate-600 font-mono">
-                              {new Date(c.created_at).toLocaleString('vi-VN')}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-right">
-                              {!isPaid ? (
-                                isStorage ? (
-                                  <span
-                                    title="Phí lưu bãi container chỉ được chốt và thu trực tiếp tại Cổng ra (/exit) khi xe chở cont rời bãi"
-                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200"
-                                  >
-                                    <Clock className="w-3 h-3 text-purple-600" />
-                                    Thu tại Cổng ra
-                                  </span>
-                                ) : isForbidden ? (
-                                  <span
-                                    title={forbiddenReason}
-                                    className="text-[11px] text-slate-400 font-medium italic"
-                                  >
-                                    {isTicket ? 'An ninh thu' : 'CCKB thu'}
-                                  </span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleOpenCollect(c)}
-                                    className="px-3 py-1 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs transition-colors cursor-pointer"
-                                  >
-                                    Thu tiền
-                                  </button>
-                                )
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenPrintReceipt(c)}
-                                  className="px-2.5 py-1 text-xs font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded inline-flex items-center gap-1 transition-colors cursor-pointer"
-                                  title="Xem & In phiếu thu tiền / biên lai"
-                                >
-                                  <Printer className="w-3.5 h-3.5 text-[#223873]" />
-                                  In biên lai
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+          {/* Danh sách khoản thu - Full width */}
+          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+            <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex items-center justify-between">
+              <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-1.5">
+                <CreditCard className="w-4 h-4 text-[#326DD8]" />
+                Sổ cái các khoản thu ({filteredCharges.length})
+              </h2>
+              <div className="text-xs flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSelectAllUnpaid}
+                  className="text-xs text-[#326DD8] hover:underline font-semibold cursor-pointer"
+                >
+                  Chọn/Bỏ tất cả khoản chưa thu
+                </button>
               </div>
             </div>
 
-            {/* Cột phụ: Biểu phí tham khảo V5 */}
-            <div className="bg-white rounded-lg border border-slate-300 shadow-2xs p-3.5 space-y-3.5">
-              <div className="border-b border-slate-200 pb-2">
-                <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-amber-500" />
-                  Biểu phí áp dụng
-                </h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">Biểu phí dịch vụ bến bãi ban hành</p>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
+                  <tr>
+                    <th className="px-3.5 py-2.5 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').length > 0 &&
+                          filteredCharges.filter(c => c.status === 'UNPAID' && canCollectCharge(c) && c.charge_type !== 'STORAGE').every(c => selectedChargeIds.includes(c.id))
+                        }
+                        onChange={handleSelectAllUnpaid}
+                        className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8]"
+                        title="Chọn các khoản chưa thu thuộc quyền hạn của bạn"
+                      />
+                    </th>
+                    <th className="px-3.5 py-2.5">Loại phí</th>
+                    <th className="px-3.5 py-2.5">Nội dung / Đối tượng</th>
+                    <th className="px-3.5 py-2.5">Số tiền</th>
+                    <th className="px-3.5 py-2.5">Trạng thái</th>
+                    <th className="px-3.5 py-2.5">Thời gian tạo</th>
+                    <th className="px-3.5 py-2.5 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E9F0]">
+                  {filteredCharges.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-[#98A2B3]">
+                        Không có khoản thu nào phù hợp.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCharges.map((c) => {
+                      const isPaid = c.status === 'PAID';
+                      const isReefer = c.charge_type === 'REEFER';
+                      const isStorage = c.charge_type === 'STORAGE';
+                      const isTicket = c.charge_type === 'TICKET';
+                      const isSelected = selectedChargeIds.includes(c.id);
 
-              <div className="space-y-2">
+                      const isForbidden = !canCollectCharge(c);
+                      let forbiddenReason = '';
+                      if (isForbidden) {
+                        if (isReefer) forbiddenReason = 'Khoản thu điện lạnh thuộc thẩm quyền Thương vụ CCKB';
+                        else if (isStorage) forbiddenReason = 'Phí lưu bãi container chỉ thu tại Cổng ra (/exit)';
+                        else if (isTicket) forbiddenReason = 'Khoản thu vé xe cổng thuộc phân hệ An ninh';
+                      }
+
+                      return (
+                        <tr 
+                          key={c.id} 
+                          className={`hover:bg-[#F8F9FB] transition-colors ${
+                            isSelected ? 'bg-[#EAF1FD]' : ''
+                          }`}
+                        >
+                          <td className="px-3.5 py-2.5 text-center">
+                            {!isPaid && !isForbidden && !isStorage ? (
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectCharge(c.id)}
+                                className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8]"
+                              />
+                            ) : (
+                              <span className="text-[#98A2B3]">•</span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs">
+                            {isTicket && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+                                <Truck className="w-3 h-3" /> Vé xe
+                              </span>
+                            )}
+                            {isReefer && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                <Zap className="w-3 h-3 text-[#B54708]" /> Tiền điện
+                              </span>
+                            )}
+                            {isStorage && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F8F9FB] text-[#667085] border border-[#E5E9F0]">
+                                <Clock className="w-3 h-3 text-[#667085]" /> Lưu bãi
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs">
+                            <p className="font-semibold text-[#17202E]">{c.title}</p>
+                            
+                            {/* Thông tin đối tượng: Container, Khách hàng, Xe chở vào */}
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              {c.container_no && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+                                  Cont: {c.container_no}
+                                </span>
+                              )}
+
+                              {c.customer_name && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                                  Khách: {c.customer_name} {c.customer_phone ? `(${c.customer_phone})` : ''}
+                                </span>
+                              )}
+
+                              {c.license_plate && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#F5F7FA] text-[#17202E] border border-[#E5E9F0]">
+                                  Xe: {c.license_plate}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Thao tác gom nhanh 1-chạm nếu là cước điện hoặc vé xe chưa thu */}
+                            {!isPaid && !isStorage && (
+                              <div className="flex items-center gap-2 mt-1.5 pt-1 border-t border-[#E5E9F0]">
+                                {c.container_no && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectAllOfContainer(c.container_no!)}
+                                    className="text-[11px] font-medium text-[#326DD8] hover:underline flex items-center gap-1 cursor-pointer"
+                                    title={`Tích chọn tất cả các khoản nợ của container ${c.container_no}`}
+                                  >
+                                    Gom tất cả của cont này
+                                  </button>
+                                )}
+                                {c.customer_name && (
+                                  <>
+                                    <span className="text-[#E5E9F0] text-[10px]">•</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSelectAllOfCustomer(c.customer_name!)}
+                                      className="text-[11px] font-medium text-[#0A9444] hover:underline flex items-center gap-1 cursor-pointer"
+                                      title={`Tích chọn tất cả các khoản nợ của khách hàng ${c.customer_name}`}
+                                    >
+                                      Gom tất cả của khách này
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-2.5 font-bold font-mono text-xs sm:text-sm text-[#17202E]">
+                            {c.amount.toLocaleString('vi-VN')} đ
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            {isPaid ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+                                <CheckCircle2 className="w-3 h-3" /> Đã thu
+                              </span>
+                            ) : isStorage ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+                                <Clock className="w-3 h-3" /> Chốt tại Cổng ra
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] text-[#D92D20] border border-[#FECDCA]">
+                                <AlertTriangle className="w-3 h-3" /> Chưa thu
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs text-[#667085] font-mono">
+                            {new Date(c.created_at).toLocaleString('vi-VN')}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right">
+                            {!isPaid ? (
+                              isStorage ? (
+                                <span
+                                  title="Phí lưu bãi container chỉ được chốt và thu trực tiếp tại Cổng ra (/exit) khi xe chở cont rời bãi"
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]"
+                                >
+                                  <Clock className="w-3 h-3 text-[#326DD8]" />
+                                  Thu tại Cổng ra
+                                </span>
+                              ) : isForbidden ? (
+                                <span
+                                  title={forbiddenReason}
+                                  className="text-[11px] text-[#98A2B3] font-medium italic"
+                                >
+                                  {isTicket ? 'An ninh thu' : 'CCKB thu'}
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenCollect(c)}
+                                  className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-2xs transition-colors cursor-pointer"
+                                >
+                                  Thu tiền
+                                </button>
+                              )
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPrintReceipt(c)}
+                                className="px-2.5 py-1 text-xs font-medium text-[#326DD8] bg-[#EFF8FF] hover:bg-[#EAF1FD] border border-[#B2DDFF] rounded-lg inline-flex items-center gap-1 transition-colors cursor-pointer"
+                                title="Xem & In phiếu thu tiền / biên lai"
+                              >
+                                <Printer className="w-3.5 h-3.5 text-[#326DD8]" />
+                                <span>In biên lai</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Khối tham khảo: Biểu phí & Quy tắc phân công thu tiền */}
+          <details className="group bg-[#F8F9FB] rounded-xl border border-[#E5E9F0] p-4 text-xs">
+            <summary className="font-semibold text-[#17202E] cursor-pointer flex items-center justify-between select-none">
+              <span className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-[#326DD8]" />
+                <span>Biểu phí dịch vụ bến bãi ban hành ({tariffs.length} mục) & Quy tắc phân công thu tiền</span>
+              </span>
+              <span className="text-[#667085] text-[11px] group-open:hidden">Nhấn để xem chi tiết ▼</span>
+              <span className="text-[#667085] text-[11px] hidden group-open:inline">Thu gọn ▲</span>
+            </summary>
+            <div className="mt-4 pt-3 border-t border-[#E5E9F0] space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {tariffs.map((tf) => (
-                  <div key={tf.id} className="p-2 bg-slate-50 rounded border border-slate-200 text-xs">
-                    <p className="font-bold text-slate-800">{tf.name}</p>
-                    <div className="flex items-center justify-between mt-1 text-slate-500 text-[11px]">
+                  <div key={tf.id} className="p-2.5 bg-white rounded-lg border border-[#E5E9F0] text-xs">
+                    <p className="font-semibold text-[#17202E]">{tf.name}</p>
+                    <div className="flex items-center justify-between mt-1 text-[#667085] text-[11px]">
                       <span>{tf.unit}</span>
-                      <span className="font-bold font-mono text-[#223873]">
-                        {tf.amount === 0 ? '0 đ (Miễn phí)' : `${tf.amount.toLocaleString()} đ`}
+                      <span className="font-bold font-mono text-[#0A9444]">
+                        {tf.amount === 0 ? '0 đ (Miễn phí)' : `${tf.amount.toLocaleString('vi-VN')} đ`}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="p-2.5 bg-amber-50 border border-amber-300 rounded text-amber-900 text-[11px] space-y-1">
-                <p className="font-bold">⚠️ Quy tắc phân công thu tiền:</p>
+              <div className="p-3 bg-[#EFF8FF] border border-[#B2DDFF] rounded-lg text-[#17202E] text-xs space-y-1">
+                <p className="font-semibold text-[#326DD8]">Quy tắc phân công thu tiền:</p>
                 <p>• <b>An ninh:</b> Thu vé cổng & phí lưu bãi phát sinh khi xe rời bãi.</p>
                 <p>• <b>CCKB:</b> Quản lý thu tiền điện container & duyệt ngoại lệ nợ.</p>
                 <p>• <b>An ninh không thu tiền điện.</b></p>
               </div>
             </div>
-          </div>
+          </details>
         </div>
       )}
 
