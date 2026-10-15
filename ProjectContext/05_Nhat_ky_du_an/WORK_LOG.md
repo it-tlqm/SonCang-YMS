@@ -1,5 +1,23 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 12:45 — Xuất Bản Tài Liệu Mô Tả Hệ Thống Bằng Microsoft Word (.docx) Chuẩn Doanh Nghiệp
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: *"Giờ hãy tạo cho tôi 1 tài liệu mô tả về hệ thống bằng word đi bạn"*.
+- **Các nội dung cấu thành tài liệu Word:**
+  1. Trang bìa doanh nghiệp (Cover Page) mang nhận diện thương hiệu Công ty Cổ phần Tà Lùng Quang Minh, tên phần mềm chính thức: *Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng*, thông tin phiên bản V1.0 (Quy chuẩn V5).
+  2. Phần 1: Giới thiệu tổng quan bến bãi, bối cảnh chuyển dịch từ AppSheet sang phần mềm chuyên dụng độc lập, mục tiêu và 4 nguyên tắc bất biến nghiệp vụ Sơn Cảng.
+  3. Phần 2: Kiến trúc kỹ thuật và công nghệ nền tảng (Next.js 16, Turbopack, TypeScript, Tailwind CSS, Supabase Cloud PostgreSQL RLS, PWA đa nền tảng, thiết kế Modern Enterprise Workspace DS-02).
+  4. Phần 3: Chi tiết chức năng 5 phân hệ vận hành trọng tâm (Cổng vào, Theo dõi Cắm rút điện container, Quản lý Bến bãi & Dwell time, Sổ cái Tài chính & Thu ngân, Kiểm soát Xuất bãi 2 cấp độc lập).
+  5. Phần 4: Biểu phí dịch vụ bến bãi ban hành (bảng 9 mục giá) và quy tắc phân công thu tiền (An ninh thu vé cổng + phí lưu đêm, CCKB thu tiền điện + duyệt bảo lãnh).
+  6. Phần 5: Ma trận phân quyền truy cập 7 vai trò chuẩn RBAC V5 (Ban Giám đốc, Super Admin, Kế toán trưởng, Thu ngân, Điều phối bến bãi, Kỹ thuật CCKB, An ninh Bốt Cổng).
+  7. Phần 6: Kế hoạch triển khai & đào tạo người dùng 4 giai đoạn đến 31/12/2026.
+  8. Phần 7: Thông tin đường dẫn truy cập Production Cloud (`https://son-cang-yms.vercel.app`), tài khoản quản trị và khối ký duyệt nghiệm thu.
+- **Tệp kết quả:**
+  * File Word chính: `docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` (45 KB)
+  * File Word bản sao tại thư mục gốc: `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` (45 KB)
+  * Script tạo tài liệu tự động: `scripts/generate_system_doc.py`
+- **Trạng thái:** Hoàn tất, đã commit và push lên GitHub `origin/main`.
+
 ## 2026-10-15 11:15 — Tối Ưu Hóa & Đồng Bộ Triệt Để Giao Diện 4 Màn Hình Vận Hành (Thu Phí, Cắm Điện, Bến Bãi, Cổng Ra)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"1 số chỗ vẫn chưa thực sự tối ưu tôi và đồng bộ lại ui bạn ạ... nói chung còn nhiều chỗ lắm"* kèm trích dẫn dữ liệu thực tế tại 4 màn hình: Sổ cái thu phí (`/billing`), Cắm điện container (`/reefer`), Quản lý bãi & cont (`/yard`), Kiểm soát xuất bãi (`/exit`).

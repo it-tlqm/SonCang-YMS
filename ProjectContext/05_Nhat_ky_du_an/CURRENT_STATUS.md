@@ -40,8 +40,12 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 11:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH TỐI ƯU HÓA VÀ ĐỒNG BỘ TRIỆT ĐỂ GIAO DIỆN 4 MÀN HÌNH VẬN HÀNH (THU PHÍ, CẮM ĐIỆN, BẾN BÃI, CỔNG RA) THEO CHUẨN DS-02**:
+- **Cập nhật lúc:** 15/10/2026 12:45 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **XUẤT BẢN TÀI LIỆU MÔ TẢ HỆ THỐNG PHẦN MỀM QUẢN LÝ BẾN BÃI/CẢNG CẠN SƠN CẢNG BẰNG MICROSOFT WORD (.DOCX) CHUẨN DOANH NGHIỆP**:
+  * **Tệp tài liệu:** `docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` (bản sao tại thư mục gốc: `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx`).
+  * **Nội dung 7 chương chi tiết:** Bối cảnh thay thế AppSheet; Kiến trúc Next.js + Supabase Cloud + PWA; Chi tiết 5 phân hệ vận hành; Biểu phí 9 mục và quy tắc thu tiền; Ma trận phân quyền 7 vai trò RBAC V5; Kế hoạch triển khai & đào tạo 4 giai đoạn đến 31/12/2026; Thông tin truy cập Production Cloud và khối ký duyệt Ban Giám đốc.
+
+- **Mốc trước đó (15/10/2026 11:15):** **HOÀN THÀNH TỐI ƯU HÓA VÀ ĐỒNG BỘ TRIỆT ĐỂ GIAO DIỆN 4 MÀN HÌNH VẬN HÀNH (THU PHÍ, CẮM ĐIỆN, BẾN BÃI, CỔNG RA) THEO CHUẨN DS-02**:
   * **Hạng mục tối ưu & đồng bộ:**
     1. **Sổ cái Thu phí & Công nợ (`/billing`):**
        - Loại bỏ hoàn toàn khối 3 thẻ KPI lặp dư thừa trong tab SỔ CÁI; thanh chỉ số 4 KPI phía trên là nguồn duy nhất.
