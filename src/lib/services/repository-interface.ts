@@ -591,6 +591,9 @@ export interface IYardRepository {
 
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;
+
+  /** Khởi tạo bãi trống 100% (làm sạch toàn bộ xe, cont, phiên điện, công nợ thử nghiệm) */
+  resetYardToClean(): Promise<{ success: boolean; error?: string }>;
 }
 
 export interface AuditLogEntry {

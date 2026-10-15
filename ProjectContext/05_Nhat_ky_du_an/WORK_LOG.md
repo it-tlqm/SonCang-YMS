@@ -1,5 +1,27 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 14:50 — Làm Sạch Triệt Để Khoản Phí / Công Nợ (`charges`), Phiên Cắm Điện (`reeferSessions`) & Bổ Sung Tùy Chọn "Khởi Tạo Bãi Trống 100%"
+
+- **Yêu cầu / nguồn:** Phản hồi và yêu cầu từ Chủ dự án:
+  *"xử lý nốt Đề xuất xử lý tiếp theo: Nếu bạn muốn loại bỏ hoàn toàn các "ảo giác" về số liệu: Làm sạch charges và reeferSessions... Cung cấp tùy chọn Khởi tạo bãi trống 100%"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Làm sạch `charges` và `reeferSessions` (Xóa bỏ 100% dữ liệu mock cũ):**
+     - [`src/lib/services/demo-repository.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/services/demo-repository.ts):
+       * Khởi tạo các mảng dữ liệu seed rỗng (`INITIAL_DEMO_VEHICLES = []`, `INITIAL_DEMO_CONTAINERS = []`, `INITIAL_DEMO_PAYMENTS = []`, `INITIAL_DEMO_TEMP_LOGS = []`), bảo toàn 100% danh mục chuẩn cấu hình Master (`SEED_YARD_ZONES_SON_CANG`, `INITIAL_DEMO_CUSTOMERS`, `INITIAL_DEMO_STAFF_USERS`, `INITIAL_DEMO_POWER_SOCKETS`).
+       * Xóa bỏ hoàn toàn 2 mảng mẫu tĩnh cũ chứa các xe và container giả định (`14C-123.45`, `TEMU9182341`, `OOLU6543210`, `CMAU5432198`).
+       * Kết nối tải và lưu trữ persistent cho `charges` và `reeferSessions` qua `localStorage` (`soncang_v5_demo_charges`, `soncang_v5_demo_reefer_sessions`).
+       * Xây dựng cơ chế đồng bộ động `syncChargesWithVehiclesAndReefer()`: Tự động lọc bỏ các khoản thu mồ côi không thuộc về lượt xe hay container nào có trong bãi; tự động tạo khoản thu vé cổng `TICKET` và đồng bộ số tiền thanh toán cho toàn bộ xe thực tế đang có trong bãi (`云桂桂桂`, `桂桂桂`, `湘湘湘`...).
+       * Tự động sinh khoản phí điện và lưu vết persistent khi cắm/rút điện (`plugInReefer`, `unplugReefer`, `recordCompletedReeferSession`).
+  2. **Bổ sung tính năng "Khởi tạo bãi trống 100%" (Clean Yard):**
+     - [`src/lib/services/repository-interface.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/services/repository-interface.ts): Bổ sung phương thức `resetYardToClean(): Promise<{ success: boolean; error?: string }>`.
+     - [`src/lib/services/demo-repository.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/services/demo-repository.ts): Dọn dẹp sạch toàn bộ các lượt xe, container, lịch sử sửa số/biển, phiên điện, công nợ, phiếu thu và audit log, đưa bãi về 0 xe, 0 container, 0 công nợ, đồng thời bảo toàn nguyên vẹn biểu phí 7 loại xe, 4 phân khu, 30 trụ điện, khách hàng và tài khoản nhân sự.
+     - [`src/lib/services/supabase-repository.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/services/supabase-repository.ts): Triển khai phương thức `resetYardToClean()`.
+     - [`src/components/layout/app-shell.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/layout/app-shell.tsx): Thêm nút *"Khởi tạo bãi trống 100%"* trong Menu người dùng (Avatar Profile) ở Header, kèm modal xác nhận an toàn.
+     - [`src/app/yard/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/yard/page.tsx): Thêm nút *"Làm sạch bãi (0 xe)"* trên thanh công cụ WorkspaceHeader và modal xác nhận.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
 ## 2026-10-15 14:20 — Tối Ưu Layout Full-Width Cho Toàn Bộ 6 Trang Quản Trị Hệ Thống (`/admin/*`)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

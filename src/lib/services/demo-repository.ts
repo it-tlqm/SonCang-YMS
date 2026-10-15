@@ -125,180 +125,9 @@ export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
   },
 ];
 
-const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [
-  {
-    id: '11000000-0000-0000-0000-000000000001',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    vehicle_type: 'CONT_LANH',
-    vehicle_type_name: 'Xe container lạnh/khô có hàng',
-    license_plate: '14C-123.45',
-    driver_name: 'Nguyễn Văn Hùng',
-    driver_phone: '0912.345.678',
-    ticket_code: 'VE-20261011-001',
-    ticket_amount: 250000,
-    ticket_payment_status: 'UNPAID', // Mặc định chưa thu, không tự gán PAID
-    status: 'IN_YARD',
-    entry_at: '2026-10-11T08:30:00Z',
-    entry_by: '20000000-0000-0000-0000-000000000020',
-    entry_by_name: 'Hoàng Văn An (Cổng chính)',
-    exit_at: null,
-    exit_by: null,
-    note: 'Chở hoa quả xuất khẩu',
-    idempotency_key: 'INIT-VEH-001',
-  },
-  {
-    id: '11000000-0000-0000-0000-000000000002',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    vehicle_type: 'DAU_KEO',
-    vehicle_type_name: 'Xe đầu kéo không cont',
-    license_plate: '15C-678.90',
-    driver_name: 'Trần Văn Nam',
-    driver_phone: '0988.765.432',
-    ticket_code: 'VE-20261011-002',
-    ticket_amount: 0,
-    ticket_payment_status: 'EXEMPT', // 0đ = Miễn phí hợp lệ
-    status: 'IN_YARD',
-    entry_at: '2026-10-11T09:15:00Z',
-    entry_by: '20000000-0000-0000-0000-000000000020',
-    entry_by_name: 'Hoàng Văn An (Cổng chính)',
-    exit_at: null,
-    exit_by: null,
-    note: 'Vào bãi lấy vỏ cont rỗng',
-    idempotency_key: 'INIT-VEH-002',
-  },
-  {
-    id: '11000000-0000-0000-0000-000000000003',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    vehicle_type: 'XE_BO_4_CHAN',
-    vehicle_type_name: 'Xe bơ 4 chân',
-    license_plate: '29H-555.55',
-    driver_name: 'Phạm Văn Long',
-    driver_phone: '0903.111.222',
-    ticket_code: 'VE-20261011-003',
-    ticket_amount: 150000,
-    ticket_payment_status: 'UNPAID', // Chưa thu
-    status: 'IN_YARD',
-    entry_at: '2026-10-11T10:00:00Z',
-    entry_by: '20000000-0000-0000-0000-000000000020',
-    entry_by_name: 'Hoàng Văn An (Cổng chính)',
-    exit_at: null,
-    exit_by: null,
-    note: 'Chở phân bón nhập khẩu',
-    idempotency_key: 'INIT-VEH-003',
-  },
-];
-
-const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [
-  {
-    id: '22000000-0000-0000-0000-000000000001',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    container_no_current: 'MSKU0934128',
-    container_no_original: 'MSKU0934128',
-    container_size: '40',
-    container_type: 'RF',
-    status: 'IN_YARD',
-    cargo_status: 'HANG',
-    inbound_vehicle_visit_id: '11000000-0000-0000-0000-000000000001',
-    inbound_license_plate: '14C-123.45',
-    inbound_at: '2026-10-11T08:30:00Z',
-    outbound_at: null,
-    created_at: '2026-10-11T08:30:00Z',
-    created_by: '20000000-0000-0000-0000-000000000020',
-    created_by_name: 'Hoàng Văn An (Cổng chính)',
-    number_changes_count: 0,
-  },
-  {
-    id: '22000000-0000-0000-0000-000000000002',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    container_no_current: 'TGHU7654321',
-    container_no_original: 'TGHU7654321',
-    container_size: '40',
-    container_type: 'DC',
-    status: 'IN_YARD',
-    cargo_status: 'RONG',
-    inbound_vehicle_visit_id: null,
-    inbound_license_plate: '14C-999.99',
-    inbound_at: '2026-10-10T14:00:00Z',
-    outbound_at: null,
-    created_at: '2026-10-10T14:00:00Z',
-    created_by: '20000000-0000-0000-0000-000000000020',
-    created_by_name: 'Hoàng Văn An (Cổng chính)',
-    number_changes_count: 0,
-  },
-  {
-    id: '22000000-0000-0000-0000-000000000003',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    container_no_current: 'CMAU1122334',
-    container_no_original: 'CMAU1122334',
-    container_size: '20',
-    container_type: 'RF',
-    status: 'IN_YARD',
-    cargo_status: 'CHUA_XAC_DINH', // Chưa xác định ban đầu
-    inbound_vehicle_visit_id: null,
-    inbound_license_plate: '14C-888.88',
-    inbound_at: '2026-10-11T11:20:00Z',
-    outbound_at: null,
-    created_at: '2026-10-11T11:20:00Z',
-    created_by: '20000000-0000-0000-0000-000000000020',
-    created_by_name: 'Hoàng Văn An (Cổng chính)',
-    number_changes_count: 0,
-  },
-  {
-    id: '22000000-0000-0000-0000-000000000004',
-    yard_id: '20000000-0000-0000-0000-000000000001',
-    container_no_current: 'TEMU7788990',
-    container_no_original: 'TEMU7788990',
-    container_size: '40',
-    container_type: 'RF',
-    status: 'IN_YARD',
-    cargo_status: 'HANG',
-    inbound_vehicle_visit_id: null,
-    inbound_license_plate: '14C-777.88',
-    inbound_at: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-    outbound_at: null,
-    created_at: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-    created_by: '20000000-0000-0000-0000-000000000020',
-    created_by_name: 'Hoàng Văn An (Cổng chính)',
-    number_changes_count: 0,
-  },
-];
-
-const INITIAL_DEMO_PAYMENTS: PaymentRecord[] = [
-  {
-    id: 'pay-demo-001',
-    yard_id: '11111111-1111-1111-1111-111111111111',
-    charge_id: 'charge-002',
-    payment_amount: 400000,
-    payment_method: 'CASH',
-    collected_by: '20000000-0000-0000-0000-000000000020',
-    collected_by_name: 'Thương vụ CCKB',
-    collector_dept: 'CCKB',
-    collected_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    receipt_code: 'PT-000002',
-    notes: 'Thu tiền điện lạnh container OOLU6543210 (4h)',
-    charge_type: 'REEFER',
-    charge_title: 'Tiền điện Container OOLU6543210 (240 phút)',
-    container_no: 'OOLU6543210',
-    license_plate: null,
-  },
-  {
-    id: 'pay-demo-002',
-    yard_id: '11111111-1111-1111-1111-111111111111',
-    charge_id: 'charge-001',
-    payment_amount: 250000,
-    payment_method: 'TRANSFER',
-    collected_by: '20000000-0000-0000-0000-000000000020',
-    collected_by_name: 'An ninh Cổng 1',
-    collector_dept: 'AN_NINH',
-    collected_at: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-    receipt_code: 'PT-000001',
-    notes: 'Thu vé xe container lạnh vào cổng',
-    charge_type: 'TICKET',
-    charge_title: 'Vé vào cổng Xe 14C-123.45 (CONT_LANH)',
-    container_no: 'TEMU9182341',
-    license_plate: '14C-123.45',
-  }
-];
+const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [];
+const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [];
+const INITIAL_DEMO_PAYMENTS: PaymentRecord[] = [];
 
 export const SEED_YARD_ZONES_SON_CANG: YardZoneInfo[] = [
   {
@@ -335,19 +164,7 @@ export const SEED_YARD_ZONES_SON_CANG: YardZoneInfo[] = [
   },
 ];
 
-const INITIAL_DEMO_TEMP_LOGS: ReeferTemperatureLog[] = [
-  {
-    id: 'temp-001',
-    container_visit_id: 'cont-001',
-    container_no: 'TEMU9182341',
-    temperature_celsius: -18.5,
-    cooling_status: 'RUNNING_NORMAL',
-    logged_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    logged_by: '20000000-0000-0000-0000-000000000020',
-    logged_by_name: 'Kỹ thuật trực ca',
-    notes: 'Bảo quản thanh long đông lạnh, máy chạy ổn định',
-  }
-];
+const INITIAL_DEMO_TEMP_LOGS: ReeferTemperatureLog[] = [];
 
 export const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   { id: 'cust-1', name: 'Công ty Cổ phần Tà Lùng Quang Minh', phone: '0206.3852.888', tax_code: '4800123456', notes: 'Đối tác chiến lược / Doanh nghiệp cảng' },
@@ -401,6 +218,8 @@ export class DemoRepository implements IYardRepository {
   private numberChanges: ContainerNumberChange[] = [];
   private plateChanges: VehiclePlateChange[] = [];
   private reeferRequests: ReeferRequest[] = [];
+  private reeferSessions: ReeferPowerSession[] = [];
+  private charges: ChargeItem[] = [];
   private payments: PaymentRecord[] = [...INITIAL_DEMO_PAYMENTS];
   private temperatureLogs: ReeferTemperatureLog[] = [...INITIAL_DEMO_TEMP_LOGS];
   private customers: Customer[] = [...INITIAL_DEMO_CUSTOMERS];
@@ -438,6 +257,8 @@ export class DemoRepository implements IYardRepository {
       const savedNC = localStorage.getItem('soncang_v5_demo_number_changes');
       const savedPC = localStorage.getItem('soncang_v5_demo_plate_changes');
       const savedRR = localStorage.getItem('soncang_v5_demo_reefer_requests');
+      const savedRS = localStorage.getItem('soncang_v5_demo_reefer_sessions');
+      const savedCH = localStorage.getItem('soncang_v5_demo_charges');
       const savedDP = localStorage.getItem('soncang_v5_demo_duplicate_policy');
       const savedPAY = localStorage.getItem('soncang_v5_demo_payments');
       const savedTL = localStorage.getItem('soncang_v5_demo_temperature_logs');
@@ -456,6 +277,12 @@ export class DemoRepository implements IYardRepository {
       }
       if (savedRR) {
         try { this.reeferRequests = JSON.parse(savedRR); } catch {}
+      }
+      if (savedRS) {
+        try { this.reeferSessions = JSON.parse(savedRS); } catch {}
+      }
+      if (savedCH) {
+        try { this.charges = JSON.parse(savedCH); } catch {}
       }
       if (savedDP) {
         try { this.duplicatePolicy = JSON.parse(savedDP); } catch {}
@@ -501,7 +328,84 @@ export class DemoRepository implements IYardRepository {
       if (savedAudit) {
         try { this.auditLogs = JSON.parse(savedAudit); } catch {}
       }
+
+      // ĐỒNG BỘ TỰ ĐỘNG: Gạt bỏ hoàn toàn các khoản thu/phiên điện ảo rác không thuộc xe/cont thực tế
+      this.syncChargesWithVehiclesAndReefer();
+      this.persist();
     }
+  }
+
+  /**
+   * Đồng bộ động khoản thu và phiên cắm điện theo chính xác phương tiện/container thực tế có trong bãi.
+   * Xóa bỏ hoàn toàn các bản ghi mẫu tĩnh cũ không thuộc về bất kỳ xe hay container nào.
+   */
+  private syncChargesWithVehiclesAndReefer() {
+    const validVehicleIds = new Set(this.vehicles.map(v => v.id));
+    const validContIds = new Set(this.containers.map(c => c.id));
+    const validContNos = new Set(this.containers.map(c => c.container_no_current));
+
+    // 1. Lọc bỏ các khoản thu giả lập cũ (14C-123.45, TEMU9182341, OOLU...) nếu không có xe/cont tương ứng
+    this.charges = this.charges.filter(c => {
+      if (c.charge_type === 'TICKET') {
+        return c.vehicle_visit_id ? validVehicleIds.has(c.vehicle_visit_id) : false;
+      }
+      if (c.charge_type === 'REEFER' || c.charge_type === 'STORAGE') {
+        return (c.container_visit_id && validContIds.has(c.container_visit_id)) ||
+               (c.container_no && validContNos.has(c.container_no));
+      }
+      return false;
+    });
+
+    // 2. Đồng bộ khoản thu vé cổng cho toàn bộ xe thực tế đang có trong bãi
+    for (const veh of this.vehicles) {
+      const existingTicketCharge = this.charges.find(
+        c => c.vehicle_visit_id === veh.id && c.charge_type === 'TICKET'
+      );
+      const isPaid = veh.ticket_payment_status === 'PAID';
+      const isExempt = veh.ticket_amount === 0 || veh.ticket_payment_status === 'EXEMPT';
+
+      if (!existingTicketCharge) {
+        this.charges.push({
+          id: `charge-ticket-${veh.id}`,
+          yard_id: veh.yard_id,
+          charge_type: 'TICKET',
+          title: `Vé vào cổng Xe ${veh.license_plate} (${veh.vehicle_type_name || veh.vehicle_type})`,
+          vehicle_visit_id: veh.id,
+          container_visit_id: null,
+          container_no: null,
+          license_plate: veh.license_plate,
+          customer_name: veh.driver_name || 'Khách hàng vãng lai',
+          customer_phone: veh.driver_phone || null,
+          amount: veh.ticket_amount ?? 0,
+          paid_amount: isPaid ? (veh.ticket_amount ?? 0) : 0,
+          status: isPaid ? 'PAID' : (isExempt ? 'EXEMPT' : 'UNPAID'),
+          notes: isPaid ? 'Đã thu vé cổng' : (isExempt ? 'Miễn phí hợp lệ' : 'Chưa thu vé cổng'),
+          created_at: veh.entry_at || new Date().toISOString(),
+        });
+      } else {
+        existingTicketCharge.amount = veh.ticket_amount ?? 0;
+        if (isPaid) {
+          existingTicketCharge.paid_amount = veh.ticket_amount ?? 0;
+          existingTicketCharge.status = 'PAID';
+        } else if (isExempt) {
+          existingTicketCharge.status = 'EXEMPT';
+        }
+      }
+    }
+
+    // 3. Lọc bỏ phiên cắm điện không thuộc về container thực tế nào
+    this.reeferSessions = this.reeferSessions.filter(s => 
+      validContIds.has(s.container_visit_id) || validContNos.has(s.container_no)
+    );
+
+    // 4. Lọc bỏ các phiếu thu tiền thanh toán không khớp xe/cont/khoản thu thật
+    const validChargeIds = new Set(this.charges.map(c => c.id));
+    const validPlates = new Set(this.vehicles.map(v => v.license_plate));
+    this.payments = this.payments.filter(p => 
+      (p.charge_id && validChargeIds.has(p.charge_id)) ||
+      (p.license_plate && validPlates.has(p.license_plate)) ||
+      (p.container_no && validContNos.has(p.container_no))
+    );
   }
 
   private persist() {
@@ -511,6 +415,8 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_demo_number_changes', JSON.stringify(this.numberChanges));
       localStorage.setItem('soncang_v5_demo_plate_changes', JSON.stringify(this.plateChanges));
       localStorage.setItem('soncang_v5_demo_reefer_requests', JSON.stringify(this.reeferRequests));
+      localStorage.setItem('soncang_v5_demo_reefer_sessions', JSON.stringify(this.reeferSessions));
+      localStorage.setItem('soncang_v5_demo_charges', JSON.stringify(this.charges));
       localStorage.setItem('soncang_v5_demo_duplicate_policy', JSON.stringify(this.duplicatePolicy));
       localStorage.setItem('soncang_v5_demo_payments', JSON.stringify(this.payments));
       localStorage.setItem('soncang_v5_demo_temperature_logs', JSON.stringify(this.temperatureLogs));
@@ -566,7 +472,7 @@ export class DemoRepository implements IYardRepository {
     }
 
     // Xác định số tiền vé và trạng thái thanh toán
-    let ticketAmount = vType.default_ticket_amount;
+    let ticketAmount = vType.default_ticket_amount ?? 0;
     let paymentStatus: TicketPaymentStatus = 'UNPAID';
 
     if (params.hasContainer) {
@@ -708,6 +614,46 @@ export class DemoRepository implements IYardRepository {
     if (secondCont) containersList.push(secondCont);
     newVehicle.containers = containersList;
 
+    const ticketCharge: ChargeItem = {
+      id: `charge-ticket-${newVehicle.id}`,
+      yard_id: params.yardId,
+      charge_type: 'TICKET',
+      title: `Vé vào cổng Xe ${newVehicle.license_plate} (${newVehicle.vehicle_type_name || newVehicle.vehicle_type})`,
+      vehicle_visit_id: newVehicle.id,
+      container_visit_id: null,
+      container_no: null,
+      license_plate: newVehicle.license_plate,
+      customer_name: newVehicle.driver_name || 'Khách hàng vãng lai',
+      customer_phone: newVehicle.driver_phone || null,
+      amount: newVehicle.ticket_amount ?? 0,
+      paid_amount: paymentStatus === 'PAID' ? (newVehicle.ticket_amount ?? 0) : 0,
+      status: paymentStatus,
+      notes: paymentStatus === 'PAID' ? 'Đã thu tiền vé cổng' : (ticketAmount === 0 ? 'Miễn phí hợp lệ' : 'Chưa thu vé cổng'),
+      created_at: newVehicle.entry_at,
+    };
+    this.charges.unshift(ticketCharge);
+
+    if (paymentStatus === 'PAID' && ticketAmount > 0) {
+      const paymentRecord: PaymentRecord = {
+        id: `pay-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        yard_id: params.yardId,
+        charge_id: ticketCharge.id,
+        payment_amount: ticketAmount,
+        payment_method: params.paymentMethod || 'CASH',
+        collected_by: params.operatorId,
+        collected_by_name: params.operatorName || 'An ninh Cổng',
+        collector_dept: 'AN_NINH',
+        collected_at: newVehicle.entry_at,
+        receipt_code: `PT-${Date.now().toString().slice(-6)}`,
+        notes: `Thu vé cổng xe ${newVehicle.license_plate}`,
+        charge_type: 'TICKET',
+        charge_title: ticketCharge.title,
+        license_plate: newVehicle.license_plate,
+        container_no: null,
+      };
+      this.payments.unshift(paymentRecord);
+    }
+
     this.persist();
     return { vehicle: newVehicle, container: newCont, secondContainer: secondCont, containers: containersList };
   }
@@ -782,45 +728,6 @@ export class DemoRepository implements IYardRepository {
     return { success: true };
   }
 
-  private reeferSessions: ReeferPowerSession[] = [
-    {
-      id: 'reefer-demo-001',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      container_visit_id: 'cont-001',
-      container_no: 'TEMU9182341',
-      power_status: 'PLUGGED',
-      plugged_in_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(), // 3 giờ trước
-      plugged_in_by: 'An ninh Cổng 1',
-      unplugged_at: null,
-      unplugged_by: null,
-      raw_duration_seconds: null,
-      billable_minutes: null,
-      applied_hourly_rate: 100000,
-      total_power_amount: null,
-      payment_status: 'UNPAID',
-      notes: 'Bảo quản hoa quả tươi xuất khẩu',
-      created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-    },
-    {
-      id: 'reefer-demo-002',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      container_visit_id: 'cont-004',
-      container_no: 'OOLU6543210',
-      power_status: 'UNPLUGGED',
-      plugged_in_at: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
-      plugged_in_by: 'An ninh Cổng 2',
-      unplugged_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-      unplugged_by: 'CCKB Trực ca',
-      raw_duration_seconds: 4 * 3600,
-      billable_minutes: 240,
-      applied_hourly_rate: 100000,
-      total_power_amount: 400000,
-      payment_status: 'PAID',
-      notes: 'Đã hoàn tất thanh toán tiền điện',
-      created_at: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
-    }
-  ];
-
   async getReeferSessions(yardId?: string): Promise<ReeferPowerSession[]> {
     if (!yardId) return this.reeferSessions;
     return this.reeferSessions.filter(s => s.yard_id === yardId);
@@ -874,6 +781,7 @@ export class DemoRepository implements IYardRepository {
     }
 
     this.reeferSessions.unshift(newSession);
+    this.persist();
     return { session: newSession };
   }
 
@@ -904,6 +812,7 @@ export class DemoRepository implements IYardRepository {
       session.billable_minutes = 0;
       session.total_power_amount = 0;
       session.notes = params.notes ? `${session.notes || ''} [0s: Chờ CCKB xác minh]`.trim() : session.notes;
+      this.persist();
       return { session };
     }
 
@@ -943,6 +852,7 @@ export class DemoRepository implements IYardRepository {
       created_at: new Date().toISOString(),
     };
     this.charges.unshift(newCharge);
+    this.persist();
 
     return { session };
   }
@@ -1051,94 +961,6 @@ export class DemoRepository implements IYardRepository {
     { id: 'tf-7', code: 'VE_XE_SANG_TAI', name: 'Vé xe sang tải nội bộ', unit: 'Lượt xe', amount: 0, is_active: true },
     { id: 'tf-8', code: 'DIEN_CONT_GIO', name: 'Tiền điện container theo giờ (Làm tròn 15p)', unit: 'Giờ', amount: 100000, is_active: true },
     { id: 'tf-9', code: 'LUU_CONT_DEM', name: 'Phí lưu container qua đêm (22h-06h, miễn đêm đầu)', unit: 'Đêm', amount: 100000, is_active: true },
-  ];
-
-  private charges: ChargeItem[] = [
-    {
-      id: 'charge-001',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      charge_type: 'TICKET',
-      title: 'Vé vào cổng Xe 14C-123.45 (Xe container lạnh)',
-      vehicle_visit_id: 'veh-001',
-      container_visit_id: 'cont-001',
-      container_no: 'TEMU9182341',
-      license_plate: '14C-123.45',
-      customer_name: 'Công ty TNHH Vận tải Á Châu',
-      customer_phone: '0912345678',
-      amount: 250000,
-      paid_amount: 0,
-      status: 'UNPAID',
-      notes: 'Chưa thu vé cổng',
-      created_at: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
-    },
-    {
-      id: 'charge-002',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      charge_type: 'REEFER',
-      title: 'Cước cắm điện Container OOLU6543210 — 240 phút',
-      vehicle_visit_id: null,
-      container_visit_id: 'cont-004',
-      container_no: 'OOLU6543210',
-      license_plate: '14C-888.99',
-      customer_name: 'Nguyễn Văn Tuấn (Chủ hàng Sầu riêng)',
-      customer_phone: '0988776655',
-      amount: 400000,
-      paid_amount: 400000,
-      status: 'PAID',
-      notes: 'Đã thu bởi CCKB',
-      created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    },
-    {
-      id: 'charge-002b',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      charge_type: 'REEFER',
-      title: 'Cước cắm điện Container OOLU6543210 — 480 phút (Lần cắm 2)',
-      vehicle_visit_id: null,
-      container_visit_id: 'cont-004',
-      container_no: 'OOLU6543210',
-      license_plate: '14C-888.99',
-      customer_name: 'Nguyễn Văn Tuấn (Chủ hàng Sầu riêng)',
-      customer_phone: '0988776655',
-      amount: 800000,
-      paid_amount: 0,
-      status: 'UNPAID',
-      notes: 'Cắm bổ sung giữ nhiệt ban ngày',
-      created_at: new Date(Date.now() - 1 * 3600 * 1000).toISOString(),
-    },
-    {
-      id: 'charge-002c',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      charge_type: 'REEFER',
-      title: 'Cước cắm điện Container TEMU9182341 — 600 phút',
-      vehicle_visit_id: 'veh-001',
-      container_visit_id: 'cont-001',
-      container_no: 'TEMU9182341',
-      license_plate: '14C-123.45',
-      customer_name: 'Công ty TNHH Vận tải Á Châu',
-      customer_phone: '0912345678',
-      amount: 1000000,
-      paid_amount: 0,
-      status: 'UNPAID',
-      notes: 'Phiên cắm liên tục bảo quản Thanh Long',
-      created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-    },
-    {
-      id: 'charge-003',
-      yard_id: '11111111-1111-1111-1111-111111111111',
-      charge_type: 'STORAGE',
-      title: 'Phí lưu bãi Container CMAU5432198 — 1 đêm chịu phí',
-      vehicle_visit_id: null,
-      container_visit_id: 'cont-003',
-      container_no: 'CMAU5432198',
-      license_plate: '14C-555.66',
-      customer_name: 'Kho lạnh Tà Lùng',
-      customer_phone: null,
-      amount: 100000,
-      paid_amount: 0,
-      status: 'UNPAID',
-      notes: 'Lưu qua đêm 22h-06h, đêm 2 chịu phí (đêm đầu miễn phí)',
-      created_at: new Date(Date.now() - 1 * 3600 * 1000).toISOString(),
-    }
   ];
 
   async getCharges(yardId?: string): Promise<ChargeItem[]> {
@@ -2891,18 +2713,42 @@ export class DemoRepository implements IYardRepository {
     return allLogs;
   }
 
-  resetDemoData() {
-    this.vehicles = [...INITIAL_DEMO_VEHICLES];
-    this.containers = [...INITIAL_DEMO_CONTAINERS];
+  async resetYardToClean(): Promise<{ success: boolean; error?: string }> {
+    this.vehicles = [];
+    this.containers = [];
     this.numberChanges = [];
     this.plateChanges = [];
     this.reeferRequests = [];
-    this.temperatureLogs = [...INITIAL_DEMO_TEMP_LOGS];
-    this.customers = [...INITIAL_DEMO_CUSTOMERS];
-    this.staffUsers = [...INITIAL_DEMO_STAFF_USERS];
-    this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
+    this.reeferSessions = [];
+    this.charges = [];
+    this.payments = [];
+    this.temperatureLogs = [];
+    this.cashSettlements = [];
+    this.settlementItems = [];
+    this.yardInvoices = [];
     this.auditLogs = [];
+
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('soncang_v5_demo_vehicles');
+      localStorage.removeItem('soncang_v5_demo_containers');
+      localStorage.removeItem('soncang_v5_demo_number_changes');
+      localStorage.removeItem('soncang_v5_demo_plate_changes');
+      localStorage.removeItem('soncang_v5_demo_reefer_requests');
+      localStorage.removeItem('soncang_v5_demo_reefer_sessions');
+      localStorage.removeItem('soncang_v5_demo_charges');
+      localStorage.removeItem('soncang_v5_demo_payments');
+      localStorage.removeItem('soncang_v5_demo_temperature_logs');
+      localStorage.removeItem('soncang_v5_cash_settlements');
+      localStorage.removeItem('soncang_v5_settlement_items');
+      localStorage.removeItem('soncang_v5_yard_invoices');
+      localStorage.removeItem('soncang_v5_audit_logs');
+    }
     this.persist();
+    return { success: true };
+  }
+
+  resetDemoData() {
+    this.resetYardToClean();
   }
 }
 

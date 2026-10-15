@@ -37,7 +37,8 @@ import {
   Wrench,
   PowerOff,
   Check,
-  Info
+  Info,
+  ShieldCheck
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -228,6 +229,27 @@ export default function YardMonitorPage() {
 
   // Quản lý Action Dropdown popover trên từng dòng bảng
   const [openActionDropdownId, setOpenActionDropdownId] = useState<string | null>(null);
+
+  // Modal Khởi tạo bãi trống 100%
+  const [showResetYardModal, setShowResetYardModal] = useState<boolean>(false);
+  const [isResettingYard, setIsResettingYard] = useState<boolean>(false);
+
+  const handleResetYardClean = async () => {
+    setIsResettingYard(true);
+    try {
+      const res = await repository.resetYardToClean();
+      if (res.success) {
+        setShowResetYardModal(false);
+        window.location.reload();
+      } else {
+        alert(res.error || 'Lỗi khi làm sạch dữ liệu bãi.');
+      }
+    } catch (err: any) {
+      alert('Lỗi hệ thống: ' + (err?.message || String(err)));
+    } finally {
+      setIsResettingYard(false);
+    }
+  };
 
   // Quản lý Modal CRUD Phân khu bãi (YardZone)
   const [isZoneModalOpen, setIsZoneModalOpen] = useState<boolean>(false);
@@ -1440,6 +1462,15 @@ export default function YardMonitorPage() {
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${isLoading ? 'animate-spin' : ''}`} />
                 <span>{isLoading ? 'Đang tải...' : 'Làm mới'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowResetYardModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#FECDCA] bg-[#FEF3F2] text-xs font-semibold text-[#D92D20] hover:bg-[#FEE4E2] transition-colors cursor-pointer shadow-2xs"
+                title="Khởi tạo bãi trống 100% (Xóa sạch toàn bộ xe/cont thử nghiệm để sẵn sàng đón xe thật)"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#D92D20]" />
+                <span>Làm sạch bãi (0 xe)</span>
               </button>
             </div>
           }
@@ -4828,6 +4859,59 @@ export default function YardMonitorPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL XÁC NHẬN KHỞI TẠO BÃI TRỐNG 100% */}
+      {showResetYardModal && (
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF6EE] border border-[#FEE4E2] flex items-center justify-center shrink-0">
+                <RotateCcw className="w-5 h-5 text-[#B54708]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-[#17202E]">
+                  Khởi tạo bãi trống 100% (Clean Yard)
+                </h3>
+                <p className="text-xs text-[#667085] mt-1 leading-relaxed">
+                  Hệ thống sẽ dọn dẹp sạch toàn bộ các lượt xe, container, phiên điện và công nợ thử nghiệm trong bãi, đưa số lượng tồn bãi về <strong>0 phương tiện, 0 container, 0 công nợ</strong> để sẵn sàng đón các lượt xe thực tế đầu tiên.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FB] rounded-xl border border-[#E5E9F0] text-[11px] text-[#667085] space-y-1.5">
+              <div className="font-semibold text-[#17202E] flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0A9444]" />
+                <span>Bảo toàn Danh mục Cấu hình Master:</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-0.5 text-[#667085]">
+                <li>Biểu phí niêm yết 7 loại xe và dịch vụ cảng</li>
+                <li>4 Phân khu chức năng bãi và 30 trụ điện 380V</li>
+                <li>Danh bạ khách hàng và tài khoản nhân sự</li>
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E9F0]">
+              <button
+                type="button"
+                onClick={() => setShowResetYardModal(false)}
+                disabled={isResettingYard}
+                className="px-3.5 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#667085] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleResetYardClean}
+                disabled={isResettingYard}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#D92D20] hover:bg-[#B42318] text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 ${isResettingYard ? 'animate-spin' : ''}`} />
+                <span>{isResettingYard ? 'Đang làm sạch...' : 'Xác nhận Khởi tạo Bãi Trống'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

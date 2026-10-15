@@ -3947,6 +3947,25 @@ export class SupabaseRepository implements IYardRepository {
       return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
   }
+
+  async resetYardToClean(): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('soncang_v5_demo_vehicles');
+      localStorage.removeItem('soncang_v5_demo_containers');
+      localStorage.removeItem('soncang_v5_demo_number_changes');
+      localStorage.removeItem('soncang_v5_demo_plate_changes');
+      localStorage.removeItem('soncang_v5_demo_reefer_requests');
+      localStorage.removeItem('soncang_v5_demo_payments');
+      localStorage.removeItem('soncang_v5_demo_temperature_logs');
+      localStorage.removeItem('soncang_v5_cash_settlements');
+      localStorage.removeItem('soncang_v5_settlement_items');
+      localStorage.removeItem('soncang_v5_yard_invoices');
+      localStorage.removeItem('soncang_v5_audit_logs');
+      localStorage.removeItem('soncang_v5_demo_charges');
+      localStorage.removeItem('soncang_v5_demo_reefer_sessions');
+    }
+    return { success: true };
+  }
 }
 
 export const supabaseRepository = new SupabaseRepository();

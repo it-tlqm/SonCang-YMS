@@ -40,19 +40,24 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 14:00 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **XÓA BỎ TRIỆT ĐỂ DỮ LIỆU ẢO GIÁC TRONG NHẬT KÝ KIỂM TOÁN (`/admin/audit-logs`) & ĐỒNG BỘ FULL-HEIGHT TABLE + CƠ CHẾ NÚT THAO TÁC TRÊN TOÀN BỘ PHÂN HỆ**:
-  * **Xóa bỏ triệt để "ảo giác" trong Nhật ký kiểm toán:**
-    1. Bổ sung phương thức `getAuditLogs()` và `logAuditEvent()` vào `IYardRepository` chuẩn mực (`src/lib/services/repository-interface.ts`).
-    2. Trong `DemoRepository`: Thay thế mảng mẫu tĩnh giả định (`14C-123.45`, `TCLU1234567`, `FSCU9876543`) bằng cơ chế đọc và tổng hợp động từ 100% dữ liệu thực tế đang có trong bãi:
-       - Các lượt xe vào bãi / xuất bãi thực tế (`云桂桂桂`, `桂桂桂`, `湘湘湘`...).
-       - Các container thực tế theo xe (`TTTT1111111`...).
-       - Lịch sử sửa biển số xe và sửa số container thực tế từ `plateChanges` và `numberChanges`.
-       - Toàn bộ phiếu thu tiền thực tế (`250.000 đ`, `200.000 đ`...).
-       - Toàn bộ phiên cắm điện, rút điện, tính cước điện container thực tế.
-       - Lưu vết bất biến (Append-only) trong `soncang_v5_audit_logs`.
-    3. Trong `SupabaseRepository`: Đọc từ bảng lưu vết `app_audit_logs` kết hợp đối soát dữ liệu thực tế từ các bảng `app_vehicle_visits`, `app_container_visits`, `app_payments`.
-    4. Trong trang `/admin/audit-logs`: Gọi trực tiếp `repository.getAuditLogs()`, bộ lọc và tìm kiếm hoạt động 100% trên dữ liệu đối soát thực tế.
+- **Cập nhật lúc:** 15/10/2026 14:50 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **LÀM SẠCH TRIỆT ĐỂ KHOẢN PHÍ / CÔNG NỢ (`charges`), PHIÊN ĐIỆN LẠNH (`reeferSessions`) & BỔ SUNG TÙY CHỌN "KHỞI TẠO BÃI TRỐNG 100%" (CLEAN YARD)**:
+  * **Làm sạch `charges` và `reeferSessions` (Xóa bỏ 100% mock data giả định):**
+    1. Làm rỗng các hằng số seed khởi tạo giả định (`INITIAL_DEMO_VEHICLES = []`, `INITIAL_DEMO_CONTAINERS = []`, `INITIAL_DEMO_PAYMENTS = []`, `INITIAL_DEMO_TEMP_LOGS = []`), bảo toàn danh mục hạ tầng chuẩn (`SEED_YARD_ZONES_SON_CANG`, `INITIAL_DEMO_CUSTOMERS`, `INITIAL_DEMO_STAFF_USERS`, `INITIAL_DEMO_POWER_SOCKETS`).
+    2. Loại bỏ hoàn toàn 2 mảng tĩnh cứng cũ trong `DemoRepository`: `charges` (chứa `14C-123.45`, `TEMU9182341`, `OOLU6543210`, `CMAU5432198`) và `reeferSessions`.
+    3. Thiết lập cơ chế đồng bộ động `syncChargesWithVehiclesAndReefer()`:
+       - Tự động thanh lọc các khoản thu và phiên cắm điện mồ côi không thuộc bất kỳ xe/container thực tế nào.
+       - Tự động sinh khoản thu vé cổng `TICKET` và phiếu thu tiền đối soát chính xác theo các xe thực tế đang có trong bãi (`云桂桂桂`, `桂桂桂`, `湘湘湘`...).
+       - Phiên cắm điện mới (`plugInReefer`, `unplugReefer`, `recordCompletedReeferSession`) lập tức tự sinh khoản phí điện và lưu vết vào `localStorage` (`soncang_v5_demo_charges`, `soncang_v5_demo_reefer_sessions`).
+  * **Cung cấp tùy chọn "Khởi tạo bãi trống 100%" (Clean Yard):**
+    1. Bổ sung phương thức `resetYardToClean(): Promise<{ success: boolean; error?: string }>` vào `IYardRepository`, `DemoRepository` và `SupabaseRepository`.
+    2. Tích hợp UI trực quan, dễ thao tác:
+       - Nút *"Khởi tạo bãi trống 100%"* trong Menu người dùng (Avatar Profile) tại Header của toàn bộ hệ thống (`src/components/layout/app-shell.tsx`).
+       - Nút *"Làm sạch bãi (0 xe)"* ngay trên thanh công cụ Quản lý Bến bãi (`src/app/yard/page.tsx`).
+       - Modal xác nhận thiết kế chuẩn với cảnh báo rõ ràng và bảo toàn tuyệt đối 100% dữ liệu danh mục Master (Biểu phí, 4 phân khu, 30 trụ điện, Khách hàng, Tài khoản nhân sự).
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
   * **Đồng bộ giải pháp Full-Height Table & Chống che nút thao tác trên toàn bộ các bảng hệ thống:**
     1. Áp dụng chuẩn layout `flex-1 flex flex-col min-h-[calc(100vh-210px)]`, table card `flex-1 flex flex-col min-h-[540px]` và vùng cuộn `overflow-x-auto flex-1 min-h-[500px] pb-40` cho tất cả các bảng:
        - `/reefer`: Tab Phiên cắm điện thực tế, Tab Container sẵn sàng cắm điện, Tab Yêu cầu CCKB, Tab Nhật ký nhiệt độ.
