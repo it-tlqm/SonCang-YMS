@@ -393,131 +393,132 @@ export default function CustomersAdminPage() {
       {/* MODAL THÊM MỚI / CHỈNH SỬA KHÁCH HÀNG                                     */}
       {/* ========================================================================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full border border-[#E5E9F0] shadow-xl overflow-hidden space-y-4">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E9F0] bg-[#F8F9FB]">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#326DD8]" />
-                <h3 className="text-xs font-semibold text-[#17202E] uppercase tracking-wide">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                  Đối tác & Khách hàng
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <Building2 className="w-4 h-4 text-[#326DD8]" />
                   {modalMode === 'CREATE' ? 'Thêm mới Khách hàng / Chủ hàng' : 'Chỉnh sửa Khách hàng'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-[#98A2B3] hover:text-[#17202E] p-1 rounded-md hover:bg-[#F1F4F8] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 pt-0 space-y-4">
-              {errorMessage && (
-                <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] rounded-lg text-xs font-medium flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{errorMessage}</span>
+            {errorMessage && (
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-lg text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#D92D20]" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitForm} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Tên Khách hàng / Doanh nghiệp <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="VD: Công ty TNHH Vận tải Á Châu..."
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Số điện thoại liên hệ</label>
+                  <input
+                    type="text"
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    placeholder="VD: 0912.345.678"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã số thuế doanh nghiệp</label>
+                  <input
+                    type="text"
+                    value={formTaxCode}
+                    onChange={(e) => setFormTaxCode(e.target.value)}
+                    placeholder="VD: 0102345678"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Địa chỉ trụ sở / Kho bãi</label>
+                <input
+                  type="text"
+                  value={formAddress}
+                  onChange={(e) => setFormAddress(e.target.value)}
+                  placeholder="VD: Cửa khẩu Tà Lùng, Quảng Hòa, Cao Bằng..."
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú đối tác / Loại hàng chuyên tuyến</label>
+                <textarea
+                  rows={2}
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  placeholder="VD: Khách thường xuyên chạy hoa quả lạnh..."
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all resize-none"
+                />
+              </div>
+
+              {modalMode === 'EDIT' && (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="chkIsActive"
+                    checked={formIsActive}
+                    onChange={(e) => setFormIsActive(e.target.checked)}
+                    className="w-4 h-4 text-[#326DD8] rounded border-[#D0D5DD] focus:ring-[#326DD8] cursor-pointer"
+                  />
+                  <label htmlFor="chkIsActive" className="text-xs font-medium text-[#344054] cursor-pointer">
+                    Đang giao dịch hoạt động
+                  </label>
                 </div>
               )}
 
-              <form onSubmit={handleSubmitForm} className="space-y-3.5 text-xs">
-                <div>
-                  <label className="block font-semibold text-[#17202E] mb-1">
-                    Tên Khách hàng / Doanh nghiệp <span className="text-[#D92D20]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    placeholder="VD: Công ty TNHH Vận tải Á Châu..."
-                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-medium text-[#667085] mb-1">Số điện thoại liên hệ</label>
-                    <input
-                      type="text"
-                      value={formPhone}
-                      onChange={(e) => setFormPhone(e.target.value)}
-                      placeholder="VD: 0912.345.678"
-                      className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg font-mono text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium text-[#667085] mb-1">Mã số thuế doanh nghiệp</label>
-                    <input
-                      type="text"
-                      value={formTaxCode}
-                      onChange={(e) => setFormTaxCode(e.target.value)}
-                      placeholder="VD: 0102345678"
-                      className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg font-mono text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-medium text-[#667085] mb-1">Địa chỉ trụ sở / Kho bãi</label>
-                  <input
-                    type="text"
-                    value={formAddress}
-                    onChange={(e) => setFormAddress(e.target.value)}
-                    placeholder="VD: Cửa khẩu Tà Lùng, Quảng Hòa, Cao Bằng..."
-                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-medium text-[#667085] mb-1">Ghi chú đối tác / Loại hàng chuyên tuyến</label>
-                  <textarea
-                    rows={2}
-                    value={formNotes}
-                    onChange={(e) => setFormNotes(e.target.value)}
-                    placeholder="VD: Khách thường xuyên chạy hoa quả lạnh..."
-                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                  />
-                </div>
-
-                {modalMode === 'EDIT' && (
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="chkIsActive"
-                      checked={formIsActive}
-                      onChange={(e) => setFormIsActive(e.target.checked)}
-                      className="w-4 h-4 text-[#326DD8] rounded border-[#E5E9F0] cursor-pointer"
-                    />
-                    <label htmlFor="chkIsActive" className="text-xs font-medium text-[#17202E] cursor-pointer">
-                      Đang giao dịch hoạt động
-                    </label>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2.5 pt-3 border-t border-[#E5E9F0]">
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => setShowModal(false)}
-                    className="px-3.5 py-2 text-xs font-medium text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] rounded-lg cursor-pointer transition-colors"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-2xs cursor-pointer flex items-center gap-1.5 transition-colors"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    <span>{modalMode === 'CREATE' ? 'Thêm khách hàng' : 'Lưu thay đổi'}</span>
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => setShowModal(false)}
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span>{modalMode === 'CREATE' ? 'Thêm khách hàng' : 'Lưu thay đổi'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

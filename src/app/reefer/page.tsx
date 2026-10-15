@@ -2061,44 +2061,49 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL CẮM ĐIỆN */}
       {showPlugModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-amber-500" />
-                Cắm điện Container Lạnh
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#D97706] tracking-wider">Kỹ thuật & Giám sát Reefer</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Zap className="w-5 h-5 text-[#D97706] fill-current" />
+                  Cắm điện Container Lạnh
+                </h3>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowPlugModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {plugError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs">
-                {plugError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{plugError}</span>
               </div>
             )}
 
-            <form onSubmit={handleConfirmPlugIn} className="space-y-3.5">
+            <form onSubmit={handleConfirmPlugIn} className="space-y-3.5 text-xs">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">
-                    Chọn Container cần cắm điện <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-semibold text-[#344054]">
+                    Chọn Container cần cắm điện <span className="text-[#D92D20]">*</span>
                   </label>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-[10px] text-[#667085] font-mono">
                     {unpluggedContainersInYard.length} cont chờ cắm
                   </span>
                 </div>
                 {unpluggedContainersInYard.length === 0 ? (
-                  <div className="p-3 bg-slate-50 border border-slate-300 rounded space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-slate-800 font-bold">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="p-3.5 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-[#17202E] font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-[#027A48] shrink-0" />
                       <span>Không có container nào trong bãi đang chờ cắm điện</span>
                     </div>
-                    <p className="text-[11px] text-slate-600">
+                    <p className="text-[11px] text-[#667085]">
                       Tất cả container hiện tại trong bãi đã được cắm điện hoặc chưa tiếp nhận container mới.
                     </p>
                     <button
@@ -2107,7 +2112,7 @@ export default function ReeferMonitoringPage() {
                         setShowPlugModal(false);
                         handleOpenCreateReqModal();
                       }}
-                      className="px-3 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Tạo Yêu cầu cắm điện trước (CCKB)</span>
@@ -2136,7 +2141,7 @@ export default function ReeferMonitoringPage() {
                           }
                         }
                       }}
-                      className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                      className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                     >
                       {requestedContainersInYard.length > 0 && (
                         <optgroup label={`⭐ ĐÃ CÓ YÊU CẦU CCKB (${requestedContainersInYard.length})`}>
@@ -2163,8 +2168,8 @@ export default function ReeferMonitoringPage() {
 
                     {/* Banner ghi chú nếu cont chưa có yêu cầu */}
                     {selectedContId && otherUnpluggedInYard.some((c) => c.id === selectedContId) && (
-                      <div className="mt-1.5 p-2 bg-blue-50 border border-blue-200 rounded text-[11px] text-blue-900 flex items-start gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                      <div className="mt-1.5 p-2.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-lg text-[11px] text-[#175CD3] flex items-start gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#326DD8] shrink-0 mt-0.5" />
                         <span>
                           Container này chưa có yêu cầu trước. Hệ thống sẽ tự động lập phiếu yêu cầu CCKB tương ứng khi cắm điện để lưu đầy đủ chứng từ thương vụ!
                         </span>
@@ -2177,17 +2182,17 @@ export default function ReeferMonitoringPage() {
               {/* VỊ TRÍ TRỤ / GIẮC CẮM ĐIỆN 380V (KHU A REEFER) */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">
-                    Vị trí Trụ / Giắc cắm điện 380V (Khu A) <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-semibold text-[#344054]">
+                    Vị trí Trụ / Giắc cắm điện 380V (Khu A) <span className="text-[#D92D20]">*</span>
                   </label>
-                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                  <span className="text-[10px] font-bold text-[#B54708] bg-[#FFFAEB] px-2 py-0.5 rounded border border-[#FEDF89]">
                     {powerSockets.length} Trụ 3 pha
                   </span>
                 </div>
                 <select
                   value={plugSocketCode}
                   onChange={(e) => setPlugSocketCode(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-bold font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444] bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-bold font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   {powerSockets.map((socket) => {
                     const code = socket.socket_code;
@@ -2209,34 +2214,34 @@ export default function ReeferMonitoringPage() {
                     );
                   })}
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#667085] mt-1">
                   Hệ thống kiểm soát chống cắm trùng giắc. Khi rút điện, giắc cắm sẽ tự động được giải phóng về trạng thái trống.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Thời gian cắm thực tế (Khớp giờ giắc Zalo) <span className="font-normal text-slate-500">(hh:mm dd/MM/yyyy)</span>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Thời gian cắm thực tế (Khớp giờ giắc Zalo) <span className="font-normal text-[#667085]">(hh:mm dd/MM/yyyy)</span>
                 </label>
                 <div className="relative">
-                  <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#667085]" />
                   <input
                     type="datetime-local"
                     value={plugInTime}
                     onChange={(e) => setPlugInTime(e.target.value)}
                     required
-                    className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                    className="w-full pl-9 pr-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
                 {plugInTime && (
-                  <div className="text-[11px] text-emerald-800 font-mono mt-1 font-semibold flex items-center gap-1">
+                  <div className="text-[11px] text-[#027A48] font-mono mt-1 font-semibold flex items-center gap-1">
                     <span>⏱️ Định dạng đã chọn:</span>
-                    <strong className="bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">{formatDateTime(plugInTime)}</strong>
+                    <strong className="bg-[#ECFDF3] px-1.5 py-0.5 rounded border border-[#ABEFC6]">{formatDateTime(plugInTime)}</strong>
                   </div>
                 )}
                 {/* Nút lùi giờ nhanh theo bằng chứng Zalo */}
                 <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                  <span className="text-[10px] text-slate-500 font-semibold">Khớp giờ giắc Zalo:</span>
+                  <span className="text-[10px] text-[#667085] font-semibold">Khớp giờ giắc Zalo:</span>
                   {[
                     { label: 'Bây giờ', mins: 0 },
                     { label: '-5p', mins: -5 },
@@ -2248,7 +2253,7 @@ export default function ReeferMonitoringPage() {
                       key={btn.label}
                       type="button"
                       onClick={() => setPlugInTime(btn.mins === 0 ? getNowLocalStr() : adjustDateTimeLocal(getNowLocalStr(), btn.mins))}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                     >
                       {btn.label}
                     </button>
@@ -2258,17 +2263,17 @@ export default function ReeferMonitoringPage() {
 
               {/* CHỌN CHẾ ĐỘ CẮM ĐIỆN VÀ SỐ GIỜ DỰ KIẾN */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Chế độ cắm điện
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPlugPowerMode('HOURLY')}
-                    className={`py-1.5 px-3 rounded border text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
+                    className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
                       plugPowerMode === 'HOURLY'
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        ? 'bg-[#D97706] text-white border-[#B45309] shadow-xs'
+                        : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     <span>Cắm theo tiếng ({Math.round(reeferHourlyRate / 1000)}k/h)</span>
@@ -2276,10 +2281,10 @@ export default function ReeferMonitoringPage() {
                   <button
                     type="button"
                     onClick={() => setPlugPowerMode('CONTINUOUS')}
-                    className={`py-1.5 px-3 rounded border text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
+                    className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
                       plugPowerMode === 'CONTINUOUS'
-                        ? 'bg-[#223873] text-white border-[#223873] shadow-2xs'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        ? 'bg-[#326DD8] text-white border-[#2557B4] shadow-xs'
+                        : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     <span>Cắm thông (24/7)</span>
@@ -2288,12 +2293,12 @@ export default function ReeferMonitoringPage() {
               </div>
 
               {plugPowerMode === 'HOURLY' && (
-                <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2 animate-in fade-in">
+                <div className="p-3.5 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-amber-950">
+                    <label className="block text-xs font-bold text-[#7A2E0E]">
                       Số giờ dự kiến cắm * (Bắt buộc)
                     </label>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 font-mono">
+                    <span className="text-[10px] font-bold text-[#B54708] bg-[#FEDF89]/60 px-2 py-0.5 rounded border border-[#FEDF89] font-mono">
                       Đơn giá {reeferHourlyRate.toLocaleString('vi-VN')} đ/h
                     </span>
                   </div>
@@ -2310,7 +2315,7 @@ export default function ReeferMonitoringPage() {
                         setPlugExpectedHours(v === '' ? '' : Math.max(1, parseInt(v) || 1));
                       }}
                       placeholder="VD: 8"
-                      className="w-24 px-2.5 py-1 border border-amber-300 rounded text-sm font-bold bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      className="w-24 px-3 py-1.5 border border-[#FEDF89] rounded-lg text-sm font-bold bg-white text-[#17202E] font-mono focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706]"
                     />
                     <div className="flex items-center gap-1 flex-wrap">
                       {[4, 8, 12, 24].map((h) => (
@@ -2318,10 +2323,10 @@ export default function ReeferMonitoringPage() {
                           key={h}
                           type="button"
                           onClick={() => setPlugExpectedHours(h)}
-                          className={`px-2 py-1 text-xs font-bold rounded transition-colors cursor-pointer ${
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                             plugExpectedHours === h
-                              ? 'bg-amber-600 text-white'
-                              : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-100'
+                              ? 'bg-[#D97706] text-white shadow-xs'
+                              : 'bg-white border border-[#FEDF89] text-[#7A2E0E] hover:bg-[#FFFAEB]'
                           }`}
                         >
                           +{h}h
@@ -2331,22 +2336,22 @@ export default function ReeferMonitoringPage() {
                   </div>
 
                   {plugExpectedHours !== '' && Number(plugExpectedHours) > 0 ? (
-                    <div className="pt-2 border-t border-amber-200 text-[11px] text-amber-900 space-y-1">
+                    <div className="pt-2 border-t border-[#FEDF89]/60 text-[11px] text-[#7A2E0E] space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-amber-800">Dự kiến rút điện lúc:</span>
-                        <span className="font-bold text-amber-950 font-mono">
+                        <span className="text-[#93370D]">Dự kiến rút điện lúc:</span>
+                        <span className="font-bold text-[#7A2E0E] font-mono">
                           {formatShortDateTime(getEstimatedUnplugDate(plugInTime, Number(plugExpectedHours)))}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800">Ước tính cước điện:</span>
-                        <span className="font-bold text-[#0A9444] font-mono">
+                        <span className="text-[#93370D]">Ước tính cước điện:</span>
+                        <span className="font-bold text-[#027A48] font-mono">
                           {Math.round((Number(plugExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-rose-700 font-semibold pt-1 border-t border-amber-200 flex items-center gap-1">
+                    <p className="text-[11px] text-[#D92D20] font-semibold pt-1 border-t border-[#FEDF89]/60 flex items-center gap-1">
                       <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
@@ -2354,7 +2359,7 @@ export default function ReeferMonitoringPage() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú hiện trường
                 </label>
                 <textarea
@@ -2362,22 +2367,22 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setPlugNotes(e.target.value)}
                   placeholder="Vị trí ổ cắm, nhiệt độ cài đặt, loại hàng..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowPlugModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={unpluggedContainersInYard.length === 0}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] disabled:bg-slate-300 rounded cursor-pointer shadow-2xs"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] disabled:bg-[#D0D5DD] rounded-lg cursor-pointer shadow-xs transition-colors"
                 >
                   Xác nhận cắm điện
                 </button>
@@ -2389,36 +2394,41 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL RÚT ĐIỆN */}
       {showUnplugModal && selectedSession && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-amber-500" />
-                Rút điện & Chốt cước Container
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#D97706] tracking-wider">Kỹ thuật & Giám sát Reefer</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Clock className="w-5 h-5 text-[#D97706]" />
+                  Rút điện & Chốt cước Container
+                </h3>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowUnplugModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {unplugError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs">
-                {unplugError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{unplugError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-1 text-xs">
-              <p><span className="text-slate-500">Số container:</span> <span className="font-mono font-bold text-[#223873]">{selectedSession.container_no}</span></p>
-              <p><span className="text-slate-500">Thời gian cắm:</span> <span className="font-mono font-semibold text-slate-800">{new Date(selectedSession.plugged_in_at).toLocaleString('vi-VN')}</span></p>
-              <p><span className="text-slate-500">Đơn vị cắm:</span> {selectedSession.plugged_in_by}</p>
+            <div className="bg-[#F8F9FB] p-3.5 rounded-xl border border-[#E5E9F0] space-y-1 text-xs">
+              <p><span className="text-[#667085]">Số container:</span> <span className="font-mono font-bold text-[#326DD8]">{selectedSession.container_no}</span></p>
+              <p><span className="text-[#667085]">Thời gian cắm:</span> <span className="font-mono font-semibold text-[#17202E]">{new Date(selectedSession.plugged_in_at).toLocaleString('vi-VN')}</span></p>
+              <p><span className="text-[#667085]">Đơn vị cắm:</span> <span className="font-medium text-[#17202E]">{selectedSession.plugged_in_by}</span></p>
             </div>
 
-            <form onSubmit={handleConfirmUnplug} className="space-y-3.5">
+            <form onSubmit={handleConfirmUnplug} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Thời gian rút thực tế (hh:mm dd/MM/yyyy — Khớp giờ giắc Zalo)
                 </label>
                 <input
@@ -2426,19 +2436,19 @@ export default function ReeferMonitoringPage() {
                   value={unplugTime}
                   onChange={handleUnplugTimeChange}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706] transition-all"
                 />
                 {unplugTime && (
-                  <p className="text-[11px] font-mono text-amber-700 mt-1 font-semibold flex items-center gap-1">
+                  <p className="text-[11px] font-mono text-[#B54708] mt-1 font-semibold flex items-center gap-1">
                     <span>⏱️ Định dạng đã chọn:</span>
-                    <span className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded border border-amber-300">
+                    <span className="bg-[#FFFAEB] text-[#B54708] px-1.5 py-0.5 rounded border border-[#FEDF89]">
                       {formatDateTime(unplugTime)}
                     </span>
                   </p>
                 )}
                 {/* Nút lùi giờ nhanh theo bằng chứng Zalo */}
                 <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                  <span className="text-[10px] text-slate-500 font-semibold">Khớp giờ giắc Zalo:</span>
+                  <span className="text-[10px] text-[#667085] font-semibold">Khớp giờ giắc Zalo:</span>
                   {[
                     { label: 'Bây giờ', mins: 0 },
                     { label: '-5p', mins: -5 },
@@ -2461,7 +2471,7 @@ export default function ReeferMonitoringPage() {
                           setCalculatedPreview({ billableMinutes: billableMins, amount });
                         }
                       }}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                     >
                       {btn.label}
                     </button>
@@ -2470,21 +2480,21 @@ export default function ReeferMonitoringPage() {
               </div>
 
               {calculatedPreview && (
-                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded space-y-1 text-xs text-emerald-900">
+                <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48]">
                   <p className="font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
                     Tính cước theo quy tắc (Làm tròn 15 phút — Tròn 5.000đ, không tiền lẻ):
                   </p>
-                  <p>• Thời lượng tính tiền: <span className="font-mono font-bold">{calculatedPreview.billableMinutes} phút</span></p>
-                  <p>• Đơn giá: <span className="font-mono font-bold">{selectedSession.applied_hourly_rate.toLocaleString('vi-VN')} đ/giờ</span></p>
-                  <p className="text-sm font-mono font-bold text-[#0A9444] pt-1">
+                  <p>• Thời lượng tính tiền: <span className="font-mono font-bold text-[#17202E]">{calculatedPreview.billableMinutes} phút</span></p>
+                  <p>• Đơn giá: <span className="font-mono font-bold text-[#17202E]">{selectedSession.applied_hourly_rate.toLocaleString('vi-VN')} đ/giờ</span></p>
+                  <p className="text-sm font-mono font-bold text-[#027A48] pt-1">
                     • Tổng tiền điện: {calculatedPreview.amount.toLocaleString('vi-VN')} VND
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú khi rút điện & Bằng chứng Zalo
                 </label>
                 <textarea
@@ -2492,21 +2502,21 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setUnplugNotes(e.target.value)}
                   placeholder="Giờ giắc ảnh/video Zalo lúc rút, tình trạng nhiệt độ khi rút..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowUnplugModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded shadow-2xs cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#D97706] hover:bg-[#B45309] rounded-lg shadow-xs cursor-pointer transition-colors"
                 >
                   Xác nhận rút điện
                 </button>
@@ -2518,48 +2528,49 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL NHẬP PHIÊN HOÀN TẤT HỒI TỐ (E04 - BẰNG CHỨNG ZALO) */}
       {showCompletedModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider">Hồi tố ngoài bãi — Zalo Timestamp</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span className="text-[10px] font-bold uppercase text-[#027A48] tracking-wider">Hồi tố ngoài bãi — Zalo Timestamp</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <CheckCircle2 className="w-5 h-5 text-[#027A48]" />
                   Nhập Hoàn Tất Phiên Điện (Cắm & Rút)
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowCompletedModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {compError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{compError}</span>
               </div>
             )}
 
-            <form onSubmit={handleConfirmCompletedSession} className="space-y-3.5">
+            <form onSubmit={handleConfirmCompletedSession} className="space-y-3.5 text-xs">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">
-                    Chọn Container cần nhập cắm & rút hoàn tất <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-semibold text-[#344054]">
+                    Chọn Container cần nhập cắm & rút hoàn tất <span className="text-[#D92D20]">*</span>
                   </label>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-[10px] text-[#667085] font-mono">
                     {unpluggedContainersInYard.length} cont trong bãi
                   </span>
                 </div>
                 {unpluggedContainersInYard.length === 0 ? (
-                  <div className="p-3 bg-slate-50 border border-slate-300 rounded space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-slate-800 font-bold">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="p-3.5 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-[#17202E] font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-[#027A48] shrink-0" />
                       <span>Không có container nào trong bãi đang chờ cắm điện</span>
                     </div>
-                    <p className="text-[11px] text-slate-600">
+                    <p className="text-[11px] text-[#667085]">
                       Tất cả container hiện tại trong bãi đã được cắm điện hoặc chưa tiếp nhận container mới.
                     </p>
                     <button
@@ -2568,7 +2579,7 @@ export default function ReeferMonitoringPage() {
                         setShowCompletedModal(false);
                         handleOpenCreateReqModal();
                       }}
-                      className="px-3 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Tạo Yêu cầu cắm điện trước (CCKB)</span>
@@ -2593,7 +2604,7 @@ export default function ReeferMonitoringPage() {
                           }
                         }
                       }}
-                      className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                      className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                     >
                       {requestedContainersInYard.length > 0 && (
                         <optgroup label={`⭐ ĐÃ CÓ YÊU CẦU CCKB (${requestedContainersInYard.length})`}>
@@ -2620,8 +2631,8 @@ export default function ReeferMonitoringPage() {
 
                     {/* Banner ghi chú nếu cont chưa có yêu cầu */}
                     {compContId && otherUnpluggedInYard.some((c) => c.id === compContId) && (
-                      <div className="mt-1.5 p-2 bg-blue-50 border border-blue-200 rounded text-[11px] text-blue-900 flex items-start gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                      <div className="mt-1.5 p-2.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-lg text-[11px] text-[#175CD3] flex items-start gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#326DD8] shrink-0 mt-0.5" />
                         <span>
                           Container này chưa có yêu cầu trước. Khi xác nhận, hệ thống sẽ tự động lập phiếu yêu cầu CCKB hoàn tất tương ứng để lưu đầy đủ chứng từ thương vụ!
                         </span>
@@ -2633,7 +2644,7 @@ export default function ReeferMonitoringPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Thời gian cắm (hh:mm dd/MM/yyyy — Zalo giắc) *
                   </label>
                   <input
@@ -2644,12 +2655,12 @@ export default function ReeferMonitoringPage() {
                       calculateCompletedPreview(e.target.value, compUnplugTime);
                     }}
                     required
-                    className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                   {compPlugTime && (
-                    <p className="text-[11px] font-mono text-emerald-700 mt-1 font-semibold flex items-center gap-1">
+                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1">
                       <span>⏱️ Cắm:</span>
-                      <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300">
+                      <span className="bg-[#ECFDF3] text-[#027A48] px-1.5 py-0.5 rounded border border-[#ABEFC6]">
                         {formatDateTime(compPlugTime)}
                       </span>
                     </p>
@@ -2668,7 +2679,7 @@ export default function ReeferMonitoringPage() {
                           setCompPlugTime(p);
                           calculateCompletedPreview(p, compUnplugTime);
                         }}
-                        className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                        className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                       >
                         {b.label}
                       </button>
@@ -2677,7 +2688,7 @@ export default function ReeferMonitoringPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Thời gian rút (hh:mm dd/MM/yyyy — Zalo giắc) *
                   </label>
                   <input
@@ -2688,12 +2699,12 @@ export default function ReeferMonitoringPage() {
                       calculateCompletedPreview(compPlugTime, e.target.value);
                     }}
                     required
-                    className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                   {compUnplugTime && (
-                    <p className="text-[11px] font-mono text-emerald-700 mt-1 font-semibold flex items-center gap-1">
+                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1">
                       <span>⏱️ Rút:</span>
-                      <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300">
+                      <span className="bg-[#ECFDF3] text-[#027A48] px-1.5 py-0.5 rounded border border-[#ABEFC6]">
                         {formatDateTime(compUnplugTime)}
                       </span>
                     </p>
@@ -2712,7 +2723,7 @@ export default function ReeferMonitoringPage() {
                           setCompUnplugTime(u);
                           calculateCompletedPreview(compPlugTime, u);
                         }}
-                        className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                        className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                       >
                         {b.label}
                       </button>
@@ -2722,20 +2733,20 @@ export default function ReeferMonitoringPage() {
               </div>
 
               {compPreview && (
-                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded space-y-1 text-xs text-emerald-900">
+                <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48]">
                   <p className="font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
                     Cước phí tự động (Làm tròn 15 phút @ {reeferHourlyRate.toLocaleString('vi-VN')} đ/h):
                   </p>
                   <div className="flex justify-between items-center pt-1">
-                    <span>Thời lượng tính tiền: <strong className="font-mono">{compPreview.durationMin} phút ({Math.round(compPreview.durationMin / 60 * 100) / 100}h)</strong></span>
-                    <span className="text-sm font-bold font-mono text-[#0A9444]">{compPreview.amount.toLocaleString('vi-VN')} đ</span>
+                    <span>Thời lượng tính tiền: <strong className="font-mono text-[#17202E]">{compPreview.durationMin} phút ({Math.round(compPreview.durationMin / 60 * 100) / 100}h)</strong></span>
+                    <span className="text-sm font-bold font-mono text-[#027A48]">{compPreview.amount.toLocaleString('vi-VN')} đ</span>
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú bằng chứng Zalo Timestamp & Hiện trường *
                 </label>
                 <textarea
@@ -2744,22 +2755,22 @@ export default function ReeferMonitoringPage() {
                   placeholder="Ảnh/video gửi nhóm Zalo lúc cắm & rút (có đồng hồ timestamp), vị trí giắc cắm..."
                   rows={2}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowCompletedModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={unpluggedContainersInYard.length === 0}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] disabled:bg-slate-300 rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] disabled:bg-[#D0D5DD] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Xác nhận & Ghi nhận Sổ cái</span>
@@ -2772,61 +2783,62 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL CCKB CHỈNH SỬA PHIÊN CẮM / RÚT THỰC TẾ & ĐỐI CHIẾU ZALO */}
       {showVerifyModal && verifySession && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">Thương vụ CCKB Bến bãi</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
-                  <Pencil className="w-5 h-5 text-blue-600" />
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB Bến bãi</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Pencil className="w-5 h-5 text-[#326DD8]" />
                   Sửa Cắm / Rút Thực tế & Khớp Giờ Zalo
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowVerifyModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {verifyError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{verifyError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-1.5 text-xs">
+            <div className="bg-[#F8F9FB] p-3.5 rounded-xl border border-[#E5E9F0] space-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Số container:</span>
-                <span className="font-mono font-bold text-[#223873]">{verifySession.container_no}</span>
+                <span className="text-[#667085]">Số container:</span>
+                <span className="font-mono font-bold text-[#326DD8]">{verifySession.container_no}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Người ghi nhận ban đầu:</span>
-                <span className="font-medium text-slate-800">{verifySession.plugged_in_by}</span>
+                <span className="text-[#667085]">Người ghi nhận ban đầu:</span>
+                <span className="font-semibold text-[#17202E]">{verifySession.plugged_in_by}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Đơn giá áp dụng:</span>
-                <span className="font-bold text-slate-800 font-mono">
+                <span className="text-[#667085]">Đơn giá áp dụng:</span>
+                <span className="font-bold text-[#17202E] font-mono">
                   {(verifySession.applied_hourly_rate || reeferHourlyRate).toLocaleString('vi-VN')} đ/giờ
                 </span>
               </div>
               {verifySession.notes && (
-                <div className="text-[11px] text-slate-600 bg-white p-2 rounded border border-slate-200 mt-1">
+                <div className="text-[11px] text-[#344054] bg-white p-2.5 rounded-lg border border-[#E5E9F0] mt-1">
                   <strong>Ghi chú hiện thời:</strong> {verifySession.notes}
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleConfirmVerifyZalo} className="space-y-3.5">
+            <form onSubmit={handleConfirmVerifyZalo} className="space-y-3.5 text-xs">
               {/* Giờ cắm thực tế */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">
-                    Thời gian cắm thực tế (hh:mm dd/MM/yyyy) <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-semibold text-[#344054]">
+                    Thời gian cắm thực tế (hh:mm dd/MM/yyyy) <span className="text-[#D92D20]">*</span>
                   </label>
-                  <span className="text-[10px] text-slate-400 font-mono">Bắt đầu tính cước</span>
+                  <span className="text-[10px] text-[#667085] font-mono">Bắt đầu tính cước</span>
                 </div>
                 <input
                   type="datetime-local"
@@ -2836,12 +2848,12 @@ export default function ReeferMonitoringPage() {
                     calculateVerifyPreview(e.target.value, verifyUnplugTime);
                   }}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] font-mono transition-all"
                 />
                 {verifyPlugTime && (
-                  <p className="text-[11px] font-mono text-blue-700 mt-1 font-semibold flex items-center gap-1">
+                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1">
                     <span>⏱️ Cắm:</span>
-                    <span className="bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-300">
+                    <span className="bg-[#EFF8FF] text-[#175CD3] px-1.5 py-0.5 rounded border border-[#B2DDFF]">
                       {formatDateTime(verifyPlugTime)}
                     </span>
                   </p>
@@ -2863,7 +2875,7 @@ export default function ReeferMonitoringPage() {
                         setVerifyPlugTime(newPlug);
                         calculateVerifyPreview(newPlug, verifyUnplugTime);
                       }}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                     >
                       {b.label}
                     </button>
@@ -2874,7 +2886,7 @@ export default function ReeferMonitoringPage() {
               {/* Giờ rút thực tế */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-semibold text-[#344054]">
                     Thời gian rút thực tế (hh:mm dd/MM/yyyy — để trống nếu đang tiếp tục cắm)
                   </label>
                   {verifyUnplugTime && (
@@ -2885,7 +2897,7 @@ export default function ReeferMonitoringPage() {
                         setVerifyStatus('PLUGGED');
                         setVerifyPreview(null);
                       }}
-                      className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
+                      className="text-[10px] text-[#D92D20] font-semibold hover:underline cursor-pointer"
                     >
                       ✕ Xóa giờ rút (đang cắm)
                     </button>
@@ -2903,12 +2915,12 @@ export default function ReeferMonitoringPage() {
                       setVerifyPreview(null);
                     }
                   }}
-                  className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] font-mono transition-all"
                 />
                 {verifyUnplugTime && (
-                  <p className="text-[11px] font-mono text-blue-700 mt-1 font-semibold flex items-center gap-1">
+                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1">
                     <span>⏱️ Rút:</span>
-                    <span className="bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-300">
+                    <span className="bg-[#EFF8FF] text-[#175CD3] px-1.5 py-0.5 rounded border border-[#B2DDFF]">
                       {formatDateTime(verifyUnplugTime)}
                     </span>
                   </p>
@@ -2929,7 +2941,7 @@ export default function ReeferMonitoringPage() {
                         setVerifyStatus('UNPLUGGED');
                         calculateVerifyPreview(verifyPlugTime, newUnplug);
                       }}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                     >
                       {b.label}
                     </button>
@@ -2939,7 +2951,7 @@ export default function ReeferMonitoringPage() {
 
               {/* Trạng thái phiên cắm điện */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Trạng thái phiên điện
                 </label>
                 <select
@@ -2956,7 +2968,7 @@ export default function ReeferMonitoringPage() {
                       calculateVerifyPreview(verifyPlugTime, nowStr);
                     }
                   }}
-                  className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   <option value="PLUGGED">PLUGGED — Đang cắm điện</option>
                   <option value="UNPLUGGED">UNPLUGGED — Đã rút điện (Chốt tính cước)</option>
@@ -2967,16 +2979,16 @@ export default function ReeferMonitoringPage() {
 
               {/* Tự động tính cước preview khi có giờ rút */}
               {verifyPreview && (
-                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded space-y-1 text-xs text-emerald-900 animate-in fade-in">
+                <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48] animate-in fade-in">
                   <p className="font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
                     Cước điện tính lại tự động (Làm tròn 15p — Tròn 5.000đ):
                   </p>
                   <div className="flex justify-between items-center pt-1">
                     <span>
-                      Thời lượng: <strong className="font-mono">{verifyPreview.durationMin} phút ({Math.round((verifyPreview.durationMin / 60) * 100) / 100} giờ)</strong>
+                      Thời lượng: <strong className="font-mono text-[#17202E]">{verifyPreview.durationMin} phút ({Math.round((verifyPreview.durationMin / 60) * 100) / 100} giờ)</strong>
                     </span>
-                    <span className="text-sm font-bold font-mono text-[#0A9444]">
+                    <span className="text-sm font-bold font-mono text-[#027A48]">
                       {verifyPreview.amount.toLocaleString('vi-VN')} đ
                     </span>
                   </div>
@@ -2985,7 +2997,7 @@ export default function ReeferMonitoringPage() {
 
               {/* Ghi chú đối chiếu */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú đối chiếu / Lý do điều chỉnh *
                 </label>
                 <textarea
@@ -2994,25 +3006,25 @@ export default function ReeferMonitoringPage() {
                   placeholder="Khớp ảnh/video Zalo timestamp lúc 15:10, điều chỉnh cắm/rút thực tế theo đề nghị của khách..."
                   rows={2}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="p-2.5 bg-blue-50 rounded border border-blue-200 text-[11px] text-blue-900 leading-relaxed">
+              <div className="p-3 bg-[#EFF8FF] rounded-xl border border-[#B2DDFF] text-[11px] text-[#175CD3] leading-relaxed">
                 ℹ️ <strong>CCKB lưu ý:</strong> Khi lưu cập nhật, hệ thống tự động đồng bộ lại thời lượng làm tròn 15 phút và khoản thu tương ứng trong Sổ cái.
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowVerifyModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Đóng
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Lưu cập nhật phiên điện</span>
@@ -3025,40 +3037,41 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL CCKB CHỈNH SỬA YÊU CẦU CẮM ĐIỆN CONTAINER (TAB REQUESTS) */}
       {showEditReqModal && editingReq && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">CCKB Bến bãi</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
-                  <Pencil className="w-5 h-5 text-blue-600" />
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">CCKB Bến bãi</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Pencil className="w-5 h-5 text-[#326DD8]" />
                   Chỉnh sửa Yêu cầu Cắm điện Container
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowEditReqModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {editReqError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{editReqError}</span>
               </div>
             )}
 
-            <form onSubmit={handleConfirmEditRequest} className="space-y-3.5">
+            <form onSubmit={handleConfirmEditRequest} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Số Container */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Số Container dự kiến <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-semibold text-[#344054]">
+                      Số Container dự kiến <span className="text-[#D92D20]">*</span>
                     </label>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[10px] text-[#667085] font-mono">
                       {editReqContNo.trim().length}/11
                     </span>
                   </div>
@@ -3069,28 +3082,28 @@ export default function ReeferMonitoringPage() {
                       onChange={(e) => setEditReqContNo(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                       required
                       maxLength={11}
-                      className={`w-full px-3 py-1.5 border rounded font-mono text-xs sm:text-sm font-bold focus:outline-none transition-colors ${
+                      className={`w-full px-3 py-2 border rounded-lg font-mono text-xs sm:text-sm font-bold focus:outline-none transition-all ${
                         editReqContValidation.level === 'SUCCESS'
-                          ? 'border-emerald-500 text-emerald-950 bg-emerald-50/40 focus:ring-1 focus:ring-emerald-500'
+                          ? 'border-[#ABEFC6] text-[#027A48] bg-[#ECFDF3] focus:ring-2 focus:ring-[#027A48]/20'
                           : editReqContValidation.level === 'ERROR'
-                          ? 'border-rose-400 text-rose-950 bg-rose-50/40 focus:ring-1 focus:ring-rose-500'
-                          : 'border-slate-300 text-slate-900 focus:border-[#223873]'
+                          ? 'border-[#FECDCA] text-[#B42318] bg-[#FEF3F2] focus:ring-2 focus:ring-[#D92D20]/20'
+                          : 'border-[#D0D5DD] text-[#17202E] bg-white focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8]'
                       }`}
                     />
                     {editReqContValidation.level === 'SUCCESS' && (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-2.5 top-1/2 -translate-y-1/2" />
+                      <CheckCircle2 className="w-4 h-4 text-[#027A48] absolute right-3 top-1/2 -translate-y-1/2" />
                     )}
                   </div>
                   {editReqContNo.trim().length > 0 && (
-                    <div className={`mt-1.5 p-2 rounded text-[11px] flex items-start gap-1.5 ${
+                    <div className={`mt-1.5 p-2 rounded-lg text-[11px] flex items-start gap-1.5 ${
                       editReqContValidation.level === 'SUCCESS'
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        ? 'bg-[#ECFDF3] text-[#027A48] border border-[#ABEFC6]'
                         : editReqContValidation.level === 'ERROR'
-                        ? 'bg-rose-50 text-rose-800 border border-rose-200'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200'
+                        ? 'bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]'
+                        : 'bg-[#F8F9FB] text-[#667085] border border-[#E5E9F0]'
                     }`}>
-                      {editReqContValidation.level === 'SUCCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />}
-                      {editReqContValidation.level === 'ERROR' && <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />}
+                      {editReqContValidation.level === 'SUCCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-[#027A48] shrink-0 mt-0.5" />}
+                      {editReqContValidation.level === 'ERROR' && <AlertTriangle className="w-3.5 h-3.5 text-[#D92D20] shrink-0 mt-0.5" />}
                       <span className="flex-1">{editReqContValidation.message}</span>
                     </div>
                   )}
@@ -3098,7 +3111,7 @@ export default function ReeferMonitoringPage() {
 
                 {/* Biển số xe kéo dự kiến */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Biển số xe kéo dự kiến
                   </label>
                   <input
@@ -3106,7 +3119,7 @@ export default function ReeferMonitoringPage() {
                     value={editReqPlate}
                     onChange={(e) => setEditReqPlate(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                     placeholder="VD: 14C-123.45"
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono text-xs sm:text-sm focus:outline-none focus:border-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
@@ -3124,7 +3137,7 @@ export default function ReeferMonitoringPage() {
 
                 {/* Số điện thoại */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Số điện thoại liên hệ
                   </label>
                   <input
@@ -3132,20 +3145,20 @@ export default function ReeferMonitoringPage() {
                     value={editReqPhone}
                     onChange={(e) => setEditReqPhone(e.target.value)}
                     placeholder="VD: 0912345678"
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:outline-none focus:border-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
 
               <div>
                 {/* Trạng thái yêu cầu */}
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Trạng thái yêu cầu
                 </label>
                 <select
                   value={editReqStatus}
                   onChange={(e) => setEditReqStatus(e.target.value as ReeferRequestStatus)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   <option value="PLANNED">PLANNED — Chờ xe vào bãi</option>
                   <option value="CONTAINER_ARRIVED">CONTAINER_ARRIVED — Đã vào bãi (Cần cắm)</option>
@@ -3158,13 +3171,13 @@ export default function ReeferMonitoringPage() {
               {/* Chế độ cắm & số giờ dự kiến */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Chế độ tính điện
                   </label>
                   <select
                     value={editReqMode}
                     onChange={(e) => setEditReqMode(e.target.value as 'HOURLY' | 'CONTINUOUS')}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="HOURLY">Cắm theo giờ thực tế ({reeferHourlyRate.toLocaleString('vi-VN')} đ/h)</option>
                     <option value="CONTINUOUS">Cắm thông liên tục (24/7)</option>
@@ -3173,7 +3186,7 @@ export default function ReeferMonitoringPage() {
 
                 {editReqMode === 'HOURLY' && (
                   <div>
-                    <label className="block text-xs font-bold text-amber-950 mb-1">
+                    <label className="block text-xs font-semibold text-[#7A2E0E] mb-1">
                       Số giờ cắm dự kiến (Nhập nhanh / Tùy chọn)
                     </label>
                     <div className="flex items-center gap-1.5">
@@ -3184,7 +3197,7 @@ export default function ReeferMonitoringPage() {
                         value={editReqExpectedHours}
                         onChange={(e) => setEditReqExpectedHours(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
                         placeholder="Tùy chọn"
-                        className="w-24 px-2.5 py-1 border border-amber-300 rounded text-sm font-bold bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        className="w-24 px-3 py-1.5 border border-[#FEDF89] rounded-lg text-sm font-bold bg-white text-[#17202E] font-mono focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706]"
                       />
                       <div className="flex items-center gap-1">
                         {[4, 8, 12, 24].map((h) => (
@@ -3192,10 +3205,10 @@ export default function ReeferMonitoringPage() {
                             key={h}
                             type="button"
                             onClick={() => setEditReqExpectedHours(h)}
-                            className={`px-2 py-0.5 text-xs font-bold rounded transition-colors cursor-pointer ${
+                            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                               editReqExpectedHours === h
-                                ? 'bg-amber-600 text-white'
-                                : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-100'
+                                ? 'bg-[#D97706] text-white shadow-xs'
+                                : 'bg-white border border-[#FEDF89] text-[#7A2E0E] hover:bg-[#FFFAEB]'
                             }`}
                           >
                             +{h}h
@@ -3208,9 +3221,9 @@ export default function ReeferMonitoringPage() {
               </div>
 
               {editReqMode === 'HOURLY' && editReqExpectedHours !== '' && Number(editReqExpectedHours) > 0 && (
-                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded flex items-center justify-between text-xs text-amber-950">
+                <div className="p-3 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl flex items-center justify-between text-xs text-[#7A2E0E]">
                   <span>Ước tính cước điện theo dự kiến ({editReqExpectedHours}h):</span>
-                  <span className="font-bold font-mono text-[#0A9444]">
+                  <span className="font-bold font-mono text-[#027A48]">
                     {Math.round((Number(editReqExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
                   </span>
                 </div>
@@ -3218,7 +3231,7 @@ export default function ReeferMonitoringPage() {
 
               {/* Ghi chú */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú yêu cầu
                 </label>
                 <textarea
@@ -3226,21 +3239,21 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setEditReqNotes(e.target.value)}
                   placeholder="Ghi chú vị trí, ca trực hoặc lưu ý đặc biệt..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowEditReqModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Lưu cập nhật yêu cầu</span>
@@ -3253,54 +3266,55 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL TẠO YÊU CẦU CẮM ĐIỆN (CCKB) */}
       {showCreateReqModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">Thương vụ CCKB Bến bãi</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
-                  <Zap className="w-5 h-5 text-amber-500" />
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB Bến bãi</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <Zap className="w-5 h-5 text-[#D97706] fill-current" />
                   Tạo yêu cầu Cắm điện Container
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[#667085] mt-0.5">
                   Lập phiếu yêu cầu cắm điện cho container đang lưu trong bãi
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowCreateReqModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {reqError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{reqError}</span>
               </div>
             )}
 
-            <form onSubmit={handleCreateRequest} className="space-y-3.5">
+            <form onSubmit={handleCreateRequest} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Chọn Container đang trong bãi <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Chọn Container đang trong bãi <span className="text-[#D92D20]">*</span>
                 </label>
                 {unpluggedContainersInYard.length === 0 ? (
-                  <div className="p-3 bg-amber-50 border border-amber-300 rounded text-xs text-amber-900">
+                  <div className="p-3.5 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl text-xs text-[#7A2E0E]">
                     Không có container nào trong bãi chưa cắm điện.
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {/* Ô tìm kiếm / lọc nhanh Container trong bãi */}
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#667085]" />
                       <input
                         type="text"
                         placeholder="Tìm theo số container hoặc biển số xe chở vào..."
                         value={reqContFilterQuery}
                         onChange={(e) => setReqContFilterQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded text-xs bg-slate-50 font-mono focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                        className="w-full pl-9 pr-3 py-2 border border-[#D0D5DD] rounded-lg text-xs bg-[#F8F9FB] font-mono text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                       />
                     </div>
 
@@ -3315,7 +3329,7 @@ export default function ReeferMonitoringPage() {
 
                       if (filteredList.length === 0) {
                         return (
-                          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                          <div className="p-3 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl text-xs text-[#7A2E0E]">
                             Không tìm thấy container nào khớp với từ khóa &quot;{reqContFilterQuery}&quot;.
                           </div>
                         );
@@ -3333,7 +3347,7 @@ export default function ReeferMonitoringPage() {
                               setReqPlate(cont.inbound_license_plate || '');
                             }
                           }}
-                          className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                          className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                         >
                           {filteredList.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -3349,18 +3363,18 @@ export default function ReeferMonitoringPage() {
                       const selectedCont = unpluggedContainersInYard.find((c) => c.id === reqSelectedYardContId);
                       if (!selectedCont) return null;
                       return (
-                        <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs space-y-1">
+                        <div className="p-3 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl text-xs space-y-1">
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Mã container:</span>
-                            <span className="font-mono font-bold text-[#223873]">{selectedCont.container_no_current}</span>
+                            <span className="text-[#667085]">Mã container:</span>
+                            <span className="font-mono font-bold text-[#326DD8]">{selectedCont.container_no_current}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Xe chở vào bãi:</span>
-                            <span className="font-mono font-bold text-slate-800">{selectedCont.inbound_license_plate || 'Chưa cập nhật'}</span>
+                            <span className="text-[#667085]">Xe chở vào bãi:</span>
+                            <span className="font-mono font-bold text-[#17202E]">{selectedCont.inbound_license_plate || 'Chưa cập nhật'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Thời gian vào bãi:</span>
-                            <span className="font-mono text-slate-700">{new Date(selectedCont.inbound_at || selectedCont.created_at).toLocaleString('vi-VN')}</span>
+                            <span className="text-[#667085]">Thời gian vào bãi:</span>
+                            <span className="font-mono text-[#344054]">{new Date(selectedCont.inbound_at || selectedCont.created_at).toLocaleString('vi-VN')}</span>
                           </div>
                         </div>
                       );
@@ -3380,13 +3394,13 @@ export default function ReeferMonitoringPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Chế độ tính điện
                   </label>
                   <select
                     value={reqMode}
                     onChange={(e) => setReqMode(e.target.value as 'HOURLY' | 'CONTINUOUS')}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="HOURLY">Cắm theo giờ thực tế ({reeferHourlyRate.toLocaleString('vi-VN')} đ/giờ)</option>
                     <option value="CONTINUOUS">Cắm thông liên tục (24/7)</option>
@@ -3396,12 +3410,12 @@ export default function ReeferMonitoringPage() {
 
               {/* KHI CHỌN CẮM THEO GIỜ: ĐIỀN SỐ GIỜ DỰ KIẾN (BẮT BUỘC) */}
               {reqMode === 'HOURLY' && (
-                <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2.5 animate-in fade-in">
+                <div className="p-3.5 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-amber-950">
+                    <label className="block text-xs font-bold text-[#7A2E0E]">
                       Số giờ dự kiến cắm * (Bắt buộc)
                     </label>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 font-mono">
+                    <span className="text-[10px] font-bold text-[#B54708] bg-[#FEDF89]/60 px-2 py-0.5 rounded border border-[#FEDF89] font-mono">
                       Biểu phí {reeferHourlyRate.toLocaleString('vi-VN')} đ/h
                     </span>
                   </div>
@@ -3418,7 +3432,7 @@ export default function ReeferMonitoringPage() {
                         setReqExpectedHours(v === '' ? '' : Math.max(1, parseInt(v) || 1));
                       }}
                       placeholder="VD: 8"
-                      className="w-24 px-2.5 py-1 border border-amber-300 rounded text-sm font-bold bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      className="w-24 px-3 py-1.5 border border-[#FEDF89] rounded-lg text-sm font-bold bg-white text-[#17202E] font-mono focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706]"
                     />
                     <div className="flex items-center gap-1 flex-wrap">
                       {[4, 8, 12, 24].map((h) => (
@@ -3426,10 +3440,10 @@ export default function ReeferMonitoringPage() {
                           key={h}
                           type="button"
                           onClick={() => setReqExpectedHours(h)}
-                          className={`px-2 py-0.5 text-xs font-bold rounded transition-colors cursor-pointer ${
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                             reqExpectedHours === h
-                              ? 'bg-amber-600 text-white'
-                              : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-100'
+                              ? 'bg-[#D97706] text-white shadow-xs'
+                              : 'bg-white border border-[#FEDF89] text-[#7A2E0E] hover:bg-[#FFFAEB]'
                           }`}
                         >
                           +{h}h
@@ -3439,20 +3453,20 @@ export default function ReeferMonitoringPage() {
                   </div>
 
                   {reqExpectedHours !== '' && Number(reqExpectedHours) > 0 ? (
-                    <div className="pt-2 border-t border-amber-200 text-[11px] text-amber-900 space-y-1">
+                    <div className="pt-2 border-t border-[#FEDF89]/60 text-[11px] text-[#7A2E0E] space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-amber-800">Thời lượng đăng ký:</span>
-                        <span className="font-bold text-amber-950 font-mono">{reqExpectedHours} tiếng</span>
+                        <span className="text-[#93370D]">Thời lượng đăng ký:</span>
+                        <span className="font-bold text-[#7A2E0E] font-mono">{reqExpectedHours} tiếng</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800">Ước tính cước điện phát sinh:</span>
-                        <span className="font-bold text-[#0A9444] font-mono">
+                        <span className="text-[#93370D]">Ước tính cước điện phát sinh:</span>
+                        <span className="font-bold text-[#027A48] font-mono">
                           {Math.round((Number(reqExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-rose-700 font-semibold pt-1 border-t border-amber-200 flex items-center gap-1">
+                    <p className="text-[11px] text-[#D92D20] font-semibold pt-1 border-t border-[#FEDF89]/60 flex items-center gap-1">
                       <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
@@ -3460,7 +3474,7 @@ export default function ReeferMonitoringPage() {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú yêu cầu đặc biệt
                 </label>
                 <textarea
@@ -3468,16 +3482,16 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setReqNotes(e.target.value)}
                   placeholder="Vị trí đỗ ưu tiên gần trạm biến áp, số điện thoại người nhận hàng..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
               {/* THỨ TỰ CÁC NÚT: ĐÓNG (TRÁI) -> LƯU & CẮM ĐIỆN NGAY (GIỮA) -> TẠO YÊU CẦU CẮM ĐIỆN (PHẢI CÙNG) */}
-              <div className="flex justify-between items-center gap-2 pt-2 border-t border-slate-200 flex-wrap">
+              <div className="flex justify-between items-center gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setShowCreateReqModal(false)}
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Đóng
                 </button>
@@ -3486,7 +3500,7 @@ export default function ReeferMonitoringPage() {
                     <button
                       type="button"
                       onClick={handleSaveAndPlugImmediately}
-                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                       title="Tạo yêu cầu và kích hoạt cắm điện ngay trong 1 chạm"
                     >
                       <Zap className="w-3.5 h-3.5 fill-current" />
@@ -3496,7 +3510,7 @@ export default function ReeferMonitoringPage() {
                   <button
                     type="submit"
                     disabled={unpluggedContainersInYard.length === 0}
-                    className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] disabled:bg-slate-300 rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                    className="py-2 px-4 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] disabled:bg-[#D0D5DD] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Tạo yêu cầu cắm điện</span>
@@ -3510,40 +3524,41 @@ export default function ReeferMonitoringPage() {
 
       {/* MODAL GHI NHẬN NHIỆT ĐỘ CONTAINER LẠNH ĐỊNH KỲ */}
       {showTempModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded border border-slate-300 max-w-2xl w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider">Kỹ thuật & Giám sát Reefer</span>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
-                  <Thermometer className="w-5 h-5 text-emerald-600" />
+                <span className="text-[10px] font-bold uppercase text-[#027A48] tracking-wider">Kỹ thuật & Giám sát Reefer</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Thermometer className="w-5 h-5 text-[#027A48]" />
                   Ghi nhận Nhiệt độ Container Lạnh
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowTempModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {tempError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{tempError}</span>
               </div>
             )}
 
-            <form onSubmit={handleConfirmSaveTemp} className="space-y-3.5">
+            <form onSubmit={handleConfirmSaveTemp} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Chọn Container lạnh đang trong bãi <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Chọn Container lạnh đang trong bãi <span className="text-[#D92D20]">*</span>
                 </label>
                 <select
                   value={tempContId}
                   onChange={(e) => setTempContId(e.target.value)}
-                  className="w-full p-2 border border-slate-300 rounded text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#027A48]/20 focus:border-[#027A48] transition-all"
                 >
                   {containers.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -3554,8 +3569,8 @@ export default function ReeferMonitoringPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Nhiệt độ đo thực tế (°C) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Nhiệt độ đo thực tế (°C) <span className="text-[#D92D20]">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -3565,9 +3580,9 @@ export default function ReeferMonitoringPage() {
                     onChange={(e) => setTempValue(e.target.value)}
                     required
                     placeholder="VD: -18.5 hoặc +4.0"
-                    className="w-full p-2 pr-10 border border-slate-300 rounded text-sm font-mono font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 pr-10 border border-[#D0D5DD] rounded-lg text-sm font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#027A48]/20 focus:border-[#027A48] transition-all"
                   />
-                  <span className="absolute right-3 top-2 text-sm font-bold text-slate-400">°C</span>
+                  <span className="absolute right-3 top-2.5 text-sm font-bold text-[#667085]">°C</span>
                 </div>
                 {/* Nút chọn nhanh nhiệt độ */}
                 <div className="flex items-center gap-1 mt-1.5 flex-wrap">
@@ -3581,7 +3596,7 @@ export default function ReeferMonitoringPage() {
                       key={preset.label}
                       type="button"
                       onClick={() => setTempValue(preset.val)}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] cursor-pointer transition-colors"
                     >
                       {preset.label}
                     </button>
@@ -3590,7 +3605,7 @@ export default function ReeferMonitoringPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Trạng thái vận hành máy lạnh:
                 </label>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -3604,10 +3619,10 @@ export default function ReeferMonitoringPage() {
                       key={s.code}
                       type="button"
                       onClick={() => setTempStatus(s.code as any)}
-                      className={`p-2 rounded text-left font-bold border transition-colors cursor-pointer ${
+                      className={`p-2.5 rounded-lg text-left font-semibold border transition-all cursor-pointer ${
                         tempStatus === s.code
-                          ? 'bg-emerald-50 text-emerald-900 border-emerald-400 ring-1 ring-emerald-400'
-                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                          ? 'bg-[#ECFDF3] text-[#027A48] border-[#ABEFC6] shadow-xs'
+                          : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#F8F9FB]'
                       }`}
                     >
                       {s.label}
@@ -3617,7 +3632,7 @@ export default function ReeferMonitoringPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú kiểm tra (Đối chiếu chủ hàng / máy nén):
                 </label>
                 <textarea
@@ -3625,22 +3640,22 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setTempNotes(e.target.value)}
                   placeholder="Kiểm tra định kỳ ca trực, quạt gió hoạt động tốt..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#027A48]/20 focus:border-[#027A48] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowTempModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingTemp}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{isSavingTemp ? 'Đang lưu...' : 'Lưu nhật ký nhiệt độ'}</span>

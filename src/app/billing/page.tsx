@@ -35,7 +35,8 @@ import {
   ShieldCheck,
   ChevronRight,
   Download,
-  QrCode
+  QrCode,
+  X
 } from 'lucide-react';
 import { formatMoneyInWords, formatDate, formatTime, formatDateTime } from '@/lib/display-formatters';
 import { exportChargesToExcel, exportShiftPaymentsToExcel } from '@/lib/export-excel';
@@ -1798,56 +1799,61 @@ export default function CashierBillingPage() {
       {/* MODAL THU GỘP NHIỀU KHOẢN PHÍ (BATCH COLLECTION MODAL) */}
       {/* ========================================================================= */}
       {showBatchModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg border border-slate-300 max-w-lg w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-amber-600" />
-                Thu Gộp Nhiều Khoản Phí Bến Bãi
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#D97706] tracking-wider">Thương vụ Thu ngân</span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Layers className="w-4 h-4 text-[#D97706]" />
+                  Thu Gộp Nhiều Khoản Phí Bến Bãi
+                </h3>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowBatchModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {batchError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs">
-                {batchError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{batchError}</span>
               </div>
             )}
 
             {/* Danh sách các khoản được gộp */}
-            <div className="border border-slate-300 rounded overflow-hidden text-xs max-h-56 overflow-y-auto">
+            <div className="border border-[#E5E9F0] rounded-xl overflow-hidden text-xs max-h-56 overflow-y-auto">
               <table className="w-full text-left">
-                <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold text-[10px] uppercase tracking-wider">
+                <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold text-[10px] uppercase tracking-wider">
                   <tr>
-                    <th className="p-2">Khoản thu</th>
-                    <th className="p-2">Container</th>
-                    <th className="p-2">Khách hàng / Xe</th>
-                    <th className="p-2 text-right">Số tiền</th>
+                    <th className="p-2.5">Khoản thu</th>
+                    <th className="p-2.5">Container</th>
+                    <th className="p-2.5">Khách hàng / Xe</th>
+                    <th className="p-2.5 text-right">Số tiền</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-[#E5E9F0]">
                   {selectedChargesList.map((chg) => (
-                    <tr key={chg.id} className="hover:bg-slate-50">
-                      <td className="p-2 font-semibold text-slate-900">{chg.title}</td>
-                      <td className="p-2 font-mono text-slate-700">
+                    <tr key={chg.id} className="hover:bg-[#F8F9FB] transition-colors">
+                      <td className="p-2.5 font-medium text-[#17202E]">{chg.title}</td>
+                      <td className="p-2.5 font-mono text-[#344054]">
                         {chg.container_no ? (
-                          <span className="font-bold text-[#223873] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                          <span className="font-bold text-[#326DD8] bg-[#EFF8FF] px-2 py-0.5 rounded-md border border-[#B2DDFF]">
                             {chg.container_no}
                           </span>
                         ) : (
                           '—'
                         )}
                       </td>
-                      <td className="p-2 text-slate-700 text-[11px]">
+                      <td className="p-2.5 text-[#344054] text-[11px]">
                         <div>{chg.customer_name || 'Khách vãng lai'}</div>
-                        {chg.license_plate && <div className="font-mono text-slate-500 font-bold">Xe: {chg.license_plate}</div>}
+                        {chg.license_plate && <div className="font-mono text-[#667085] font-semibold">Xe: {chg.license_plate}</div>}
                       </td>
-                      <td className="p-2 text-right font-mono font-bold text-slate-900">
+                      <td className="p-2.5 text-right font-mono font-bold text-[#17202E]">
                         {(chg.amount - chg.paid_amount).toLocaleString()} đ
                       </td>
                     </tr>
@@ -1856,33 +1862,33 @@ export default function CashierBillingPage() {
               </table>
             </div>
 
-            <div className="p-3 bg-slate-50 border border-slate-300 rounded space-y-1">
+            <div className="p-3.5 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider">
+                <span className="text-[11px] text-[#667085] font-semibold uppercase tracking-wider">
                   Tổng số tiền thanh toán gộp ({selectedChargeIds.length} khoản):
                 </span>
-                <span className="text-lg font-mono font-bold text-emerald-700">
+                <span className="text-lg font-mono font-bold text-[#027A48]">
                   {selectedBatchTotal.toLocaleString()} VNĐ
                 </span>
               </div>
-              <p className="text-[11px] italic text-slate-600 text-right">
-                (Bằng chữ: <strong className="not-italic text-slate-800">{formatMoneyInWords(selectedBatchTotal)}</strong>)
+              <p className="text-[11px] italic text-[#667085] text-right">
+                (Bằng chữ: <strong className="not-italic text-[#17202E]">{formatMoneyInWords(selectedBatchTotal)}</strong>)
               </p>
             </div>
 
-            <form onSubmit={handleConfirmBatchCollect} className="space-y-3">
+            <form onSubmit={handleConfirmBatchCollect} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Phương thức thanh toán gộp
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setBatchPayMethod('CASH')}
-                    className={`p-2 text-xs font-bold rounded border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
                       batchPayMethod === 'CASH'
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                        : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                        ? 'border-[#027A48] bg-[#ECFDF3] text-[#027A48] shadow-xs'
+                        : 'border-[#D0D5DD] text-[#344054] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     Tiền mặt (CASH)
@@ -1890,10 +1896,10 @@ export default function CashierBillingPage() {
                   <button
                     type="button"
                     onClick={() => setBatchPayMethod('TRANSFER')}
-                    className={`p-2 text-xs font-bold rounded border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
                       batchPayMethod === 'TRANSFER'
-                        ? 'border-blue-600 bg-blue-50 text-blue-800'
-                        : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                        ? 'border-[#326DD8] bg-[#EFF8FF] text-[#175CD3] shadow-xs'
+                        : 'border-[#D0D5DD] text-[#344054] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     Chuyển khoản (TRANSFER)
@@ -1902,29 +1908,29 @@ export default function CashierBillingPage() {
               </div>
 
               {batchPayMethod === 'TRANSFER' && (
-                <div className="p-3 bg-blue-50/50 border border-blue-200 rounded flex items-center gap-3">
+                <div className="p-3.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-xl flex items-center gap-3">
                   <img
                     src={generateVietQrUrl(selectedBatchTotal, `THU GOP ${batchReceiptCode || 'SON CANG'}`)}
                     alt="VietQR Chuyển khoản"
-                    className="w-20 h-20 object-contain bg-white p-1 rounded border border-slate-200 flex-shrink-0"
+                    className="w-20 h-20 object-contain bg-white p-1 rounded-lg border border-[#B2DDFF] flex-shrink-0"
                   />
                   <div className="text-xs space-y-1">
-                    <p className="font-bold text-slate-900 flex items-center gap-1">
-                      <QrCode className="w-3.5 h-3.5 text-blue-600" />
+                    <p className="font-bold text-[#17202E] flex items-center gap-1">
+                      <QrCode className="w-3.5 h-3.5 text-[#326DD8]" />
                       Mã VietQR Napas 247 Tự Động
                     </p>
-                    <p className="text-slate-600 text-[11px]">
-                      Quét QR chuyển đúng <span className="font-mono font-bold text-blue-800">{selectedBatchTotal.toLocaleString()} đ</span>
+                    <p className="text-[#344054] text-[11px]">
+                      Quét QR chuyển đúng <span className="font-mono font-bold text-[#175CD3]">{selectedBatchTotal.toLocaleString()} đ</span>
                     </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      Nội dung CK: <span className="font-bold text-slate-900">THU GOP {batchReceiptCode || 'SON CANG'}</span>
+                    <p className="text-[10px] text-[#667085] font-mono">
+                      Nội dung CK: <span className="font-bold text-[#17202E]">THU GOP {batchReceiptCode || 'SON CANG'}</span>
                     </p>
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mã biên lai / Phiếu thu gộp chung
                 </label>
                 <input
@@ -1932,12 +1938,12 @@ export default function CashierBillingPage() {
                   value={batchReceiptCode}
                   onChange={(e) => setBatchReceiptCode(e.target.value)}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs font-mono font-bold text-slate-900"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú đợt thu gộp
                 </label>
                 <textarea
@@ -1945,23 +1951,23 @@ export default function CashierBillingPage() {
                   onChange={(e) => setBatchNotes(e.target.value)}
                   placeholder="Ghi chú người nộp, xe xuất bãi, thanh toán cùng lúc..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowBatchModal(false)}
                   disabled={isSubmittingBatch}
-                  className="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded font-semibold border border-slate-300"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingBatch}
-                  className="px-3.5 py-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 rounded font-bold shadow-sm flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingBatch ? 'Đang ghi nhận...' : 'Xác nhận Thu Gộp'}
                 </button>
@@ -1975,46 +1981,51 @@ export default function CashierBillingPage() {
       {/* MODAL THU TIỀN ĐƠN LẺ */}
       {/* ========================================================================= */}
       {showCollectModal && selectedCharge && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg border border-slate-300 max-w-md w-full p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-emerald-600" />
-                Lập Phiếu thu tiền dịch vụ
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#0A9444] tracking-wider">Chứng từ Thu phí</span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <Receipt className="w-4 h-4 text-[#0A9444]" />
+                  Lập Phiếu thu tiền dịch vụ
+                </h3>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowCollectModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {collectError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded text-xs">
-                {collectError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{collectError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 border border-slate-200 p-3 rounded space-y-1 text-xs">
-              <p><span className="text-slate-500">Khoản thu:</span> <span className="font-bold text-slate-900">{selectedCharge.title}</span></p>
-              <p><span className="text-slate-500">Số tiền cần thu:</span> <span className="font-mono font-bold text-base text-emerald-700">{(selectedCharge.amount - selectedCharge.paid_amount).toLocaleString()} VNĐ</span></p>
-              <p><span className="text-slate-500">Bộ phận thu:</span> <span className="font-bold text-slate-800">{isSecurityRole ? 'An ninh Cổng' : 'Thương vụ CCKB'}</span></p>
+            <div className="bg-[#F8F9FB] border border-[#E5E9F0] p-3.5 rounded-xl space-y-1 text-xs">
+              <p><span className="text-[#667085]">Khoản thu:</span> <span className="font-bold text-[#17202E]">{selectedCharge.title}</span></p>
+              <p><span className="text-[#667085]">Số tiền cần thu:</span> <span className="font-mono font-bold text-base text-[#027A48]">{(selectedCharge.amount - selectedCharge.paid_amount).toLocaleString()} VNĐ</span></p>
+              <p><span className="text-[#667085]">Bộ phận thu:</span> <span className="font-semibold text-[#17202E]">{isSecurityRole ? 'An ninh Cổng' : 'Thương vụ CCKB'}</span></p>
             </div>
 
-            <form onSubmit={handleConfirmCollect} className="space-y-3">
+            <form onSubmit={handleConfirmCollect} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Phương thức thanh toán
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPayMethod('CASH')}
-                    className={`p-2 text-xs font-bold rounded border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
                       payMethod === 'CASH'
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                        : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                        ? 'border-[#027A48] bg-[#ECFDF3] text-[#027A48] shadow-xs'
+                        : 'border-[#D0D5DD] text-[#344054] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     Tiền mặt (CASH)
@@ -2022,10 +2033,10 @@ export default function CashierBillingPage() {
                   <button
                     type="button"
                     onClick={() => setPayMethod('TRANSFER')}
-                    className={`p-2 text-xs font-bold rounded border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
                       payMethod === 'TRANSFER'
-                        ? 'border-blue-600 bg-blue-50 text-blue-800'
-                        : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                        ? 'border-[#326DD8] bg-[#EFF8FF] text-[#175CD3] shadow-xs'
+                        : 'border-[#D0D5DD] text-[#344054] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     Chuyển khoản (TRANSFER)
@@ -2034,32 +2045,32 @@ export default function CashierBillingPage() {
               </div>
 
               {payMethod === 'TRANSFER' && (
-                <div className="p-3 bg-blue-50/50 border border-blue-200 rounded flex items-center gap-3">
+                <div className="p-3.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-xl flex items-center gap-3">
                   <img
                     src={generateVietQrUrl(
                       selectedCharge.amount - selectedCharge.paid_amount,
                       `THU ${selectedCharge.charge_type} ${selectedCharge.license_plate || selectedCharge.container_no || receiptCode || 'SC'}`
                     )}
                     alt="VietQR Chuyển khoản"
-                    className="w-20 h-20 object-contain bg-white p-1 rounded border border-slate-200 flex-shrink-0"
+                    className="w-20 h-20 object-contain bg-white p-1 rounded-lg border border-[#B2DDFF] flex-shrink-0"
                   />
                   <div className="text-xs space-y-1">
-                    <p className="font-bold text-slate-900 flex items-center gap-1">
-                      <QrCode className="w-3.5 h-3.5 text-blue-600" />
+                    <p className="font-bold text-[#17202E] flex items-center gap-1">
+                      <QrCode className="w-3.5 h-3.5 text-[#326DD8]" />
                       Mã VietQR Napas 247 Tự Động
                     </p>
-                    <p className="text-slate-600 text-[11px]">
-                      Quét mã chuyển đúng <span className="font-mono font-bold text-blue-800">{(selectedCharge.amount - selectedCharge.paid_amount).toLocaleString()} đ</span>
+                    <p className="text-[#344054] text-[11px]">
+                      Quét mã chuyển đúng <span className="font-mono font-bold text-[#175CD3]">{(selectedCharge.amount - selectedCharge.paid_amount).toLocaleString()} đ</span>
                     </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      Nội dung CK: <span className="font-bold text-slate-900">THU {selectedCharge.charge_type} {selectedCharge.license_plate || selectedCharge.container_no || ''}</span>
+                    <p className="text-[10px] text-[#667085] font-mono">
+                      Nội dung CK: <span className="font-bold text-[#17202E]">THU {selectedCharge.charge_type} {selectedCharge.license_plate || selectedCharge.container_no || ''}</span>
                     </p>
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mã biên lai / Phiếu thu
                 </label>
                 <input
@@ -2067,12 +2078,12 @@ export default function CashierBillingPage() {
                   value={receiptCode}
                   onChange={(e) => setReceiptCode(e.target.value)}
                   required
-                  className="w-full p-2 border border-slate-300 rounded text-xs font-mono font-bold text-slate-900"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Ghi chú phiếu thu
                 </label>
                 <textarea
@@ -2080,21 +2091,21 @@ export default function CashierBillingPage() {
                   onChange={(e) => setPayNotes(e.target.value)}
                   placeholder="Ghi chú người nộp, số điện thoại hoặc lý do..."
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowCollectModal(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded font-semibold border border-slate-300"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 rounded font-bold shadow-sm"
+                  className="py-2 px-4 text-xs text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Xác nhận Thu tiền
                 </button>
@@ -2108,18 +2119,18 @@ export default function CashierBillingPage() {
       {/* MODAL IN BIÊN LAI ĐƠN LẺ (MẪU 01-TT/SC) */}
       {/* ========================================================================= */}
       {receiptCharge && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg border border-slate-300 max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 print:hidden">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-emerald-600" />
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-4 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#17202E] flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-[#0A9444]" />
                 Xem trước Biên lai / Phiếu thu tiền dịch vụ
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="py-2 px-3.5 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   In phiếu ngay
@@ -2130,14 +2141,14 @@ export default function CashierBillingPage() {
                     setReceiptCharge(null);
                     setReceiptMeta(null);
                   }}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                  className="py-2 px-3.5 text-xs font-semibold text-[#344054] hover:bg-[#F8F9FB] bg-white rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   ✕ Đóng
                 </button>
               </div>
             </div>
 
-            <div className="border border-slate-300 rounded p-6 sm:p-7 space-y-4 bg-white text-slate-900 print:border-none print:p-0">
+            <div className="border border-[#E5E9F0] rounded-xl p-6 sm:p-7 space-y-4 bg-white text-[#17202E] print:border-none print:p-0">
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="font-bold text-xs uppercase text-slate-900 tracking-wider">
@@ -2257,18 +2268,18 @@ export default function CashierBillingPage() {
       {/* MODAL IN BIÊN LAI TỔNG HỢP GỘP NHIỀU KHOẢN (MẪU 01-TT/SC GỘP) */}
       {/* ========================================================================= */}
       {batchReceiptItems && batchReceiptMeta && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg border border-slate-300 max-w-3xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 print:hidden">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-amber-600" />
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-3xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#17202E] flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-[#D97706]" />
                 Xem trước Phiếu Thu Tiền Tổng Hợp Gộp Nhiều Khoản
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   In phiếu ngay
@@ -2279,7 +2290,7 @@ export default function CashierBillingPage() {
                     setBatchReceiptItems(null);
                     setBatchReceiptMeta(null);
                   }}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold text-[#344054] hover:text-[#17202E] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   ✕ Đóng
                 </button>
@@ -2400,18 +2411,18 @@ export default function CashierBillingPage() {
       {/* MODAL IN BIÊN BẢN BÀN GIAO CA TRỰC (MẪU BB-BGC/SC - RV12) */}
       {/* ========================================================================= */}
       {showShiftPrintModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg border border-slate-300 max-w-3xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 print:hidden">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-emerald-600" />
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-3xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative print:p-0 print:shadow-none print:max-w-full print:border-none">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#17202E] flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-[#0A9444]" />
                 Xem trước Biên bản Bàn giao Ca trực & Đối soát Doanh thu Bến bãi
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   In biên bản ngay
@@ -2419,7 +2430,7 @@ export default function CashierBillingPage() {
                 <button
                   type="button"
                   onClick={() => setShowShiftPrintModal(false)}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold text-[#344054] hover:text-[#17202E] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   ✕ Đóng
                 </button>

@@ -438,18 +438,16 @@ export default function DashboardPage() {
         </div>
 
         {/* WORKSPACE VIEW TABS */}
-        <div className="px-5 pt-3 border-b border-[#E5E9F0] bg-white">
-          <WorkspaceTabs
-            tabs={[
-              { id: 'vehicles', label: 'Phương tiện trong bãi', count: vehicles.length, icon: Truck },
-              { id: 'containers', label: 'Container lưu bãi', count: containers.length, icon: Layers },
-              { id: 'reefer', label: 'Phiên điện hoạt động', count: activeReeferCount, icon: Zap },
-              { id: 'distribution', label: 'Phân loại phương tiện', icon: BarChart3 },
-            ]}
-            activeTab={activeMainTab}
-            onChange={(id) => setActiveMainTab(id as any)}
-          />
-        </div>
+        <WorkspaceTabs
+          tabs={[
+            { id: 'vehicles', label: 'Phương tiện trong bãi', count: vehicles.length, icon: Truck },
+            { id: 'containers', label: 'Container lưu bãi', count: containers.length, icon: Layers },
+            { id: 'reefer', label: 'Phiên điện hoạt động', count: activeReeferCount, icon: Zap },
+            { id: 'distribution', label: 'Phân loại phương tiện', icon: BarChart3 },
+          ]}
+          activeTab={activeMainTab}
+          onChange={(id) => setActiveMainTab(id as any)}
+        />
 
         {/* DATA TABLE VIEW AREA */}
         <div className="p-5 flex-1">

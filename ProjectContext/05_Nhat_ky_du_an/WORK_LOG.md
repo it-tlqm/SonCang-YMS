@@ -1,5 +1,64 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 13:40 — Hiệu Chỉnh Workspace Tabs & Nâng Cấp Đồng Bộ 100% Modals (43 Modals) Theo Chuẩn Enterprise DS-02
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *"Cứ ấn vào sơ đồ phân khu là cái header này bị co lại và bị che khuất 1 chút trên và dưới: 'Sơ đồ & Danh mục Phân khu bãi Sơn Cảng (4 phân khu)...'"*
+  2. *"Những chỗ này đang bị chưa có padding nên trông cứ dính dính vào phía trái bạn ạ: Tổng hợp Xe & Cont | Container | Phương tiện... Nó phải giống chỗ này nè: Phương tiện trong bãi 3 | Container lưu bãi 1..."*
+  3. *"Những modal này chưa thực sự đồng bộ system design mới: Hiệu chỉnh phương tiện / Sửa biển số xe / Hiệu chỉnh ca trực... tất cả modal khác của ứng dụng"*.
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Hiệu chỉnh Workspace Tabs toàn hệ thống (`src/components/workspace/workspace-tabs.tsx`):**
+     - Sửa lỗi tabs dính sát mép trái và co dúm: Trước đây container tabs chỉ có padding `px-4`, thiếu khoảng thoáng trên dưới và chống co dãn.
+     - Cập nhật wrapper thành `px-4 sm:px-5 py-2.5 border-b border-[#E5E9F0] bg-white shrink-0`, thanh cuộn ngang `flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5`.
+     - Đồng bộ giao diện thông thoáng, chuẩn tỉ lệ trên toàn bộ 7 phân hệ: `/yard`, `/reefer`, `/exit`, `/billing`, `/accounting`, `/reports`, `/admin/users`.
+  2. **Khắc phục lỗi Header & Toolbar Phân khu (`/yard`):**
+     - Thanh tìm kiếm xe trước đây render phía trên toolbar phân khu khiến tiêu đề bị đẩy và co cụt lại. Đã bổ sung điều kiện `activeTab !== 'zones'` để ẩn thanh lọc xe khi xem sơ đồ phân khu.
+     - Nâng cấp Toolbar phân khu, Zone cards, Power socket cards sang chuẩn container DS-02 bo góc mềm, đổ bóng nhẹ.
+  3. **Thiết kế lại và đồng bộ 100% Modals (43 modals) theo chuẩn Modern Enterprise DS-02:**
+     - Nền tối mờ: `fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in`.
+     - Thân Modal Shell: `bg-white rounded-2xl max-w-lg (hoặc max-w-2xl / max-w-3xl / max-w-4xl) w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto`.
+     - Tiêu đề & Header: Kicker phân hệ `text-[10px] font-bold text-[#326DD8] uppercase tracking-wider`, title `text-sm font-bold text-[#17202E]`, nút đóng `p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer` kèm `<X className="w-4 h-4" />`.
+     - Form Controls: Nhãn `text-xs font-semibold text-[#344054] mb-1`, ô nhập `w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all`.
+     - Thanh nút bấm cuối: `flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1` (Hủy: `py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD]`; Xác nhận: `py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] / bg-[#326DD8] rounded-lg shadow-xs`).
+     - Áp dụng trên toàn bộ 43 modals:
+       * `/yard`: 16 modals (Hiệu chỉnh biển số xe, loại hàng, container, zone/slot, cont đơn, ca trực/lượt xe, CRUD phân khu, chi tiết/thêm/sửa trụ điện).
+       * `/reefer`: 7 modals (Cắm điện, rút điện chốt cước, hồi tố timestamp Zalo, kiểm tra/sửa phiên điện, lập/sửa yêu cầu CCKB, nhiệt độ cont).
+       * `/exit`: 4 modals (Kiểm soát xuất bãi thống nhất, CCKB duyệt xuất bãi bảo lãnh, biên lai thu phí lưu bãi, thu vé cổng ra).
+       * `/billing`: 5 modals (Thu gộp nhiều khoản phí, thu tiền đơn lẻ, in biên lai đơn lẻ, in phiếu thu gộp, in biên bản bàn giao ca trực).
+       * `/admin/users`: 4 modals (Thêm/sửa nhân sự & đổi vai trò RBAC V5, tạo vai trò mới, xem ma trận quyền, đặt lại mật khẩu).
+       * `/admin/tariffs`: 1 modal (Điều chỉnh đơn giá biểu phí).
+       * `/admin/customers`: 1 modal (Thêm/sửa đối tác & khách hàng).
+       * `/reports`: 1 modal (Xem trước bản in báo cáo vận hành & doanh thu).
+       * `src/components/accounting/*`: 4 modals (Thu hồi nợ AP07, lập đề nghị xuất HĐĐT, chốt nộp quỹ hiện trường, ghi nhận số HĐĐT) + 2 print views (Bảng kê Mẫu 01:BPA, Biên bản bàn giao tiền mặt).
+       * `src/components/modals/*`: 1 modal (Đổi mật khẩu người dùng).
+       * `src/components/customer-combobox.tsx`: 1 modal (Sửa nhanh thông tin khách hàng).
+- **Tệp đã chỉnh sửa:**
+  - `src/components/workspace/workspace-tabs.tsx`
+  - `src/app/dashboard/page.tsx`
+  - `src/app/yard/page.tsx`
+  - `src/app/reefer/page.tsx`
+  - `src/app/exit/page.tsx`
+  - `src/app/billing/page.tsx`
+  - `src/app/admin/users/page.tsx`
+  - `src/app/reports/page.tsx`
+  - `src/app/admin/tariffs/page.tsx`
+  - `src/app/admin/customers/page.tsx`
+  - `src/components/accounting/collect-debt-modal.tsx`
+  - `src/components/accounting/create-invoice-modal.tsx`
+  - `src/components/accounting/create-settlement-modal.tsx`
+  - `src/components/accounting/record-e-invoice-modal.tsx`
+  - `src/components/accounting/invoice-statement-print.tsx`
+  - `src/components/accounting/settlement-receipt-print.tsx`
+  - `src/components/modals/change-password-modal.tsx`
+  - `src/components/customer-combobox.tsx`
+  - `ProjectContext/05_Nhat_ky_du_an/CURRENT_STATUS.md`
+  - `ProjectContext/05_Nhat_ky_du_an/WORK_LOG.md`
+- **Kiểm thử & Xác minh kỹ thuật:**
+  * `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+  * `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+  * Bảo toàn tuyệt đối: Không can thiệp DB/RPC, bảo toàn RBAC V5 và an toàn dữ liệu.
+- **Trạng thái:** Hoàn tất, sẵn sàng đẩy Git main và đồng bộ Production.
+
 ## 2026-10-15 13:00 — Tối Ưu Hóa Chiều Cao Bảng (Full Height) & Cơ Chế Mở Menu Thao Tác Thông Minh Màn Hình Quản Lý Bãi (/yard)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"Cái bảng này đang chưa full heignt b ạ nên khi có 1->5 xe thì sẽ bị che mất những cái nút thao tác của xe ấy bạn"* kèm trích dẫn dữ liệu 3 xe trong bãi (`云桂桂桂`, `桂桂桂`, `湘湘湘`).

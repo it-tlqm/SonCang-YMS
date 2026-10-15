@@ -40,17 +40,42 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 13:00 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH TỐI ƯU HÓA CHIỀU CAO (FULL HEIGHT) VÀ CƠ CHẾ POPUP THAO TÁC CHO BẢNG QUẢN LÝ BẾN BÃI & TỒN BÃI (`/yard`)**:
+- **Cập nhật lúc:** 15/10/2026 13:40 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH TOÀN DIỆN HIỆU CHỈNH WORKSPACE TABS & NÂNG CẤP ĐỒNG BỘ 100% DIALOG/MODAL TRÊN TOÀN HỆ THỐNG THEO CHUẨN THIẾT KẾ HIỆN ĐẠI ENTERPRISE DS-02**:
+  * **Giải quyết triệt để lỗi Workspace Tabs co rúm & dính mép trái:**
+    1. Nâng cấp component lõi `src/components/workspace/workspace-tabs.tsx`: bổ sung padding trái phải `px-4 sm:px-5`, chiều cao chuẩn `py-2.5`, viền đáy `border-b border-[#E5E9F0]`, chống co kéo `shrink-0` và cuộn ngang mượt `no-scrollbar`.
+    2. Đồng bộ trải nghiệm thông thoáng, cân đối trên toàn bộ 7 phân hệ: `/yard` (Quản lý bến bãi), `/reefer` (Container điện lạnh), `/exit` (Kiểm soát cổng ra), `/billing` (Sổ cái thu phí), `/accounting` (Kế toán bến bãi), `/reports` (Báo cáo vận hành), `/admin/users` (Quản trị nhân sự).
+  * **Giải quyết triệt để lỗi Toolbar Phân khu & Trụ điện bị che khuất / co hẹp (`/yard`):**
+    1. Ẩn thanh tìm kiếm phương tiện khi chuyển sang tab `zones` (`activeTab !== 'zones'`), ngăn xung đột diện tích thanh công cụ.
+    2. Thiết kế lại Toolbar phân khu, Zone cards và Power socket cards theo chuẩn DS-02 container, thẻ chỉ số sức chứa, điện 380V.
+  * **Hiện đại hóa và đồng bộ triệt để 100% Modals (43 modal) theo chuẩn DS-02 Enterprise:**
+    1. **Khung Modal Shell:** Bo góc `rounded-2xl`, viền `#E5E9F0`, đổ bóng sâu `shadow-2xl`, nền mờ tối `bg-[#101828]/50 backdrop-blur-xs`, hoạt ảnh `animate-in fade-in`, chiều cao tối đa `max-h-[90vh] overflow-y-auto`.
+    2. **Tiêu đề & Header:** Kicker phân hệ chữ in hoa `text-[10px] font-bold text-[#326DD8] uppercase tracking-wider`, icon Lucide màu ngữ cảnh, nút đóng bo góc `p-1.5 rounded-lg text-[#667085] hover:bg-[#F8F9FB]`.
+    3. **Form Controls:** Nhãn `text-xs font-semibold text-[#344054] mb-1`, dấu sao bắt buộc màu đỏ `text-rose-500`, ô nhập liệu viền `border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8]`.
+    4. **Thanh nút bấm cuối:** Viền trên `border-t border-[#E5E9F0] -mx-5 px-5 -mb-1 pt-3`, nút Hủy `py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD]`, nút Xác nhận `py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] / bg-[#326DD8] rounded-lg shadow-xs`.
+    5. **Danh mục 43 modals đã đồng bộ 100%:**
+       - `/yard`: 16 modals (Hiệu chỉnh biển số, hàng hóa, cont, zone/slot, cont đơn, ca trực/lượt xe, CRUD phân khu, chi tiết/thêm/sửa trụ điện...).
+       - `/reefer`: 7 modals (Cắm điện, rút điện chốt cước, hồi tố timestamp Zalo, kiểm tra/sửa phiên điện, lập/sửa yêu cầu CCKB, nhật ký nhiệt độ).
+       - `/exit`: 4 modals (Kiểm soát xuất bãi thống nhất, CCKB duyệt xuất bãi bảo lãnh, biên lai thu phí lưu bãi, thu vé cổng ra).
+       - `/billing`: 5 modals (Thu gộp nhiều khoản phí, thu tiền đơn lẻ, in biên lai đơn lẻ, in phiếu thu gộp, in biên bản bàn giao ca trực).
+       - `/admin/users`: 4 modals (Thêm/sửa nhân sự & đổi vai trò RBAC V5, tạo vai trò mới, xem ma trận quyền, đặt lại mật khẩu).
+       - `/admin/tariffs`: 1 modal (Điều chỉnh đơn giá biểu phí).
+       - `/admin/customers`: 1 modal (Thêm/sửa đối tác & khách hàng).
+       - `/reports`: 1 modal (Xem trước bản in báo cáo vận hành & doanh thu).
+       - `src/components/accounting/*`: 4 modals (Thu hồi nợ AP07, lập đề nghị xuất HĐĐT, chốt nộp quỹ hiện trường, ghi nhận số HĐĐT) + 2 print views (Bảng kê Mẫu 01:BPA, Biên bản bàn giao tiền mặt).
+       - `src/components/modals/*`: 1 modal (Đổi mật khẩu người dùng).
+       - `src/components/customer-combobox.tsx`: 1 modal (Sửa nhanh thông tin khách hàng).
+  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
+    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+    - Bảo toàn 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+
+- **Mốc trước đó (15/10/2026 13:00):** **HOÀN THÀNH TỐI ƯU HÓA CHIỀU CAO (FULL HEIGHT) VÀ CƠ CHẾ POPUP THAO TÁC CHO BẢNG QUẢN LÝ BẾN BÃI & TỒN BÃI (`/yard`)**:
   * **Giải quyết triệt để lỗi che khuất nút/menu thao tác khi có 1–5 xe:**
     1. **Khắc phục lỗi co hẹp & cắt mép:** Trước đây khi bãi chỉ có 1–5 xe/cont, card bảng co cụt lại theo số dòng (~180px) khiến dropdown menu "Thao tác" (chiều cao ~240px) bị tràn mép và bị thuộc tính `overflow-x-auto` cắt cụt mất các nút chức năng bên dưới.
     2. **Layout Full Height & Flex Fill:** Nâng cấp container bảng và khung trang thành flex column co giãn tối đa (`flex-1 flex flex-col min-h-[calc(100vh-210px)]`), thiết lập chiều cao tối thiểu cho card bảng (`min-h-[540px]`) và vùng cuộn (`min-h-[500px] pb-40`) trên cả 3 tab: `Cặp xe — Container`, `Phương tiện trong bãi` và `Container tồn bãi`.
     3. **Cơ chế mở Popup thông minh (Smart Dropdown Direction):** Tự động xác định các dòng cuối bảng (`idx >= length - 2 && length > 2`) để tự động mở ngược lên trên (`bottom-full mb-1`), các dòng phía trên mở xuống dưới (`top-full mt-1`). Đảm bảo menu thao tác luôn nằm trọn vẹn trong tầm nhìn người dùng ở mọi độ phân giải màn hình.
     4. **Chuẩn hóa Design Tokens DS-02:** Nâng cấp menu popup và nút bấm sang bo góc `rounded-xl`, viền `#E5E9F0`, đổ bóng mềm mại `shadow-xl`, các mục chức năng mang màu văn bản `#17202E`, phụ đề `#667085`, hover `#F8F9FB` / `#EFF8FF`.
-  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
-    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
-    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
-    - Bảo toàn 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
 
 - **Mốc trước đó (15/10/2026 12:45):** **XUẤT BẢN TÀI LIỆU MÔ TẢ HỆ THỐNG PHẦN MỀM QUẢN LÝ BẾN BÃI/CẢNG CẠN SƠN CẢNG BẰNG MICROSOFT WORD (.DOCX) CHUẨN DOANH NGHIỆP**:
   * **Tệp tài liệu:** `docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` (bản sao tại thư mục gốc: `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx`).

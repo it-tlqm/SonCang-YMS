@@ -414,31 +414,36 @@ export function CustomerCombobox({
       {/* MODAL SỬA THÔNG TIN KHÁCH HÀNG TỨC THÌ (KHI THÊM NHẦM / SAI TÊN / SAI SĐT) */}
       {/* ========================================================================= */}
       {editingCustomer && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#223873]" />
-                <span>Chỉnh sửa thông tin Khách hàng / Chủ hàng</span>
-              </h3>
+        <div className="fixed inset-0 z-[60] bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                  Đối tác & Khách hàng
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <Building2 className="w-4 h-4 text-[#326DD8]" />
+                  <span>Chỉnh sửa thông tin Khách hàng / Chủ hàng</span>
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditingCustomer(null)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {editError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-800 rounded text-xs font-semibold">
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-lg text-xs font-semibold">
                 {editError}
               </div>
             )}
 
             <form onSubmit={handleSaveEditCustomer} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Tên Khách hàng / Doanh nghiệp <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -447,50 +452,50 @@ export function CustomerCombobox({
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="VD: Công ty TNHH Vận tải Á Châu..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Số điện thoại liên hệ</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Số điện thoại liên hệ</label>
                   <input
                     type="text"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     placeholder="VD: 0912.345.678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded font-mono text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Mã số thuế (Tùy chọn)</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã số thuế (Tùy chọn)</label>
                   <input
                     type="text"
                     value={editTaxCode}
                     onChange={(e) => setEditTaxCode(e.target.value)}
                     placeholder="VD: 0102345678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded font-mono text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Ghi chú đối tác / Loại hàng</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú đối tác / Loại hàng</label>
                 <input
                   type="text"
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
                   placeholder="VD: Khách thường xuyên chạy hàng sầu riêng..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-between pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   disabled={isSavingEdit || isDeletingCust}
                   onClick={handleDeleteCustomer}
-                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-300 cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-3.5 text-xs font-semibold text-[#D92D20] bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] rounded-lg cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Xóa khách hàng</span>
@@ -501,14 +506,14 @@ export function CustomerCombobox({
                     type="button"
                     disabled={isSavingEdit || isDeletingCust}
                     onClick={() => setEditingCustomer(null)}
-                    className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer"
+                    className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingEdit || isDeletingCust}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                    className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                   >
                     {isSavingEdit ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />

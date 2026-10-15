@@ -1133,16 +1133,17 @@ export default function ReportsManagementPage() {
       {/* 4. MODAL IN BÁO CÁO (PRINT / PDF PREVIEW)                       */}
       {/* ============================================================== */}
       {showPrintModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FFFFFF] rounded-xl border border-[#E5E9F0] max-w-3xl w-full shadow-xl overflow-hidden my-6">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-[#FFFFFF] rounded-2xl border border-[#E5E9F0] max-w-3xl w-full shadow-2xl overflow-hidden my-6 print:m-0 print:border-none print:shadow-none print:rounded-none">
             {/* Thanh công cụ Modal */}
-            <div className="bg-[#17202E] text-white px-5 py-3 flex items-center justify-between no-print border-b border-[#223873]">
+            <div className="bg-white px-5 py-3.5 flex items-center justify-between no-print border-b border-[#E5E9F0]">
               <div className="flex items-center space-x-2">
-                <Printer className="w-4 h-4 text-emerald-400" />
-                <span className="font-semibold text-xs uppercase tracking-wider">Xem trước Bản in Báo cáo Vận hành & Doanh thu</span>
+                <Printer className="w-4 h-4 text-[#0A9444]" />
+                <span className="font-bold text-xs uppercase tracking-wider text-[#17202E]">Xem trước Bản in Báo cáo Vận hành & Doanh thu</span>
               </div>
               <div className="flex items-center space-x-2">
                 <button
+                  type="button"
                   onClick={() => window.print()}
                   className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
@@ -1150,8 +1151,9 @@ export default function ReportsManagementPage() {
                   <span>In ngay / Lưu PDF</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowPrintModal(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>

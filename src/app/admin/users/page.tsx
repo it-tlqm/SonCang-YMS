@@ -1443,32 +1443,37 @@ export default function UsersAndRbacAdminPage() {
       {/* MODAL THÊM MỚI / CHỈNH SỬA & ĐỔI VAI TRÒ NHÂN SỰ                          */}
       {/* ========================================================================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#223873]" />
-                <span>{modalMode === 'CREATE' ? 'Thêm mới Tài khoản Nhân sự' : 'Chỉnh sửa Thông tin & Đổi Vai trò'}</span>
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-[#E5E9F0] max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                  Quản trị Nhân sự & RBAC V5
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <Users className="w-4 h-4 text-[#326DD8]" />
+                  <span>{modalMode === 'CREATE' ? 'Thêm mới Tài khoản Nhân sự' : 'Chỉnh sửa Thông tin & Đổi Vai trò'}</span>
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-lg text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{modalError}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmitStaffForm} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Họ và tên Nhân viên <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1477,13 +1482,13 @@ export default function UsersAndRbacAdminPage() {
                   value={formFullName}
                   onChange={(e) => setFormFullName(e.target.value)}
                   placeholder="VD: Hoàng Văn An..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
                     Email công vụ <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1492,30 +1497,30 @@ export default function UsersAndRbacAdminPage() {
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
                     placeholder="VD: an.hv@soncang.vn"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Số điện thoại liên hệ</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Số điện thoại liên hệ</label>
                   <input
                     type="text"
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
                     placeholder="VD: 0981 123 456"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
 
               {/* CHỌN VAI TRÒ CHUẨN RBAC V5 */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Phân công Vai trò (Role V1) <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={formRoleCode}
                   onChange={(e) => handleRoleChange(e.target.value as RoleCode)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   {ROLES_V5_METADATA.map((r) => (
                     <option key={r.code} value={r.code}>
@@ -1523,40 +1528,40 @@ export default function UsersAndRbacAdminPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#667085] mt-1">
                   Hệ thống tự động cấp đúng {ROLE_PERMISSIONS_V5[formRoleCode]?.length || 0} quyền theo ma trận RBAC V5.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Bộ phận công tác</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Bộ phận công tác</label>
                   <input
                     type="text"
                     disabled
                     value={ROLES_V5_METADATA.find(r => r.code === formRoleCode)?.deptName || formDepartmentCode}
-                    className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded-xl text-slate-600 font-semibold"
+                    className="w-full px-3 py-2 border border-[#E5E9F0] bg-[#F8F9FB] rounded-lg text-xs font-semibold text-[#667085]"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Bãi phân công trực</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Bãi phân công trực</label>
                   <input
                     type="text"
                     value={formYardName}
                     onChange={(e) => setFormYardName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Ghi chú phân công / Vị trí trực ca</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú phân công / Vị trí trực ca</label>
                 <input
                   type="text"
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
                   placeholder="VD: Trực ca bốt gác Cổng vào ban ngày..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
@@ -1566,26 +1571,26 @@ export default function UsersAndRbacAdminPage() {
                   id="chkStaffIsActive"
                   checked={formIsActive}
                   onChange={(e) => setFormIsActive(e.target.checked)}
-                  className="w-4 h-4 text-[#223873] rounded border-slate-300 cursor-pointer"
+                  className="w-4 h-4 text-[#326DD8] rounded border-[#D0D5DD] focus:ring-[#326DD8] cursor-pointer"
                 />
-                <label htmlFor="chkStaffIsActive" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                <label htmlFor="chkStaffIsActive" className="text-xs font-medium text-[#344054] cursor-pointer">
                   Tài khoản đang hoạt động (Cho phép đăng nhập trực ca)
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -1604,32 +1609,37 @@ export default function UsersAndRbacAdminPage() {
       {/* MODAL TẠO MỚI VAI TRÒ (ROLE) TRONG DATABASE                                */}
       {/* ========================================================================= */}
       {showCreateRoleModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#223873]" />
-                <span>Thêm mới Vai trò (Role) trong CSDL</span>
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-[#E5E9F0] max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                  Ma trận Phân quyền RBAC
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <ShieldCheck className="w-4 h-4 text-[#326DD8]" />
+                  <span>Thêm mới Vai trò (Role) trong CSDL</span>
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowCreateRoleModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {createRoleError && (
-              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-lg text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{createRoleError}</span>
               </div>
             )}
 
             <form onSubmit={handleCreateRoleSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mã Vai trò (Role Code) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1638,13 +1648,13 @@ export default function UsersAndRbacAdminPage() {
                   placeholder="VD: GATE_SUPERVISOR..."
                   value={newRoleCode}
                   onChange={(e) => setNewRoleCode(e.target.value.toUpperCase())}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono font-bold text-slate-900 uppercase focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-xs font-bold text-[#17202E] uppercase bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Viết hoa, không dấu, dùng dấu gạch dưới (VD: SEC_SPECIALIST)</span>
+                <span className="text-[11px] text-[#667085] mt-1 block">Viết hoa, không dấu, dùng dấu gạch dưới (VD: SEC_SPECIALIST)</span>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Tên Vai trò hiển thị <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1653,18 +1663,18 @@ export default function UsersAndRbacAdminPage() {
                   placeholder="VD: Giám sát Ca Cổng..."
                   value={newRoleName}
                   onChange={(e) => setNewRoleName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Bộ phận trực thuộc <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={newRoleDeptCode}
                   onChange={(e) => setNewRoleDeptCode(e.target.value as DepartmentCode)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#223873]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   <option value="AN_NINH">Bộ phận An ninh & Bảo vệ (AN_NINH)</option>
                   <option value="CCKB">Bộ phận Thương vụ & Cảng cạn CCKB (CCKB)</option>
@@ -1674,29 +1684,29 @@ export default function UsersAndRbacAdminPage() {
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Mô tả trách nhiệm vai trò</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Mô tả trách nhiệm vai trò</label>
                 <textarea
                   rows={2}
                   placeholder="Mô tả phạm vi trách nhiệm của vai trò mới này..."
                   value={newRoleDescription}
                   onChange={(e) => setNewRoleDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873] resize-none"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   disabled={isSubmittingRole}
                   onClick={() => setShowCreateRoleModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingRole}
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557b0] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   {isSubmittingRole ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -1715,18 +1725,21 @@ export default function UsersAndRbacAdminPage() {
       {/* MODAL XEM CHI TIẾT QUYỀN CỦA TỪNG NHÂN SỰ                                 */}
       {/* ========================================================================= */}
       {viewPermsStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-5 shadow-2xl space-y-3.5 border border-slate-300 max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 shrink-0">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-5 shadow-2xl space-y-3.5 border border-[#E5E9F0] max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1 shrink-0">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
-                  <Key className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-[#EFF4FE] text-[#326DD8] flex items-center justify-center">
+                  <Key className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Chi tiết Quyền hạn: {viewPermsStaff.full_name}
+                  <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                    Chi tiết Quyền hạn RBAC V5
+                  </span>
+                  <h3 className="text-sm font-bold text-[#17202E]">
+                    {viewPermsStaff.full_name}
                   </h3>
-                  <span className="text-[11px] font-mono text-slate-500">
+                  <span className="text-[11px] font-mono text-[#667085]">
                     Vai trò: {viewPermsStaff.role_code} — {ROLE_PERMISSIONS_V5[viewPermsStaff.role_code]?.length || 0} / 67 Quyền
                   </span>
                 </div>
@@ -1734,9 +1747,9 @@ export default function UsersAndRbacAdminPage() {
               <button
                 type="button"
                 onClick={() => setViewPermsStaff(null)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -1746,27 +1759,27 @@ export default function UsersAndRbacAdminPage() {
                 const grantedPerms = FULL_PERMISSIONS_V5.filter(p => grantedCodes.includes(p.code));
 
                 return grantedPerms.map((p, idx) => (
-                  <div key={p.code} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5">
-                    <span className="font-mono text-slate-400 font-bold shrink-0 text-[10px] mt-0.5">#{idx + 1}</span>
+                  <div key={p.code} className="p-2.5 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] flex items-start gap-2.5">
+                    <span className="font-mono text-[#667085] font-bold shrink-0 text-[10px] mt-0.5">#{idx + 1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">{p.action}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                        <span className="font-bold text-[#17202E]">{p.action}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-[#D0D5DD] text-[#344054]">
                           {p.module}
                         </span>
                       </div>
-                      <span className="font-mono text-[10px] text-blue-700 block mt-0.5">{p.code}</span>
+                      <span className="font-mono text-[10px] text-[#326DD8] block mt-0.5">{p.code}</span>
                     </div>
                   </div>
                 ));
               })()}
             </div>
 
-            <div className="pt-2 border-t border-slate-200 flex justify-end shrink-0">
+            <div className="pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1 flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setViewPermsStaff(null)}
-                className="px-4 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Đóng
               </button>
@@ -1779,58 +1792,54 @@ export default function UsersAndRbacAdminPage() {
       {/* MODAL: ĐẶT LẠI MẬT KHẨU NHÂN SỰ (RESET PASSWORD & AUDIT LOGGING)          */}
       {/* ========================================================================= */}
       {resetPwdStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101828]/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
             {/* MODAL HEADER */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-purple-50/60">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-purple-100 text-purple-800">
-                  <KeyRound className="w-4 h-4 text-purple-700" />
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-black text-slate-900">
-                    Đặt lại Mật khẩu Nhân sự
-                  </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Cấp mật khẩu mới và lưu vết kiểm toán (Audit Trail)
-                  </p>
-                </div>
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#7E22CE] uppercase tracking-wider block">
+                  Bảo mật & Kiểm toán
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <KeyRound className="w-4 h-4 text-[#7E22CE]" />
+                  <span>Đặt lại Mật khẩu Nhân sự</span>
+                </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setResetPwdStaff(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* FORM BODY */}
-            <form onSubmit={handleConfirmResetPassword} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleConfirmResetPassword} className="space-y-3.5 text-xs">
               {resetPwdError && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="p-3 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-[#D92D20] shrink-0" />
                   <span>{resetPwdError}</span>
                 </div>
               )}
 
               {/* THÔNG TIN NHÂN SỰ ĐƯỢC CHỌN */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+              <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs">
+                  <span className="font-bold text-[#17202E] text-xs">
                     {resetPwdStaff.full_name}
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-slate-200 text-purple-700 font-bold">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-[#D0D5DD] text-[#7E22CE] font-bold">
                     {resetPwdStaff.role_code}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[11px]">
-                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                <div className="flex items-center gap-1.5 text-[#667085] font-mono text-[11px]">
+                  <Mail className="w-3.5 h-3.5 text-[#98A2B3]" />
                   <span>{resetPwdStaff.email}</span>
                 </div>
                 {resetPwdStaff.phone && (
-                  <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-[#667085] text-[11px]">
+                    <Phone className="w-3.5 h-3.5 text-[#98A2B3]" />
                     <span>{resetPwdStaff.phone}</span>
                   </div>
                 )}
@@ -1839,14 +1848,14 @@ export default function UsersAndRbacAdminPage() {
               {/* Ô NHẬP MẬT KHẨU MỚI & NÚT RANDOM / COPY */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-700">
+                  <label className="text-xs font-semibold text-[#344054]">
                     Mật khẩu mới cấp <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={handleGenerateRandomPassword}
-                      className="text-[10px] font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200 transition-colors cursor-pointer flex items-center gap-1"
+                      className="text-[10px] font-semibold text-[#7E22CE] hover:text-[#6B21A8] bg-[#FAF5FF] hover:bg-[#F3E8FF] px-2 py-0.5 rounded-md border border-[#E9D5FF] transition-colors cursor-pointer flex items-center gap-1"
                       title="Tự động tạo mật khẩu mạnh ngẫu nhiên"
                     >
                       <span>🎲 Tạo ngẫu nhiên</span>
@@ -1854,7 +1863,7 @@ export default function UsersAndRbacAdminPage() {
                     <button
                       type="button"
                       onClick={handleCopyPassword}
-                      className="text-[10px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-md border border-slate-300 transition-colors cursor-pointer flex items-center gap-1"
+                      className="text-[10px] font-semibold text-[#344054] hover:text-[#17202E] bg-white hover:bg-[#F8F9FB] px-2 py-0.5 rounded-md border border-[#D0D5DD] transition-colors cursor-pointer flex items-center gap-1"
                       title="Sao chép mật khẩu gửi nhân sự"
                     >
                       <Copy className="w-3 h-3" />
@@ -1869,13 +1878,13 @@ export default function UsersAndRbacAdminPage() {
                     value={newStaffPassword}
                     onChange={(e) => setNewStaffPassword(e.target.value)}
                     placeholder="Nhập hoặc tạo mật khẩu mới (tối thiểu 6 ký tự)..."
-                    className="w-full pl-3 pr-9 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-600 bg-purple-50/20"
+                    className="w-full pl-3 pr-9 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#7E22CE]/20 focus:border-[#7E22CE] bg-white"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewStaffPassword(!showNewStaffPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] cursor-pointer p-0.5"
                     title={showNewStaffPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   >
                     {showNewStaffPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -1885,7 +1894,7 @@ export default function UsersAndRbacAdminPage() {
 
               {/* LÝ DO ĐẶT LẠI MẬT KHẨU (GHI VẾT KIỂM TOÁN) */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Lý do cấp lại mật khẩu <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1893,7 +1902,7 @@ export default function UsersAndRbacAdminPage() {
                   value={resetReason}
                   onChange={(e) => setResetReason(e.target.value)}
                   placeholder="Ví dụ: Nhân viên quên mật khẩu ca trực; Bàn giao tài khoản ca mới..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 bg-slate-50/50"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#7E22CE]/20 focus:border-[#7E22CE] bg-white"
                   required
                 />
               </div>
@@ -1905,27 +1914,27 @@ export default function UsersAndRbacAdminPage() {
                   id="mustChangePwd"
                   checked={mustChangePwd}
                   onChange={(e) => setMustChangePwd(e.target.checked)}
-                  className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  className="w-4 h-4 rounded text-[#7E22CE] border-[#D0D5DD] focus:ring-[#7E22CE] cursor-pointer"
                 />
-                <label htmlFor="mustChangePwd" className="text-slate-700 font-medium cursor-pointer">
+                <label htmlFor="mustChangePwd" className="text-xs font-medium text-[#344054] cursor-pointer">
                   Yêu cầu nhân viên đổi mật khẩu ở lần đăng nhập tiếp theo
                 </label>
               </div>
 
               {/* MODAL ACTIONS */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setResetPwdStaff(null)}
                   disabled={isSubmittingResetPwd}
-                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold cursor-pointer transition-colors"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingResetPwd || !newStaffPassword || newStaffPassword.length < 6}
-                  className="px-4 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold cursor-pointer transition-colors shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#7E22CE] hover:bg-[#6B21A8] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingResetPwd ? (
                     <>

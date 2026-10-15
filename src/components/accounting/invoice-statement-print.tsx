@@ -70,30 +70,32 @@ export function InvoiceStatementPrint({ invoice, charges = [], onClose }: Invoic
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto print:p-0 print:bg-white print:static print:inset-auto">
-      <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden print:shadow-none print:w-full print:max-w-none">
+    <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in print:p-0 print:bg-white print:static print:inset-auto">
+      <div className="relative w-full max-w-4xl bg-white rounded-2xl border border-[#E5E9F0] shadow-2xl overflow-hidden print:shadow-none print:w-full print:max-w-none print:border-none print:rounded-none">
         
         {/* Print Toolbar */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white print:hidden">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-lg">Bảng kê chi tiết Mẫu số 01:BPA</span>
-            <span className="text-xs bg-blue-600 px-2.5 py-1 rounded-full font-mono">
+        <div className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-[#E5E9F0] text-[#17202E] print:hidden">
+          <div className="flex items-center gap-2.5">
+            <span className="font-bold text-sm text-[#17202E]">Bảng kê chi tiết Mẫu số 01:BPA</span>
+            <span className="text-[11px] bg-[#EFF4FE] text-[#326DD8] border border-[#B2CCFF] px-2.5 py-0.5 rounded-full font-mono font-bold">
               {invoice.e_invoice_no ? `HĐ: ${invoice.e_invoice_no}` : invoice.invoice_code}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0A9444] hover:bg-[#087a38] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              In Bảng Kê (Mẫu 01:BPA)
+              <span>In Bảng Kê (Mẫu 01:BPA)</span>
             </button>
             <button
+              type="button"
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+              className="p-1.5 text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] rounded-lg transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>

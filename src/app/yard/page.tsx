@@ -1533,71 +1533,71 @@ export default function YardMonitorPage() {
 
         <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col min-h-[calc(100vh-210px)]">
           {/* Search Box & Filters */}
-          <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-between gap-2">
-            <div className="relative flex-1 sm:w-64 min-w-[200px]">
-              <Search className="w-4 h-4 text-[#98A2B3] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={
-                  activeTab === 'pairs'
-                    ? 'Tìm biển số xe, số cont, tài xế...'
-                    : activeTab === 'containers'
-                    ? 'Tìm số container, xe vào...'
-                    : 'Tìm biển số xe, tài xế...'
-                }
-                className="w-full pl-9 pr-3 py-1.5 text-xs font-mono border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
-              />
-            </div>
+          {activeTab !== 'zones' && (
+            <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-between gap-2">
+              <div className="relative flex-1 sm:w-64 min-w-[200px]">
+                <Search className="w-4 h-4 text-[#98A2B3] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={
+                    activeTab === 'pairs'
+                      ? 'Tìm biển số xe, số cont, tài xế...'
+                      : activeTab === 'containers'
+                      ? 'Tìm số container, xe vào...'
+                      : 'Tìm biển số xe, tài xế...'
+                  }
+                  className="w-full pl-9 pr-3 py-1.5 text-xs font-mono border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] bg-white text-[#17202E]"
+                />
+              </div>
 
-            {/* Bộ lọc cho Tab Tổng hợp */}
-            {activeTab === 'pairs' && (
-              <>
-                <div className="flex items-center space-x-1.5">
-                  <select
-                    value={filterPairType}
-                    onChange={(e) => setFilterPairType(e.target.value)}
-                    className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
-                  >
-                    <option value="ALL">Tất cả xe & cont</option>
-                    <option value="PAIRED">Xe chở Container</option>
-                    <option value="NO_CONT">Xe lẻ không Cont</option>
-                  </select>
-                </div>
+              {/* Bộ lọc cho Tab Tổng hợp */}
+              {activeTab === 'pairs' && (
+                <>
+                  <div className="flex items-center space-x-1.5">
+                    <select
+                      value={filterPairType}
+                      onChange={(e) => setFilterPairType(e.target.value)}
+                      className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
+                    >
+                      <option value="ALL">Tất cả xe & cont</option>
+                      <option value="PAIRED">Xe chở Container</option>
+                      <option value="NO_CONT">Xe lẻ không Cont</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <select
+                      value={filterCargo}
+                      onChange={(e) => setFilterCargo(e.target.value)}
+                      className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
+                    >
+                      <option value="ALL">Mọi loại hàng</option>
+                      <option value="HANG">Có HÀNG</option>
+                      <option value="RONG">RỖNG</option>
+                      <option value="CHUA_XAC_DINH">Chưa XĐ</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Bộ lọc cho Tab Container */}
+              {activeTab === 'containers' && (
                 <div className="flex items-center space-x-1.5">
                   <select
                     value={filterCargo}
                     onChange={(e) => setFilterCargo(e.target.value)}
                     className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
                   >
-                    <option value="ALL">Mọi loại hàng</option>
+                    <option value="ALL">Tất cả loại hàng</option>
                     <option value="HANG">Có HÀNG</option>
                     <option value="RONG">RỖNG</option>
                     <option value="CHUA_XAC_DINH">Chưa XĐ</option>
                   </select>
                 </div>
-              </>
-            )}
+              )}
 
-            {/* Bộ lọc cho Tab Container */}
-            {activeTab === 'containers' && (
-              <div className="flex items-center space-x-1.5">
-                <select
-                  value={filterCargo}
-                  onChange={(e) => setFilterCargo(e.target.value)}
-                  className="px-2.5 py-1.5 border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] font-semibold text-xs focus:outline-none focus:border-[#326DD8] cursor-pointer"
-                >
-                  <option value="ALL">Tất cả loại hàng</option>
-                  <option value="HANG">Có HÀNG</option>
-                  <option value="RONG">RỖNG</option>
-                  <option value="CHUA_XAC_DINH">Chưa XĐ</option>
-                </select>
-              </div>
-            )}
-
-            {/* Bộ lọc Dwell Time cho các tab (Pairs, Containers, Vehicles) */}
-            {activeTab !== 'zones' && (
+              {/* Bộ lọc Dwell Time cho các tab (Pairs, Containers, Vehicles) */}
               <div className="flex items-center space-x-1.5">
                 <select
                   value={filterDwell}
@@ -1610,8 +1610,8 @@ export default function YardMonitorPage() {
                   <option value="OVER_48H">Tồn bãi ≥ 48h (Quá hạn)</option>
                 </select>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
       {/* 3. BẢNG TỔNG HỢP XE — CONTAINER (CẶP GHÉP MAPPING BẾN BÃI) */}
       {activeTab === 'pairs' && (
@@ -2350,20 +2350,20 @@ export default function YardMonitorPage() {
       {activeTab === 'zones' && (
         <div className="space-y-4">
           {/* Thanh công cụ quản lý phân khu */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs">
+          <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-[#E5E9F0] shadow-xs">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Grid className="w-4 h-4 text-[#223873]" />
+              <h2 className="text-sm font-semibold text-[#17202E] flex items-center gap-2">
+                <Grid className="w-4 h-4 text-[#326DD8]" />
                 Sơ đồ & Danh mục Phân khu bãi Sơn Cảng ({yardZones.length} phân khu)
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-[#667085] mt-0.5">
                 Quản lý phân khu chức năng bến bãi, sức chứa xe/container và trụ điện 380V
               </p>
             </div>
             <button
               type="button"
               onClick={handleOpenCreateZoneModal}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors cursor-pointer self-start sm:self-auto"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Thêm Phân khu mới</span>
@@ -2378,51 +2378,51 @@ export default function YardMonitorPage() {
               const percent = zone.capacity > 0 ? Math.min(100, Math.round((totalCount / zone.capacity) * 100)) : 0;
 
               return (
-                <div key={zone.code} className="bg-white rounded-lg border border-slate-300 p-3.5 shadow-2xs space-y-3 flex flex-col justify-between hover:border-slate-400 transition-colors">
+                <div key={zone.code} className="bg-white rounded-xl border border-[#E5E9F0] p-4 shadow-xs space-y-3 flex flex-col justify-between hover:border-[#D0D5DD] transition-colors">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${zone.color_badge || 'bg-slate-100 text-slate-800 border-slate-300'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${zone.color_badge || 'bg-[#F8F9FB] text-[#344054] border-[#E5E9F0]'}`}>
                         {zone.code}
                       </span>
                       <div className="flex items-center space-x-1">
                         {zone.has_power_outlets && (
-                          <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded flex items-center space-x-1">
+                          <span className="text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] px-1.5 py-0.5 rounded flex items-center space-x-1">
                             <span>⚡ Trụ 380V</span>
                           </span>
                         )}
                         <button
                           type="button"
                           onClick={() => handleOpenEditZoneModal(zone)}
-                          className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                          className="p-1 rounded-md text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] cursor-pointer"
                           title="Sửa thông tin phân khu"
                         >
-                          <Edit3 className="w-3 h-3" />
+                          <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteZone(zone.code)}
-                          className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                          className="p-1 rounded-md text-[#667085] hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
                           title="Xóa phân khu"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
-                    <h3 className="font-bold text-xs text-slate-900">{zone.name}</h3>
-                    <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                    <h3 className="font-semibold text-xs text-[#17202E]">{zone.name}</h3>
+                    <p className="text-[11px] text-[#667085] leading-relaxed mt-0.5">
                       {zone.description}
                     </p>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                  <div className="space-y-1.5 pt-2 border-t border-[#E5E9F0]">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-slate-600">Đang đỗ / Sức chứa:</span>
-                      <span className="font-bold font-mono text-slate-900">
+                      <span className="font-medium text-[#667085]">Đang đỗ / Sức chứa:</span>
+                      <span className="font-semibold font-mono text-[#17202E]">
                         {totalCount} / {zone.capacity} ({percent}%)
                       </span>
                     </div>
 
-                    <div className="w-full bg-slate-100 rounded h-1.5 overflow-hidden border border-slate-200">
+                    <div className="w-full bg-[#F1F4F8] rounded h-1.5 overflow-hidden">
                       <div 
                         className={`h-1.5 rounded transition-all ${
                           percent > 90 ? 'bg-rose-500' : percent > 70 ? 'bg-amber-500' : 'bg-[#0A9444]'
@@ -2431,11 +2431,11 @@ export default function YardMonitorPage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] pt-1 text-slate-600 font-mono">
-                      <span>Xe: <strong className="text-slate-900">{zoneVehicles.length}</strong></span>
-                      <span>Cont: <strong className="text-slate-900">{zoneContainers.length}</strong></span>
+                    <div className="flex items-center justify-between text-[11px] pt-1 text-[#667085] font-mono">
+                      <span>Xe: <strong className="text-[#17202E]">{zoneVehicles.length}</strong></span>
+                      <span>Cont: <strong className="text-[#17202E]">{zoneContainers.length}</strong></span>
                       {zone.code === 'KHU_A_REEFER' && (
-                        <span>Cắm điện: <strong className="text-amber-600">{containers.filter(c => c.is_plugged).length}</strong></span>
+                        <span>Cắm điện: <strong className="text-[#B54708]">{containers.filter(c => c.is_plugged).length}</strong></span>
                       )}
                     </div>
                   </div>
@@ -2480,14 +2480,14 @@ export default function YardMonitorPage() {
             });
 
             return (
-              <div className="bg-white rounded-lg border border-slate-300 p-4 shadow-2xs space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div className="bg-white rounded-xl border border-[#E5E9F0] p-4 shadow-xs space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E5E9F0]">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-[#17202E] flex items-center gap-2">
                       <Zap className="w-4 h-4 text-amber-500 fill-current" />
                       <span>Quản lý & Giám sát Trụ điện Container Lạnh 380V (Khu A Reefer)</span>
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-[#667085] mt-0.5">
                       Dữ liệu cơ sở dữ liệu động. Bấm vào từng trụ để xem chi tiết, cắm điện nhanh, rút điện hoặc bật chế độ bảo trì/sửa chữa.
                     </p>
                   </div>
@@ -2495,7 +2495,7 @@ export default function YardMonitorPage() {
                     <button
                       type="button"
                       onClick={handleOpenCreateSocketModal}
-                      className="px-2.5 py-1 rounded bg-[#0A9444] hover:bg-[#087C3C] text-white font-bold text-xs shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
                       title="Thêm trụ điện mới vào danh mục bến bãi"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -2503,7 +2503,7 @@ export default function YardMonitorPage() {
                     </button>
                     <Link
                       href="/reefer"
-                      className="px-2.5 py-1 rounded bg-[#223873] hover:bg-[#1a2c5a] text-white font-bold text-xs transition-colors flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#223873] hover:bg-[#1a2c5a] text-white font-semibold text-xs transition-colors flex items-center gap-1"
                     >
                       <span>Mở Quản lý CCKB</span>
                       <ExternalLink className="w-3 h-3" />
@@ -2512,20 +2512,20 @@ export default function YardMonitorPage() {
                 </div>
 
                 {/* THỐNG KÊ THỜI GIAN THỰC & BỘ LỌC TRẠNG THÁI */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
                   <div className="flex items-center gap-2 flex-wrap text-xs">
-                    <span className="font-bold text-slate-700">Tổng: {totalSockets} trụ</span>
-                    <span className="text-slate-300">•</span>
-                    <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold flex items-center gap-1">
-                      <Zap className="w-3 h-3 text-amber-600 fill-current" />
+                    <span className="font-semibold text-[#344054]">Tổng: {totalSockets} trụ</span>
+                    <span className="text-[#D0D5DD]">•</span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] font-semibold flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-[#B54708] fill-current" />
                       <span>Đang cắm: {inUseCount}</span>
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span className="px-2 py-0.5 rounded-md bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-[#0A9444]" />
                       <span>Trống: {availCount}</span>
                     </span>
                     {maintCount > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-900 border border-rose-300 font-bold flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-semibold flex items-center gap-1">
                         <Wrench className="w-3 h-3 text-rose-600" />
                         <span>Bảo trì/Khóa: {maintCount}</span>
                       </span>
@@ -2547,10 +2547,10 @@ export default function YardMonitorPage() {
                           key={st}
                           type="button"
                           onClick={() => setSocketFilterStatus(st)}
-                          className={`px-2 py-1 rounded font-bold transition-colors cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
                             isActive
-                              ? 'bg-[#223873] text-white shadow-2xs'
-                              : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+                              ? 'bg-[#326DD8] text-white shadow-xs'
+                              : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
                           }`}
                         >
                           {labels[st]}
@@ -2962,50 +2962,50 @@ export default function YardMonitorPage() {
 
       {/* 5. MODAL ĐIỀU PHỐI CẬP NHẬT HÀNG / RỖNG (CHUẨN HÓA RPC V5: CHỈ HÀNG HOẶC RỖNG) */}
       {selectedCont && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-sm w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Phân hệ Điều phối bãi</span>
-                <h3 className="text-sm font-bold text-slate-900">Cập nhật HÀNG / RỖNG</h3>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider">Phân hệ Điều phối bãi</span>
+                <h3 className="text-base font-semibold text-[#17202E]">Cập nhật HÀNG / RỖNG</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedCont(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {updateError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200">
                 {updateError}
               </div>
             )}
 
-            <div className="bg-slate-50 p-2.5 rounded border border-slate-300 text-xs space-y-1">
-              <div>Container: <strong className="font-mono text-slate-900 text-sm">{selectedCont.container_no_current}</strong></div>
-              <div>Hiện tại: {renderCargoBadge(selectedCont.cargo_status)}</div>
+            <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] text-xs space-y-1.5">
+              <div className="text-[#667085]">Container: <strong className="font-mono text-[#17202E] text-sm">{selectedCont.container_no_current}</strong></div>
+              <div className="flex items-center gap-1.5 text-[#667085]">Hiện tại: {renderCargoBadge(selectedCont.cargo_status)}</div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700">
+              <label className="block text-xs font-semibold text-[#344054]">
                 Chọn trạng thái hàng hóa mới:
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { code: 'HANG', label: 'HÀNG (Có hàng)', color: 'bg-emerald-50 text-emerald-800 border-emerald-400 ring-1 ring-emerald-500' },
-                  { code: 'RONG', label: 'RỖNG (Vỏ rỗng)', color: 'bg-blue-50 text-blue-800 border-blue-400 ring-1 ring-blue-500' },
+                  { code: 'HANG', label: 'HÀNG (Có hàng)', color: 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5] ring-1 ring-[#0A9444]' },
+                  { code: 'RONG', label: 'RỖNG (Vỏ rỗng)', color: 'bg-[#EFF8FF] text-[#326DD8] border-[#B2DDFF] ring-1 ring-[#326DD8]' },
                 ].map((item) => (
                   <button
                     key={item.code}
                     type="button"
                     onClick={() => setNewCargoStatus(item.code as CargoStatusUpdate)}
-                    className={`p-2.5 rounded text-xs font-bold border transition-colors cursor-pointer flex flex-col items-center justify-center space-y-1 ${
+                    className={`p-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex flex-col items-center justify-center space-y-1 ${
                       newCargoStatus === item.code
-                        ? `${item.color} shadow-2xs`
-                        : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                        ? `${item.color} shadow-xs`
+                        : 'bg-white text-[#667085] border-[#E5E9F0] hover:bg-[#F8F9FB] hover:text-[#17202E]'
                     }`}
                   >
                     <span>{item.label}</span>
@@ -3014,11 +3014,11 @@ export default function YardMonitorPage() {
               </div>
             </div>
 
-            <div className="pt-1 flex space-x-2">
+            <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
               <button
                 type="button"
                 onClick={() => setSelectedCont(null)}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Hủy
               </button>
@@ -3027,7 +3027,7 @@ export default function YardMonitorPage() {
                 type="button"
                 onClick={handleSaveCargoStatus}
                 disabled={isUpdating}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
               >
                 {isUpdating ? 'Đang lưu...' : 'Xác nhận lưu'}
               </button>
@@ -3038,40 +3038,40 @@ export default function YardMonitorPage() {
 
       {/* 6. MODAL SỬA SỐ CONTAINER (RBAC V5: AN NINH / CCKB TRƯỞNG, KHÔNG THAY ĐỔI ID LƯỢT) */}
       {selectedContForCorrection && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Hiệu chỉnh số container</span>
-                <h3 className="text-sm font-bold text-slate-900">Sửa số Container</h3>
+                <span className="text-[10px] font-bold text-[#B54708] uppercase tracking-wider">Hiệu chỉnh số container</span>
+                <h3 className="text-base font-semibold text-[#17202E]">Sửa số Container</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedContForCorrection(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {correctionError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>{correctionError}</span>
               </div>
             )}
 
-            <div className="bg-amber-50/60 p-2.5 rounded text-xs space-y-1 border border-amber-300">
-              <div className="text-slate-600">Số container hiện tại:</div>
-              <div className="font-mono font-bold text-sm text-slate-900">{selectedContForCorrection.container_no_current}</div>
-              <p className="text-[11px] text-amber-800 pt-0.5">
+            <div className="bg-[#FFFAEB] p-3 rounded-xl text-xs space-y-1 border border-[#FEDF89]">
+              <div className="text-[#667085]">Số container hiện tại:</div>
+              <div className="font-mono font-bold text-sm text-[#17202E]">{selectedContForCorrection.container_no_current}</div>
+              <p className="text-[11px] text-[#B54708] pt-1 border-t border-[#FEDF89]/60">
                 Lưu ý: Thao tác sửa số sẽ được ghi nhận vào nhật ký kiểm toán và không làm thay đổi lịch sử lượt xe.
               </p>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Số container mới (Bắt buộc):
                 </label>
                 <input
@@ -3079,12 +3079,12 @@ export default function YardMonitorPage() {
                   value={newContainerNo}
                   onChange={(e) => setNewContainerNo(e.target.value.toUpperCase())}
                   placeholder="VD: TCLU1234567"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold uppercase focus:outline-none focus:border-amber-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#B54708]/20 focus:border-[#B54708] bg-white text-[#17202E]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Lý do sửa số (Bắt buộc tối thiểu 3 ký tự):
                 </label>
                 <textarea
@@ -3092,12 +3092,12 @@ export default function YardMonitorPage() {
                   onChange={(e) => setCorrectionReason(e.target.value)}
                   placeholder="VD: Nhân viên cổng gõ nhầm 1 ký tự, đã đối chiếu hình ảnh thực tế..."
                   rows={2}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-amber-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#B54708]/20 focus:border-[#B54708] bg-white text-[#17202E] resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Bằng chứng / Ghi chú đối chiếu (Tùy chọn):
                 </label>
                 <input
@@ -3105,16 +3105,16 @@ export default function YardMonitorPage() {
                   value={correctionEvidence}
                   onChange={(e) => setCorrectionEvidence(e.target.value)}
                   placeholder="VD: Biên bản số 01/BB-AN hoặc link ảnh hiện trường..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-amber-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#B54708]/20 focus:border-[#B54708] bg-white text-[#17202E]"
                 />
               </div>
             </div>
 
-            <div className="pt-1 flex space-x-2">
+            <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
               <button
                 type="button"
                 onClick={() => setSelectedContForCorrection(null)}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Hủy
               </button>
@@ -3123,7 +3123,7 @@ export default function YardMonitorPage() {
                 type="button"
                 onClick={handleSaveCorrection}
                 disabled={isCorrecting}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#B54708] hover:bg-[#93370D] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
               >
                 {isCorrecting ? 'Đang lưu...' : 'Xác nhận sửa số'}
               </button>
@@ -3134,51 +3134,53 @@ export default function YardMonitorPage() {
 
       {/* 7. MODAL XEM LỊCH SỬ SỬA SỐ CONTAINER */}
       {selectedContForHistory && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div className="flex items-center space-x-2">
-                <History className="w-4 h-4 text-[#223873]" />
+                <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] text-[#326DD8] flex items-center justify-center">
+                  <History className="w-4 h-4" />
+                </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Lịch sử đổi số container</h3>
-                  <span className="text-xs font-mono font-bold text-slate-500">{selectedContForHistory.container_no_current}</span>
+                  <h3 className="text-base font-semibold text-[#17202E]">Lịch sử đổi số container</h3>
+                  <span className="text-xs font-mono font-semibold text-[#326DD8]">{selectedContForHistory.container_no_current}</span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedContForHistory(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {isLoadingHistory ? (
-              <div className="py-6 text-center text-xs text-slate-500 font-bold">
+              <div className="py-6 text-center text-xs text-[#667085] font-semibold">
                 Đang tải lịch sử đổi số...
               </div>
             ) : historyChanges.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-400 font-semibold">
+              <div className="py-6 text-center text-xs text-[#98A2B3] font-medium">
                 Chưa có lần sửa số nào được ghi nhận cho container này.
               </div>
             ) : (
               <div className="max-h-72 overflow-y-auto space-y-2.5 pr-1">
                 {historyChanges.map((item, idx) => (
-                  <div key={item.id || idx} className="p-2.5 rounded bg-slate-50 border border-slate-300 text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <div key={item.id || idx} className="p-3 rounded-xl bg-[#F8F9FB] border border-[#E5E9F0] text-xs space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-[#667085]">
                       <span>{new Date(item.changed_at).toLocaleString('vi-VN')}</span>
-                      <span className="font-bold text-[#223873]">{item.changed_by_name || item.changed_by}</span>
+                      <span className="font-semibold text-[#326DD8]">{item.changed_by_name || item.changed_by}</span>
                     </div>
                     <div className="flex items-center space-x-2 font-mono font-bold text-xs">
                       <span className="text-rose-600 line-through">{item.old_number}</span>
-                      <span className="text-slate-400">→</span>
-                      <span className="text-emerald-700">{item.new_number}</span>
+                      <span className="text-[#98A2B3]">→</span>
+                      <span className="text-[#0A9444]">{item.new_number}</span>
                     </div>
-                    <div className="text-slate-700 text-xs pt-0.5">
+                    <div className="text-[#344054] text-xs pt-0.5">
                       <strong>Lý do:</strong> {item.reason}
                     </div>
                     {item.evidence_url && (
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-[#667085]">
                         <strong>Bằng chứng:</strong> {item.evidence_url}
                       </div>
                     )}
@@ -3187,11 +3189,11 @@ export default function YardMonitorPage() {
               </div>
             )}
 
-            <div className="pt-1">
+            <div className="pt-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
               <button
                 type="button"
                 onClick={() => setSelectedContForHistory(null)}
-                className="w-full py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Đóng
               </button>
@@ -3202,63 +3204,63 @@ export default function YardMonitorPage() {
 
       {/* 8. MODAL SỬA BIỂN SỐ XE (AN NINH / ĐIỀU PHỐI, BẢO TOÀN NGUYÊN VẸN ID LƯỢT XE VÀ TIỀN VÉ) */}
       {selectedVehForCorrection && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Hiệu chỉnh phương tiện</span>
-                <h3 className="text-sm font-bold text-slate-900">Sửa biển số xe</h3>
+                <span className="text-[10px] font-bold text-[#B54708] uppercase tracking-wider">Hiệu chỉnh phương tiện</span>
+                <h3 className="text-base font-semibold text-[#17202E]">Sửa biển số xe</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedVehForCorrection(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {plateCorrectionError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>{plateCorrectionError}</span>
               </div>
             )}
 
-            <div className="bg-amber-50/60 p-2.5 rounded text-xs space-y-1 border border-amber-300">
+            <div className="bg-[#FFFAEB] p-3 rounded-xl text-xs space-y-1.5 border border-[#FEDF89]">
               <div className="flex items-center justify-between">
-                <span className="text-slate-600">Biển số hiện tại:</span>
-                <span className="font-mono font-bold text-sm text-slate-900">{selectedVehForCorrection.license_plate}</span>
+                <span className="text-[#667085]">Biển số hiện tại:</span>
+                <span className="font-mono font-bold text-sm text-[#17202E] bg-white px-2 py-0.5 rounded border border-[#FEDF89]">{selectedVehForCorrection.license_plate}</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Loại xe:</span>
-                <span className="font-bold text-slate-700">{getVehicleTypeName(selectedVehForCorrection.vehicle_type_name || selectedVehForCorrection.vehicle_type)}</span>
+                <span className="text-[#667085]">Loại xe:</span>
+                <span className="font-semibold text-[#344054]">{getVehicleTypeName(selectedVehForCorrection.vehicle_type_name || selectedVehForCorrection.vehicle_type)}</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Tiền vé cổng:</span>
-                <span className="font-bold font-mono text-[#0A9444]">
+                <span className="text-[#667085]">Tiền vé cổng:</span>
+                <span className="font-semibold font-mono text-[#0A9444]">
                   {selectedVehForCorrection.ticket_amount !== null ? `${selectedVehForCorrection.ticket_amount.toLocaleString('vi-VN')} đ` : '0 đ'}
                 </span>
               </div>
-              <p className="text-[11px] text-amber-800 pt-0.5 border-t border-amber-200">
+              <p className="text-[11px] text-[#B54708] pt-1 border-t border-[#FEDF89]/60">
                 Lưu ý: Thao tác sửa biển số xe sẽ tự động ghi nhật ký kiểm toán, bảo toàn nguyên vẹn ID lượt xe và trạng thái sổ cái thu phí.
               </p>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-700">
+                  <label className="text-xs font-semibold text-[#344054]">
                     Biển số xe mới (Bắt buộc):
                   </label>
                   <div className="flex items-center space-x-1">
-                    <span className="text-[10px] text-slate-400">Gõ nhanh biển TQ:</span>
+                    <span className="text-[10px] text-[#667085]">Gõ nhanh biển TQ:</span>
                     {['桂', '粤', '云', '湘', '挂'].map((ch) => (
                       <button
                         key={ch}
                         type="button"
                         onClick={() => setNewLicensePlate((prev) => ch + prev)}
-                        className="px-1 py-0.5 text-[10px] bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 font-bold rounded border border-slate-300 cursor-pointer"
+                        className="px-1.5 py-0.5 text-[10px] bg-[#F8F9FB] hover:bg-[#FFFAEB] text-[#344054] hover:text-[#B54708] font-bold rounded-md border border-[#E5E9F0] hover:border-[#FEDF89] cursor-pointer transition-colors"
                         title={`Thêm ký tự ${ch}`}
                       >
                         +{ch}
@@ -3271,12 +3273,12 @@ export default function YardMonitorPage() {
                   value={newLicensePlate}
                   onChange={(e) => setNewLicensePlate(e.target.value.toUpperCase())}
                   placeholder="VD: 14C-123.45 hoặc 桂A-12345"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold uppercase focus:outline-none focus:border-amber-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#B54708]/20 focus:border-[#B54708] bg-white text-[#17202E]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Lý do sửa biển số xe (Bắt buộc tối thiểu 3 ký tự):
                 </label>
                 <textarea
@@ -3284,16 +3286,16 @@ export default function YardMonitorPage() {
                   onChange={(e) => setPlateCorrectionReason(e.target.value)}
                   placeholder="VD: Nhập nhầm ký tự khi đón tiếp tại cổng, đã đối chiếu lại hình ảnh đăng kiểm..."
                   rows={2}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-amber-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#B54708]/20 focus:border-[#B54708] bg-white text-[#17202E] resize-none"
                 />
               </div>
             </div>
 
-            <div className="pt-1 flex space-x-2">
+            <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
               <button
                 type="button"
                 onClick={() => setSelectedVehForCorrection(null)}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Hủy
               </button>
@@ -3302,7 +3304,7 @@ export default function YardMonitorPage() {
                 type="button"
                 onClick={handleSavePlateCorrection}
                 disabled={isCorrectingPlate}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#B54708] hover:bg-[#93370D] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
               >
                 {isCorrectingPlate ? 'Đang lưu...' : 'Xác nhận sửa biển'}
               </button>
@@ -3313,95 +3315,97 @@ export default function YardMonitorPage() {
 
       {/* 9. MODAL XEM NHẬT KÝ & LỊCH SỬ LƯỢT XE */}
       {selectedVehForHistory && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-lg w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div className="flex items-center space-x-2">
-                <History className="w-4 h-4 text-[#223873]" />
+                <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] text-[#326DD8] flex items-center justify-center">
+                  <History className="w-4 h-4" />
+                </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Nhật ký & Lịch sử lượt xe</h3>
-                  <span className="text-xs font-mono font-bold text-slate-500">{selectedVehForHistory.license_plate}</span>
+                  <h3 className="text-base font-semibold text-[#17202E]">Nhật ký & Lịch sử lượt xe</h3>
+                  <span className="text-xs font-mono font-semibold text-[#326DD8]">{selectedVehForHistory.license_plate}</span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedVehForHistory(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Thông tin tổng quan lượt xe */}
-            <div className="bg-slate-50 p-2.5 rounded text-xs grid grid-cols-2 gap-2 border border-slate-300 shrink-0">
+            <div className="bg-[#F8F9FB] p-3 rounded-xl text-xs grid grid-cols-2 gap-2 border border-[#E5E9F0] shrink-0">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Loại phương tiện:</span>
-                <span className="font-bold text-slate-800">{getVehicleTypeName(selectedVehForHistory.vehicle_type_name || selectedVehForHistory.vehicle_type)}</span>
+                <span className="text-[#667085] block text-[10px] uppercase font-bold">Loại phương tiện:</span>
+                <span className="font-semibold text-[#17202E]">{getVehicleTypeName(selectedVehForHistory.vehicle_type_name || selectedVehForHistory.vehicle_type)}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Mã vé cổng:</span>
-                <span className="font-mono font-bold text-slate-800">{selectedVehForHistory.ticket_code || '—'}</span>
+                <span className="text-[#667085] block text-[10px] uppercase font-bold">Mã vé cổng:</span>
+                <span className="font-mono font-bold text-[#17202E]">{selectedVehForHistory.ticket_code || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Tiền vé:</span>
+                <span className="text-[#667085] block text-[10px] uppercase font-bold">Tiền vé:</span>
                 <span className="font-mono font-bold text-[#0A9444]">
                   {selectedVehForHistory.ticket_amount !== null ? `${selectedVehForHistory.ticket_amount.toLocaleString('vi-VN')} đ` : '0 đ'}
                 </span>
-                <span className="ml-1 text-[10px]">
+                <span className="ml-1 text-[10px] text-[#667085]">
                   ({selectedVehForHistory.ticket_payment_status === 'PAID' ? 'Đã thu' : selectedVehForHistory.ticket_payment_status === 'EXEMPT' ? 'Miễn phí' : 'Chưa thu'})
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Tài xế / SĐT:</span>
-                <span className="font-bold text-slate-800">
+                <span className="text-[#667085] block text-[10px] uppercase font-bold">Tài xế / SĐT:</span>
+                <span className="font-semibold text-[#17202E]">
                   {selectedVehForHistory.driver_name || 'Chưa ghi tên'} {selectedVehForHistory.driver_phone ? `(${selectedVehForHistory.driver_phone})` : ''}
                 </span>
               </div>
             </div>
 
             {/* Dòng thời gian / Timeline các sự kiện */}
-            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
-              <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              <h4 className="text-[11px] font-semibold text-[#344054] uppercase tracking-wider flex items-center space-x-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#667085]" />
                 <span>Tiến trình vận hành lượt xe</span>
               </h4>
 
               {/* Sự kiện 1: Vào cổng */}
-              <div className="relative pl-4 pb-2.5 border-l-2 border-emerald-500 text-xs space-y-0.5">
-                <div className="absolute -left-[5px] top-0 w-2 h-2 rounded bg-emerald-600"></div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="font-bold text-emerald-800">1. Tiếp nhận vào bãi</span>
+              <div className="relative pl-4 pb-2.5 border-l-2 border-[#0A9444] text-xs space-y-0.5">
+                <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-[#0A9444]"></div>
+                <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                  <span className="font-semibold text-[#0A9444]">1. Tiếp nhận vào bãi</span>
                   <span className="font-mono">{new Date(selectedVehForHistory.entry_at).toLocaleString('vi-VN')}</span>
                 </div>
-                <div className="text-slate-700 text-[11px]">
+                <div className="text-[#344054] text-[11px]">
                   Nhân viên tiếp nhận: <strong>{selectedVehForHistory.entry_by_name || 'Nhân viên An ninh'}</strong>
                 </div>
               </div>
 
               {/* Sự kiện 2: Lịch sử đổi biển số xe nếu có */}
               {isLoadingVehHistory ? (
-                <div className="py-4 text-center text-xs text-slate-500 font-bold">
+                <div className="py-4 text-center text-xs text-[#667085] font-semibold">
                   Đang tải lịch sử đổi biển số...
                 </div>
               ) : vehHistoryChanges.length > 0 ? (
-                <div className="relative pl-4 pb-2.5 border-l-2 border-amber-500 text-xs space-y-2">
-                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded bg-amber-600"></div>
-                  <div className="font-bold text-amber-800 text-[11px]">
+                <div className="relative pl-4 pb-2.5 border-l-2 border-[#B54708] text-xs space-y-2">
+                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-[#B54708]"></div>
+                  <div className="font-semibold text-[#B54708] text-[11px]">
                     2. Lịch sử hiệu chỉnh biển số xe ({vehHistoryChanges.length} lần)
                   </div>
                   <div className="space-y-1.5">
                     {vehHistoryChanges.map((change, idx) => (
-                      <div key={change.id || idx} className="p-2 rounded bg-amber-50 border border-amber-300 text-xs space-y-0.5">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                      <div key={change.id || idx} className="p-2.5 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] text-xs space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-[#667085] font-mono">
                           <span>{new Date(change.changed_at).toLocaleString('vi-VN')}</span>
-                          <span className="font-bold text-slate-700">{change.changed_by_name || change.changed_by}</span>
+                          <span className="font-semibold text-[#344054]">{change.changed_by_name || change.changed_by}</span>
                         </div>
                         <div className="flex items-center space-x-2 font-mono font-bold text-xs">
                           <span className="text-rose-600 line-through">{change.old_plate}</span>
-                          <span className="text-slate-400">→</span>
-                          <span className="text-emerald-700">{change.new_plate}</span>
+                          <span className="text-[#98A2B3]">→</span>
+                          <span className="text-[#0A9444]">{change.new_plate}</span>
                         </div>
-                        <div className="text-slate-700 text-[11px]">
+                        <div className="text-[#344054] text-[11px]">
                           <strong>Lý do:</strong> {change.reason}
                         </div>
                       </div>
@@ -3409,9 +3413,9 @@ export default function YardMonitorPage() {
                   </div>
                 </div>
               ) : (
-                <div className="relative pl-4 pb-2.5 border-l-2 border-slate-300 text-xs space-y-1">
-                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded bg-slate-400"></div>
-                  <div className="text-slate-500 text-[11px]">
+                <div className="relative pl-4 pb-2.5 border-l-2 border-[#E5E9F0] text-xs space-y-1">
+                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-[#98A2B3]"></div>
+                  <div className="text-[#667085] text-[11px]">
                     Biển số xe giữ nguyên từ lúc vào bãi, chưa có lần chỉnh sửa nào.
                   </div>
                 </div>
@@ -3422,16 +3426,19 @@ export default function YardMonitorPage() {
                 const linkedCont = resolvedContainers.find(c => c.inbound_vehicle_visit_id === selectedVehForHistory.id);
                 if (!linkedCont) return null;
                 return (
-                  <div className="relative pl-4 pb-2.5 border-l-2 border-blue-500 text-xs space-y-0.5">
-                    <div className="absolute -left-[5px] top-0 w-2 h-2 rounded bg-blue-600"></div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="font-bold text-blue-800">3. Container đi kèm</span>
-                      <span className="font-mono font-bold text-blue-900 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-300">
+                  <div className="relative pl-4 pb-2.5 border-l-2 border-[#326DD8] text-xs space-y-0.5">
+                    <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-[#326DD8]"></div>
+                    <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                      <span className="font-semibold text-[#326DD8]">3. Container đi kèm</span>
+                      <span className="font-mono font-bold text-[#326DD8] bg-[#EFF8FF] px-1.5 py-0.2 rounded border border-[#B2DDFF]">
                         {linkedCont.container_no_current}
                       </span>
                     </div>
-                    <div className="text-slate-600 text-[11px]">
-                      Quy cách: {formatContainerSpec(linkedCont.container_size, linkedCont.container_type)} — Trạng thái: {renderCargoBadge(linkedCont.cargo_status)}
+                    <div className="text-[#667085] text-[11px] flex items-center gap-1.5">
+                      <span>Quy cách: {formatContainerSpec(linkedCont.container_size, linkedCont.container_type)}</span>
+                      <span>—</span>
+                      <span>Trạng thái:</span>
+                      {renderCargoBadge(linkedCont.cargo_status)}
                     </div>
                   </div>
                 );
@@ -3439,21 +3446,21 @@ export default function YardMonitorPage() {
 
               {/* Sự kiện 4: Ghi chú lượt xe nếu có */}
               {selectedVehForHistory.note && (
-                <div className="relative pl-4 pb-1 border-l-2 border-slate-300 text-xs space-y-1">
-                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded bg-slate-400"></div>
-                  <span className="font-bold text-slate-600 text-[11px]">Nhật ký ghi chú lượt xe:</span>
-                  <div className="p-2 rounded bg-slate-50 border border-slate-300 text-slate-700 text-xs leading-relaxed">
+                <div className="relative pl-4 pb-1 border-l-2 border-[#E5E9F0] text-xs space-y-1">
+                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-[#98A2B3]"></div>
+                  <span className="font-semibold text-[#344054] text-[11px]">Nhật ký ghi chú lượt xe:</span>
+                  <div className="p-2.5 rounded-xl bg-[#F8F9FB] border border-[#E5E9F0] text-[#344054] text-xs leading-relaxed">
                     {selectedVehForHistory.note}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="pt-1 border-t border-slate-200 shrink-0">
+            <div className="pt-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1 shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedVehForHistory(null)}
-                className="w-full py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Đóng
               </button>
@@ -3464,46 +3471,46 @@ export default function YardMonitorPage() {
 
       {/* MODAL GÁN PHÂN KHU & VỊ TRÍ ĐỖ BÃI */}
       {locationModalItem && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-[#223873] uppercase tracking-wider">Phân hệ Điều phối & Quản lý Bãi</span>
-                <h3 className="text-sm font-bold text-slate-900">Gán Phân khu & Vị trí đỗ</h3>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider">Phân hệ Điều phối & Quản lý Bãi</span>
+                <h3 className="text-base font-semibold text-[#17202E]">Gán Phân khu & Vị trí đỗ</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setLocationModalItem(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {locationError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>{locationError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 p-2.5 rounded text-xs space-y-0.5 border border-slate-300">
-              <div className="text-slate-500 font-medium">
+            <div className="bg-[#F8F9FB] p-3 rounded-xl text-xs space-y-1 border border-[#E5E9F0]">
+              <div className="text-[#667085] font-medium">
                 {locationModalItem.type === 'VEHICLE' ? 'Phương tiện:' : 'Container:'}
               </div>
-              <div className="font-mono font-bold text-sm text-slate-900">{locationModalItem.title}</div>
-              <div className="text-[11px] text-slate-600">{locationModalItem.subtitle}</div>
+              <div className="font-mono font-bold text-sm text-[#17202E]">{locationModalItem.title}</div>
+              <div className="text-[11px] text-[#667085]">{locationModalItem.subtitle}</div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Chọn Phân khu bãi (Bãi Sơn Cảng):
                 </label>
                 <select
                   value={selectedZoneCode}
                   onChange={(e) => setSelectedZoneCode(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                 >
                   {yardZones.map(z => (
                     <option key={z.code} value={z.code}>
@@ -3514,7 +3521,7 @@ export default function YardMonitorPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mã ô đỗ / Số trụ điện (Tùy chọn):
                 </label>
                 <input
@@ -3522,9 +3529,9 @@ export default function YardMonitorPage() {
                   value={inputSlotCode}
                   onChange={(e) => setInputSlotCode(e.target.value.toUpperCase())}
                   placeholder={selectedZoneCode === 'KHU_A_REEFER' ? 'VD: R01, R02... (Trụ 1-30)' : 'VD: B-01, C-12...'}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold uppercase focus:outline-none focus:border-[#0A9444] bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#667085] mt-1">
                   {selectedZoneCode === 'KHU_A_REEFER' 
                     ? 'Khu A có 30 trụ điện 380V đánh số từ R01 đến R30.'
                     : 'Nhập vị trí hàng / ô đỗ theo quy hoạch bãi để tài xế và an ninh dễ tìm kiếm.'}
@@ -3532,11 +3539,11 @@ export default function YardMonitorPage() {
               </div>
             </div>
 
-            <div className="pt-1 flex space-x-2">
+            <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
               <button
                 type="button"
                 onClick={() => setLocationModalItem(null)}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Hủy
               </button>
@@ -3544,7 +3551,7 @@ export default function YardMonitorPage() {
                 type="button"
                 onClick={handleSaveLocation}
                 disabled={isUpdatingLocation}
-                className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
               >
                 {isUpdatingLocation ? 'Đang lưu...' : 'Lưu vị trí'}
               </button>
@@ -3555,12 +3562,12 @@ export default function YardMonitorPage() {
 
       {/* MODAL TIẾP NHẬN CONTAINER LẺ (HẠ BÃI / THUÊ NGOÀI) */}
       {isSingleContModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-lg w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-[#223873] uppercase tracking-wider">Nghiệp vụ Tiếp nhận Bãi</span>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-1.5">
+                <span className="text-[10px] font-bold text-[#0A9444] uppercase tracking-wider">Nghiệp vụ Tiếp nhận Bãi</span>
+                <h3 className="text-base font-semibold text-[#17202E] flex items-center space-x-1.5 mt-0.5">
                   <ContainerIcon className="w-4 h-4 text-[#0A9444]" />
                   <span>Tiếp nhận Container lẻ (Hạ bãi)</span>
                 </h3>
@@ -3568,26 +3575,26 @@ export default function YardMonitorPage() {
               <button
                 type="button"
                 onClick={() => setIsSingleContModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {singleContError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>{singleContError}</span>
               </div>
             )}
 
-            <form onSubmit={handleCreateSingleContainer} className="space-y-3">
-              <div className="p-2.5 bg-blue-50/60 rounded border border-blue-200 text-xs text-blue-900 leading-relaxed">
+            <form onSubmit={handleCreateSingleContainer} className="space-y-3.5 text-xs">
+              <div className="p-3 bg-[#EFF8FF] rounded-xl border border-[#B2DDFF] text-xs text-[#1E40AF] leading-relaxed">
                 Áp dụng khi bãi tiếp nhận container riêng lẻ do <strong>cẩu tự hành hạ bãi</strong>, <strong>thuê container ngoài</strong> hoặc <strong>xe nâng nội bộ chuyển vào</strong> không theo luồng xe vận tải qua cổng.
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Số hiệu Container (4 chữ + 7 số) *
                 </label>
                 <input
@@ -3596,17 +3603,17 @@ export default function YardMonitorPage() {
                   value={singleContNo}
                   onChange={(e) => setSingleContNo(e.target.value.toUpperCase())}
                   placeholder="VD: TCLU1234567, RF40..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold uppercase text-blue-900 bg-white focus:outline-none focus:border-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Kích cỡ cont:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Kích cỡ cont:</label>
                   <select
                     value={singleContSize}
                     onChange={(e) => setSingleContSize(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                   >
                     <option value="40">40ft (Tiêu chuẩn)</option>
                     <option value="20">20ft (Ngắn)</option>
@@ -3614,11 +3621,11 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Loại vỏ cont:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Loại vỏ cont:</label>
                   <select
                     value={singleContType}
                     onChange={(e) => setSingleContType(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                   >
                     <option value="RF">RF — Container Lạnh</option>
                     <option value="DC">DC — Container Khô</option>
@@ -3630,11 +3637,11 @@ export default function YardMonitorPage() {
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Tình trạng Hàng ban đầu:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Tình trạng Hàng ban đầu:</label>
                   <select
                     value={singleCargoStatus}
                     onChange={(e) => setSingleCargoStatus(e.target.value as CargoStatus)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                   >
                     <option value="CHUA_XAC_DINH">Chưa xác định</option>
                     <option value="HANG">Có HÀNG</option>
@@ -3642,11 +3649,11 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Phân khu hạ bãi:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Phân khu hạ bãi:</label>
                   <select
                     value={singleYardZone}
                     onChange={(e) => setSingleYardZone(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
                   >
                     {yardZones.map(z => (
                       <option key={z.code} value={z.code}>{z.name}</option>
@@ -3657,59 +3664,59 @@ export default function YardMonitorPage() {
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Ô đỗ / Trụ điện (Tùy chọn):</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Ô đỗ / Trụ điện (Tùy chọn):</label>
                   <input
                     type="text"
                     value={singleSlotCode}
                     onChange={(e) => setSingleSlotCode(e.target.value.toUpperCase())}
                     placeholder="VD: R05, A-02..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold uppercase focus:outline-none focus:border-[#0A9444] bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Nguồn gốc / Phương tiện hạ bãi:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Nguồn gốc / Phương tiện hạ bãi:</label>
                   <input
                     type="text"
                     value={singleSource}
                     onChange={(e) => setSingleSource(e.target.value)}
                     placeholder="VD: Cẩu 14C-8888, Cont thuê ngoài..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-medium focus:outline-none focus:border-[#0A9444] bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-700 flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <label className="text-xs font-semibold text-[#344054] flex items-center space-x-1">
+                    <Clock className="w-3.5 h-3.5 text-[#667085]" />
                     <span>Thời gian vào bãi (hh:mm dd/MM/yyyy — Hỗ trợ Backdate):</span>
                   </label>
                   <div className="flex items-center space-x-1">
                     <button
                       type="button"
                       onClick={() => setQuickSingleInboundHoursAgo(0)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       Hiện tại
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickSingleInboundHoursAgo(2)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -2h
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickSingleInboundHoursAgo(6)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -6h
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickSingleInboundHoursAgo(24)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -1 ngày
                     </button>
@@ -3720,15 +3727,18 @@ export default function YardMonitorPage() {
                   value={singleInboundAtText}
                   onChange={(e) => setSingleInboundAtText(e.target.value)}
                   placeholder="hh:mm dd/MM/yyyy (Ví dụ: 20:45 12/10/2026)"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs font-mono font-bold bg-white focus:outline-none focus:border-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] text-[#17202E]"
                 />
                 {(() => {
                   const parsed = parseVietnameseDateTimeString(singleInboundAtText);
                   if (parsed) {
                     return (
-                      <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
-                        <span>⏱️ Thời điểm: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
-                        <span className="bg-white text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                      <div className="mt-1.5 p-2 bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] rounded-lg text-xs font-semibold flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 shrink-0" />
+                          <span>Thời điểm xác nhận: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                        </span>
+                        <span className="bg-white text-[#0A9444] px-1.5 py-0.5 rounded border border-[#A6F4C5] font-bold font-mono">
                           {toVietnameseDateTimeString(parsed)}
                         </span>
                       </div>
@@ -3736,7 +3746,7 @@ export default function YardMonitorPage() {
                   }
                   if (singleInboundAtText.trim()) {
                     return (
-                      <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
+                      <div className="mt-1.5 p-2 bg-rose-50 text-rose-800 border border-rose-300 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                         <span>Vui lòng nhập định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>20:45 12/10/2026</strong>)</span>
                       </div>
@@ -3747,28 +3757,28 @@ export default function YardMonitorPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Ghi chú tiếp nhận:</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú tiếp nhận:</label>
                 <input
                   type="text"
                   value={singleNotes}
                   onChange={(e) => setSingleNotes(e.target.value)}
                   placeholder="Ghi chú về đơn vị thuê cont hoặc biên bản hạ bãi..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#0A9444] bg-white"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
                 />
               </div>
 
-              <div className="pt-1 flex space-x-2">
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setIsSingleContModalOpen(false)}
-                  className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingSingleCont}
-                  className="flex-1 py-1.5 px-3 rounded text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {isSubmittingSingleCont ? 'Đang tiếp nhận...' : 'Xác nhận Tiếp nhận Cont'}
                 </button>
@@ -3780,104 +3790,104 @@ export default function YardMonitorPage() {
 
       {/* MODAL HIỆU CHỈNH LƯỢT XE (SEC_LEAD / SYS_ADMIN) */}
       {adjustingVehicle && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-lg w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
                     Lead An ninh & Admin
                   </span>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hiệu chỉnh Ca trực</span>
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider">Hiệu chỉnh Ca trực</span>
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-1.5 mt-0.5">
-                  <SlidersHorizontal className="w-4 h-4 text-indigo-600" />
-                  <span>Hiệu chỉnh Lượt xe: <span className="font-mono text-indigo-700">{adjustingVehicle.license_plate}</span></span>
+                <h3 className="text-base font-semibold text-[#17202E] flex items-center space-x-2 mt-1">
+                  <SlidersHorizontal className="w-4 h-4 text-[#326DD8]" />
+                  <span>Hiệu chỉnh Lượt xe: <span className="font-mono text-[#326DD8]">{adjustingVehicle.license_plate}</span></span>
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setAdjustingVehicle(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {adjError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
+              <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>{adjError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveAdjustment} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveAdjustment} className="space-y-3.5 text-xs">
               {/* Thẻ tóm tắt thông tin hiện tại */}
-              <div className="bg-slate-50 p-2.5 rounded border border-slate-300 space-y-1">
+              <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] space-y-1.5">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">Mã lượt xe: <strong className="font-mono text-slate-800">{adjustingVehicle.id.slice(0, 13)}...</strong></span>
-                  <span className="text-slate-500">Mã vé: <strong className="font-mono text-slate-800">{adjustingVehicle.ticket_code || 'Chưa cấp'}</strong></span>
+                  <span className="text-[#667085]">Mã lượt xe: <strong className="font-mono text-[#17202E]">{adjustingVehicle.id.slice(0, 13)}...</strong></span>
+                  <span className="text-[#667085]">Mã vé: <strong className="font-mono text-[#17202E]">{adjustingVehicle.ticket_code || 'Chưa cấp'}</strong></span>
                 </div>
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">Loại xe ban đầu: <strong>{getVehicleTypeName(adjustingVehicle.vehicle_type_name || adjustingVehicle.vehicle_type)}</strong></span>
-                  <span className="text-slate-500">Tiền vé hiện tại: <strong className="text-emerald-700 font-bold font-mono">{adjustingVehicle.ticket_amount ? adjustingVehicle.ticket_amount.toLocaleString('vi-VN') + ' đ' : '0 đ'}</strong></span>
+                  <span className="text-[#667085]">Loại xe ban đầu: <strong className="text-[#17202E]">{getVehicleTypeName(adjustingVehicle.vehicle_type_name || adjustingVehicle.vehicle_type)}</strong></span>
+                  <span className="text-[#667085]">Tiền vé hiện tại: <strong className="text-[#0A9444] font-bold font-mono">{adjustingVehicle.ticket_amount ? adjustingVehicle.ticket_amount.toLocaleString('vi-VN') + ' đ' : '0 đ'}</strong></span>
                 </div>
               </div>
 
               {/* Sửa Ngày giờ vào cổng (Backdate) chuẩn hh:mm dd/MM/yyyy */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-700 flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <label className="font-semibold text-[#344054] flex items-center space-x-1">
+                    <Clock className="w-3.5 h-3.5 text-[#667085]" />
                     <span>Thời gian xe vào cổng (hh:mm dd/MM/yyyy):</span>
                   </label>
                   <div className="flex items-center gap-1 flex-wrap justify-end">
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(0)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       Hiện tại
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(1)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -1h
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(2)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -2h
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(6)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -6h
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryHoursAgo(24)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                     >
                       -1 ngày
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryShift(6)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-[#223873] border border-blue-200 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#EFF8FF] hover:bg-[#D0E1FD] text-[#326DD8] border border-[#B2DDFF] cursor-pointer transition-colors"
                     >
                       Ca sáng 06:00
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuickAdjEntryShift(18)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#EFF8FF] hover:bg-[#D0E1FD] text-[#326DD8] border border-[#B2DDFF] cursor-pointer transition-colors"
                     >
                       Ca tối 18:00
                     </button>
@@ -3888,18 +3898,18 @@ export default function YardMonitorPage() {
                   value={adjEntryAtText}
                   onChange={(e) => setAdjEntryAtText(e.target.value)}
                   placeholder="hh:mm dd/MM/yyyy (Ví dụ: 20:45 12/10/2026)"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold text-sm text-[#223873] bg-white focus:outline-none focus:border-indigo-500 shadow-2xs"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] shadow-xs"
                 />
                 {(() => {
                   const parsed = parseVietnameseDateTimeString(adjEntryAtText);
                   if (parsed) {
                     return (
-                      <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
+                      <div className="mt-1.5 p-2 bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] rounded-lg text-xs font-semibold flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
-                          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>⏱️ Thời điểm xác nhận: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                          <Check className="w-3.5 h-3.5 text-[#0A9444] shrink-0" />
+                          <span>Thời điểm xác nhận: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
                         </span>
-                        <span className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                        <span className="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-[#A6F4C5] font-bold">
                           {toVietnameseDateTimeString(parsed)}
                         </span>
                       </div>
@@ -3907,15 +3917,15 @@ export default function YardMonitorPage() {
                   }
                   if (adjEntryAtText.trim()) {
                     return (
-                      <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
-                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <div className="mt-1.5 p-2 bg-rose-50 text-rose-800 border border-rose-300 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                         <span>Vui lòng nhập đúng định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>20:45 12/10/2026</strong>)</span>
                       </div>
                     );
                   }
                   return null;
                 })()}
-                <p className="text-[10px] text-slate-500 mt-0.5">
+                <p className="text-[11px] text-[#667085] mt-1">
                   Đồng bộ tự động thời gian tiếp nhận bãi cho các container chở theo xe.
                 </p>
               </div>
@@ -3923,13 +3933,13 @@ export default function YardMonitorPage() {
               {/* Sửa Loại xe & Tiền vé */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#344054] mb-1">
                     Sửa Loại phương tiện:
                   </label>
                   <select
                     value={adjVehicleType}
                     onChange={(e) => handleVehicleTypeChange(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-bold text-slate-800 bg-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-semibold text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8]"
                   >
                     {VEHICLE_TYPES_OPTIONS.map(vt => (
                       <option key={vt.code} value={vt.code}>{vt.name}</option>
@@ -3937,7 +3947,7 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#344054] mb-1">
                     Tiền vé cổng (VNĐ):
                   </label>
                   <input
@@ -3945,7 +3955,7 @@ export default function YardMonitorPage() {
                     step="10000"
                     value={adjTicketAmount}
                     onChange={(e) => setAdjTicketAmount(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold text-[#0A9444] bg-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-xs text-[#0A9444] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8]"
                   />
                 </div>
               </div>
@@ -3957,25 +3967,25 @@ export default function YardMonitorPage() {
                 if (attachedConts.length === 0 || !isNewNonContType) return null;
 
                 return (
-                  <div className="p-3 rounded bg-amber-50 border border-amber-300 space-y-2 animate-in fade-in">
+                  <div className="p-3 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] space-y-2 animate-in fade-in">
                     <div className="flex items-start gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-[#B54708] shrink-0 mt-0.5" />
                       <div>
-                        <strong className="text-amber-900 font-bold text-xs uppercase tracking-wide">
-                          XỬ LÝ CONTAINER ĐI KÈM KHI ĐỔI SANG XE KHÔNG CHỞ CONT
+                        <strong className="text-[#B54708] font-semibold text-xs uppercase tracking-wide">
+                          Xử lý Container đi kèm khi đổi sang xe không chở Cont
                         </strong>
-                        <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
-                          Xe này ban đầu gắn với container: <b className="font-mono text-slate-900">{attachedConts.map(c => c.container_no_current).join(', ')}</b>.
+                        <p className="text-[11px] text-[#B54708] leading-relaxed mt-0.5">
+                          Xe này ban đầu gắn với container: <b className="font-mono text-[#17202E]">{attachedConts.map(c => c.container_no_current).join(', ')}</b>.
                           Bạn đang đổi sang loại xe không chở container. Vui lòng chọn cách xử lý container này:
                         </p>
                       </div>
                     </div>
 
                     <div className="space-y-1.5 pt-1">
-                      <label className={`flex items-start gap-2 p-2 rounded border cursor-pointer transition-colors ${
+                      <label className={`flex items-start gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                         adjContainerAction === 'CANCEL'
-                          ? 'bg-rose-50 border-rose-300 text-rose-950 font-semibold shadow-2xs'
-                          : 'bg-white border-amber-200 text-slate-700 hover:bg-amber-50/50'
+                          ? 'bg-rose-50 border-rose-300 text-rose-950 font-semibold shadow-xs'
+                          : 'bg-white border-[#E5E9F0] text-[#344054] hover:bg-[#FFFAEB]/50'
                       }`}>
                         <input
                           type="radio"
@@ -3987,16 +3997,16 @@ export default function YardMonitorPage() {
                         />
                         <div className="flex-1 text-xs">
                           <span className="font-bold text-rose-700">1. HỦY BỎ LƯỢT CONTAINER (CANCELLED)</span>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
+                          <p className="text-[10px] text-[#667085] mt-0.5">
                             Áp dụng khi <strong>nhập nhầm</strong> lúc vào cổng; thực tế xe này không chở container nào và không có cont này trong bãi.
                           </p>
                         </div>
                       </label>
 
-                      <label className={`flex items-start gap-2 p-2 rounded border cursor-pointer transition-colors ${
+                      <label className={`flex items-start gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                         adjContainerAction === 'DETACH'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-semibold shadow-2xs'
-                          : 'bg-white border-amber-200 text-slate-700 hover:bg-amber-50/50'
+                          ? 'bg-[#ECFDF3] border-[#A6F4C5] text-[#0A9444] font-semibold shadow-xs'
+                          : 'bg-white border-[#E5E9F0] text-[#344054] hover:bg-[#FFFAEB]/50'
                       }`}>
                         <input
                           type="radio"
@@ -4004,11 +4014,11 @@ export default function YardMonitorPage() {
                           value="DETACH"
                           checked={adjContainerAction === 'DETACH'}
                           onChange={() => setAdjContainerAction('DETACH')}
-                          className="mt-0.5 text-[#0A9444] focus:ring-emerald-500 cursor-pointer"
+                          className="mt-0.5 text-[#0A9444] focus:ring-[#0A9444] cursor-pointer"
                         />
                         <div className="flex-1 text-xs">
                           <span className="font-bold text-[#0A9444]">2. TÁCH THÀNH CONTAINER TỒN BÃI ĐỘC LẬP (HẠ BÃI)</span>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
+                          <p className="text-[10px] text-[#667085] mt-0.5">
                             Áp dụng khi container <strong>đã hạ bãi lưu kho độc lập</strong> trong bãi, gỡ liên kết khỏi xe này để tiếp tục lưu bãi.
                           </p>
                         </div>
@@ -4021,13 +4031,13 @@ export default function YardMonitorPage() {
               {/* Trạng thái Lượt xe & Trạng thái thanh toán vé */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#344054] mb-1">
                     Trạng thái Lượt xe:
                   </label>
                   <select
                     value={adjStatus}
                     onChange={(e) => setAdjStatus(e.target.value as VehicleVisitStatus)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-bold text-slate-800 bg-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-semibold text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8]"
                   >
                     <option value="IN_YARD">Đang trong bãi (IN_YARD)</option>
                     <option value="EXITED">Đã xuất bãi (EXITED)</option>
@@ -4035,18 +4045,18 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#344054] mb-1">
                     Trạng thái thanh toán vé:
                   </label>
                   <select
                     value={adjTicketPaymentStatus}
                     onChange={(e) => setAdjTicketPaymentStatus(e.target.value as TicketPaymentStatus)}
-                    className={`w-full px-3 py-1.5 border rounded font-bold bg-white focus:outline-none focus:border-indigo-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg font-semibold text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] ${
                       adjTicketPaymentStatus === 'CANCELLED'
                         ? 'border-rose-400 text-rose-700 bg-rose-50/50'
                         : adjTicketPaymentStatus === 'PAID'
-                        ? 'border-emerald-400 text-emerald-800 bg-emerald-50/30'
-                        : 'border-slate-300 text-slate-800'
+                        ? 'border-[#A6F4C5] text-[#0A9444] bg-[#ECFDF3]/50'
+                        : 'border-[#D0D5DD] text-[#17202E]'
                     }`}
                   >
                     <option value="PAID">Đã thu (PAID)</option>
@@ -4059,18 +4069,18 @@ export default function YardMonitorPage() {
 
               {/* KHỐI CHỌN / SỬA HÌNH THỨC THU TIỀN VÉ KHI VÉ LÀ ĐÃ THU (PAID) */}
               {adjTicketPaymentStatus === 'PAID' && (
-                <div className="p-2.5 rounded bg-emerald-50 border border-emerald-300 space-y-2 animate-in fade-in">
+                <div className="p-3 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                      <span>💵 Hình thức / Phương thức thu tiền vé:</span>
-                      <span className="text-[10px] text-emerald-700 font-normal">(Bắt buộc chọn đúng thực tế đối soát ca)</span>
+                    <label className="text-xs font-semibold text-[#087C3C] flex items-center gap-1.5">
+                      <span>Hình thức / Phương thức thu tiền vé:</span>
+                      <span className="text-[10px] text-[#0A9444] font-normal">(Bắt buộc chọn đúng thực tế đối soát ca)</span>
                     </label>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border cursor-pointer font-semibold text-xs transition-colors ${
                       adjPaymentMethod === 'CASH'
-                        ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-emerald-50/50'
+                        ? 'bg-[#0A9444] text-white border-[#087C3C] shadow-xs'
+                        : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#ECFDF3]/50'
                     }`}>
                       <input
                         type="radio"
@@ -4082,10 +4092,10 @@ export default function YardMonitorPage() {
                       />
                       <span>💵 Tiền mặt</span>
                     </label>
-                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border cursor-pointer font-semibold text-xs transition-colors ${
                       adjPaymentMethod === 'TRANSFER'
-                        ? 'bg-[#223873] text-white border-blue-900 shadow-2xs ring-1 ring-blue-700'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-blue-50/50'
+                        ? 'bg-[#326DD8] text-white border-[#2557B4] shadow-xs'
+                        : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#EFF8FF]/50'
                     }`}>
                       <input
                         type="radio"
@@ -4097,10 +4107,10 @@ export default function YardMonitorPage() {
                       />
                       <span>🏦 Chuyển khoản</span>
                     </label>
-                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-md border cursor-pointer font-bold text-xs transition-colors ${
+                    <label className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border cursor-pointer font-semibold text-xs transition-colors ${
                       adjPaymentMethod === 'OTHER'
-                        ? 'bg-slate-700 text-white border-slate-800 shadow-2xs ring-1 ring-slate-600'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                        ? 'bg-[#344054] text-white border-[#1D2939] shadow-xs'
+                        : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-[#F8F9FB]'
                     }`}>
                       <input
                         type="radio"
@@ -4118,8 +4128,8 @@ export default function YardMonitorPage() {
 
               {/* Khối cảnh báo đặc biệt khi chọn Hủy vé / Hoàn tiền */}
               {adjTicketPaymentStatus === 'CANCELLED' && (
-                <div className="p-2.5 rounded bg-rose-50 border border-rose-300 space-y-1.5">
-                  <div className="flex items-center space-x-1.5 text-rose-800 font-bold">
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-300 space-y-1.5">
+                  <div className="flex items-center space-x-1.5 text-rose-800 font-semibold">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
                     <span>Nghiệp vụ Hủy vé cổng & Hoàn tiền tài xế</span>
                   </div>
@@ -4127,7 +4137,7 @@ export default function YardMonitorPage() {
                     Hệ thống sẽ cập nhật trạng thái khoản cước vé sang <strong>CANCELLED</strong> và trừ doanh thu ca trực tương ứng.
                   </p>
                   <div>
-                    <label className="block text-[11px] font-bold text-rose-900 mb-1">
+                    <label className="block text-[11px] font-semibold text-rose-900 mb-1">
                       Lý do hủy vé & hoàn tiền (Bắt buộc) *
                     </label>
                     <input
@@ -4136,7 +4146,7 @@ export default function YardMonitorPage() {
                       value={adjRefundReason}
                       onChange={(e) => setAdjRefundReason(e.target.value)}
                       placeholder="VD: Xe nhầm cổng/quay đầu, đã trả lại 250k tiền mặt cho lái xe..."
-                      className="w-full px-3 py-1.5 border border-rose-300 rounded text-xs bg-white text-rose-900 font-medium focus:outline-none focus:border-rose-500"
+                      className="w-full px-3 py-2 border border-rose-300 rounded-lg text-xs bg-white text-rose-900 font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -4146,14 +4156,14 @@ export default function YardMonitorPage() {
               {adjStatus === 'EXITED' && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">Thời gian xe xuất bãi (hh:mm dd/MM/yyyy):</label>
+                    <label className="font-semibold text-[#344054]">Thời gian xe xuất bãi (hh:mm dd/MM/yyyy):</label>
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => {
                           setAdjExitAtText(toVietnameseDateTimeString(new Date()));
                         }}
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                        className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                       >
                         Giờ hiện tại
                       </button>
@@ -4163,7 +4173,7 @@ export default function YardMonitorPage() {
                           const d = new Date(Date.now() - 3600 * 1000);
                           setAdjExitAtText(toVietnameseDateTimeString(d));
                         }}
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer"
+                        className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#F8F9FB] hover:bg-[#EFF8FF] text-[#344054] hover:text-[#326DD8] border border-[#E5E9F0] cursor-pointer transition-colors"
                       >
                         -1h
                       </button>
@@ -4174,18 +4184,18 @@ export default function YardMonitorPage() {
                     value={adjExitAtText}
                     onChange={(e) => setAdjExitAtText(e.target.value)}
                     placeholder="hh:mm dd/MM/yyyy (Ví dụ: 21:00 12/10/2026)"
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold text-sm text-[#223873] bg-white focus:outline-none focus:border-indigo-500 shadow-2xs"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] shadow-xs"
                   />
                   {(() => {
                     const parsed = parseVietnameseDateTimeString(adjExitAtText);
                     if (parsed) {
                       return (
-                        <div className="mt-1 p-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded text-xs font-semibold flex items-center justify-between">
+                        <div className="mt-1.5 p-2 bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] rounded-lg text-xs font-semibold flex items-center justify-between">
                           <span className="flex items-center gap-1.5">
-                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span>⏱️ Thời điểm xuất bãi: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
+                            <Check className="w-3.5 h-3.5 text-[#0A9444] shrink-0" />
+                            <span>Thời điểm xuất bãi: <strong>{describeVietnameseDateTime(parsed)}</strong></span>
                           </span>
-                          <span className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
+                          <span className="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-[#A6F4C5] font-bold">
                             {toVietnameseDateTimeString(parsed)}
                           </span>
                         </div>
@@ -4193,8 +4203,8 @@ export default function YardMonitorPage() {
                     }
                     if (adjExitAtText.trim()) {
                       return (
-                        <div className="mt-1 p-1.5 bg-rose-50 text-rose-800 border border-rose-300 rounded text-xs font-semibold flex items-center gap-1.5">
-                          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <div className="mt-1.5 p-2 bg-rose-50 text-rose-800 border border-rose-300 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                           <span>Vui lòng nhập đúng định dạng <strong>hh:mm dd/MM/yyyy</strong> (Ví dụ: <strong>21:00 12/10/2026</strong>)</span>
                         </div>
                       );
@@ -4207,32 +4217,32 @@ export default function YardMonitorPage() {
               {/* Sửa thông tin tài xế nếu ghi sai */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Họ tên tài xế:</label>
+                  <label className="block font-semibold text-[#344054] mb-1">Họ tên tài xế:</label>
                   <input
                     type="text"
                     value={adjDriverName}
                     onChange={(e) => setAdjDriverName(e.target.value)}
                     placeholder="VD: Nguyễn Văn A..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white text-[#17202E]"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Số điện thoại:</label>
+                  <label className="block font-semibold text-[#344054] mb-1">Số điện thoại:</label>
                   <input
                     type="text"
                     value={adjDriverPhone}
                     onChange={(e) => setAdjDriverPhone(e.target.value)}
                     placeholder="VD: 0912..."
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white text-[#17202E]"
                   />
                 </div>
               </div>
 
               {/* Lý do hiệu chỉnh (BẮT BUỘC) */}
               <div>
-                <label className="block font-bold text-slate-900 mb-1 flex items-center justify-between">
+                <label className="block font-semibold text-[#17202E] mb-1 flex items-center justify-between">
                   <span>Lý do hiệu chỉnh ca trực (Bắt buộc tối thiểu 5 ký tự) *</span>
-                  <span className="text-[10px] font-normal text-slate-400">Ghi vết kiểm toán</span>
+                  <span className="text-[10px] font-normal text-[#667085]">Ghi vết kiểm toán</span>
                 </label>
                 <textarea
                   required
@@ -4240,22 +4250,22 @@ export default function YardMonitorPage() {
                   value={adjReason}
                   onChange={(e) => setAdjReason(e.target.value)}
                   placeholder="VD: Nhập bù giờ vào ca đêm do sự cố mạng; Chỉnh lại loại xe đúng thực tế đối soát ca..."
-                  className="w-full px-3 py-1.5 border border-indigo-200 rounded text-xs bg-indigo-50/20 text-slate-900 font-medium focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs bg-[#F8F9FB] text-[#17202E] font-medium focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none"
                 />
               </div>
 
-              <div className="pt-1 flex space-x-2">
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setAdjustingVehicle(null)}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-lg font-semibold text-xs text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Đóng
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingAdj}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg font-semibold text-xs text-white bg-[#326DD8] hover:bg-[#2557B4] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {isSubmittingAdj ? 'Đang lưu...' : 'Xác nhận Hiệu chỉnh'}
                 </button>
@@ -4267,34 +4277,34 @@ export default function YardMonitorPage() {
 
       {/* MODAL THÊM / SỬA PHÂN KHU BÃI (YARD ZONE CRUD) */}
       {isZoneModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-4.5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold text-[#223873] uppercase tracking-wider">Cấu hình Quy hoạch Bến Bãi</span>
-                <h3 className="text-sm font-bold text-slate-900">
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider">Cấu hình Quy hoạch Bến Bãi</span>
+                <h3 className="text-sm font-bold text-[#17202E]">
                   {editingZoneCode ? `Sửa Phân khu: ${editingZoneCode}` : 'Thêm Phân khu bãi mới'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsZoneModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {zoneError && (
-              <div className="p-2 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center space-x-1.5 border border-rose-200">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <div className="p-3 rounded-xl bg-[#FEF3F2] text-[#B42318] text-xs font-medium flex items-center gap-2 border border-[#FECDCA]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D92D20]" />
                 <span>{zoneError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveZone} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveZone} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mã phân khu (Viết hoa không dấu, VD: KHU_E_STORAGE) *
                 </label>
                 <input
@@ -4304,12 +4314,12 @@ export default function YardMonitorPage() {
                   value={zoneFormCode}
                   onChange={(e) => setZoneFormCode(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
                   placeholder="VD: KHU_E_REEFER"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold uppercase bg-white focus:outline-none focus:border-[#0A9444] disabled:bg-slate-100 disabled:text-slate-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold uppercase text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] disabled:bg-[#F8F9FB] disabled:text-[#667085] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Tên phân khu chức năng *
                 </label>
                 <input
@@ -4318,12 +4328,12 @@ export default function YardMonitorPage() {
                   value={zoneFormName}
                   onChange={(e) => setZoneFormName(e.target.value)}
                   placeholder="VD: Khu E — Bãi Container Lạnh Mở Rộng"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-medium bg-white focus:outline-none focus:border-[#0A9444]"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
                   Mô tả chức năng & quy hoạch:
                 </label>
                 <textarea
@@ -4331,28 +4341,28 @@ export default function YardMonitorPage() {
                   value={zoneFormDesc}
                   onChange={(e) => setZoneFormDesc(e.target.value)}
                   placeholder="VD: Khu vực bố trí thêm 20 trụ cắm điện cho cont lạnh hoa quả..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded font-medium bg-white focus:outline-none focus:border-[#0A9444] resize-none"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Sức chứa tối đa (xe/cont):</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Sức chứa tối đa (xe/cont):</label>
                   <input
                     type="number"
                     min="1"
                     value={zoneFormCapacity}
                     onChange={(e) => setZoneFormCapacity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold bg-white focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Màu nhãn phân khu:</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Màu nhãn phân khu:</label>
                   <select
                     value={zoneFormBadge}
                     onChange={(e) => setZoneFormBadge(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-medium focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="bg-blue-100 text-blue-800 border-blue-300">Xanh dương (Blue)</option>
                     <option value="bg-amber-100 text-amber-800 border-amber-300">Vàng hổ phách (Amber)</option>
@@ -4364,31 +4374,31 @@ export default function YardMonitorPage() {
                 </div>
               </div>
 
-              <div className="p-2.5 rounded bg-amber-50 border border-amber-300 flex items-center space-x-2">
+              <div className="p-3 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] flex items-center gap-2.5">
                 <input
                   type="checkbox"
                   id="chkHasPower"
                   checked={zoneFormHasPower}
                   onChange={(e) => setZoneFormHasPower(e.target.checked)}
-                  className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500 cursor-pointer"
+                  className="w-4 h-4 text-[#B54708] rounded border-[#FEDF89] focus:ring-[#B54708] cursor-pointer"
                 />
-                <label htmlFor="chkHasPower" className="font-bold text-amber-900 cursor-pointer">
+                <label htmlFor="chkHasPower" className="text-xs font-semibold text-[#B54708] cursor-pointer">
                   Khu vực có trang bị giắc cắm / Trụ điện công nghiệp 380V (Reefer)
                 </label>
               </div>
 
-              <div className="pt-1 flex space-x-2">
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setIsZoneModalOpen(false)}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingZone}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingZone ? 'Đang lưu...' : (editingZoneCode ? 'Lưu thay đổi' : 'Tạo phân khu')}
                 </button>
@@ -4400,50 +4410,50 @@ export default function YardMonitorPage() {
 
       {/* MODAL 1: CHI TIẾT & THAO TÁC TRỤ ĐIỆN 380V (POWER SOCKET) */}
       {selectedSocket && !isEditSocketModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-lg w-full p-5 border border-slate-300 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded bg-amber-100 text-amber-800">
-                  <Zap className="w-5 h-5 fill-current text-amber-600" />
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]">
+                  <Zap className="w-5 h-5 fill-current text-[#D97706]" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-2">
                     <span>{selectedSocket.socket_name}</span>
-                    <span className="font-mono text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-300">
+                    <span className="font-mono text-xs bg-[#F8F9FB] text-[#344054] px-2 py-0.5 rounded-md border border-[#E5E9F0]">
                       {selectedSocket.socket_code}
                     </span>
                   </h3>
-                  <span className="text-xs text-slate-500">Phân khu: Khu A — Bãi Container Lạnh</span>
+                  <span className="text-[11px] text-[#667085]">Phân khu: Khu A — Bãi Container Lạnh</span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedSocket(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Trạng thái & Thông số kỹ thuật */}
-            <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-3 gap-2.5 text-xs bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0]">
               <div>
-                <span className="text-slate-500 block text-[10px]">Điện áp</span>
-                <span className="font-bold font-mono text-slate-900">{selectedSocket.voltage || '380V (3 pha)'}</span>
+                <span className="text-[#667085] block text-[10px] font-semibold uppercase">Điện áp</span>
+                <span className="font-bold font-mono text-[#17202E]">{selectedSocket.voltage || '380V (3 pha)'}</span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">Dòng điện</span>
-                <span className="font-bold font-mono text-slate-900">{selectedSocket.amperage || '32A'}</span>
+                <span className="text-[#667085] block text-[10px] font-semibold uppercase">Dòng điện</span>
+                <span className="font-bold font-mono text-[#17202E]">{selectedSocket.amperage || '32A'}</span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">Tình trạng</span>
-                <span className={`inline-block font-bold text-[11px] px-1.5 py-0.5 rounded ${
+                <span className="text-[#667085] block text-[10px] font-semibold uppercase">Tình trạng</span>
+                <span className={`inline-block font-bold text-[11px] px-2 py-0.5 rounded-full ${
                   selectedSocket.status === 'IN_USE'
-                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                    ? 'bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]'
                     : selectedSocket.status === 'MAINTENANCE' || selectedSocket.status === 'FAULTY'
-                    ? 'bg-rose-100 text-rose-900 border border-rose-300'
-                    : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                    ? 'bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]'
+                    : 'bg-[#ECFDF3] text-[#027A48] border border-[#ABEFC6]'
                 }`}>
                   {selectedSocket.status === 'IN_USE'
                     ? '⚡ Đang cắm điện'
@@ -4455,8 +4465,8 @@ export default function YardMonitorPage() {
             </div>
 
             {selectedSocket.notes && (
-              <div className="text-xs text-slate-600 bg-blue-50/60 p-2.5 rounded border border-blue-200">
-                <span className="font-bold text-blue-900">Ghi chú trụ: </span>
+              <div className="text-xs text-[#344054] bg-[#EFF8FF] p-3 rounded-xl border border-[#B2DDFF]">
+                <span className="font-bold text-[#175CD3]">Ghi chú trụ: </span>
                 <span>{selectedSocket.notes}</span>
               </div>
             )}
@@ -4465,25 +4475,25 @@ export default function YardMonitorPage() {
             {selectedSocket.status === 'IN_USE' && (() => {
               const cont = containers.find(c => c.is_plugged && (c.plug_socket_code === selectedSocket.socket_code || c.slot_code === selectedSocket.socket_code));
               return (
-                <div className="p-3 bg-amber-50 rounded-lg border border-amber-300 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-amber-950">
-                    <span className="flex items-center gap-1">
-                      <Zap className="w-4 h-4 text-amber-600 fill-current animate-pulse" />
+                <div className="p-3.5 bg-[#FFFAEB] rounded-xl border border-[#FEDF89] space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#7A2E0E]">
+                    <span className="flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-[#D97706] fill-current animate-pulse" />
                       <span>Thông tin Container đang cấp điện</span>
                     </span>
-                    <span className="font-mono bg-amber-200/80 px-2 py-0.5 rounded text-amber-900">
+                    <span className="font-mono bg-[#FEDF89] px-2 py-0.5 rounded text-[#7A2E0E]">
                       {cont?.container_no_current || 'Cont đang cắm'}
                     </span>
                   </div>
                   {cont && (
-                    <div className="grid grid-cols-2 gap-2 text-xs text-amber-900 pt-1 border-t border-amber-200">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-[#7A2E0E] pt-2 border-t border-[#FEDF89]/60">
                       <div>
-                        <span className="text-amber-800 text-[11px]">Xe chở vào: </span>
-                        <strong className="font-mono">{cont.inbound_license_plate || '—'}</strong>
+                        <span className="text-[#93370D] text-[11px] font-medium">Xe chở vào: </span>
+                        <strong className="font-mono font-bold">{cont.inbound_license_plate || '—'}</strong>
                       </div>
                       <div>
-                        <span className="text-amber-800 text-[11px]">Quy cách: </span>
-                        <strong>{formatContainerSpec(cont.container_size, cont.container_type)} ({cont.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'})</strong>
+                        <span className="text-[#93370D] text-[11px] font-medium">Quy cách: </span>
+                        <strong className="font-bold">{formatContainerSpec(cont.container_size, cont.container_type)} ({cont.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'})</strong>
                       </div>
                     </div>
                   )}
@@ -4491,7 +4501,7 @@ export default function YardMonitorPage() {
                     <button
                       type="button"
                       onClick={() => handleQuickUnplug(selectedSocket.socket_code)}
-                      className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shadow-2xs"
+                      className="flex-1 py-2 px-3 rounded-lg font-semibold text-white bg-[#D92D20] hover:bg-[#B42318] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       <PowerOff className="w-3.5 h-3.5" />
                       <span>⚡ Rút điện ngay (CCKB)</span>
@@ -4499,7 +4509,7 @@ export default function YardMonitorPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleMaintenance(selectedSocket.socket_code, selectedSocket.status)}
-                      className="py-1.5 px-3 rounded font-bold text-amber-900 bg-white border border-amber-300 hover:bg-amber-100 transition-colors cursor-pointer text-xs flex items-center gap-1"
+                      className="py-2 px-3 rounded-lg font-semibold text-[#B54708] bg-white border border-[#FEDF89] hover:bg-[#FFFAEB] transition-colors cursor-pointer text-xs flex items-center gap-1.5"
                     >
                       <Wrench className="w-3.5 h-3.5" />
                       <span>Báo sự cố</span>
@@ -4512,11 +4522,11 @@ export default function YardMonitorPage() {
             {/* TRƯỜNG HỢP TRỤ TRỐNG */}
             {selectedSocket.status === 'AVAILABLE' && (
               <div className="space-y-3 pt-1">
-                <div className="p-3 bg-amber-50 rounded-lg border border-amber-300 text-xs text-amber-900 flex items-start gap-2">
-                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-[#FFFAEB] rounded-xl border border-[#FEDF89] text-xs text-[#B54708] flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Quy trình cắm điện Container Lạnh</span>
-                    <p className="text-[11px] text-amber-800 mt-0.5">
+                    <p className="text-[11px] text-[#93370D] mt-0.5">
                       Theo quy trình chuẩn Sơn Cảng, thao tác lập phiếu cắm điện, quản lý nhiệt độ và tính cước được thực hiện tại phân hệ <b>Thương vụ CCKB</b>.
                     </p>
                   </div>
@@ -4525,7 +4535,7 @@ export default function YardMonitorPage() {
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <Link
                     href={`/reefer?socket=${encodeURIComponent(selectedSocket.socket_code)}`}
-                    className="py-2 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shadow-2xs col-span-2 text-center"
+                    className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
                     <span>👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
@@ -4534,18 +4544,18 @@ export default function YardMonitorPage() {
                   <button
                     type="button"
                     onClick={() => handleToggleMaintenance(selectedSocket.socket_code, selectedSocket.status)}
-                    className="py-1.5 px-2.5 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1"
+                    className="py-2 px-2.5 rounded-lg font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Wrench className="w-3.5 h-3.5 text-slate-500" />
+                    <Wrench className="w-3.5 h-3.5 text-[#667085]" />
                     <span>Đặt bảo trì</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleOpenEditSocketModal(selectedSocket)}
-                    className="py-1.5 px-2.5 rounded font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1"
+                    className="py-2 px-2.5 rounded-lg font-semibold text-[#326DD8] bg-[#EFF8FF] hover:bg-[#D1E9FF] border border-[#B2DDFF] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-[#223873]" />
+                    <Edit3 className="w-3.5 h-3.5 text-[#326DD8]" />
                     <span>Sửa thông tin</span>
                   </button>
                 </div>
@@ -4555,11 +4565,11 @@ export default function YardMonitorPage() {
             {/* TRƯỜNG HỢP BẢO TRÌ */}
             {(selectedSocket.status === 'MAINTENANCE' || selectedSocket.status === 'FAULTY') && (
               <div className="space-y-3 pt-1">
-                <div className="p-3 bg-rose-50 rounded-lg border border-rose-300 text-xs text-rose-900 flex items-start gap-2">
-                  <Wrench className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-[#FEF3F2] rounded-xl border border-[#FECDCA] text-xs text-[#B42318] flex items-start gap-2.5">
+                  <Wrench className="w-4 h-4 text-[#D92D20] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Trụ điện đang trong chế độ bảo trì / sửa chữa</span>
-                    <p className="text-[11px] text-rose-800 mt-0.5">
+                    <p className="text-[11px] text-[#912018] mt-0.5">
                       Lý do: {selectedSocket.notes || 'Đang bảo dưỡng aptomat/dây dẫn'}. Trụ tạm khóa không thể tiếp nhận cắm điện.
                     </p>
                   </div>
@@ -4569,7 +4579,7 @@ export default function YardMonitorPage() {
                   <button
                     type="button"
                     onClick={() => handleToggleMaintenance(selectedSocket.socket_code, selectedSocket.status)}
-                    className="py-2 px-3 rounded font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shadow-2xs col-span-2"
+                    className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2"
                   >
                     <Check className="w-4 h-4" />
                     <span>✓ Hoàn tất bảo trì & Mở lại trụ</span>
@@ -4578,7 +4588,7 @@ export default function YardMonitorPage() {
                   <button
                     type="button"
                     onClick={() => handleOpenEditSocketModal(selectedSocket)}
-                    className="py-1.5 px-2.5 rounded font-bold text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1"
+                    className="py-2 px-2.5 rounded-lg font-semibold text-[#326DD8] bg-[#EFF8FF] hover:bg-[#D1E9FF] border border-[#B2DDFF] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Sửa thông tin</span>
@@ -4587,20 +4597,20 @@ export default function YardMonitorPage() {
                   <button
                     type="button"
                     onClick={() => handleDeleteSocket(selectedSocket.socket_code)}
-                    className="py-1.5 px-2.5 rounded font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-300 transition-colors cursor-pointer text-xs flex items-center justify-center gap-1"
+                    className="py-2 px-2.5 rounded-lg font-semibold text-[#D92D20] bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <Trash2 className="w-3.5 h-3.5 text-[#D92D20]" />
                     <span>Xóa trụ</span>
                   </button>
                 </div>
               </div>
             )}
 
-            <div className="pt-2 border-t border-slate-200 flex justify-end">
+            <div className="pt-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1 flex justify-end">
               <button
                 type="button"
                 onClick={() => setSelectedSocket(null)}
-                className="py-1.5 px-4 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs transition-colors cursor-pointer"
+                className="py-2 px-4 rounded-lg font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] text-xs transition-colors cursor-pointer"
               >
                 Đóng
               </button>
@@ -4611,65 +4621,65 @@ export default function YardMonitorPage() {
 
       {/* MODAL 2: THÊM TRỤ ĐIỆN MỚI */}
       {isCreateSocketModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-emerald-100 text-emerald-800">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#ECFDF3] text-[#027A48] border border-[#ABEFC6]">
                   <Plus className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Thêm Trụ điện 380V mới</h3>
-                  <span className="text-[10px] text-slate-500">Mở rộng hạ tầng điện container lạnh</span>
+                  <h3 className="text-sm font-bold text-[#17202E]">Thêm Trụ điện 380V mới</h3>
+                  <span className="text-[10px] text-[#667085]">Mở rộng hạ tầng điện container lạnh</span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCreateSocketModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {socketActionError && (
-              <div className="p-2.5 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center gap-1.5 border border-rose-200">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <div className="p-3 rounded-xl bg-[#FEF3F2] text-[#B42318] text-xs font-medium flex items-center gap-2 border border-[#FECDCA]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D92D20]" />
                 <span>{socketActionError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveCreateSocket} className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2.5">
+            <form onSubmit={handleSaveCreateSocket} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Mã trụ (VD: R31) *</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã trụ (VD: R31) *</label>
                   <input
                     type="text"
                     required
                     value={socketFormCode}
                     onChange={(e) => setSocketFormCode(e.target.value.toUpperCase().replace(/\s+/g, ''))}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded font-mono font-bold focus:outline-none focus:border-[#0A9444] bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Tên hiển thị *</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Tên hiển thị *</label>
                   <input
                     type="text"
                     required
                     value={socketFormName}
                     onChange={(e) => setSocketFormName(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-[#0A9444] bg-white"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Điện áp</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Điện áp</label>
                   <select
                     value={socketFormVoltage}
                     onChange={(e) => setSocketFormVoltage(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-mono text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="380V">380V (3 pha công nghiệp)</option>
                     <option value="220V">220V (1 pha)</option>
@@ -4677,11 +4687,11 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Dòng điện</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Dòng điện</label>
                   <select
                     value={socketFormAmperage}
                     onChange={(e) => setSocketFormAmperage(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono focus:outline-none focus:border-[#0A9444]"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-mono text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="32A">32A (Phổ biến nhất)</option>
                     <option value="63A">63A (Tải nặng)</option>
@@ -4691,28 +4701,28 @@ export default function YardMonitorPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Ghi chú kỹ thuật</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú kỹ thuật</label>
                 <textarea
                   rows={2}
                   value={socketFormNotes}
                   onChange={(e) => setSocketFormNotes(e.target.value)}
                   placeholder="Vị trí cột điện, aptomat phụ trách, bảo vệ chống giật..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#0A9444] bg-white resize-none"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white resize-none transition-all"
                 />
               </div>
 
-              <div className="pt-2 flex space-x-2">
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setIsCreateSocketModalOpen(false)}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingSocket}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingSocket ? 'Đang tạo...' : 'Tạo Trụ điện'}
                 </button>
@@ -4724,53 +4734,53 @@ export default function YardMonitorPage() {
 
       {/* MODAL 3: SỬA TRỤ ĐIỆN */}
       {isEditSocketModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 border border-slate-300 shadow-xl space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-blue-100 text-[#223873]">
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Sửa Trụ điện: {socketFormCode}</h3>
-                  <span className="text-[10px] text-slate-500">Cập nhật thông số kỹ thuật</span>
+                  <h3 className="text-sm font-bold text-[#17202E]">Sửa Trụ điện: {socketFormCode}</h3>
+                  <span className="text-[10px] text-[#667085]">Cập nhật thông số kỹ thuật</span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsEditSocketModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {socketActionError && (
-              <div className="p-2.5 rounded bg-rose-50 text-rose-700 text-xs font-semibold flex items-center gap-1.5 border border-rose-200">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <div className="p-3 rounded-xl bg-[#FEF3F2] text-[#B42318] text-xs font-medium flex items-center gap-2 border border-[#FECDCA]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D92D20]" />
                 <span>{socketActionError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveEditSocket} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveEditSocket} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Tên hiển thị *</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Tên hiển thị *</label>
                 <input
                   type="text"
                   required
                   value={socketFormName}
                   onChange={(e) => setSocketFormName(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-[#223873] bg-white font-medium"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Điện áp</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Điện áp</label>
                   <select
                     value={socketFormVoltage}
                     onChange={(e) => setSocketFormVoltage(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono focus:outline-none"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-mono text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="380V">380V (3 pha)</option>
                     <option value="220V">220V (1 pha)</option>
@@ -4778,11 +4788,11 @@ export default function YardMonitorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Dòng điện</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Dòng điện</label>
                   <select
                     value={socketFormAmperage}
                     onChange={(e) => setSocketFormAmperage(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono focus:outline-none"
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-mono text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   >
                     <option value="32A">32A</option>
                     <option value="63A">63A</option>
@@ -4792,27 +4802,27 @@ export default function YardMonitorPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Ghi chú</label>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Ghi chú</label>
                 <textarea
                   rows={2}
                   value={socketFormNotes}
                   onChange={(e) => setSocketFormNotes(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none bg-white resize-none"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                 />
               </div>
 
-              <div className="pt-2 flex space-x-2">
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setIsEditSocketModalOpen(false)}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingSocket}
-                  className="flex-1 py-1.5 px-3 rounded font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingSocket ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </button>

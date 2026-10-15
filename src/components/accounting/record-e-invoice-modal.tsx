@@ -70,64 +70,65 @@ export function RecordEInvoiceModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-800 to-teal-800 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <FileCheck className="w-5 h-5 text-emerald-300" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold">Ghi Nhận Số Hóa Đơn Điện Tử</h2>
-              <p className="text-xs text-emerald-200">Cập nhật sau khi xuất thành công trên hệ thống HĐĐT (VNPT/Viettel/MISA)</p>
-            </div>
+        <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+          <div>
+            <span className="text-[10px] font-bold text-[#0A9444] uppercase tracking-wider block">
+              Kế toán Hóa đơn
+            </span>
+            <h2 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+              <FileCheck className="w-4 h-4 text-[#0A9444]" />
+              Ghi Nhận Số Hóa Đơn Điện Tử
+            </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-emerald-200 hover:text-white hover:bg-white/10 rounded-lg transition"
+            className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-rose-800 text-xs">
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
+          <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] rounded-lg flex items-start gap-2.5 text-[#B42318] text-xs font-semibold">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-[#D92D20]" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           {/* Thông tin hồ sơ hóa đơn */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5">
+          <div className="bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl p-3.5 space-y-1.5">
             <div className="flex justify-between">
-              <span className="text-slate-500 font-medium">Mã đề xuất:</span>
-              <span className="font-mono font-bold text-slate-800">{invoice.invoice_code}</span>
+              <span className="text-[#667085] font-medium">Mã đề xuất:</span>
+              <span className="font-mono font-bold text-[#17202E]">{invoice.invoice_code}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500 font-medium">Người mua hàng:</span>
-              <span className="font-semibold text-slate-800">{invoice.buyer_name}</span>
+              <span className="text-[#667085] font-medium">Người mua hàng:</span>
+              <span className="font-semibold text-[#17202E]">{invoice.buyer_name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500 font-medium">Mã số thuế / CCCD:</span>
-              <span className="font-mono font-bold text-blue-900">
+              <span className="text-[#667085] font-medium">Mã số thuế / CCCD:</span>
+              <span className="font-mono font-bold text-[#326DD8]">
                 {invoice.tax_code || invoice.id_card_no || '---'}
               </span>
             </div>
-            <div className="flex justify-between border-t border-slate-200 pt-1.5 mt-1">
-              <span className="text-slate-600 font-semibold">Tổng tiền thanh toán:</span>
-              <span className="font-mono font-black text-blue-700 text-sm">
+            <div className="flex justify-between border-t border-[#E5E9F0] pt-1.5 mt-1">
+              <span className="text-[#344054] font-semibold">Tổng tiền thanh toán:</span>
+              <span className="font-mono font-bold text-[#0A9444] text-sm">
                 {formatCurrency(invoice.total_amount)}
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">
-              Số Hóa Đơn Điện Tử (Kèm Ký hiệu nếu có) *
+            <label className="block text-xs font-semibold text-[#344054] mb-1">
+              Số Hóa Đơn Điện Tử (Kèm Ký hiệu nếu có) <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -136,27 +137,27 @@ export function RecordEInvoiceModal({
               placeholder="Vd: 0004521 (Ký hiệu: 1C26TQM)"
               value={eInvoiceNo}
               onChange={e => setEInvoiceNo(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm font-mono font-bold text-emerald-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="w-full px-3 py-2 bg-white border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
             />
-            <span className="text-[11px] text-slate-500 mt-0.5 block">
+            <span className="text-[11px] text-[#667085] mt-1 block">
               Nhập số hóa đơn chính thức trả về từ phần mềm hóa đơn điện tử
             </span>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-[#344054] mb-1">
               Ngày giờ ký phát hành
             </label>
             <input
               type="datetime-local"
               value={issuedAt}
               onChange={e => setIssuedAt(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-white border border-[#D0D5DD] rounded-lg text-xs font-mono text-[#17202E] outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-[#344054] mb-1">
               Ghi chú thêm (Tùy chọn)
             </label>
             <input
@@ -164,33 +165,33 @@ export function RecordEInvoiceModal({
               placeholder="Vd: Đã gửi email cho khách hàng..."
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-white border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-slate-600 hover:text-slate-800 font-semibold rounded-lg hover:bg-slate-100 transition"
+              className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !eInvoiceNo.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg shadow-md transition disabled:opacity-50"
+              className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang ghi nhận...
+                  <span>Đang ghi nhận...</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Xác Nhận Đã Xuất HĐĐT
+                  <span>Xác Nhận Đã Xuất HĐĐT</span>
                 </>
               )}
             </button>

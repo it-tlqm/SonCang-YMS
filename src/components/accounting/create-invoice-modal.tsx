@@ -198,37 +198,38 @@ export function CreateInvoiceModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+      <div className="bg-white rounded-2xl max-w-4xl w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-900 to-indigo-900 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <Receipt className="w-5 h-5 text-blue-300" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold">Lập Đề Nghị Xuất Hóa Đơn GTGT Bến Bãi</h2>
-              <p className="text-xs text-blue-200">Hỗ trợ Doanh nghiệp (MST) & Cá nhân / Lái xe (CCCD 12 số)</p>
-            </div>
+        <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+          <div>
+            <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+              Kế toán Hóa đơn & Thuế
+            </span>
+            <h2 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+              <Receipt className="w-4 h-4 text-[#326DD8]" />
+              Lập Đề Nghị Xuất Hóa Đơn GTGT Bến Bãi
+            </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-blue-200 hover:text-white hover:bg-white/10 rounded-lg transition"
+            className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mx-6 mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-xs">
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
+          <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] rounded-lg flex items-start gap-2.5 text-[#B42318] text-xs font-semibold">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-[#D92D20]" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* Bước 1: Chọn khoản thu gom vào hóa đơn */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -568,29 +569,29 @@ export function CreateInvoiceModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+              className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={isSubmitting || selectedChargeIds.size === 0}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded-lg shadow-md hover:shadow transition disabled:opacity-50"
+              className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang lập hóa đơn...
+                  <span>Đang lập hóa đơn...</span>
                 </>
               ) : (
                 <>
                   <FileText className="w-4 h-4" />
-                  Lưu Đề Nghị & In Bảng Kê (Mẫu 01:BPA)
+                  <span>Lưu Đề Nghị & In Bảng Kê (Mẫu 01:BPA)</span>
                 </>
               )}
             </button>

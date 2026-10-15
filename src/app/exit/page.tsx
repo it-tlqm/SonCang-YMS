@@ -1515,22 +1515,22 @@ export default function ExitClearancePage() {
       {/* MODAL HỢP NHẤT: AN NINH KIỂM SOÁT XUẤT BÃI PHƯƠNG TIỆN & CONTAINER       */}
       {/* ========================================================================= */}
       {showUnifiedExitModal && selectedVehForExit && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-3.5 my-auto border border-slate-300">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl space-y-4 my-auto border border-[#E5E9F0]">
             {/* HEADER GỘP THÔNG TIN XE CÔNG THÁI HỌC CAO */}
-            <div className="flex items-start justify-between border-b border-slate-200 pb-2.5">
+            <div className="flex items-start justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="text-base font-bold text-[#17202E] flex items-center gap-1.5">
                     <LogOut className="w-4 h-4 text-[#0A9444]" />
                     Xuất bãi phương tiện
                   </span>
-                  <span className="font-mono font-bold text-base bg-[#223873] text-white px-2 py-0.5 rounded shadow-2xs">
+                  <span className="font-mono font-bold text-base bg-[#326DD8] text-white px-2.5 py-0.5 rounded-lg shadow-xs">
                     {selectedVehForExit.license_plate || 'Không biển'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1 flex-wrap">
-                  <span className="font-medium text-slate-700">
+                <div className="flex items-center gap-2 text-[11px] text-[#667085] mt-1 flex-wrap">
+                  <span className="font-medium text-[#344054]">
                     {getVehicleTypeName(selectedVehForExit.vehicle_type_name || selectedVehForExit.vehicle_type)}
                   </span>
                   <span>•</span>
@@ -1538,12 +1538,12 @@ export default function ExitClearancePage() {
                     Vào: {new Date(selectedVehForExit.entry_at).toLocaleTimeString('vi-VN')} {new Date(selectedVehForExit.entry_at).toLocaleDateString('vi-VN')}
                   </span>
                   <span>•</span>
-                  <span className={`px-1.5 py-0.2 rounded font-bold text-[10px] border ${
+                  <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] border ${
                     selectedVehForExit.ticket_payment_status === 'PAID' 
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                      ? 'bg-[#ECFDF3] text-[#027A48] border-[#ABEFC6]' 
                       : selectedVehForExit.ticket_payment_status === 'EXEMPT' 
-                      ? 'bg-blue-50 text-blue-800 border-blue-300' 
-                      : 'bg-amber-50 text-amber-800 border-amber-300'
+                      ? 'bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]' 
+                      : 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
                   }`}>
                     Vé cổng: {selectedVehForExit.ticket_payment_status === 'PAID' ? 'Đã thu' : selectedVehForExit.ticket_payment_status === 'EXEMPT' ? 'Miễn phí' : 'Chưa thu'}
                   </span>
@@ -1552,20 +1552,20 @@ export default function ExitClearancePage() {
               <button 
                 type="button"
                 onClick={() => setShowUnifiedExitModal(false)} 
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer p-0.5"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {exitError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-800 rounded text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                 <span>{exitError}</span>
               </div>
             )}
 
-            <form onSubmit={handleConfirmUnifiedExit} className="space-y-3">
+            <form onSubmit={handleConfirmUnifiedExit} className="space-y-3.5 text-xs">
               {/* CHECKLIST 4 ĐIỀU KIỆN XUẤT BÃI (DẠNG 4 PILLS NGANG SIÊU GỌN) */}
               {(() => {
                 const modalTicketOk = selectedVehForExit.ticket_payment_status === 'PAID' || selectedVehForExit.ticket_payment_status === 'EXEMPT' || (collectEntryTicketAtExit && selectedVehForExit.ticket_payment_status === 'UNPAID');
@@ -1955,21 +1955,21 @@ export default function ExitClearancePage() {
               </div>
 
               {/* NÚT THAO TÁC */}
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowUnifiedExitModal(false)}
                   disabled={isSubmittingExit}
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer border border-slate-300"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
-                  Hủy
+                  Đóng
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingExit || (hasTrailingContainer && (!selectedTrailingContId || isTrailingContPlugged))}
-                  className={`px-4 py-1.5 text-xs font-bold text-white rounded shadow-2xs transition-colors flex items-center gap-1.5 ${
+                  className={`py-2 px-4 text-xs font-semibold text-white rounded-lg shadow-xs transition-colors flex items-center gap-1.5 ${
                     isSubmittingExit || (hasTrailingContainer && (!selectedTrailingContId || isTrailingContPlugged))
-                      ? 'bg-slate-400 cursor-not-allowed opacity-60'
+                      ? 'bg-[#D0D5DD] cursor-not-allowed opacity-60'
                       : 'bg-[#0A9444] hover:bg-[#087C3C] cursor-pointer'
                   }`}
                 >
@@ -1992,29 +1992,37 @@ export default function ExitClearancePage() {
       {/* MODAL CCKB DUYỆT CLEARANCE                                                */}
       {/* ========================================================================= */}
       {showClearanceModal && selectedCont && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 shadow-xl space-y-3.5 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-300 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-[#223873]" />
-                CCKB Duyệt Điều Kiện Xuất Bãi
-              </h3>
-              <button onClick={() => setShowClearanceModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">
-                ✕
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-[#E5E9F0]">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <FileCheck className="w-5 h-5 text-[#326DD8]" />
+                  Duyệt Điều Kiện Xuất Bãi
+                </h3>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowClearanceModal(false)} 
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {clearanceError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-800 rounded text-xs font-semibold">
-                {clearanceError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{clearanceError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 border border-slate-200 p-3 rounded space-y-1.5 text-xs">
-              <p><span className="text-slate-500">Container:</span> <span className="font-mono font-bold text-slate-900">{selectedCont.container_no_current}</span></p>
-              <p><span className="text-slate-500">Quy cách vỏ:</span> <span className="font-semibold">{selectedCont.container_type || 'RF'}</span></p>
-              <p><span className="text-slate-500">Trạng thái hàng:</span> <span className="font-semibold">{selectedCont.cargo_status === 'HANG' ? 'Có hàng' : 'Vỏ rỗng'}</span></p>
-              <p><span className="text-slate-500">Thời gian vào bãi:</span> <span className="text-slate-700 font-mono">{new Date(selectedCont.inbound_at).toLocaleString('vi-VN')}</span></p>
+            <div className="bg-[#F8F9FB] border border-[#E5E9F0] p-3.5 rounded-xl space-y-1.5 text-xs">
+              <p><span className="text-[#667085]">Container:</span> <span className="font-mono font-bold text-[#326DD8]">{selectedCont.container_no_current}</span></p>
+              <p><span className="text-[#667085]">Quy cách vỏ:</span> <span className="font-semibold text-[#17202E]">{selectedCont.container_type || 'RF'}</span></p>
+              <p><span className="text-[#667085]">Trạng thái hàng:</span> <span className="font-semibold text-[#17202E]">{selectedCont.cargo_status === 'HANG' ? 'Có hàng' : 'Vỏ rỗng'}</span></p>
+              <p><span className="text-[#667085]">Thời gian vào bãi:</span> <span className="text-[#344054] font-mono">{new Date(selectedCont.inbound_at).toLocaleString('vi-VN')}</span></p>
             </div>
 
             {/* Chi tiết cước cắm điện container */}
@@ -2026,7 +2034,7 @@ export default function ExitClearancePage() {
 
               if (!hasReefer) {
                 return (
-                  <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                  <div className="p-3 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl text-xs text-[#667085]">
                     ℹ️ Container không có phát sinh cắm điện trong bãi.
                   </div>
                 );
@@ -2034,13 +2042,13 @@ export default function ExitClearancePage() {
 
               if (unpaidPower === 0) {
                 return (
-                  <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded text-xs text-emerald-900 space-y-1">
+                  <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl text-xs text-[#027A48] space-y-1">
                     <div className="font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
                       <span>Cước điện: Đã thanh toán đầy đủ (0 đ nợ)</span>
                     </div>
                     {paidPower > 0 && (
-                      <div className="text-[11px] text-emerald-800">
+                      <div className="text-[11px] text-[#027A48]">
                         Tổng tiền điện đã thu: <strong className="font-mono">{paidPower.toLocaleString('vi-VN')} đ</strong>. Đủ điều kiện duyệt xuất bãi bình thường.
                       </div>
                     )}
@@ -2049,64 +2057,64 @@ export default function ExitClearancePage() {
               }
 
               return (
-                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded text-xs text-rose-900 space-y-1.5">
-                  <div className="font-bold flex items-center gap-1.5 text-rose-800">
-                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                <div className="p-3.5 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl text-xs text-[#B42318] space-y-1.5">
+                  <div className="font-bold flex items-center gap-1.5 text-[#B42318]">
+                    <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
                     <span>Container CHƯA thanh toán tiền điện!</span>
                   </div>
-                  <div className="text-[11px] text-rose-800">
-                    Tiền cắm điện còn nợ: <strong className="font-mono text-sm text-rose-950 font-bold">{unpaidPower.toLocaleString('vi-VN')} đ</strong>
+                  <div className="text-[11px] text-[#B42318]">
+                    Tiền cắm điện còn nợ: <strong className="font-mono text-sm text-[#912018] font-bold">{unpaidPower.toLocaleString('vi-VN')} đ</strong>
                   </div>
-                  <p className="text-[10px] text-rose-700 italic leading-relaxed">
+                  <p className="text-[10px] text-[#D92D20] italic leading-relaxed">
                     * Bắt buộc: Để cho xe kéo cont này ra bãi khi chưa thanh toán cước điện, CCKB phải tích chọn &quot;Phê duyệt cho phép bảo lãnh công nợ&quot; bên dưới và ghi rõ người bảo lãnh.
                   </p>
                 </div>
               );
             })()}
 
-            <form onSubmit={handleConfirmClearance} className="space-y-3.5">
-              <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-1.5">
-                <label className="flex items-center space-x-2 text-xs font-bold text-amber-950 cursor-pointer">
+            <form onSubmit={handleConfirmClearance} className="space-y-3.5 text-xs">
+              <div className="p-3.5 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl space-y-1.5">
+                <label className="flex items-center space-x-2 text-xs font-semibold text-[#7A2E0E] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={allowDebt}
                     onChange={(e) => setAllowDebt(e.target.checked)}
-                    className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                    className="w-4 h-4 text-[#D97706] rounded border-[#FEDF89] focus:ring-[#D97706]"
                   />
                   <span>Phê duyệt cho phép bảo lãnh công nợ (Xuất bãi nợ cước)</span>
                 </label>
                 {allowDebt && (
-                  <p className="text-[11px] text-amber-800 italic">
+                  <p className="text-[11px] text-[#93370D] italic">
                     * Yêu cầu nhập lý do cụ thể và thông tin người bảo lãnh để kiểm toán tài chính.
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Ghi chú phê duyệt CCKB {allowDebt && <span className="text-rose-500">*</span>}
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Ghi chú phê duyệt CCKB {allowDebt && <span className="text-[#D92D20]">*</span>}
                 </label>
                 <textarea
                   value={clearanceNotes}
                   onChange={(e) => setClearanceNotes(e.target.value)}
                   placeholder={allowDebt ? "Bắt buộc nhập lý do bảo lãnh nợ, văn bản đồng ý..." : "Ghi chú thêm về điều kiện xuất bãi..."}
                   rows={2}
-                  className="w-full p-2 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-slate-500"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
                   required={allowDebt}
                 />
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setShowClearanceModal(false)}
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer border border-slate-300"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded shadow-2xs cursor-pointer"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs cursor-pointer transition-colors"
                 >
                   Xác nhận duyệt
                 </button>
@@ -2120,10 +2128,10 @@ export default function ExitClearancePage() {
       {/* MODAL IN BIÊN LAI THU PHÍ LƯU BÃI CONTAINER (MẪU 02-PLB/SC)             */}
       {/* ========================================================================= */}
       {exitReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative border border-slate-300 print:p-0 print:shadow-none print:max-w-full">
-            <div className="flex items-center justify-between border-b border-slate-300 pb-3 print:hidden">
-              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-5 relative border border-[#E5E9F0] print:p-0 print:shadow-none print:max-w-full print:border-none">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
+              <span className="text-xs font-bold text-[#17202E] flex items-center gap-1.5 uppercase tracking-wider">
                 <Printer className="w-4 h-4 text-[#0A9444]" />
                 Biên lai thu Phí lưu bãi Container tại cổng ra
               </span>
@@ -2131,7 +2139,7 @@ export default function ExitClearancePage() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="py-2 px-3.5 text-xs font-semibold text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   In phiếu ngay
@@ -2139,81 +2147,81 @@ export default function ExitClearancePage() {
                 <button
                   type="button"
                   onClick={() => setExitReceipt(null)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 transition-colors cursor-pointer"
+                  className="py-2 px-3.5 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
                 >
                   ✕ Đóng
                 </button>
               </div>
             </div>
 
-            <div className="border border-slate-300 rounded p-5 sm:p-6 space-y-4 bg-white text-slate-900 print:border-none print:p-0">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-200 pb-3">
+            <div className="border border-[#E5E9F0] rounded-xl p-5 sm:p-6 space-y-4 bg-white text-[#17202E] print:border-none print:p-0">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-[#E5E9F0] pb-3">
                 <div>
-                  <p className="font-bold text-xs uppercase text-[#223873] tracking-wider">
+                  <p className="font-bold text-xs uppercase text-[#326DD8] tracking-wider">
                     CÔNG TY CỔ PHẦN TÀ LÙNG QUANG MINH
                   </p>
-                  <p className="text-xs font-semibold text-slate-700 mt-0.5">
+                  <p className="text-xs font-semibold text-[#17202E] mt-0.5">
                     Bến bãi & Cảng cạn Sơn Cảng — Cửa khẩu Quốc tế Tà Lùng
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-[#667085]">
                     Huyện Quảng Hòa, Tỉnh Cao Bằng
                   </p>
                 </div>
                 <div className="text-right sm:self-start">
-                  <p className="text-[11px] font-mono text-slate-500 uppercase">Mẫu: 02-PLB/SC</p>
-                  <p className="text-xs font-bold font-mono text-slate-900">
+                  <p className="text-[11px] font-mono text-[#667085] uppercase">Mẫu: 02-PLB/SC</p>
+                  <p className="text-xs font-bold font-mono text-[#17202E]">
                     Số: {exitReceipt.receiptCode}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+                  <p className="text-[11px] text-[#667085] font-mono mt-0.5">
                     Ngày: {new Date(exitReceipt.payDate).toLocaleDateString('vi-VN')}
                   </p>
                 </div>
               </div>
 
               <div className="text-center py-1">
-                <h2 className="text-lg sm:text-xl font-bold text-[#223873] uppercase tracking-wide">
+                <h2 className="text-lg sm:text-xl font-bold text-[#17202E] uppercase tracking-wide">
                   BIÊN LAI THU PHÍ LƯU BÃI CONTAINER
                 </h2>
-                <p className="text-xs italic text-slate-500 mt-0.5">
+                <p className="text-xs italic text-[#667085] mt-0.5">
                   (Thu trực tiếp tại Cổng ra Sơn Cảng — Liên giao khách hàng)
                 </p>
               </div>
 
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                  <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Số Container:</span>
-                  <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-300 inline-block w-fit">
+                  <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Số Container:</span>
+                  <span className="font-mono font-bold text-[#17202E] bg-[#F8F9FB] px-2.5 py-0.5 rounded-lg border border-[#E5E9F0] inline-block w-fit">
                     {exitReceipt.containerNo}
                   </span>
                 </div>
 
                 {exitReceipt.licensePlate && (
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                    <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Xe chở ra cổng:</span>
-                    <span className="font-mono font-bold text-slate-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 inline-block w-fit">
+                    <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Xe chở ra cổng:</span>
+                    <span className="font-mono font-bold text-[#17202E] bg-[#FFFAEB] px-2.5 py-0.5 rounded-lg border border-[#FEDF89] inline-block w-fit">
                       {exitReceipt.licensePlate}
                     </span>
                   </div>
                 )}
 
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                  <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Thời gian lưu bãi:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Thời gian lưu bãi:</span>
+                  <span className="font-semibold text-[#17202E]">
                     Tổng cộng {exitReceipt.totalNights} đêm (Miễn phí 1 đêm đầu, tính phí {exitReceipt.chargedNights} đêm)
                   </span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                  <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Hình thức thanh toán:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Hình thức thanh toán:</span>
+                  <span className="font-semibold text-[#17202E]">
                     {exitReceipt.payMethod === 'BANK_TRANSFER' ? '📱 Chuyển khoản ngân hàng (QR / CK)' : '💵 Tiền mặt'}
                   </span>
                 </div>
 
                 {exitReceipt.entryTicketFee && exitReceipt.entryTicketFee > 0 && (
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                    <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Vé xe vào cổng:</span>
-                    <span className="font-bold font-mono text-[#0A9444] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
+                    <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Vé xe vào cổng:</span>
+                    <span className="font-bold font-mono text-[#027A48] bg-[#ECFDF3] px-2 py-0.5 rounded border border-[#ABEFC6]">
                       {exitReceipt.entryTicketFee.toLocaleString('vi-VN')} VNĐ (Thu tại cổng ra)
                     </span>
                   </div>
@@ -2221,42 +2229,42 @@ export default function ExitClearancePage() {
 
                 {exitReceipt.penaltyFee && exitReceipt.penaltyFee > 0 && (
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                    <span className="text-slate-500 sm:w-40 flex-shrink-0 font-medium">Phạt mất liên vé giấy:</span>
-                    <span className="font-bold font-mono text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-300">
+                    <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Phạt mất liên vé giấy:</span>
+                    <span className="font-bold font-mono text-[#D92D20] bg-[#FEF3F2] px-2 py-0.5 rounded border border-[#FECDCA]">
                       {exitReceipt.penaltyFee.toLocaleString('vi-VN')} VNĐ (Mã PHAT_MAT_VE)
                     </span>
                   </div>
                 )}
 
-                <div className="border-t border-slate-200 pt-2.5 mt-2.5">
+                <div className="border-t border-[#E5E9F0] pt-2.5 mt-2.5">
                   <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-                    <span className="text-xs font-bold text-slate-700 uppercase">Tổng số tiền thực thu tại cổng:</span>
+                    <span className="text-xs font-bold text-[#344054] uppercase">Tổng số tiền thực thu tại cổng:</span>
                     <span className="text-xl font-bold font-mono text-[#0A9444]">
                       {exitReceipt.fee.toLocaleString('vi-VN')} VNĐ
                     </span>
                   </div>
-                  <div className="mt-1 text-xs text-slate-600 italic">
-                    (Bằng chữ: <strong className="text-slate-900 not-italic font-bold">{formatMoneyInWords(exitReceipt.fee)}</strong>)
+                  <div className="mt-1 text-xs text-[#667085] italic">
+                    (Bằng chữ: <strong className="text-[#17202E] not-italic font-bold">{formatMoneyInWords(exitReceipt.fee)}</strong>)
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-5 text-center text-xs">
                 <div>
-                  <p className="font-bold text-slate-800 uppercase">Người nộp tiền / Lái xe</p>
-                  <p className="text-[11px] text-slate-400 italic">(Ký, họ tên)</p>
+                  <p className="font-bold text-[#17202E] uppercase">Người nộp tiền / Lái xe</p>
+                  <p className="text-[11px] text-[#667085] italic">(Ký, họ tên)</p>
                   <div className="h-14" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-800 uppercase">Nhân viên An ninh Cổng ra</p>
-                  <p className="text-[11px] text-slate-400 italic">(Ký, ghi rõ họ tên)</p>
+                  <p className="font-bold text-[#17202E] uppercase">Nhân viên An ninh Cổng ra</p>
+                  <p className="text-[11px] text-[#667085] italic">(Ký, ghi rõ họ tên)</p>
                   <div className="h-14 flex items-end justify-center">
-                    <p className="font-bold text-slate-800">{user?.email || 'An ninh bốt cổng ra'}</p>
+                    <p className="font-bold text-[#17202E]">{user?.email || 'An ninh bốt cổng ra'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-dashed border-slate-300 pt-2 text-center text-[10px] text-slate-500 font-mono">
+              <div className="border-t border-dashed border-[#D0D5DD] pt-2 text-center text-[10px] text-[#667085] font-mono">
                 Chứng từ điện tử trích xuất từ Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng — Tà Lùng Quang Minh
               </div>
             </div>
@@ -2268,68 +2276,72 @@ export default function ExitClearancePage() {
       {/* MODAL THU TIỀN VÉ VÀO CỔNG TẠI BỐT GÁC CHO XE CHƯA THU                  */}
       {/* ========================================================================= */}
       {quickCollectVeh && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 shadow-2xl space-y-3.5 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-300 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-[#0A9444]" />
-                Thu Vé Cổng Phương Tiện
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-[#E5E9F0]">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#0A9444] tracking-wider">Thu ngân Hiện trường</span>
+                <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
+                  <CreditCard className="w-5 h-5 text-[#0A9444]" />
+                  Thu Vé Cổng Phương Tiện
+                </h3>
+              </div>
               <button 
                 type="button"
                 onClick={() => setQuickCollectVeh(null)} 
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {quickCollectError && (
-              <div className="p-2.5 bg-rose-50 border border-rose-300 text-rose-800 rounded text-xs font-semibold">
-                {quickCollectError}
+              <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-xl text-xs font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D92D20] shrink-0" />
+                <span>{quickCollectError}</span>
               </div>
             )}
 
-            <div className="bg-slate-50 border border-slate-200 p-3 rounded space-y-1.5 text-xs">
+            <div className="bg-[#F8F9FB] border border-[#E5E9F0] p-3.5 rounded-xl space-y-1.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-medium">Biển số xe:</span>
-                <span className="font-mono font-bold text-base text-slate-900">{quickCollectVeh.license_plate || 'Không biển'}</span>
+                <span className="text-[#667085] font-medium">Biển số xe:</span>
+                <span className="font-mono font-bold text-base text-[#17202E]">{quickCollectVeh.license_plate || 'Không biển'}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">Loại phương tiện:</span>
-                <span className="font-semibold text-slate-800">{getVehicleTypeName(quickCollectVeh.vehicle_type_name || quickCollectVeh.vehicle_type)}</span>
+                <span className="text-[#667085]">Loại phương tiện:</span>
+                <span className="font-semibold text-[#17202E]">{getVehicleTypeName(quickCollectVeh.vehicle_type_name || quickCollectVeh.vehicle_type)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">Mức tiền vé:</span>
+                <span className="text-[#667085]">Mức tiền vé:</span>
                 <span className="text-sm font-bold font-mono text-[#0A9444]">{(quickCollectVeh.ticket_amount || 0).toLocaleString('vi-VN')} đ</span>
               </div>
             </div>
 
-            <form onSubmit={handleConfirmQuickCollectTicket} className="space-y-3.5">
+            <form onSubmit={handleConfirmQuickCollectTicket} className="space-y-3.5 text-xs">
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">Hình thức thanh toán:</label>
+                <label className="block text-xs font-semibold text-[#344054]">Hình thức thanh toán:</label>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
+                  <label className="flex items-center space-x-2 text-xs text-[#344054] cursor-pointer">
                     <input
                       type="radio"
                       name="quickCollectPayMethod"
                       value="CASH"
                       checked={quickCollectMethod === 'CASH'}
                       onChange={() => setQuickCollectMethod('CASH')}
-                      className="text-[#0A9444]"
+                      className="text-[#0A9444] focus:ring-[#0A9444]"
                     />
-                    <span>💵 Tiền mặt</span>
+                    <span className="font-medium">💵 Tiền mặt</span>
                   </label>
-                  <label className="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
+                  <label className="flex items-center space-x-2 text-xs text-[#344054] cursor-pointer">
                     <input
                       type="radio"
                       name="quickCollectPayMethod"
                       value="BANK_TRANSFER"
                       checked={quickCollectMethod === 'BANK_TRANSFER'}
                       onChange={() => setQuickCollectMethod('BANK_TRANSFER')}
-                      className="text-[#0A9444]"
+                      className="text-[#0A9444] focus:ring-[#0A9444]"
                     />
-                    <span>📱 Chuyển khoản (VietQR / CK)</span>
+                    <span className="font-medium">📱 Chuyển khoản (VietQR / CK)</span>
                   </label>
                 </div>
 
@@ -2340,23 +2352,23 @@ export default function ExitClearancePage() {
                       value={quickCollectReceiptCode}
                       onChange={(e) => setQuickCollectReceiptCode(e.target.value)}
                       placeholder="Mã tham chiếu CK / Số biên lai thu vé..."
-                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-mono"
+                      className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                       required
                     />
-                    <div className="p-2.5 bg-blue-50 border border-blue-200 rounded space-y-2">
+                    <div className="p-3 bg-[#EFF8FF] border border-[#B2DDFF] rounded-xl space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-blue-900">Mã VietQR thu vé cổng</span>
+                        <span className="text-xs font-bold text-[#175CD3]">Mã VietQR thu vé cổng</span>
                         <button
                           type="button"
                           onClick={() => setShowQuickCollectQr(!showQuickCollectQr)}
-                          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
+                          className="px-2.5 py-1 bg-[#326DD8] hover:bg-[#2557B4] text-white rounded-lg font-semibold text-[11px] flex items-center gap-1 cursor-pointer shadow-xs transition-colors"
                         >
                           <QrCode className="w-3 h-3" />
                           <span>{showQuickCollectQr ? 'Ẩn QR' : 'Mở VietQR vé cổng'}</span>
                         </button>
                       </div>
                       {showQuickCollectQr && (
-                        <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-blue-300 rounded shadow-2xs">
+                        <div className="flex flex-col items-center justify-center p-3 bg-white border border-[#B2DDFF] rounded-xl shadow-xs">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={generateVietQrUrl({
@@ -2364,9 +2376,9 @@ export default function ExitClearancePage() {
                               description: `VE CONG ${quickCollectVeh.license_plate || 'XE'}`
                             })}
                             alt="Mã VietQR vé cổng"
-                            className="w-44 h-auto rounded border border-slate-200"
+                            className="w-44 h-auto rounded-lg border border-[#E5E9F0]"
                           />
-                          <span className="text-[10px] text-slate-500 mt-1 font-semibold">Tài xế quét mã bằng app ngân hàng</span>
+                          <span className="text-[10px] text-[#667085] mt-1 font-semibold">Tài xế quét mã bằng app ngân hàng</span>
                         </div>
                       )}
                     </div>
@@ -2374,19 +2386,19 @@ export default function ExitClearancePage() {
                 )}
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
                 <button
                   type="button"
                   onClick={() => setQuickCollectVeh(null)}
                   disabled={isSubmittingQuickCollect}
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer border border-slate-300"
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg cursor-pointer border border-[#D0D5DD] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingQuickCollect}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>{isSubmittingQuickCollect ? 'Đang ghi nhận...' : 'Xác nhận Đã thu tiền vé'}</span>

@@ -259,105 +259,106 @@ export default function TariffsAdminPage() {
 
       {/* MODAL ĐIỀU CHỈNH ĐƠN GIÁ */}
       {editingTariff && (
-        <div className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full border border-[#E5E9F0] shadow-xl overflow-hidden space-y-4">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E9F0] bg-[#F8F9FB]">
-              <div className="flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-[#326DD8]" />
-                <h3 className="text-xs font-semibold text-[#17202E] uppercase tracking-wide">
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider block">
+                  Biểu phí Dịch vụ
+                </span>
+                <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+                  <Edit3 className="w-4 h-4 text-[#326DD8]" />
                   Điều chỉnh Đơn giá Biểu phí
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingTariff(null)}
-                className="text-[#98A2B3] hover:text-[#17202E] p-1 rounded-md hover:bg-[#F1F4F8] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 pt-0 space-y-4">
-              {editError && (
-                <div className="p-3 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] text-xs font-medium flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{editError}</span>
-                </div>
-              )}
+            {editError && (
+              <div className="p-3 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#D92D20]" />
+                <span>{editError}</span>
+              </div>
+            )}
 
-              <form onSubmit={handleSavePrice} className="space-y-4">
-                <div className="bg-[#F8F9FB] p-3.5 rounded-lg border border-[#E5E9F0] space-y-1.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-[#667085]">Mã dịch vụ:</span>
-                    <span className="font-mono font-semibold text-[#17202E]">{editingTariff.code}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#667085]">Tên dịch vụ:</span>
-                    <span className="font-medium text-[#17202E] text-right truncate max-w-[220px]">{editingTariff.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#667085]">Đơn vị tính:</span>
-                    <span className="text-[#17202E]">{editingTariff.unit}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-[#E5E9F0] pt-1">
-                    <span className="text-[#667085]">Đơn giá hiện hành:</span>
-                    <span className="font-mono font-semibold text-[#17202E]">
-                      {editingTariff.amount.toLocaleString('vi-VN')} đ
-                    </span>
-                  </div>
+            <form onSubmit={handleSavePrice} className="space-y-3.5 text-xs">
+              <div className="bg-[#F8F9FB] p-3.5 rounded-xl border border-[#E5E9F0] space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-[#667085]">Mã dịch vụ:</span>
+                  <span className="font-mono font-semibold text-[#17202E]">{editingTariff.code}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-[#667085]">Tên dịch vụ:</span>
+                  <span className="font-medium text-[#17202E] text-right truncate max-w-[220px]">{editingTariff.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#667085]">Đơn vị tính:</span>
+                  <span className="text-[#17202E]">{editingTariff.unit}</span>
+                </div>
+                <div className="flex justify-between border-t border-[#E5E9F0] pt-1.5 mt-1">
+                  <span className="text-[#667085]">Đơn giá hiện hành:</span>
+                  <span className="font-mono font-bold text-[#17202E]">
+                    {editingTariff.amount.toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#17202E] mb-1">
-                    Đơn giá mới (VNĐ) <span className="text-[#D92D20]">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={newAmount}
-                    onChange={(e) => setNewAmount(Number(e.target.value))}
-                    step={1000}
-                    min={0}
-                    required
-                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg font-mono text-base font-bold text-[#0A9444] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Đơn giá mới (VNĐ) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(Number(e.target.value))}
+                  step={1000}
+                  min={0}
+                  required
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono text-base font-bold text-[#0A9444] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white transition-all"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#17202E] mb-1">
-                    Lý do / Căn cứ văn bản điều chỉnh <span className="text-[#D92D20]">*</span>
-                  </label>
-                  <textarea
-                    value={editReason}
-                    onChange={(e) => setEditReason(e.target.value)}
-                    placeholder="VD: Quyết định điều chỉnh giá số 05/QĐ-TLQM..."
-                    rows={2}
-                    required
-                    className="w-full p-2.5 border border-[#E5E9F0] rounded-lg text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Lý do / Căn cứ văn bản điều chỉnh <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  value={editReason}
+                  onChange={(e) => setEditReason(e.target.value)}
+                  placeholder="VD: Quyết định điều chỉnh giá số 05/QĐ-TLQM..."
+                  rows={2}
+                  required
+                  className="w-full p-2.5 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white transition-all resize-none"
+                />
+              </div>
 
-                <div className="p-3 bg-[#F8F9FB] border border-[#E5E9F0] rounded-lg text-[11px] text-[#667085] leading-relaxed">
-                  Lưu ý: Thao tác điều chỉnh đơn giá sẽ được ghi nhận vào Nhật ký Kiểm toán của bến bãi.
-                </div>
+              <div className="p-3 bg-[#F8F9FB] border border-[#E5E9F0] rounded-xl text-[11px] text-[#667085] leading-relaxed">
+                Lưu ý: Thao tác điều chỉnh đơn giá sẽ được ghi nhận vào Nhật ký Kiểm toán của bến bãi.
+              </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-[#E5E9F0]">
-                  <button
-                    type="button"
-                    onClick={() => setEditingTariff(null)}
-                    className="px-3.5 py-2 text-xs font-medium text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] rounded-lg cursor-pointer transition-colors"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Áp dụng đơn giá</span>
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
+                <button
+                  type="button"
+                  onClick={() => setEditingTariff(null)}
+                  className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Áp dụng đơn giá</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

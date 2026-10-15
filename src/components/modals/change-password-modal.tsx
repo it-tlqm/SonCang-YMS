@@ -99,51 +99,50 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/80">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800">
-              <KeyRound className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-black text-slate-900">
-                Đổi mật khẩu tài khoản
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Áp dụng cho tài khoản: <strong>{user?.fullName || user?.email}</strong>
-              </p>
-            </div>
+        <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+          <div>
+            <span className="text-[10px] font-bold text-[#0A9444] uppercase tracking-wider block">
+              Tài khoản & Bảo mật
+            </span>
+            <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
+              <KeyRound className="w-4 h-4 text-[#0A9444]" />
+              Đổi mật khẩu tài khoản
+            </h3>
+            <p className="text-[11px] text-[#667085] mt-0.5">
+              Áp dụng cho: <strong className="text-[#17202E]">{user?.fullName || user?.email}</strong>
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* MODAL BODY */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           {errorMsg && (
-            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] rounded-lg text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-[#D92D20]" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <div className="p-3 bg-[#E7F6EC] border border-[#A6E3B8] text-[#0A9444] rounded-lg text-xs font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#0A9444]" />
               <span className="font-semibold">{successMsg}</span>
             </div>
           )}
 
           {/* Ô nhập Mật khẩu mới */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-[#344054] mb-1">
               Mật khẩu mới <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
@@ -152,13 +151,13 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Tối thiểu 6 ký tự..."
-                className="w-full pl-3 pr-9 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#0A9444] bg-slate-50/50"
+                className="w-full pl-3 pr-9 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white transition-all"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] cursor-pointer p-0.5"
                 title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -168,7 +167,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
           {/* Ô xác nhận Mật khẩu mới */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-[#344054] mb-1">
               Xác nhận mật khẩu mới <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
@@ -177,68 +176,68 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Nhập lại mật khẩu mới..."
-                className={`w-full pl-3 pr-9 py-2 border rounded-xl text-xs font-mono focus:outline-none focus:ring-2 bg-slate-50/50 ${
+                className={`w-full pl-3 pr-9 py-2 border rounded-lg text-xs font-mono font-medium text-[#17202E] focus:outline-none focus:ring-2 bg-white transition-all ${
                   confirmPassword && !isMatch 
-                    ? 'border-rose-300 focus:ring-rose-400' 
-                    : 'border-slate-200 focus:ring-[#0A9444]'
+                    ? 'border-[#FDA29B] focus:ring-[#FDA29B]/20 focus:border-[#F04438]' 
+                    : 'border-[#D0D5DD] focus:ring-[#0A9444]/20 focus:border-[#0A9444]'
                 }`}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] cursor-pointer p-0.5"
                 title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             {confirmPassword && !isMatch && (
-              <span className="text-[10px] text-rose-500 mt-1 block">
+              <span className="text-[11px] text-[#D92D20] mt-1 block">
                 Mật khẩu xác nhận chưa khớp.
               </span>
             )}
           </div>
 
           {/* Tiêu chuẩn an toàn mật khẩu */}
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1.5 text-[11px] text-slate-600">
-            <span className="font-bold text-slate-700 block text-[10px] uppercase tracking-wider">
+          <div className="p-3 bg-[#F8F9FB] rounded-xl border border-[#E5E9F0] space-y-1.5 text-[11px] text-[#475467]">
+            <span className="font-bold text-[#344054] block text-[10px] uppercase tracking-wider">
               Yêu cầu bảo mật:
             </span>
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-              <span className={hasMinLength ? 'text-emerald-700 font-semibold' : ''}>
+              <span className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? 'bg-[#0A9444]' : 'bg-[#D0D5DD]'}`} />
+              <span className={hasMinLength ? 'text-[#0A9444] font-semibold' : ''}>
                 Độ dài tối thiểu từ 6 ký tự
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${hasNumber ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-              <span className={hasNumber ? 'text-emerald-700 font-semibold' : ''}>
+              <span className={`w-1.5 h-1.5 rounded-full ${hasNumber ? 'bg-[#0A9444]' : 'bg-[#D0D5DD]'}`} />
+              <span className={hasNumber ? 'text-[#0A9444] font-semibold' : ''}>
                 Có chứa ít nhất một chữ số (0-9)
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${hasUpper ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-              <span className={hasUpper ? 'text-emerald-700 font-semibold' : ''}>
+              <span className={`w-1.5 h-1.5 rounded-full ${hasUpper ? 'bg-[#0A9444]' : 'bg-[#D0D5DD]'}`} />
+              <span className={hasUpper ? 'text-[#0A9444] font-semibold' : ''}>
                 Nên có chữ cái in hoa (A-Z) để tăng tính bảo mật
               </span>
             </div>
           </div>
 
           {/* MODAL ACTIONS */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold cursor-pointer transition-colors"
+              className="py-2 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !hasMinLength || !isMatch}
-              className="px-4 py-1.5 rounded-xl bg-[#0A9444] hover:bg-emerald-700 text-white font-bold cursor-pointer transition-colors shadow-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="py-2 px-4 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087a38] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
