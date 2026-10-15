@@ -163,7 +163,7 @@ export default function TariffsAdminPage() {
         }
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-5xl">
+      <div className="p-4 sm:p-5 space-y-4 w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
         {/* THÔNG BÁO NGUYÊN TẮC BẤT BIẾN */}
         <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
           <AlertCircle className="w-4 h-4 text-[#0A9444] shrink-0 mt-0.5" />
@@ -193,7 +193,7 @@ export default function TariffsAdminPage() {
         )}
 
         {/* Search & Table card */}
-        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="w-full sm:w-72">
               <SearchInput
@@ -207,7 +207,7 @@ export default function TariffsAdminPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[480px]">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold">
                 <tr>

@@ -79,7 +79,7 @@ export default function VehicleTypesAdminPage() {
         }
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-5xl">
+      <div className="p-4 sm:p-5 space-y-4 w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
         {/* Financial rule notice */}
         <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
           <AlertCircle className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
@@ -92,7 +92,7 @@ export default function VehicleTypesAdminPage() {
         </div>
 
         {/* BẢNG DANH MỤC 7 LOẠI XE */}
-        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden flex-1 flex flex-col min-h-[540px]">
           <div className="px-4 py-3 border-b border-[#E5E9F0] bg-[#F8F9FB] flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-[#17202E]">
               Danh sách nhóm phương tiện ({vehicleTypes.length})
@@ -100,7 +100,7 @@ export default function VehicleTypesAdminPage() {
             <span className="text-[11px] text-[#667085]">Tiêu chuẩn phân loại bến bãi V5</span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[480px]">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold">
                 <tr>

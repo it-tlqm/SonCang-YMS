@@ -234,7 +234,7 @@ export default function CustomersAdminPage() {
 
       {/* KPI Cards Strip */}
       <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
           <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
             <span className="text-[#667085] block text-[11px]">Tổng số đối tác</span>
             <span className="text-xl font-bold font-mono text-[#17202E] mt-0.5 block">{totalCount}</span>
@@ -250,7 +250,7 @@ export default function CustomersAdminPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-6xl">
+      <div className="p-4 sm:p-5 space-y-4 w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
         {/* Thông báo thành công */}
         {successMessage && (
           <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">
@@ -269,7 +269,7 @@ export default function CustomersAdminPage() {
         )}
 
         {/* Thanh tìm kiếm & Bộ lọc */}
-        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="w-full sm:w-80">
               <SearchInput
@@ -293,7 +293,7 @@ export default function CustomersAdminPage() {
           </div>
 
           {/* Bảng danh sách khách hàng */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[480px]">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold text-[11px]">
                 <tr>

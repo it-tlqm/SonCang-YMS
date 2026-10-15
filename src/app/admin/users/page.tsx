@@ -717,7 +717,7 @@ export default function UsersAndRbacAdminPage() {
 
       {/* KPI Cards Strip */}
       <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-5xl">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 w-full">
           <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
             <span className="text-[11px] text-[#667085] block">Tổng số tài khoản</span>
             <span className="text-xl font-bold font-mono text-[#17202E] mt-0.5 block">{totalStaffCount}</span>
@@ -761,7 +761,7 @@ export default function UsersAndRbacAdminPage() {
         onChange={(tabId) => setActiveTab(tabId as any)}
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-7xl w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
+      <div className="p-4 sm:p-5 space-y-4 w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
         {/* THÔNG BÁO THÀNH CÔNG */}
         {successMsg && (
           <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">

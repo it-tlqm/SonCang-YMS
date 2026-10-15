@@ -1,5 +1,27 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 14:20 — Tối Ưu Layout Full-Width Cho Toàn Bộ 6 Trang Quản Trị Hệ Thống (`/admin/*`)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  *"Mấy trang này tại sao k cho nội dung phía trong full width đi bạn?
+  https://son-cang-yms.vercel.app/admin/customers
+  https://son-cang-yms.vercel.app/admin/tariffs
+  https://son-cang-yms.vercel.app/admin/vehicle-types
+  https://son-cang-yms.vercel.app/admin/vehicle-duplicate
+  https://son-cang-yms.vercel.app/admin/audit-logs"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Nguyên nhân kỹ thuật:** Các trang quản trị hệ thống trước đây sử dụng các class giới hạn chiều rộng cứng (`max-w-4xl`, `max-w-5xl`, `max-w-6xl`, `max-w-7xl` kết hợp `mx-auto`), khiến nội dung bị bó hẹp trong một dải hẹp ở giữa màn hình và để lại khoảng trống thừa thãi lớn ở hai bên trên các màn hình máy tính để bàn (1080p, 2K, 4K), không đồng bộ với các màn hình vận hành chính như Bến bãi (`/yard`), Điện lạnh (`/reefer`), Cổng ra (`/exit`), Kế toán (`/accounting`), Sổ cái (`/billing`).
+  2. **Giải pháp triển khai đồng bộ:**
+     - [`src/app/admin/customers/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/customers/page.tsx): Loại bỏ `max-w-4xl` trên dải KPI, chuyển container bảng từ `max-w-6xl` sang `w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]`, mở rộng thẻ bảng `flex-1 min-h-[540px]` và vùng cuộn `overflow-x-auto flex-1 min-h-[480px]`.
+     - [`src/app/admin/tariffs/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/tariffs/page.tsx): Loại bỏ `max-w-5xl`, đưa vùng nội dung về `w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]`, thiết lập bảng biểu phí `flex-1 min-h-[540px]`.
+     - [`src/app/admin/vehicle-types/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/vehicle-types/page.tsx): Loại bỏ `max-w-5xl`, đưa bảng 7 loại xe về `w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]`.
+     - [`src/app/admin/vehicle-duplicate/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/vehicle-duplicate/page.tsx): Loại bỏ `max-w-4xl`, mở rộng `w-full pb-16`, tối ưu lưới hiển thị 4 chế độ kiểm soát từ `sm:grid-cols-2` lên `lg:grid-cols-4` trên màn hình lớn.
+     - [`src/app/admin/audit-logs/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/audit-logs/page.tsx): Loại bỏ `max-w-7xl mx-auto`, đưa layout bảng nhật ký kiểm toán về `w-full flex-1 flex flex-col`.
+     - [`src/app/admin/users/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx): Loại bỏ `max-w-5xl` trên dải KPI và `max-w-7xl` trên workspace container, đồng bộ `w-full`.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
 ## 2026-10-15 14:00 — Xóa Bỏ Dữ Liệu Ảo Giác Trong Nhật Ký Kiểm Toán (`/admin/audit-logs`) & Đồng Bộ Full-Height Table Toàn Hệ Thống
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

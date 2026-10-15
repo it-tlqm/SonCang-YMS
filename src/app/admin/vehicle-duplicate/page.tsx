@@ -205,7 +205,7 @@ export default function VehicleDuplicateAdminPage() {
         }
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-4xl pb-16">
+      <div className="p-4 sm:p-5 space-y-4 w-full pb-16">
         {/* HỘP QUY ĐỊNH NGHIỆP VỤ */}
         <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
           <AlertCircle className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
@@ -250,7 +250,7 @@ export default function VehicleDuplicateAdminPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   {
                     code: 'WARN_AND_ALLOW',

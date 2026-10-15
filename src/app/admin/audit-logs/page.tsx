@@ -129,7 +129,7 @@ export default function AuditLogsAdminPage() {
         }
       />
 
-      <div className="p-4 sm:p-5 flex-1 flex flex-col space-y-4 max-w-7xl w-full mx-auto">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col space-y-4 w-full">
         {/* Notice */}
         <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
           <Lock className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
