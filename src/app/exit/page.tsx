@@ -20,11 +20,19 @@ import {
   DollarSign,
   QrCode,
   CreditCard,
-  Download
+  Download,
+  X
 } from 'lucide-react';
 import { getVehicleTypeName, formatMoneyInWords } from '@/lib/display-formatters';
 import { generateVietQrUrl } from '@/lib/vietqr-generator';
 import { exportExitedVehiclesToExcel } from '@/lib/export-excel';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { SecondaryPanel } from '@/components/workspace/secondary-panel';
+import { RightContextPanel } from '@/components/workspace/right-context-panel';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 export default function ExitClearancePage() {
   const { user, role, yardId, can, repository } = useAuth();
@@ -112,6 +120,12 @@ export default function ExitClearancePage() {
     payDate: string;
     notes?: string;
   } | null>(null);
+
+  // DS-02 Multi-pane states
+  const [selectedVehicleForInspector, setSelectedVehicleForInspector] = useState<VehicleVisit | null>(null);
+  const [selectedContForInspector, setSelectedContForInspector] = useState<ContainerVisit | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
 
   // Tải dữ liệu ban đầu
   useEffect(() => {
@@ -633,151 +647,267 @@ export default function ExitClearancePage() {
   const clearedCount = inYardContainers.filter(c => c.clearance_status === 'CLEARED' || c.clearance_status === 'CLEARED_WITH_DEBT').length;
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-300 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-200">
-              Kiểm soát Xuất bãi
-            </span>
-            <span className="text-xs font-semibold text-slate-500">Bốt Cổng ra & Thương vụ CCKB</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 mt-1">
-            <LogOut className="w-6 h-6 text-[#0A9444]" />
-            Cổng ra & Kiểm soát Xuất bãi Sơn Cảng
-          </h1>
-          <p className="text-xs text-slate-600 mt-1">
-            Quy trình kiểm soát xuất bãi theo xe: An ninh xác nhận xe rời bãi, đối soát container kéo ra, tiền điện & phí lưu bãi
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleManualRefresh}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 font-bold cursor-pointer shadow-2xs"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Làm mới dữ liệu
-          </button>
-        </div>
-      </div>
-
-      {/* Thông báo thao tác */}
-      {actionSuccessMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded flex items-center justify-between text-emerald-900 text-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span className="font-semibold">{actionSuccessMsg}</span>
-          </div>
-          <button onClick={() => setActionSuccessMsg('')} className="text-emerald-800 font-bold hover:underline cursor-pointer">
-            Đóng
-          </button>
-        </div>
-      )}
-
-      {/* Tabs Chuyển đổi nghiệp vụ */}
-      <div className="flex items-center gap-2 border-b border-slate-300 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('GATE_EXIT')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded font-bold text-xs transition-colors cursor-pointer border ${
-            activeTab === 'GATE_EXIT'
-              ? 'bg-[#0A9444] text-white border-[#0A9444] shadow-2xs'
-              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>An ninh Cổng ra: Xe đang trong bãi ({inYardVehicles.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('CLEARANCE')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded font-bold text-xs transition-colors cursor-pointer border ${
-            activeTab === 'CLEARANCE'
-              ? 'bg-[#223873] text-white border-[#223873] shadow-2xs'
-              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <FileCheck className="w-4 h-4" />
-          <span>Thương vụ CCKB: Duyệt cont cắm điện ({reeferPendingCount} chờ duyệt / {reeferContainers.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('EXITED_HISTORY')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded font-bold text-xs transition-colors cursor-pointer border ${
-            activeTab === 'EXITED_HISTORY'
-              ? 'bg-slate-800 text-white border-slate-800 shadow-2xs'
-              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <Clock className="w-4 h-4 text-emerald-400" />
-          <span>Lịch sử Xe đã xuất bãi ({exitedVehicles.length})</span>
-        </button>
-      </div>
-
-      {/* KPI Tóm tắt */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Xe trong bãi</p>
-            <p className="text-xl font-bold font-mono text-slate-900 mt-0.5">{inYardVehicles.length} <span className="text-xs font-sans font-normal text-slate-500">lượt xe</span></p>
-          </div>
-          <div className="p-2.5 bg-slate-100 rounded border border-slate-200">
-            <Truck className="w-5 h-5 text-slate-700" />
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Container tồn bãi</p>
-            <p className="text-xl font-bold font-mono text-[#223873] mt-0.5">{inYardContainers.length} <span className="text-xs font-sans font-normal text-slate-500">cont</span></p>
-          </div>
-          <div className="p-2.5 bg-blue-50 rounded border border-blue-200">
-            <Truck className="w-5 h-5 text-[#223873]" />
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Cont đã duyệt xuất</p>
-            <p className="text-xl font-bold font-mono text-[#0A9444] mt-0.5">{clearedCount} <span className="text-xs font-sans font-normal text-slate-500">cont</span></p>
-          </div>
-          <div className="p-2.5 bg-emerald-50 rounded border border-emerald-200">
-            <CheckCircle2 className="w-5 h-5 text-[#0A9444]" />
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Chờ CCKB duyệt điện</p>
-            <p className="text-xl font-bold font-mono text-amber-700 mt-0.5">{reeferPendingCount} <span className="text-xs font-sans font-normal text-slate-500">cont</span></p>
-            <p className="text-[10px] text-emerald-700 font-bold mt-0.5">({noReeferCount} cont không cắm: Miễn duyệt)</p>
-          </div>
-          <div className="p-2.5 bg-amber-50 rounded border border-amber-200">
-            <Clock className="w-5 h-5 text-amber-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Thanh tìm kiếm */}
-      <div className="bg-white p-3 rounded-lg border border-slate-300 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="relative w-full max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder={activeTab === 'GATE_EXIT' ? "Tìm theo biển số xe, tài xế, mã vé..." : "Tìm theo số container, biển số xe..."}
+    <div className="flex-1 flex overflow-hidden w-full h-full bg-[#FFFFFF]">
+      {/* ============================================================== */}
+      {/* 1. SECONDARY PANEL: DANH SÁCH CHỜ XUẤT                         */}
+      {/* ============================================================== */}
+      <SecondaryPanel
+        title="Chờ xuất bãi"
+        count={activeTab === 'CLEARANCE' ? reeferPendingCount : inYardVehicles.length}
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
+        searchSlot={
+          <SearchInput
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-slate-500 focus:border-slate-500 font-mono"
+            onChange={setSearchQuery}
+            placeholder={activeTab === 'CLEARANCE' ? 'Tìm container...' : 'Tìm biển số xe, mã vé...'}
           />
+        }
+        filterSlot={
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('GATE_EXIT')}
+              className={`flex-1 py-1 px-2 rounded text-[11px] font-medium transition-colors text-center cursor-pointer ${
+                activeTab === 'GATE_EXIT'
+                  ? 'bg-[#EAF1FD] text-[#326DD8] font-semibold'
+                  : 'text-[#667085] hover:bg-[#F1F4F8]'
+              }`}
+            >
+              Xe ra ({inYardVehicles.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('CLEARANCE')}
+              className={`flex-1 py-1 px-2 rounded text-[11px] font-medium transition-colors text-center cursor-pointer ${
+                activeTab === 'CLEARANCE'
+                  ? 'bg-[#EAF1FD] text-[#326DD8] font-semibold'
+                  : 'text-[#667085] hover:bg-[#F1F4F8]'
+              }`}
+            >
+              CCKB ({reeferPendingCount})
+            </button>
+          </div>
+        }
+      >
+        {activeTab === 'CLEARANCE' ? (
+          filteredContainers.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">
+              Không có container nào phù hợp
+            </div>
+          ) : (
+            filteredContainers.map((c) => {
+              const isSelected = selectedContForInspector?.id === c.id;
+              const isCleared = c.clearance_status === 'CLEARED' || c.clearance_status === 'CLEARED_WITH_DEBT';
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedContForInspector(c);
+                    setSelectedVehicleForInspector(null);
+                    setIsInspectorOpen(true);
+                  }}
+                  className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                    isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono font-bold text-xs text-[#17202E]">
+                      {c.container_no_current}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      isCleared 
+                        ? 'bg-[#ECFDF3] text-[#0A9444]' 
+                        : 'bg-[#FFFAEB] text-[#B54708]'
+                    }`}>
+                      {isCleared ? 'Đã duyệt' : 'Chờ duyệt'}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[#667085]">
+                    Vào: {new Date(c.inbound_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </button>
+              );
+            })
+          )
+        ) : (
+          filteredVehicles.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">
+              Không có phương tiện nào trong bãi
+            </div>
+          ) : (
+            filteredVehicles.map((v) => {
+              const isSelected = selectedVehicleForInspector?.id === v.id;
+              const isTicketPaid = v.ticket_payment_status === 'PAID' || v.ticket_payment_status === 'EXEMPT';
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedVehicleForInspector(v);
+                    setSelectedContForInspector(null);
+                    setIsInspectorOpen(true);
+                  }}
+                  className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                    isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono font-bold text-xs text-[#17202E]">
+                      {v.license_plate || 'XE-CHUA-BIEN-SO'}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      isTicketPaid ? 'bg-[#ECFDF3] text-[#0A9444]' : 'bg-[#FEF3F2] text-[#D92D20]'
+                    }`}>
+                      {isTicketPaid ? 'Vé: Đã thu' : 'Chưa thu vé'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                    <span>{getVehicleTypeName(v.vehicle_type)}</span>
+                    <span className="font-mono">
+                      {new Date(v.entry_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </button>
+              );
+            })
+          )
+        )}
+      </SecondaryPanel>
+
+      {/* ============================================================== */}
+      {/* 2. MAIN WORKSPACE                                              */}
+      {/* ============================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+        <WorkspaceHeader
+          title="Cổng ra & Kiểm soát Xuất bãi Sơn Cảng"
+          subtitle="Quy trình kiểm soát xuất bãi theo xe: An ninh xác nhận xe rời bãi, đối soát container kéo ra, tiền điện & phí lưu bãi"
+          icon={LogOut}
+          badge={
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+              Bốt Cổng ra & Thương vụ CCKB
+            </span>
+          }
+          actions={
+            <div className="flex items-center gap-2">
+              {canClearanceRead && (
+                <button
+                  type="button"
+                  onClick={() => exportExitedVehiclesToExcel(exitedVehicles)}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+                  title="Xuất file Excel báo cáo xe đã xuất bãi"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#667085]" />
+                  <span>Xuất Excel</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleManualRefresh}
+                disabled={isLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${isLoading ? 'animate-spin' : ''}`} />
+                <span>Làm mới</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* Thông báo thao tác */}
+        {actionSuccessMsg && (
+          <div className="mx-5 mt-4 p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] flex items-center justify-between text-xs text-[#0A9444]">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span className="font-medium">{actionSuccessMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionSuccessMsg('')}
+              className="p-1 rounded text-[#0A9444] hover:bg-[#D1FADF]"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Compact KPI strip */}
+        <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]/50">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Xe trong bãi</span>
+                <Truck className="w-3.5 h-3.5 text-[#326DD8]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#17202E]">
+                {inYardVehicles.length}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">lượt xe đang đỗ</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Container tồn bãi</span>
+                <Truck className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#17202E]">
+                {inYardContainers.length}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">container lưu bãi</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Đã duyệt xuất</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#0A9444]">
+                {clearedCount}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">đủ điều kiện ra cổng</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Chờ duyệt điện</span>
+                <Clock className="w-3.5 h-3.5 text-[#B54708]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#B54708]">
+                {reeferPendingCount}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">{noReeferCount} cont không cắm</div>
+            </div>
+          </div>
         </div>
-        <div className="text-[11px] font-bold text-slate-600">
-          {activeTab === 'GATE_EXIT' 
-            ? `Hiển thị ${filteredVehicles.length}/${inYardVehicles.length} phương tiện`
-            : `Hiển thị ${filteredContainers.length}/${inYardContainers.length} container`}
-        </div>
-      </div>
+
+        {/* WORKSPACE VIEW TABS */}
+        <WorkspaceTabs
+          tabs={[
+            {
+              id: 'GATE_EXIT',
+              label: 'An ninh Cổng ra: Xe trong bãi',
+              count: inYardVehicles.length,
+              icon: ShieldCheck,
+            },
+            {
+              id: 'CLEARANCE',
+              label: 'Thương vụ CCKB: Duyệt xuất',
+              count: reeferPendingCount,
+              icon: FileCheck,
+            },
+            {
+              id: 'EXITED_HISTORY',
+              label: 'Lịch sử Xe đã xuất bãi',
+              count: exitedVehicles.length,
+              icon: Clock,
+            },
+          ]}
+          activeTab={activeTab}
+          onChange={(tabId) => setActiveTab(tabId as any)}
+        />
+
+        <div className="p-4 sm:p-5 space-y-4">
 
       {/* ========================================================================= */}
       {/* TAB 1: AN NINH CỔNG RA VẬT LÝ — KIỂM SOÁT XUẤT BÃI THEO TỪNG XE          */}
@@ -1266,6 +1396,126 @@ export default function ExitClearancePage() {
           </div>
         </div>
       )}
+
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 3. RIGHT CONTEXT PANEL: HỒ SƠ CHI TIẾT ĐỐI TƯỢNG              */}
+      {/* ============================================================== */}
+      <RightContextPanel
+        title={selectedVehicleForInspector ? 'Hồ sơ Xuất bãi' : (selectedContForInspector ? 'Kiểm tra Container' : 'Thông tin Cổng ra')}
+        subtitle={selectedVehicleForInspector?.license_plate || selectedContForInspector?.container_no_current || 'Chọn lượt xe hoặc cont để tra cứu'}
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        footerActions={
+          selectedVehicleForInspector ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedVehForExit(selectedVehicleForInspector);
+                setShowUnifiedExitModal(true);
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-[#087C3C] text-white text-xs font-semibold hover:bg-[#076934] transition-colors cursor-pointer text-center shadow-2xs"
+            >
+              Làm thủ tục Xuất bãi
+            </button>
+          ) : selectedContForInspector ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCont(selectedContForInspector);
+                setShowClearanceModal(true);
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-[#326DD8] text-white text-xs font-semibold hover:bg-[#2557B4] transition-colors cursor-pointer text-center shadow-2xs"
+            >
+              Duyệt điều kiện xuất bãi
+            </button>
+          ) : undefined
+        }
+      >
+        {selectedVehicleForInspector ? (
+          <div className="space-y-4 text-xs">
+            <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#667085]">Biển số xe</span>
+                <span className="font-mono font-bold text-sm text-[#17202E]">
+                  {selectedVehicleForInspector.license_plate || 'Không biển số'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Loại phương tiện</span>
+                <span className="font-medium text-[#17202E]">
+                  {getVehicleTypeName(selectedVehicleForInspector.vehicle_type)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Thời gian vào</span>
+                <span className="font-mono text-[#17202E]">
+                  {new Date(selectedVehicleForInspector.entry_at).toLocaleString('vi-VN')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Vé vào cổng</span>
+                <span className={`font-semibold ${
+                  selectedVehicleForInspector.ticket_payment_status === 'PAID' ? 'text-[#0A9444]' : 'text-[#D92D20]'
+                }`}>
+                  {selectedVehicleForInspector.ticket_payment_status === 'PAID' ? 'Đã thu' : 'Chưa thu'}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-1.5">
+              <h4 className="font-semibold text-[#17202E]">Thông tin tài xế</h4>
+              <p className="text-[#667085]">Họ và tên: <strong className="text-[#17202E]">{selectedVehicleForInspector.driver_name || 'Chưa ghi nhận'}</strong></p>
+              <p className="text-[#667085]">Số điện thoại: <strong className="font-mono text-[#17202E]">{selectedVehicleForInspector.driver_phone || '---'}</strong></p>
+            </div>
+          </div>
+        ) : selectedContForInspector ? (
+          <div className="space-y-4 text-xs">
+            <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#667085]">Số container</span>
+                <span className="font-mono font-bold text-sm text-[#17202E]">
+                  {selectedContForInspector.container_no_current}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Quy cách</span>
+                <span className="font-mono font-medium text-[#17202E]">
+                  {selectedContForInspector.container_size}ft — {selectedContForInspector.container_type || 'RF'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Trạng thái hàng</span>
+                <span className="font-bold text-[#17202E]">
+                  {selectedContForInspector.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Thời gian vào bãi</span>
+                <span className="font-mono text-[#17202E]">
+                  {new Date(selectedContForInspector.inbound_at).toLocaleString('vi-VN')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#667085]">Trạng thái duyệt CCKB</span>
+                <span className={`font-semibold ${
+                  selectedContForInspector.clearance_status === 'CLEARED' ? 'text-[#0A9444]' : 'text-[#B54708]'
+                }`}>
+                  {selectedContForInspector.clearance_status === 'CLEARED' ? 'Đã duyệt xuất' : 'Chờ duyệt'}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            icon={LogOut}
+            title="Chưa chọn đối tượng"
+            description="Bấm vào một dòng trong danh sách bên trái hoặc bảng trung tâm để kiểm tra chi tiết."
+          />
+        )}
+      </RightContextPanel>
 
       {/* ========================================================================= */}
       {/* MODAL HỢP NHẤT: AN NINH KIỂM SOÁT XUẤT BÃI PHƯƠNG TIỆN & CONTAINER       */}

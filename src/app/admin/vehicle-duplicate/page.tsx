@@ -7,7 +7,7 @@ import { VehicleType, VehicleDuplicatePolicy, DuplicatePolicyMode } from '@/type
 import { 
   ShieldAlert, 
   CheckCircle2, 
-  AlertTriangle, 
+  AlertCircle, 
   Clock, 
   Save, 
   RefreshCw, 
@@ -16,9 +16,11 @@ import {
   CopyCheck, 
   ArrowLeft,
   Truck,
-  Settings,
-  DollarSign
+  DollarSign,
+  Check
 } from 'lucide-react';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { StatusBadge } from '@/components/workspace/status-badge';
 
 export default function VehicleDuplicateAdminPage() {
   const { user, yardId, can, repository } = useAuth();
@@ -150,440 +152,407 @@ export default function VehicleDuplicateAdminPage() {
 
   if (!isAllowed) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 text-center max-w-lg mx-auto shadow-xs">
-        <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900">Khu vực Quản trị Hệ thống</h2>
-        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-          Tài khoản <strong>{user?.roleName || 'Chưa phân vai trò'}</strong> không có quyền quản trị chính sách kiểm soát trùng lặp (<code>admin.billing_settings.manage</code>). Chức năng này chỉ dành cho Quản trị viên (<code>SYS_ADMIN</code>).
-        </p>
+      <div className="flex-1 flex items-center justify-center p-6 bg-[#FFFFFF]">
+        <div className="bg-white rounded-xl p-6 sm:p-8 border border-[#E5E9F0] text-center max-w-md w-full shadow-xs">
+          <ShieldAlert className="w-10 h-10 text-[#D92D20] mx-auto mb-3" />
+          <h2 className="text-base font-semibold text-[#17202E]">Giới hạn quyền truy cập</h2>
+          <p className="text-xs text-[#667085] mt-2 leading-relaxed">
+            Tài khoản của bạn không có quyền quản trị chính sách kiểm soát trùng lặp xe. Chức năng này chỉ dành cho Quản trị viên hệ thống.
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-medium text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Về trang Tổng quan</span>
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 max-w-4xl mx-auto pb-12">
-      {/* HEADER QUẢN TRỊ */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E3E8EF] shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-              <CopyCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold tracking-wider uppercase text-purple-700">
-                Quản trị Nghiệp vụ & Vận hành
-              </span>
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 mt-0.5">
-                Cấu hình Kiểm soát Trùng lặp Phương tiện
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
+    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+      {/* 1. WORKSPACE HEADER */}
+      <WorkspaceHeader
+        title="Cấu hình Kiểm soát Trùng lặp Phương tiện"
+        subtitle="Quy tắc phát hiện xe vào nhiều lần trong ngày, chống nhấp lặp và chính sách ngoại lệ xe bo"
+        icon={CopyCheck}
+        badge={
+          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+            Chính sách Cổng vào
+          </span>
+        }
+        actions={
+          <div className="flex items-center gap-2">
             <Link
               href="/admin/vehicle-types"
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center space-x-1"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors"
             >
-              <Truck className="w-3.5 h-3.5 text-slate-500" />
+              <Truck className="w-3.5 h-3.5 text-[#667085]" />
               <span>Loại xe</span>
             </Link>
-            <Link
-              href="/admin/tariffs"
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center space-x-1"
-            >
-              <DollarSign className="w-3.5 h-3.5 text-slate-500" />
-              <span>Biểu phí</span>
-            </Link>
             <button
-              onClick={loadPolicy}
-              disabled={isLoading}
-              className="p-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
-              title="Tải lại dữ liệu"
+              type="button"
+              onClick={handleSavePolicy}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <Save className="w-3.5 h-3.5" />
+              <span>{isSaving ? 'Đang lưu...' : 'Lưu chính sách'}</span>
             </button>
           </div>
-        </div>
+        }
+      />
 
+      <div className="p-4 sm:p-5 space-y-4 max-w-4xl pb-16">
         {/* HỘP QUY ĐỊNH NGHIỆP VỤ */}
-        <div className="mt-4 p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-950 text-xs flex items-start space-x-2.5">
-          <AlertTriangle className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <strong>Nguyên tắc bến bãi Sơn Cảng (Cửa khẩu Tà Lùng):</strong> Phương tiện ra vào thực tế phát sinh nhiều tình huống: xe bo chở hàng quay vòng nhiều chuyến trong ngày, xe đầu kéo hạ bãi rồi đi ra chưa kịp quẹt cổng ra, hoặc ca trước quên xác nhận xuất bãi. Hệ thống cho phép cấu hình sâu nhiều kịch bản linh hoạt để An ninh kiểm soát chặt chẽ mà không làm tắc cổng.
+            <span className="font-semibold text-[#17202E]">Nguyên tắc bến bãi Sơn Cảng:</span>
+            <p className="text-[12px] text-[#667085] mt-0.5">
+              Phương tiện ra vào phát sinh nhiều tình huống: xe bo chở hàng quay vòng nhiều chuyến trong ngày, xe đầu kéo hạ bãi rồi đi ra chưa kịp quẹt cổng ra, hoặc ca trước quên xác nhận xuất bãi. Hệ thống cho phép cấu hình sâu các kịch bản để An ninh kiểm soát chặt chẽ mà không làm tắc cổng.
+            </p>
           </div>
         </div>
 
         {/* THÔNG BÁO PHẢN HỒI */}
         {successMessage && (
-          <div className="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center space-x-2 animate-in fade-in">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#0A9444] shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center space-x-2 animate-in fade-in">
-            <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+          <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] rounded-lg text-xs font-medium flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#D92D20] shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
-      </div>
 
-      {isLoading ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
-          <RefreshCw className="w-8 h-8 text-purple-600 animate-spin mx-auto mb-3" />
-          <p className="text-xs text-slate-500 font-semibold">Đang nạp cấu hình chính sách từ hệ thống...</p>
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {/* PHẦN 1: CHẾ ĐỘ XỬ LÝ CHÍNH */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3.5">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-                <span>1. Chế độ xử lý khi phát hiện xe đang trong bãi</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Quyết định hành vi mặc định khi An ninh tiếp nhận biển số xe đang có bản ghi Trong bãi (IN_YARD).
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                {
-                  code: 'WARN_AND_ALLOW',
-                  title: 'Cảnh báo & Cho phép ghi đè kèm lý do (Khuyên dùng)',
-                  badge: 'Thực tế Sơn Cảng',
-                  badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                  desc: 'Hiển thị cảnh báo thông tin lượt cũ (giờ vào, đỗ bao lâu, tình trạng vé). An ninh chọn lý do nghiệp vụ và có thể chọn tự động đóng lượt cũ ngay tại Cổng vào.',
-                },
-                {
-                  code: 'BLOCK_STRICT',
-                  title: 'Chặn nghiêm ngặt tuyệt đối',
-                  badge: 'Khóa cổng',
-                  badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
-                  desc: 'Cấm hoàn toàn tiếp nhận xe mới nếu biển số vẫn đang trong bãi (trừ các loại xe thuộc danh mục miễn trừ). Bắt buộc phải xuất bãi tại Cổng ra trước.',
-                },
-                {
-                  code: 'AUTO_CLOSE_PREVIOUS',
-                  title: 'Tự động xuất bãi lượt cũ & Mở lượt mới',
-                  badge: 'Lưu lượng cao',
-                  badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
-                  desc: 'Hệ thống tự động kết thúc lượt xe cũ (ghi chú: tự động xuất bãi) và mở lượt mới mà không cần xác nhận. Thích hợp giờ cao điểm chống ùn tắc.',
-                },
-                {
-                  code: 'ALLOW_SILENT',
-                  title: 'Cho phép tự do (Không cảnh báo)',
-                  badge: 'Mở tự do',
-                  badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
-                  desc: 'Bỏ qua kiểm tra trùng lặp xe trong bãi. Hệ thống cho phép tạo các lượt xe mới bình thường và chỉ ghi vết nhật ký audit log.',
-                },
-              ].map((m) => {
-                const isSelected = policyMode === m.code;
-                return (
-                  <label
-                    key={m.code}
-                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
-                      isSelected
-                        ? 'border-purple-600 bg-purple-50/50 shadow-xs'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="policy_mode"
-                          value={m.code}
-                          checked={isSelected}
-                          onChange={() => setPolicyMode(m.code as DuplicatePolicyMode)}
-                          className="text-purple-600 focus:ring-purple-500"
-                        />
-                        <span className="font-bold text-xs text-slate-900">{m.title}</span>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${m.badgeColor}`}>
-                        {m.badge}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 leading-relaxed pl-5">
-                      {m.desc}
-                    </p>
-                  </label>
-                );
-              })}
-            </div>
+        {isLoading ? (
+          <div className="bg-white rounded-lg p-12 text-center border border-[#E5E9F0]">
+            <RefreshCw className="w-6 h-6 text-[#326DD8] animate-spin mx-auto mb-2" />
+            <p className="text-xs text-[#667085]">Đang nạp cấu hình chính sách từ hệ thống...</p>
           </div>
-
-          {/* PHẦN 2: COOLDOWN & CHỐNG NHẤP LẶP */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                2. Ngưỡng thời gian trùng lặp ngắn (Anti Double-Entry / Cooldown Window)
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Bảo vệ hệ thống khỏi tình huống nhân viên bấm 2 lần liên tiếp hoặc 2 nhân viên cùng thao tác 1 phương tiện.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <label className="block text-xs font-bold text-slate-800">
-                  Thời gian Cooldown tối thiểu (Phút)
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    min="0"
-                    max="180"
-                    value={cooldownMinutes}
-                    onChange={(e) => setCooldownMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-32 px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white focus:border-purple-600 focus:outline-none"
-                  />
-                  <span className="text-xs text-slate-500">phút kể từ lần vào trước</span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Nếu xe vào cách lần trước dưới số phút này sẽ kích hoạt cảnh báo nhấp lặp. Mặc định: 15 phút.
+        ) : (
+          <div className="space-y-4">
+            {/* PHẦN 1: CHẾ ĐỘ XỬ LÝ CHÍNH */}
+            <div className="bg-white rounded-lg p-4 sm:p-5 border border-[#E5E9F0] space-y-3">
+              <div>
+                <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                  1. Chế độ xử lý khi phát hiện xe đang trong bãi
+                </h2>
+                <p className="text-[11px] text-[#667085] mt-0.5">
+                  Quyết định hành vi mặc định khi An ninh tiếp nhận biển số xe đang có bản ghi Trong bãi (IN_YARD).
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <label className="block text-xs font-bold text-slate-800">
-                  Hành vi khi vi phạm Cooldown
-                </label>
-                <div className="space-y-2 pt-1 text-xs">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cooldown_action"
-                      value="BLOCK"
-                      checked={cooldownAction === 'BLOCK'}
-                      onChange={() => setCooldownAction('BLOCK')}
-                      className="text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="font-semibold text-slate-800">Chặn tuyệt đối (Khuyên dùng)</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    code: 'WARN_AND_ALLOW',
+                    title: 'Cảnh báo & Cho phép ghi đè (Khuyên dùng)',
+                    badge: 'Thực tế Sơn Cảng',
+                    desc: 'Hiển thị cảnh báo thông tin lượt cũ. An ninh chọn lý do nghiệp vụ và có thể chọn tự động đóng lượt cũ ngay tại Cổng vào.',
+                  },
+                  {
+                    code: 'BLOCK_STRICT',
+                    title: 'Chặn nghiêm ngặt tuyệt đối',
+                    badge: 'Khóa cổng',
+                    desc: 'Cấm hoàn toàn tiếp nhận xe mới nếu biển số vẫn đang trong bãi (trừ loại xe miễn trừ). Bắt buộc phải xuất bãi tại Cổng ra trước.',
+                  },
+                  {
+                    code: 'AUTO_CLOSE_PREVIOUS',
+                    title: 'Tự động xuất bãi lượt cũ & Mở lượt mới',
+                    badge: 'Lưu lượng cao',
+                    desc: 'Hệ thống tự động kết thúc lượt xe cũ và mở lượt mới mà không cần xác nhận. Thích hợp giờ cao điểm chống ùn tắc.',
+                  },
+                  {
+                    code: 'ALLOW_SILENT',
+                    title: 'Cho phép tự do (Không cảnh báo)',
+                    badge: 'Mở tự do',
+                    desc: 'Bỏ qua kiểm tra trùng lặp xe trong bãi. Hệ thống cho phép tạo các lượt xe mới bình thường và chỉ ghi vết nhật ký audit log.',
+                  },
+                ].map((m) => {
+                  const isSelected = policyMode === m.code;
+                  return (
+                    <label
+                      key={m.code}
+                      className={`p-3.5 rounded-lg border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 ${
+                        isSelected
+                          ? 'border-[#326DD8] bg-[#EFF8FF]'
+                          : 'border-[#E5E9F0] hover:border-[#D0D5DD] bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="policy_mode"
+                            value={m.code}
+                            checked={isSelected}
+                            onChange={() => setPolicyMode(m.code as DuplicatePolicyMode)}
+                            className="text-[#326DD8] focus:ring-[#326DD8]"
+                          />
+                          <span className="font-semibold text-xs text-[#17202E]">{m.title}</span>
+                        </div>
+                        <StatusBadge variant={isSelected ? 'info' : 'neutral'} label={m.badge} />
+                      </div>
+                      <p className="text-[11px] text-[#667085] leading-relaxed pl-5">
+                        {m.desc}
+                      </p>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* PHẦN 2: COOLDOWN & CHỐNG NHẤP LẶP */}
+            <div className="bg-white rounded-lg p-4 sm:p-5 border border-[#E5E9F0] space-y-3">
+              <div>
+                <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                  2. Ngưỡng thời gian trùng lặp ngắn (Anti Double-Entry / Cooldown Window)
+                </h2>
+                <p className="text-[11px] text-[#667085] mt-0.5">
+                  Bảo vệ hệ thống khỏi tình huống nhân viên bấm 2 lần liên tiếp hoặc 2 nhân viên cùng thao tác 1 phương tiện.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] space-y-1.5">
+                  <label className="block font-semibold text-[#17202E]">
+                    Thời gian Cooldown tối thiểu (Phút)
                   </label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                  <div className="flex items-center gap-2">
                     <input
-                      type="radio"
-                      name="cooldown_action"
-                      value="WARN"
-                      checked={cooldownAction === 'WARN'}
-                      onChange={() => setCooldownAction('WARN')}
-                      className="text-purple-600 focus:ring-purple-500"
+                      type="number"
+                      min="0"
+                      max="180"
+                      value={cooldownMinutes}
+                      onChange={(e) => setCooldownMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-28 px-3 py-1.5 font-mono text-sm font-bold border border-[#E5E9F0] rounded-lg bg-white focus:border-[#326DD8] focus:outline-none"
                     />
-                    <span className="font-semibold text-slate-800">Cảnh báo nghiêm ngặt (Cho phép xác nhận tiếp tục)</span>
+                    <span className="text-[#667085]">phút kể từ lần vào trước</span>
+                  </div>
+                  <p className="text-[11px] text-[#98A2B3]">
+                    Mặc định: 15 phút.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] space-y-1.5">
+                  <label className="block font-semibold text-[#17202E]">
+                    Hành vi khi vi phạm Cooldown
                   </label>
+                  <div className="space-y-2 pt-1 text-xs">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cooldown_action"
+                        value="BLOCK"
+                        checked={cooldownAction === 'BLOCK'}
+                        onChange={() => setCooldownAction('BLOCK')}
+                        className="text-[#326DD8] focus:ring-[#326DD8]"
+                      />
+                      <span className="font-medium text-[#17202E]">Chặn tuyệt đối (Khuyên dùng)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cooldown_action"
+                        value="WARN"
+                        checked={cooldownAction === 'WARN'}
+                        onChange={() => setCooldownAction('WARN')}
+                        className="text-[#326DD8] focus:ring-[#326DD8]"
+                      />
+                      <span className="font-medium text-[#17202E]">Cảnh báo (Cho phép xác nhận tiếp tục)</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* PHẦN 3: KIỂM TRA CÔNG NỢ VÉ VÀ TIỆN ÍCH CỔNG VÀO */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                3. Kiểm soát Tài chính & Tiện ích Thao tác Cổng vào
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Ràng buộc công nợ vé vào cổng của lượt cũ và tính năng thao tác nhanh cho nhân viên An ninh.
-              </p>
-            </div>
+            {/* PHẦN 3: KIỂM TRA CÔNG NỢ VÉ VÀ TIỆN ÍCH CỔNG VÀO */}
+            <div className="bg-white rounded-lg p-4 sm:p-5 border border-[#E5E9F0] space-y-3">
+              <div>
+                <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                  3. Kiểm soát Tài chính & Tiện ích Thao tác Cổng vào
+                </h2>
+                <p className="text-[11px] text-[#667085] mt-0.5">
+                  Ràng buộc công nợ vé vào cổng của lượt cũ và tiện ích xử lý nhanh cho nhân viên An ninh.
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              {/* Check Unpaid Ticket */}
-              <label className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checkUnpaidTicket}
-                  onChange={(e) => setCheckUnpaidTicket(e.target.checked)}
-                  className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 mt-0.5"
-                />
-                <div>
-                  <span className="font-bold text-slate-800">Kiểm tra công nợ vé lượt cũ</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                    Phát hiện và cảnh báo màu đỏ nếu xe đang có lượt cũ trong bãi chưa thanh toán tiền vé cổng (UNPAID).
-                  </p>
-                </div>
-              </label>
-
-              {/* Block if Unpaid Ticket */}
-              <label className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={blockIfUnpaidTicket}
-                  disabled={!checkUnpaidTicket}
-                  onChange={(e) => setBlockIfUnpaidTicket(e.target.checked)}
-                  className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 mt-0.5 disabled:opacity-50"
-                />
-                <div>
-                  <span className="font-bold text-slate-800">Chặn vào cổng nếu còn nợ vé cũ</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                    Bắt buộc tài xế phải thanh toán vé lượt trước mới cho phép mở lượt xe vào bãi mới.
-                  </p>
-                </div>
-              </label>
-
-              {/* Require Reason */}
-              <label className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={requireOverrideReason}
-                  onChange={(e) => setRequireOverrideReason(e.target.checked)}
-                  className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 mt-0.5"
-                />
-                <div>
-                  <span className="font-bold text-slate-800">Bắt buộc nhập / chọn lý do khi ghi đè</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                    Yêu cầu An ninh phải chọn lý do nghiệp vụ giải trình cho việc tiếp nhận xe trùng lặp để lưu vết audit log.
-                  </p>
-                </div>
-              </label>
-
-              {/* Allow Quick Exit */}
-              <label className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={allowQuickExitPrevious}
-                  onChange={(e) => setAllowQuickExitPrevious(e.target.checked)}
-                  className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 mt-0.5"
-                />
-                <div>
-                  <span className="font-bold text-slate-800">Cho phép An ninh đóng nhanh lượt cũ tại Cổng vào</span>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                    Ngay tại modal tiếp nhận, an ninh có thể tick &quot;Đồng thời xuất bãi lượt cũ&quot; giúp làm sạch dữ liệu bãi ngay lập tức.
-                  </p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {/* PHẦN 4: DANH SÁCH LOẠI PHƯƠNG TIỆN NGOẠI LỆ */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                4. Danh sách Loại phương tiện Ngoại lệ (Chạy nhiều chuyến liên tục)
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Các loại xe được tích chọn bên dưới sẽ được phép vào nhiều lượt dễ dàng, không bị chặn bởi chế độ &quot;Chặn nghiêm ngặt&quot;.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
-              {vehicleTypes.map((vt) => {
-                const isExempt = exemptVehicleTypes.includes(vt.code);
-                return (
-                  <label
-                    key={vt.code}
-                    className={`p-3 rounded-xl border transition-colors flex items-center space-x-2.5 cursor-pointer ${
-                      isExempt
-                        ? 'bg-purple-50 border-purple-300 text-purple-950 font-semibold'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isExempt}
-                      onChange={() => handleToggleExemptType(vt.code)}
-                      className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <div className="truncate">
-                      <p className="truncate font-bold">{vt.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">{vt.code}</p>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* PHẦN 5: DANH MỤC LÝ DO MẪU CẤU HÌNH ĐƯỢC */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                5. Danh mục Lý do mẫu khi tiếp nhận trùng lặp
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Các lý do hiển thị trong hộp chọn trên màn hình Cổng vào để nhân viên An ninh thao tác nhanh.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {presetReasons.map((r, idx) => (
-                <div
-                  key={r.code || idx}
-                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs"
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-500 text-[11px]">
-                      {idx + 1}
-                    </span>
-                    <span className="font-semibold text-slate-800">{r.label}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <label className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={checkUnpaidTicket}
+                    onChange={(e) => setCheckUnpaidTicket(e.target.checked)}
+                    className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8] mt-0.5"
+                  />
+                  <div>
+                    <span className="font-semibold text-[#17202E]">Kiểm tra công nợ vé lượt cũ</span>
+                    <p className="text-[11px] text-[#667085] mt-0.5 leading-relaxed">
+                      Phát hiện và cảnh báo nếu xe đang có lượt cũ trong bãi chưa thanh toán tiền vé cổng (UNPAID).
+                    </p>
                   </div>
-                  {r.code !== 'LY_DO_KHAC' && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveReason(r.code)}
-                      className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
-                      title="Xóa lý do này"
+                </label>
+
+                <label className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={blockIfUnpaidTicket}
+                    disabled={!checkUnpaidTicket}
+                    onChange={(e) => setBlockIfUnpaidTicket(e.target.checked)}
+                    className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8] mt-0.5 disabled:opacity-50"
+                  />
+                  <div>
+                    <span className="font-semibold text-[#17202E]">Chặn vào cổng nếu còn nợ vé cũ</span>
+                    <p className="text-[11px] text-[#667085] mt-0.5 leading-relaxed">
+                      Bắt buộc tài xế phải thanh toán vé lượt trước mới cho phép mở lượt xe vào bãi mới.
+                    </p>
+                  </div>
+                </label>
+
+                <label className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={requireOverrideReason}
+                    onChange={(e) => setRequireOverrideReason(e.target.checked)}
+                    className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8] mt-0.5"
+                  />
+                  <div>
+                    <span className="font-semibold text-[#17202E]">Bắt buộc chọn lý do khi ghi đè</span>
+                    <p className="text-[11px] text-[#667085] mt-0.5 leading-relaxed">
+                      Yêu cầu An ninh phải chọn lý do nghiệp vụ giải trình cho việc tiếp nhận xe trùng lặp.
+                    </p>
+                  </div>
+                </label>
+
+                <label className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allowQuickExitPrevious}
+                    onChange={(e) => setAllowQuickExitPrevious(e.target.checked)}
+                    className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8] mt-0.5"
+                  />
+                  <div>
+                    <span className="font-semibold text-[#17202E]">Cho phép đóng nhanh lượt cũ tại Cổng vào</span>
+                    <p className="text-[11px] text-[#667085] mt-0.5 leading-relaxed">
+                      An ninh có thể tick &quot;Đồng thời xuất bãi lượt cũ&quot; giúp làm sạch dữ liệu bãi ngay lập tức.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* PHẦN 4: DANH SÁCH LOẠI PHƯƠNG TIỆN NGOẠI LỆ */}
+            <div className="bg-white rounded-lg p-4 sm:p-5 border border-[#E5E9F0] space-y-3">
+              <div>
+                <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                  4. Danh sách Loại phương tiện Ngoại lệ (Chạy nhiều chuyến liên tục)
+                </h2>
+                <p className="text-[11px] text-[#667085] mt-0.5">
+                  Các loại xe được tích chọn bên dưới sẽ được phép vào nhiều lượt dễ dàng, không bị chặn bởi chế độ &quot;Chặn nghiêm ngặt&quot;.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+                {vehicleTypes.map((vt) => {
+                  const isExempt = exemptVehicleTypes.includes(vt.code);
+                  return (
+                    <label
+                      key={vt.code}
+                      className={`p-3 rounded-lg border transition-colors flex items-center gap-2.5 cursor-pointer ${
+                        isExempt
+                          ? 'bg-[#EFF8FF] border-[#B2DDFF] text-[#17202E] font-medium'
+                          : 'bg-white border-[#E5E9F0] text-[#667085] hover:bg-[#F8F9FB]'
+                      }`}
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
+                      <input
+                        type="checkbox"
+                        checked={isExempt}
+                        onChange={() => handleToggleExemptType(vt.code)}
+                        className="rounded border-[#E5E9F0] text-[#326DD8] focus:ring-[#326DD8]"
+                      />
+                      <div className="truncate">
+                        <p className="truncate font-semibold text-[#17202E]">{vt.name}</p>
+                        <p className="text-[10px] text-[#98A2B3] font-mono">{vt.code}</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Thêm lý do mới */}
-            <div className="flex items-center space-x-2 pt-2">
-              <input
-                type="text"
-                value={newReasonText}
-                onChange={(e) => setNewReasonText(e.target.value)}
-                placeholder="Nhập lý do nghiệp vụ mẫu mới..."
-                className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:border-purple-600 focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddReason();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={handleAddReason}
-                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-colors flex items-center space-x-1 cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Thêm lý do</span>
-              </button>
-            </div>
-          </div>
+            {/* PHẦN 5: DANH MỤC LÝ DO MẪU CẤU HÌNH ĐƯỢC */}
+            <div className="bg-white rounded-lg p-4 sm:p-5 border border-[#E5E9F0] space-y-3">
+              <div>
+                <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider">
+                  5. Danh mục Lý do mẫu khi tiếp nhận trùng lặp
+                </h2>
+                <p className="text-[11px] text-[#667085] mt-0.5">
+                  Các lý do hiển thị trong hộp chọn trên màn hình Cổng vào để nhân viên An ninh thao tác nhanh.
+                </p>
+              </div>
 
-          {/* THANH THAO TÁC LƯU DƯỚI CÙNG */}
-          <div className="sticky bottom-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-lg flex items-center justify-between">
-            <div className="text-xs text-slate-500 font-medium hidden sm:block">
-              Thay đổi chính sách sẽ áp dụng ngay lập tức cho các lượt xe vào cổng mới.
+              <div className="space-y-1.5">
+                {presetReasons.map((r, idx) => (
+                  <div
+                    key={r.code || idx}
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded bg-white border border-[#E5E9F0] flex items-center justify-center font-mono text-[10px] text-[#667085]">
+                        {idx + 1}
+                      </span>
+                      <span className="font-medium text-[#17202E]">{r.label}</span>
+                    </div>
+                    {r.code !== 'LY_DO_KHAC' && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReason(r.code)}
+                        className="text-[#98A2B3] hover:text-[#D92D20] p-1 rounded hover:bg-[#FEF3F2] transition-colors cursor-pointer"
+                        title="Xóa lý do này"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Thêm lý do mới */}
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="text"
+                  value={newReasonText}
+                  onChange={(e) => setNewReasonText(e.target.value)}
+                  placeholder="Nhập lý do nghiệp vụ mẫu mới..."
+                  className="flex-1 px-3 py-1.5 text-xs border border-[#E5E9F0] rounded-lg bg-white text-[#17202E] focus:border-[#326DD8] focus:outline-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddReason();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddReason}
+                  className="px-3.5 py-1.5 bg-[#326DD8] hover:bg-[#2557B4] text-white font-medium text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm lý do</span>
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              disabled={isSaving}
-              onClick={handleSavePolicy}
-              className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer disabled:opacity-50"
-            >
-              {isSaving ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Đang lưu chính sách...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Lưu Chính Sách Trùng Lặp</span>
-                </>
-              )}
-            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

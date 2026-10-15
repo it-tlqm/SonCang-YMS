@@ -40,8 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 14/10/2026 18:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH CHUYỂN ĐỔI SANG SUPABASE AUTH THỰC TẾ & LOẠI BỎ TOÀN BỘ TÀI KHOẢN TẠM TẠI MÀN HÌNH ĐĂNG NHẬP**:
+- **Cập nhật lúc:** 15/10/2026 07:25 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH RÀ SOÁT TOÀN DIỆN & NÂNG CẤP ĐỒNG BỘ 100% CÁC MÀN HÌNH SANG MODERN ENTERPRISE WORKSPACE (DS-02)**:
+  * **Hạng mục rà soát & nâng cấp bổ sung:**
+    1. **Màn hình Thống kê & Báo cáo (`/reports`):** Tái cấu trúc hoàn chỉnh theo chuẩn DS-02 5 vùng làm việc (Secondary Panel chọn khoảng thời gian & bộ phận thực thu, Main Workspace với 4 tab chuyên sâu: Doanh thu & Dòng tiền, Lưu lượng xe & 7 loại xe, Container & Điện lạnh, Phân khu & Công suất bãi; Right Context Inspector tổng hợp chỉ số điều hành trọng yếu; Modal xem trước bản in chuẩn hành chính).
+    2. **Màn hình Đăng nhập Công vụ (`/login`):** Thiết kế lại giao diện tối giản Enterprise, chuẩn hóa bảng màu DS-02 (nền `#F8F9FB`, viền `#E5E9F0`, nhận diện thương hiệu `#0A9444`), loại bỏ hoàn toàn các thuật ngữ kỹ thuật nội bộ (Supabase, Database, PostgreSQL RLS) khỏi nhãn hiển thị và chip bảo mật.
+    3. **Rà soát & Làm sạch Toàn diện Codebase:** Kiểm tra tự động 100% các file `src/` bằng script audit, làm sạch các thông báo tải dữ liệu và tooltip phân quyền tại `src/app/admin/users/page.tsx` và `src/app/api/admin/users/reset-password/route.ts`.
+  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
+    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu trên toàn bộ repository).
+    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+    - Server Production thử nghiệm: Chạy ổn định trên cổng 3005 (`task-1184`), phản hồi **HTTP 200 OK trên toàn bộ 15 routes**.
+    - An toàn nghiệp vụ: Bảo toàn nguyên vẹn RBAC V5, schema database, migrations 001–028, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+    - Chuẩn hóa ngôn ngữ: Sử dụng danh xưng nghiệp vụ **Phần mềm quản lý bến bãi/cảng cạn**, không sử dụng từ "BOS".
+  * **Bước tiếp theo:** Bàn giao giao diện hoàn thiện và tiếp nhận ý kiến đóng góp từ Chủ dự án.
+
+- **Mốc trước đó (14/10/2026 18:15):** **HOÀN THÀNH CHUYỂN ĐỔI SANG SUPABASE AUTH THỰC TẾ & LOẠI BỎ TOÀN BỘ TÀI KHOẢN TẠM TẠI MÀN HÌNH ĐĂNG NHẬP**:
   * **Loại bỏ giao diện Đăng nhập tạm (1-chạm):** Đã xóa toàn bộ khối demo chọn vai trò 1-chạm trên `/login`, chuyển sang màn hình đăng nhập chuẩn doanh nghiệp với Email công vụ + Mật khẩu (bảo mật SSL, tích hợp trực tiếp Supabase Cloud PostgreSQL RLS).
   * **Thiết lập tài khoản Super Admin chính thức:**
     - Email: `it@talunglogistics.com` | Mật khẩu: `SonCang@2026!IT`

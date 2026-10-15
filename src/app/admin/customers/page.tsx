@@ -11,15 +11,16 @@ import {
   Pencil, 
   Trash2, 
   Phone, 
-  ArrowLeft, 
-  CheckCircle2, 
+  Check, 
   AlertCircle, 
   Loader2, 
-  FileText, 
   Save, 
-  ShieldCheck,
-  Power
+  X,
+  Users
 } from 'lucide-react';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
 
 export default function CustomersAdminPage() {
   const { repository, can, role } = useAuth();
@@ -107,12 +108,12 @@ export default function CustomersAdminPage() {
     setShowModal(true);
   };
 
-  // Lưu Khách hàng
+  // Lưu thông tin
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedName = formName.trim();
-    if (!trimmedName) {
-      setErrorMessage('Tên Khách hàng / Doanh nghiệp không được để trống.');
+    const cleanName = formName.trim();
+    if (!cleanName) {
+      setErrorMessage('Tên khách hàng không được để trống.');
       return;
     }
 
@@ -122,7 +123,7 @@ export default function CustomersAdminPage() {
 
       if (modalMode === 'CREATE') {
         const res = await repository.createCustomer({
-          name: trimmedName,
+          name: cleanName,
           phone: formPhone.trim() || undefined,
           tax_code: formTaxCode.trim() || undefined,
           address: formAddress.trim() || undefined,
@@ -130,15 +131,15 @@ export default function CustomersAdminPage() {
         });
 
         if (!res.success || !res.customer) {
-          setErrorMessage(res.error || 'Lỗi khi tạo mới khách hàng.');
+          setErrorMessage(res.error || 'Lỗi khi thêm mới khách hàng.');
           return;
         }
 
-        setSuccessMessage(`Đã thêm mới thành công khách hàng "${res.customer.name}".`);
+        setSuccessMessage(`Đã thêm mới thành công đối tác "${res.customer.name}".`);
       } else if (selectedCustomer) {
         const res = await repository.updateCustomer({
           id: selectedCustomer.id,
-          name: trimmedName,
+          name: cleanName,
           phone: formPhone.trim() || undefined,
           tax_code: formTaxCode.trim() || undefined,
           address: formAddress.trim() || undefined,
@@ -206,182 +207,185 @@ export default function CustomersAdminPage() {
   const enterpriseCount = customers.filter(c => Boolean(c.tax_code)).length;
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Header Bar */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E3E8EF] shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#223873] flex items-center justify-center font-bold">
-              <Building2 className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold tracking-wider uppercase text-blue-700">
-                Danh mục Đối tác & Khách hàng
-              </span>
-              <h1 className="text-lg sm:text-xl font-black text-[#223873] mt-0.5">
-                Quản lý Khách hàng & Chủ hàng Bến bãi
-              </h1>
-            </div>
-          </div>
-
+    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+      {/* 1. WORKSPACE HEADER */}
+      <WorkspaceHeader
+        title="Danh mục Đối tác & Khách hàng"
+        subtitle="Quản lý thông tin chủ hàng, mã số thuế doanh nghiệp và hồ sơ đối soát bến bãi"
+        icon={Building2}
+        badge={
+          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+            {totalCount} đối tác
+          </span>
+        }
+        actions={
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0A9444] hover:bg-[#087C3C] text-xs font-bold text-white shadow-2xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Thêm mới Khách hàng</span>
             </button>
           </div>
-        </div>
+        }
+      />
 
+      {/* KPI Cards Strip */}
+      <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl">
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[#667085] block text-[11px]">Tổng số đối tác</span>
+            <span className="text-xl font-bold font-mono text-[#17202E] mt-0.5 block">{totalCount}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[#667085] block text-[11px]">Đang giao dịch hoạt động</span>
+            <span className="text-xl font-bold font-mono text-[#0A9444] mt-0.5 block">{activeCount}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[#667085] block text-[11px]">Doanh nghiệp có Mã số thuế</span>
+            <span className="text-xl font-bold font-mono text-[#326DD8] mt-0.5 block">{enterpriseCount}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-5 space-y-4 max-w-6xl">
         {/* Thông báo thành công */}
         {successMessage && (
-          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMessage}</span>
+          <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span>{successMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage('')}
+              className="text-[#0A9444] hover:underline cursor-pointer font-semibold text-xs"
+            >
+              Đóng
+            </button>
           </div>
         )}
 
-        {/* Thống kê thẻ tóm tắt */}
-        <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <span className="text-slate-500 block text-[11px]">Tổng số đối tác</span>
-            <span className="text-base font-black text-slate-900 mt-0.5 block">{totalCount}</span>
-          </div>
-          <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100">
-            <span className="text-emerald-700 block text-[11px]">Đang giao dịch</span>
-            <span className="text-base font-black text-[#0A9444] mt-0.5 block">{activeCount}</span>
-          </div>
-          <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100">
-            <span className="text-blue-700 block text-[11px]">Doanh nghiệp có MST</span>
-            <span className="text-base font-black text-[#223873] mt-0.5 block">{enterpriseCount}</span>
-          </div>
-        </div>
-      </div>
+        {/* Thanh tìm kiếm & Bộ lọc */}
+        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden">
+          <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="w-full sm:w-80">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Tìm tên khách hàng, SĐT, MST, ghi chú..."
+              />
+            </div>
 
-      {/* Thanh tìm kiếm & Bộ lọc */}
-      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tìm tên khách hàng, SĐT, MST, ghi chú..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#223873] bg-slate-50/50"
-          />
-        </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-[#E5E9F0] bg-white text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+              >
+                <option value="ALL">Tất cả trạng thái ({customers.length})</option>
+                <option value="ACTIVE">Đang hoạt động ({activeCount})</option>
+                <option value="INACTIVE">Tạm ngưng ({totalCount - activeCount})</option>
+              </select>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none"
-          >
-            <option value="ALL">Tất cả trạng thái ({customers.length})</option>
-            <option value="ACTIVE">Đang hoạt động ({activeCount})</option>
-            <option value="INACTIVE">Tạm ngưng ({totalCount - activeCount})</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Bảng danh sách khách hàng */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="px-4 py-3">Tên Khách hàng / Doanh nghiệp</th>
-                <th className="px-3 py-3">Điện thoại liên hệ</th>
-                <th className="px-3 py-3">Mã số thuế</th>
-                <th className="px-3 py-3">Ghi chú đối tác / Loại hàng</th>
-                <th className="px-3 py-3 text-center">Trạng thái</th>
-                <th className="px-4 py-3 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {isLoading ? (
+          {/* Bảng danh sách khách hàng */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold text-[11px]">
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#223873]" />
-                    <span>Đang tải danh mục khách hàng...</span>
-                  </td>
+                  <th className="px-4 py-2.5">Tên Khách hàng / Doanh nghiệp</th>
+                  <th className="px-3 py-2.5">Điện thoại liên hệ</th>
+                  <th className="px-3 py-2.5">Mã số thuế</th>
+                  <th className="px-3 py-2.5">Ghi chú đối tác / Loại hàng</th>
+                  <th className="px-3 py-2.5 text-center">Trạng thái</th>
+                  <th className="px-4 py-2.5 text-right">Thao tác</th>
                 </tr>
-              ) : filteredCustomers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
-                    Không tìm thấy khách hàng nào phù hợp với điều kiện tìm kiếm.
-                  </td>
-                </tr>
-              ) : (
-                filteredCustomers.map((c) => {
-                  const isActive = c.is_active !== false;
-                  return (
-                    <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-slate-900 text-sm">{c.name}</div>
-                        {c.address && (
-                          <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{c.address}</div>
-                        )}
-                      </td>
-                      <td className="px-3 py-3">
-                        {c.phone ? (
-                          <span className="font-mono font-semibold text-slate-800 flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-slate-400" />
-                            {c.phone}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-3 font-mono font-semibold text-slate-700">
-                        {c.tax_code || <span className="text-slate-400 font-sans font-normal">—</span>}
-                      </td>
-                      <td className="px-3 py-3 text-slate-600 max-w-xs">
-                        {c.notes || <span className="text-slate-400">—</span>}
-                      </td>
-                      <td className="px-3 py-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(c)}
-                          title="Bấm để đổi trạng thái hoạt động"
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border cursor-pointer transition-colors ${
-                            isActive
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200'
-                          }`}
-                        >
-                          {isActive ? '● Đang giao dịch' : '○ Tạm ngưng'}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5">
+              </thead>
+              <tbody className="divide-y divide-[#E5E9F0]">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="p-10 text-center text-[#98A2B3]">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-[#326DD8]" />
+                      <span>Đang tải danh mục khách hàng...</span>
+                    </td>
+                  </tr>
+                ) : filteredCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-10 text-center text-[#98A2B3]">
+                      Không tìm thấy đối tác nào phù hợp với bộ lọc tìm kiếm.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCustomers.map((c) => {
+                    const isActive = c.is_active !== false;
+                    return (
+                      <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-[#17202E] text-xs">{c.name}</div>
+                          {c.address && (
+                            <div className="text-[11px] text-[#667085] mt-0.5 line-clamp-1">{c.address}</div>
+                          )}
+                        </td>
+                        <td className="px-3 py-3">
+                          {c.phone ? (
+                            <span className="font-mono text-[#17202E] flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-[#98A2B3]" />
+                              {c.phone}
+                            </span>
+                          ) : (
+                            <span className="text-[#98A2B3]">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 font-mono text-[#17202E]">
+                          {c.tax_code || <span className="text-[#98A2B3]">—</span>}
+                        </td>
+                        <td className="px-3 py-3 text-[#667085] max-w-xs truncate">
+                          {c.notes || <span className="text-[#98A2B3]">—</span>}
+                        </td>
+                        <td className="px-3 py-3 text-center">
                           <button
                             type="button"
-                            onClick={() => handleOpenEdit(c)}
-                            title="Chỉnh sửa thông tin khách hàng"
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 transition-colors cursor-pointer"
+                            onClick={() => handleToggleStatus(c)}
+                            title="Bấm để đổi trạng thái"
+                            className="cursor-pointer"
                           >
-                            <Pencil className="w-3.5 h-3.5" />
+                            <StatusBadge
+                              variant={isActive ? 'success' : 'neutral'}
+                              label={isActive ? 'Đang giao dịch' : 'Tạm ngưng'}
+                            />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(c)}
-                            title="Xóa khách hàng"
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                        </td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(c)}
+                              title="Chỉnh sửa thông tin"
+                              className="p-1.5 rounded-md text-[#667085] hover:text-[#326DD8] hover:bg-[#F1F4F8] transition-colors cursor-pointer"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(c)}
+                              title="Xóa khách hàng"
+                              className="p-1.5 rounded-md text-[#667085] hover:text-[#D92D20] hover:bg-[#FEF3F2] transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -389,127 +393,131 @@ export default function CustomersAdminPage() {
       {/* MODAL THÊM MỚI / CHỈNH SỬA KHÁCH HÀNG                                     */}
       {/* ========================================================================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 border border-slate-300">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#223873]" />
-                <span>{modalMode === 'CREATE' ? 'Thêm mới Khách hàng / Chủ hàng' : 'Chỉnh sửa Khách hàng'}</span>
-              </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full border border-[#E5E9F0] shadow-xl overflow-hidden space-y-4">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#326DD8]" />
+                <h3 className="text-xs font-semibold text-[#17202E] uppercase tracking-wide">
+                  {modalMode === 'CREATE' ? 'Thêm mới Khách hàng / Chủ hàng' : 'Chỉnh sửa Khách hàng'}
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                className="text-[#98A2B3] hover:text-[#17202E] p-1 rounded-md hover:bg-[#F1F4F8] transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {errorMessage && (
-              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmitForm} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Tên Khách hàng / Doanh nghiệp <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="VD: Công ty TNHH Vận tải Á Châu..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Số điện thoại liên hệ</label>
-                  <input
-                    type="text"
-                    value={formPhone}
-                    onChange={(e) => setFormPhone(e.target.value)}
-                    placeholder="VD: 0912.345.678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Mã số thuế doanh nghiệp</label>
-                  <input
-                    type="text"
-                    value={formTaxCode}
-                    onChange={(e) => setFormTaxCode(e.target.value)}
-                    placeholder="VD: 0102345678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-medium text-slate-700 mb-1">Địa chỉ trụ sở / Kho bãi</label>
-                <input
-                  type="text"
-                  value={formAddress}
-                  onChange={(e) => setFormAddress(e.target.value)}
-                  placeholder="VD: Khu kinh tế cửa khẩu Tà Lùng, Quảng Hòa, Cao Bằng..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-slate-700 mb-1">Ghi chú đối tác / Loại hàng chuyên tuyến</label>
-                <textarea
-                  rows={2}
-                  value={formNotes}
-                  onChange={(e) => setFormNotes(e.target.value)}
-                  placeholder="VD: Khách thường xuyên chạy hoa quả lạnh, thanh toán chuyển khoản..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#223873]"
-                />
-              </div>
-
-              {modalMode === 'EDIT' && (
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="checkbox"
-                    id="chkIsActive"
-                    checked={formIsActive}
-                    onChange={(e) => setFormIsActive(e.target.checked)}
-                    className="w-4 h-4 text-[#223873] rounded border-slate-300 cursor-pointer"
-                  />
-                  <label htmlFor="chkIsActive" className="text-xs font-semibold text-slate-700 cursor-pointer">
-                    Trạng thái: Đang giao dịch hoạt động
-                  </label>
+            <div className="p-5 pt-0 space-y-4">
+              {errorMessage && (
+                <div className="p-3 bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] rounded-lg text-xs font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  <span>{modalMode === 'CREATE' ? 'Tạo mới Khách hàng' : 'Lưu thay đổi'}</span>
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSubmitForm} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block font-semibold text-[#17202E] mb-1">
+                    Tên Khách hàng / Doanh nghiệp <span className="text-[#D92D20]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="VD: Công ty TNHH Vận tải Á Châu..."
+                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-medium text-[#667085] mb-1">Số điện thoại liên hệ</label>
+                    <input
+                      type="text"
+                      value={formPhone}
+                      onChange={(e) => setFormPhone(e.target.value)}
+                      placeholder="VD: 0912.345.678"
+                      className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg font-mono text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium text-[#667085] mb-1">Mã số thuế doanh nghiệp</label>
+                    <input
+                      type="text"
+                      value={formTaxCode}
+                      onChange={(e) => setFormTaxCode(e.target.value)}
+                      placeholder="VD: 0102345678"
+                      className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg font-mono text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-medium text-[#667085] mb-1">Địa chỉ trụ sở / Kho bãi</label>
+                  <input
+                    type="text"
+                    value={formAddress}
+                    onChange={(e) => setFormAddress(e.target.value)}
+                    placeholder="VD: Cửa khẩu Tà Lùng, Quảng Hòa, Cao Bằng..."
+                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium text-[#667085] mb-1">Ghi chú đối tác / Loại hàng chuyên tuyến</label>
+                  <textarea
+                    rows={2}
+                    value={formNotes}
+                    onChange={(e) => setFormNotes(e.target.value)}
+                    placeholder="VD: Khách thường xuyên chạy hoa quả lạnh..."
+                    className="w-full px-3 py-2 border border-[#E5E9F0] rounded-lg text-xs text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]"
+                  />
+                </div>
+
+                {modalMode === 'EDIT' && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="checkbox"
+                      id="chkIsActive"
+                      checked={formIsActive}
+                      onChange={(e) => setFormIsActive(e.target.checked)}
+                      className="w-4 h-4 text-[#326DD8] rounded border-[#E5E9F0] cursor-pointer"
+                    />
+                    <label htmlFor="chkIsActive" className="text-xs font-medium text-[#17202E] cursor-pointer">
+                      Đang giao dịch hoạt động
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2.5 pt-3 border-t border-[#E5E9F0]">
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => setShowModal(false)}
+                    className="px-3.5 py-2 text-xs font-medium text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] rounded-lg cursor-pointer transition-colors"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-2xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    <span>{modalMode === 'CREATE' ? 'Thêm khách hàng' : 'Lưu thay đổi'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

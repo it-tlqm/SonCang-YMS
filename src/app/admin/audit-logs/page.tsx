@@ -6,21 +6,16 @@ import { useAuth } from '@/contexts/auth-context';
 import { 
   History, 
   ShieldAlert, 
-  Search, 
-  RefreshCw, 
   ArrowLeft, 
-  Filter, 
-  Calendar, 
-  User, 
-  FileText,
-  AlertTriangle,
-  CheckCircle2,
-  Lock,
-  Layers,
-  Truck,
-  Zap,
-  Receipt
+  Lock, 
+  Users,
+  Search,
+  Filter
 } from 'lucide-react';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 export interface AuditLogEntry {
   id: string;
@@ -38,7 +33,7 @@ export interface AuditLogEntry {
 }
 
 export default function AuditLogsAdminPage() {
-  const { user, role, can, authMode } = useAuth();
+  const { user, role, can } = useAuth();
 
   // Kiểm tra quyền kiểm toán / quản trị
   const isAllowed = role === 'SYS_ADMIN' || can('admin.roles.manage') || can('report.revenue.read');
@@ -99,7 +94,7 @@ export default function AuditLogsAdminPage() {
               old_value: item.old_number,
               new_value: item.new_number,
               reason: item.reason,
-              occurred_at: item.created_at,
+              occurred_at: item.changed_at,
             });
           });
         }
@@ -107,16 +102,16 @@ export default function AuditLogsAdminPage() {
         // ignore
       }
 
-      // 3. Mẫu log hệ thống chuẩn cho audit trail
+      // 3. Demo logs mẫu chuẩn
       if (generatedLogs.length === 0) {
         generatedLogs.push(
           {
             id: 'log-seed-1',
             event_name: 'ticket.payment.collect',
             category: 'PAYMENT',
-            actor_name: 'Nhân viên An ninh Cổng UAT',
+            actor_name: 'Nhân viên An ninh Cổng',
             actor_role: 'SEC_STAFF',
-            target_id: 'veh-001',
+            target_id: 'ticket-001',
             target_label: 'Vé xe: 14C-123.45',
             description: 'Thu tiền vé xe vào cổng trực tiếp tại bốt gác (250.000 đ - Tiền mặt)',
             new_value: '250.000 đ',
@@ -167,19 +162,21 @@ export default function AuditLogsAdminPage() {
 
   if (!isAllowed) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 text-center max-w-lg mx-auto shadow-xs mt-10">
-        <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900">Khu vực Nhật ký Kiểm toán</h2>
-        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-          Tài khoản <strong>{user?.fullName || user?.roleName}</strong> không có quyền truy cập nhật ký kiểm toán. Chức năng này chỉ dành cho Quản trị viên và Lãnh đạo bộ phận.
-        </p>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded-xl transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Về trang Tổng quan</span>
-        </Link>
+      <div className="flex-1 flex items-center justify-center p-6 bg-[#FFFFFF]">
+        <div className="bg-white rounded-xl p-6 sm:p-8 border border-[#E5E9F0] text-center max-w-md w-full shadow-xs">
+          <ShieldAlert className="w-10 h-10 text-[#D92D20] mx-auto mb-3" />
+          <h2 className="text-base font-semibold text-[#17202E]">Giới hạn quyền truy cập</h2>
+          <p className="text-xs text-[#667085] mt-2 leading-relaxed">
+            Tài khoản của bạn không có quyền truy cập nhật ký kiểm toán. Chức năng này chỉ dành cho Quản trị viên và Lãnh đạo bộ phận.
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-medium text-white bg-[#326DD8] hover:bg-[#2557B4] rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Về trang Tổng quan</span>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -197,156 +194,151 @@ export default function AuditLogsAdminPage() {
   const getCategoryBadge = (cat: AuditLogEntry['category']) => {
     switch (cat) {
       case 'VEHICLE':
-        return <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-bold text-[10px]">Phương tiện</span>;
+        return <StatusBadge variant="info" label="Phương tiện" />;
       case 'CONTAINER':
-        return <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-bold text-[10px]">Container</span>;
+        return <StatusBadge variant="navy" label="Container" />;
       case 'PAYMENT':
-        return <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200 font-bold text-[10px]">Tài chính</span>;
+        return <StatusBadge variant="success" label="Tài chính" />;
       case 'REEFER':
-        return <span className="bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200 font-bold text-[10px]">Điện cont</span>;
+        return <StatusBadge variant="warning" label="Điện cont" />;
       case 'CLEARANCE':
-        return <span className="bg-rose-50 text-rose-700 px-2 py-0.5 rounded border border-rose-200 font-bold text-[10px]">Duyệt xuất</span>;
+        return <StatusBadge variant="error" label="Duyệt xuất" />;
       default:
-        return <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold text-[10px]">Hệ thống</span>;
+        return <StatusBadge variant="neutral" label="Hệ thống" />;
     }
   };
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="bg-white rounded-lg p-4 border border-slate-300 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded bg-slate-100 border border-slate-300 text-slate-800 flex items-center justify-center font-bold">
-              <History className="w-5 h-5 text-slate-700" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">
-                Kiểm toán & Đối soát Vận hành
-              </span>
-              <h1 className="text-base sm:text-lg font-bold uppercase tracking-tight text-slate-900">
-                Nhật ký Kiểm toán Toàn bãi (Audit Trail)
-              </h1>
-            </div>
-          </div>
-
+    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+      {/* 1. WORKSPACE HEADER */}
+      <WorkspaceHeader
+        title="Nhật ký Kiểm toán Toàn bãi"
+        subtitle="Hệ thống lưu vết bất biến (Append-only) phục vụ đối soát, tra cứu và hậu kiểm vận hành"
+        icon={History}
+        badge={
+          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
+            {logs.length} bản ghi
+          </span>
+        }
+        actions={
           <div className="flex items-center gap-2">
             <Link
               href="/admin/users"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-slate-300 bg-slate-50 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors"
             >
-              <span>Xem Nhân sự & Quyền →</span>
+              <Users className="w-3.5 h-3.5 text-[#667085]" />
+              <span>Nhân sự & Quyền</span>
             </Link>
           </div>
-        </div>
+        }
+      />
 
-        {/* THÔNG BÁO BẤT BIẾN NHẬT KÝ */}
-        <div className="mt-3 p-3 rounded bg-slate-50 border border-slate-300 text-slate-800 text-xs flex items-start space-x-2.5">
-          <Lock className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+      <div className="p-4 sm:p-5 space-y-4 max-w-6xl">
+        {/* Notice */}
+        <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
+          <Lock className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <strong className="font-bold text-slate-900 uppercase text-[11px] tracking-wider">Quy tắc Nhật ký Bất biến (Append-only Log):</strong>
-            <p className="text-[11px] text-slate-600 mt-0.5">
-              Mọi hành động nhạy cảm (sửa số container, sửa biển số xe, thu tiền, duyệt nợ, cắm/rút điện) đều được ghi nhận vĩnh viễn kèm danh tính người thực hiện, thời gian thực tế và lý do. Dữ liệu audit không thể bị chỉnh sửa hay xóa bỏ.
+            <span className="font-semibold text-[#17202E]">Quy tắc nhật ký kiểm toán bất biến:</span>
+            <p className="text-[12px] text-[#667085] mt-0.5">
+              Mọi hành động tác động dữ liệu (sửa số container, sửa biển số xe, thu tiền, duyệt nợ, cắm/rút điện) đều được ghi nhận vĩnh viễn kèm danh tính người thực hiện, thời gian thực tế và lý do.
             </p>
           </div>
         </div>
-      </div>
 
-      {/* BỘ LỌC VÀ BẢNG LOGS */}
-      <div className="bg-white rounded-lg border border-slate-300 shadow-sm p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm theo nội dung, biển số, mã cont, lý do..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-900"
-            />
+        {/* BỘ LỌC VÀ BẢNG LOGS */}
+        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden space-y-3 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="w-full sm:w-80">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Tìm nội dung, biển số, mã cont, lý do..."
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              {(['ALL', 'VEHICLE', 'CONTAINER', 'PAYMENT', 'REEFER', 'CLEARANCE'] as const).map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer border ${
+                    categoryFilter === cat
+                      ? 'bg-[#326DD8] border-[#326DD8] text-white shadow-2xs'
+                      : 'bg-[#F8F9FB] border-[#E5E9F0] text-[#667085] hover:text-[#17202E] hover:bg-[#F1F4F8]'
+                  }`}
+                >
+                  {cat === 'ALL' && 'Tất cả'}
+                  {cat === 'VEHICLE' && 'Phương tiện'}
+                  {cat === 'CONTAINER' && 'Container'}
+                  {cat === 'PAYMENT' && 'Tài chính'}
+                  {cat === 'REEFER' && 'Điện cont'}
+                  {cat === 'CLEARANCE' && 'Duyệt xuất'}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {(['ALL', 'VEHICLE', 'CONTAINER', 'PAYMENT', 'REEFER', 'CLEARANCE'] as const).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap cursor-pointer border ${
-                  categoryFilter === cat
-                    ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
-                    : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {cat === 'ALL' && 'Tất cả'}
-                {cat === 'VEHICLE' && 'Phương tiện'}
-                {cat === 'CONTAINER' && 'Container'}
-                {cat === 'PAYMENT' && 'Tài chính'}
-                {cat === 'REEFER' && 'Điện cont'}
-                {cat === 'CLEARANCE' && 'Duyệt xuất'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-x-auto rounded border border-slate-300">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="px-3 py-2.5">Thời gian</th>
-                <th className="px-3 py-2.5">Phân loại</th>
-                <th className="px-3 py-2.5">Người thực hiện</th>
-                <th className="px-3 py-2.5">Đối tượng tác động</th>
-                <th className="px-3 py-2.5">Nội dung chi tiết</th>
-                <th className="px-3 py-2.5">Căn cứ / Lý do</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredLogs.length === 0 ? (
+          <div className="overflow-x-auto rounded-md border border-[#E5E9F0]">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold text-[11px]">
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                    Không có nhật ký kiểm toán nào phù hợp điều kiện tìm kiếm.
-                  </td>
+                  <th className="px-3.5 py-2.5">Thời gian</th>
+                  <th className="px-3.5 py-2.5">Phân loại</th>
+                  <th className="px-3.5 py-2.5">Người thực hiện</th>
+                  <th className="px-3.5 py-2.5">Đối tượng tác động</th>
+                  <th className="px-3.5 py-2.5">Nội dung chi tiết</th>
+                  <th className="px-3.5 py-2.5">Căn cứ / Lý do</th>
                 </tr>
-              ) : (
-                filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2.5 text-slate-600 whitespace-nowrap font-mono">
-                      <div>{new Date(log.occurred_at).toLocaleTimeString('vi-VN')}</div>
-                      <div className="text-[10px] text-slate-400">{new Date(log.occurred_at).toLocaleDateString('vi-VN')}</div>
-                    </td>
-
-                    <td className="px-3 py-2.5 whitespace-nowrap">
-                      {getCategoryBadge(log.category)}
-                    </td>
-
-                    <td className="px-3 py-2.5">
-                      <div className="font-semibold text-slate-900">{log.actor_name}</div>
-                      <div className="text-[10px] font-mono text-slate-500">{log.actor_role}</div>
-                    </td>
-
-                    <td className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap">
-                      {log.target_label}
-                    </td>
-
-                    <td className="px-3 py-2.5">
-                      <div className="text-slate-800">{log.description}</div>
-                      {log.old_value && log.new_value && (
-                        <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
-                          <span className="line-through text-rose-600">{log.old_value}</span>
-                          {' → '}
-                          <span className="font-bold text-emerald-700">{log.new_value}</span>
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="px-3 py-2.5 text-slate-600 italic">
-                      {log.reason || '—'}
+              </thead>
+              <tbody className="divide-y divide-[#E5E9F0]">
+                {filteredLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-10 text-center text-[#98A2B3]">
+                      Không có bản ghi nhật ký kiểm toán nào phù hợp với bộ lọc tìm kiếm.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-[#F8F9FB] transition-colors">
+                      <td className="px-3.5 py-2.5 text-[#667085] whitespace-nowrap font-mono text-xs">
+                        <div>{new Date(log.occurred_at).toLocaleTimeString('vi-VN')}</div>
+                        <div className="text-[10px] text-[#98A2B3]">{new Date(log.occurred_at).toLocaleDateString('vi-VN')}</div>
+                      </td>
+
+                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                        {getCategoryBadge(log.category)}
+                      </td>
+
+                      <td className="px-3.5 py-2.5">
+                        <div className="font-semibold text-[#17202E]">{log.actor_name}</div>
+                        <div className="text-[10px] font-mono text-[#667085]">{log.actor_role}</div>
+                      </td>
+
+                      <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E] whitespace-nowrap">
+                        {log.target_label}
+                      </td>
+
+                      <td className="px-3.5 py-2.5">
+                        <div className="text-[#17202E]">{log.description}</div>
+                        {log.old_value && log.new_value && (
+                          <div className="text-[11px] text-[#667085] mt-0.5 font-mono">
+                            <span className="line-through text-[#D92D20]">{log.old_value}</span>
+                            {' → '}
+                            <span className="font-bold text-[#0A9444]">{log.new_value}</span>
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="px-3.5 py-2.5 text-[#667085] italic text-[11px]">
+                        {log.reason || '—'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro } from "next/font/google";
+import { Inter, Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { AppShell } from "@/components/layout/app-shell";
 import { PwaRegister } from "@/components/pwa-register";
+
+const inter = Inter({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 const beVietnamPro = Be_Vietnam_Pro({
   weight: ["300", "400", "500", "600", "700"],
@@ -40,8 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${beVietnamPro.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-[var(--color-brand-bg)] text-[var(--color-brand-text)]">
+    <html lang="vi" className={`${inter.variable} ${beVietnamPro.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-sans bg-[#FFFFFF] text-[#17202E]">
         <AuthProvider>
           <AppShell>
             {children}

@@ -40,6 +40,13 @@ import {
 import { formatMoneyInWords, formatDate, formatTime, formatDateTime } from '@/lib/display-formatters';
 import { exportChargesToExcel, exportShiftPaymentsToExcel } from '@/lib/export-excel';
 import { generateVietQrUrl } from '@/lib/vietqr-generator';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { SecondaryPanel } from '@/components/workspace/secondary-panel';
+import { RightContextPanel } from '@/components/workspace/right-context-panel';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 export default function CashierBillingPage() {
   const { user, role, yardId, can, repository } = useAuth();
@@ -82,6 +89,12 @@ export default function CashierBillingPage() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>('ALL');
   const [contFilter, setContFilter] = useState<string>('ALL');
   const [customerFilter, setCustomerFilter] = useState<string>('ALL');
+
+  // DS-02 Multi-pane Workspace: Secondary Panel & Inspector
+  const [selectedInspectorCharge, setSelectedInspectorCharge] = useState<ChargeItem | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
+  const [secondarySearch, setSecondarySearch] = useState<string>('');
+  const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'UNPAID' | 'REEFER' | 'TICKET'>('ALL');
 
   // Chọn nhiều khoản (Batch Collection)
   const [selectedChargeIds, setSelectedChargeIds] = useState<string[]>([]);
@@ -599,131 +612,305 @@ export default function CashierBillingPage() {
       .reduce((acc, curr) => acc + curr.paid_amount, 0);
   }, [roleScopedCharges]);
 
+  // DS-02 Secondary Panel Filtered List
+  const filteredSecondaryCharges = useMemo(() => {
+    return roleScopedCharges.filter((c) => {
+      const q = secondarySearch.toLowerCase().trim();
+      const matchQ = !q || (
+        c.title?.toLowerCase().includes(q) ||
+        (c.container_no && c.container_no.toLowerCase().includes(q)) ||
+        (c.license_plate && c.license_plate.toLowerCase().includes(q)) ||
+        (c.customer_name && c.customer_name.toLowerCase().includes(q))
+      );
+      if (!matchQ) return false;
+
+      if (secondaryFilter === 'UNPAID') return c.status === 'UNPAID';
+      if (secondaryFilter === 'REEFER') return c.charge_type === 'REEFER';
+      if (secondaryFilter === 'TICKET') return c.charge_type === 'TICKET';
+      return true;
+    }).sort((a, b) => {
+      if (a.status === 'UNPAID' && b.status !== 'UNPAID') return -1;
+      if (a.status !== 'UNPAID' && b.status === 'UNPAID') return 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [roleScopedCharges, secondarySearch, secondaryFilter]);
+
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
-      {/* Header & Tabs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-300 pb-4">
-        <div>
-          <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded border inline-block ${
-            isCCKBRole 
-              ? 'text-amber-800 bg-amber-50 border-amber-300' 
-              : isSecurityRole 
-              ? 'text-blue-800 bg-blue-50 border-blue-300'
-              : 'text-emerald-800 bg-emerald-50 border-emerald-300'
-          }`}>
-            {isCCKBRole 
-              ? 'Thương vụ CCKB — Thu cước điện Container' 
-              : isSecurityRole 
-              ? 'An ninh Cổng — Thu vé xe & Tra cứu Lưu bãi' 
-              : 'Tài chính Bến bãi & Thu ngân Ca trực'}
-          </span>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 mt-1">
-            {isCCKBRole ? (
-              <>
-                <Zap className="w-6 h-6 text-amber-500" />
-                Thu phí Cước điện Container Lạnh — Thương vụ CCKB
-              </>
-            ) : isSecurityRole ? (
-              <>
-                <Truck className="w-6 h-6 text-[#223873]" />
-                Thu phí Vé xe & Tra cứu Phí lưu bãi — An ninh Cổng
-              </>
-            ) : (
-              <>
-                <Receipt className="w-6 h-6 text-[#0A9444]" />
-                Thu phí, Sổ cái & Báo cáo Ca trực Sơn Cảng
-              </>
-            )}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            {isCCKBRole 
-              ? 'Chuyên trách thu cước cắm điện container, hỗ trợ gom thu nhiều lần cắm theo container hoặc theo khách hàng'
-              : isSecurityRole 
-              ? 'Thu vé vào cổng phương tiện. Phí lưu bãi container được chốt và thu trực tiếp tại Cổng ra (/exit)'
-              : 'Quản lý toàn bộ các khoản phải thu bến bãi, thu gộp nhiều khoản, đối soát tiền mặt ca trực & in biên bản bàn giao'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {activeTab === 'LEDGER' ? (
-            <button
-              onClick={() => exportChargesToExcel(filteredCharges)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-blue-900 bg-blue-50 border border-blue-300 rounded hover:bg-blue-100 font-bold shadow-2xs transition-colors cursor-pointer"
-              title="Xuất Sổ cái các khoản thu sang file Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Xuất XLSX Sổ cái ({filteredCharges.length})</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => exportShiftPaymentsToExcel(shiftPayments, shiftTimeRange.label)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-emerald-900 bg-emerald-50 border border-emerald-300 rounded hover:bg-emerald-100 font-bold shadow-2xs transition-colors cursor-pointer"
-              title="Xuất Bảng kê chứng từ ca trực sang file Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Xuất XLSX Ca trực ({shiftPayments.length})</span>
-            </button>
-          )}
-
+    <div className="flex-1 flex overflow-hidden bg-[#FFFFFF] min-h-0">
+      {/* ============================================================== */}
+      {/* 1. SECONDARY PANEL: SỔ CÁI & QUEUE CHỜ THU                    */}
+      {/* ============================================================== */}
+      <SecondaryPanel
+        title="Khoản chờ thu"
+        count={roleScopedCharges.filter(c => c.status === 'UNPAID').length}
+        headerActions={
           <button
+            type="button"
             onClick={handleManualRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 font-semibold shadow-2xs transition-colors cursor-pointer"
+            className="p-1 rounded text-[#667085] hover:text-[#17202E] hover:bg-[#F1F4F8] transition-colors"
+            title="Làm mới"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Làm mới
           </button>
-        </div>
-      </div>
-
-      {/* Tabs Chuyển đổi Phân hệ */}
-      <div className="flex border-b border-slate-300 gap-1">
-        <button
-          onClick={() => setActiveTab('LEDGER')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
-            activeTab === 'LEDGER'
-              ? 'border-[#223873] text-[#223873] bg-blue-50/40'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
-          }`}
-        >
-          <CreditCard className="w-4 h-4" />
-          <span>Sổ cái Thu phí & Công nợ Bến bãi</span>
-          <span className="ml-1 px-1.5 py-0.2 rounded text-[10px] bg-slate-100 text-slate-700 font-mono font-bold border border-slate-300">
-            {charges.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('SHIFT_REPORT');
-            handleSelectCurrentShift();
-          }}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
-            activeTab === 'SHIFT_REPORT'
-              ? 'border-[#0A9444] text-[#0A9444] bg-emerald-50/40'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
-          }`}
-        >
-          <Calendar className="w-4 h-4" />
-          <span>Báo cáo Ca trực & Bàn giao Ca (Shift Handover)</span>
-          <span className="ml-1 px-1.5 py-0.2 rounded text-[10px] bg-emerald-100 text-[#0A9444] font-mono font-bold border border-emerald-300">
-            RV12
-          </span>
-        </button>
-      </div>
-
-      {/* Thông báo thao tác */}
-      {actionSuccessMsg && (
-        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded text-emerald-900 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span className="font-semibold">{actionSuccessMsg}</span>
+        }
+        searchSlot={
+          <SearchInput
+            value={secondarySearch}
+            onChange={setSecondarySearch}
+            placeholder="Tìm biển số, số cont..."
+          />
+        }
+        filterSlot={
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('ALL')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'ALL'
+                  ? 'bg-[#326DD8] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Tất cả ({roleScopedCharges.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('UNPAID')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'UNPAID'
+                  ? 'bg-[#D92D20] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Chưa thu ({roleScopedCharges.filter(c => c.status === 'UNPAID').length})
+            </button>
+            {isCCKBRole && (
+              <button
+                type="button"
+                onClick={() => setSecondaryFilter('REEFER')}
+                className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                  secondaryFilter === 'REEFER'
+                    ? 'bg-[#B54708] text-white font-medium'
+                    : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+                }`}
+              >
+                Cước điện ({roleScopedCharges.filter(c => c.charge_type === 'REEFER').length})
+              </button>
+            )}
+            {isSecurityRole && (
+              <button
+                type="button"
+                onClick={() => setSecondaryFilter('TICKET')}
+                className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                  secondaryFilter === 'TICKET'
+                    ? 'bg-[#223873] text-white font-medium'
+                    : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+                }`}
+              >
+                Vé xe ({roleScopedCharges.filter(c => c.charge_type === 'TICKET').length})
+              </button>
+            )}
           </div>
-          <button onClick={() => setActionSuccessMsg('')} className="text-emerald-700 font-bold hover:underline cursor-pointer">
-            Đóng
-          </button>
+        }
+      >
+        {filteredSecondaryCharges.length === 0 ? (
+          <div className="p-4 text-center text-xs text-[#98A2B3]">
+            Không tìm thấy khoản thu nào
+          </div>
+        ) : (
+          filteredSecondaryCharges.map((c) => {
+            const isSelected = selectedInspectorCharge?.id === c.id;
+            const mainLabel = c.container_no || c.license_plate || c.title || 'Khoản thu';
+            const typeLabel = c.charge_type === 'REEFER' ? 'CƯỚC ĐIỆN' : c.charge_type === 'TICKET' ? 'VÉ CỔNG' : 'LƯU BÃI';
+
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  setSelectedInspectorCharge(c);
+                  setIsInspectorOpen(true);
+                }}
+                className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                  isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-mono font-bold text-xs text-[#17202E]">
+                    {mainLabel}
+                  </span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                    c.status === 'PAID'
+                      ? 'bg-[#ECFDF3] text-[#0A9444]'
+                      : 'bg-[#FEF3F2] text-[#D92D20]'
+                  }`}>
+                    {c.status === 'PAID' ? 'ĐÃ THU' : 'CHƯA THU'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                  <span className="truncate max-w-[150px]">{typeLabel} {c.customer_name ? `• ${c.customer_name}` : ''}</span>
+                  <span className="font-mono font-bold text-[#0A9444]">
+                    {c.amount.toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+              </button>
+            );
+          })
+        )}
+      </SecondaryPanel>
+
+      {/* ============================================================== */}
+      {/* 2. MAIN WORKSPACE                                              */}
+      {/* ============================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+        <WorkspaceHeader
+          title={
+            isCCKBRole
+              ? 'Thu phí Cước điện Container — Thương vụ CCKB'
+              : isSecurityRole
+              ? 'Thu phí Vé xe & Tra cứu Lưu bãi — An ninh'
+              : 'Sổ cái Tài chính & Thu ngân Bến bãi'
+          }
+          subtitle={
+            isCCKBRole
+              ? 'Thu cước cắm điện container, gom thu theo cont hoặc theo khách hàng, đối soát ca trực'
+              : isSecurityRole
+              ? 'Thu vé phương tiện vào cổng, theo dõi trạng thái thanh toán vé & tra cứu lưu bãi'
+              : 'Quản lý toàn bộ khoản phải thu, thanh toán gộp, đối soát tiền mặt ca trực & in biên bản'
+          }
+          icon={Receipt}
+          badge={
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+              {isCCKBRole ? 'Thương vụ CCKB' : isSecurityRole ? 'An ninh Cổng' : 'Tài chính Thu ngân'}
+            </span>
+          }
+          actions={
+            <div className="flex items-center gap-2 flex-wrap">
+              {activeTab === 'LEDGER' ? (
+                <button
+                  type="button"
+                  onClick={() => exportChargesToExcel(filteredCharges)}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+                  title="Xuất XLSX Sổ cái"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#667085]" />
+                  <span>Xuất XLSX ({filteredCharges.length})</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => exportShiftPaymentsToExcel(shiftPayments, shiftTimeRange.label)}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-xs font-medium text-[#0A9444] hover:bg-[#D1FADF] transition-colors cursor-pointer"
+                  title="Xuất XLSX Ca trực"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#0A9444]" />
+                  <span>Xuất XLSX Ca ({shiftPayments.length})</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleManualRefresh}
+                disabled={isLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${isLoading ? 'animate-spin' : ''}`} />
+                <span>Làm mới</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* Thông báo thao tác */}
+        {actionSuccessMsg && (
+          <div className="mx-5 mt-4 p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] flex items-center justify-between text-xs text-[#0A9444]">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span className="font-medium">{actionSuccessMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionSuccessMsg('')}
+              className="p-1 rounded text-[#0A9444] hover:bg-[#D1FADF]"
+            >
+              Đóng
+            </button>
+          </div>
+        )}
+
+        {/* Compact KPI strip (4 cards) */}
+        <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Chưa thanh toán</span>
+                <AlertTriangle className="w-3.5 h-3.5 text-[#D92D20]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#D92D20]">
+                {totalUnpaid.toLocaleString('vi-VN')} đ
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">cần thu bến bãi</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Đã thực thu</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#0A9444]">
+                {totalPaid.toLocaleString('vi-VN')} đ
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">đã vào quỹ ca trực</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Tổng khoản thu</span>
+                <CreditCard className="w-3.5 h-3.5 text-[#326DD8]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#17202E]">
+                {roleScopedCharges.length}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">chứng từ trong sổ cái</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>{isCCKBRole ? 'Container cắm điện' : isSecurityRole ? 'Lưu bãi cổng ra' : 'Biểu phí hiệu lực'}</span>
+                {isCCKBRole ? <Zap className="w-3.5 h-3.5 text-[#B54708]" /> : <Tag className="w-3.5 h-3.5 text-[#223873]" />}
+              </div>
+              <div className="text-xl font-bold font-mono text-[#17202E]">
+                {isCCKBRole ? `${availableContainers.length} cont` : isSecurityRole ? `${roleScopedCharges.filter(c => c.charge_type === 'STORAGE' && c.status === 'PAID').length} lượt` : `${tariffs.length} mục`}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">danh mục khai thác</div>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* WORKSPACE VIEW TABS */}
+        <WorkspaceTabs
+          tabs={[
+            {
+              id: 'LEDGER',
+              label: 'Sổ cái Thu phí & Công nợ',
+              count: roleScopedCharges.length,
+              icon: CreditCard,
+            },
+            {
+              id: 'SHIFT_REPORT',
+              label: 'Báo cáo Ca trực & Bàn giao Ca',
+              count: shiftPayments.length,
+              icon: Calendar,
+            },
+          ]}
+          activeTab={activeTab}
+          onChange={(tabId) => {
+            setActiveTab(tabId as any);
+            if (tabId === 'SHIFT_REPORT') handleSelectCurrentShift();
+          }}
+        />
+
+        <div className="p-4 sm:p-5 space-y-4">
 
       {/* ========================================================================= */}
       {/* TAB 1: SỔ CÁI & THU PHÍ TRỰC TIẾP (LEDGER & BATCH COLLECTION) */}
@@ -1558,6 +1745,124 @@ export default function CashierBillingPage() {
           </div>
         </div>
       )}
+
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 3. RIGHT CONTEXT PANEL: CHI TIẾT KHOẢN THU                    */}
+      {/* ============================================================== */}
+      <RightContextPanel
+        isOpen={isInspectorOpen && !!selectedInspectorCharge}
+        onClose={() => setIsInspectorOpen(false)}
+        title={
+          selectedInspectorCharge
+            ? `${selectedInspectorCharge.amount.toLocaleString('vi-VN')} đ`
+            : 'Chi tiết khoản thu'
+        }
+        subtitle={
+          selectedInspectorCharge?.container_no
+            ? `Container: ${selectedInspectorCharge.container_no}`
+            : selectedInspectorCharge?.license_plate
+            ? `Xe: ${selectedInspectorCharge.license_plate}`
+            : selectedInspectorCharge?.title || 'Khoản thu bến bãi'
+        }
+        headerActions={
+          selectedInspectorCharge ? (
+            <StatusBadge
+              variant={selectedInspectorCharge.status === 'PAID' ? 'success' : 'error'}
+              label={selectedInspectorCharge.status === 'PAID' ? 'ĐÃ THU' : 'CHƯA THU'}
+            />
+          ) : undefined
+        }
+        footerActions={
+          selectedInspectorCharge && selectedInspectorCharge.status === 'UNPAID' && canCollectCharge(selectedInspectorCharge) ? (
+            <button
+              type="button"
+              onClick={() => handleOpenCollect(selectedInspectorCharge)}
+              className="w-full py-2 px-3 rounded-lg bg-[#0A9444] text-white text-xs font-semibold hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              <span>Thu tiền ngay ({selectedInspectorCharge.amount.toLocaleString('vi-VN')} đ)</span>
+            </button>
+          ) : undefined
+        }
+      >
+        {selectedInspectorCharge && (() => {
+          const matchedPay = payments.find(p => p.charge_id === selectedInspectorCharge.id);
+          return (
+          <div className="space-y-4 text-xs">
+            {/* Thông tin biểu phí & chứng từ */}
+            <div className="p-3 rounded-lg border border-[#E5E9F0] bg-[#F8F9FB] space-y-2">
+              <div className="flex items-center justify-between text-[#667085] text-[11px] font-semibold uppercase tracking-wider">
+                <span>Dịch vụ</span>
+                <span className="font-mono text-[#17202E] font-bold">
+                  {selectedInspectorCharge.charge_type === 'REEFER' ? 'Cước điện' : selectedInspectorCharge.charge_type === 'TICKET' ? 'Vé cổng' : 'Lưu bãi'}
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-[#17202E]">
+                {selectedInspectorCharge.title}
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E5E9F0] text-[11px]">
+                <div>
+                  <span className="text-[#667085]">Số tiền: </span>
+                  <span className="font-mono font-bold text-[#0A9444]">
+                    {selectedInspectorCharge.amount.toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#667085]">Đã thu: </span>
+                  <span className="font-mono font-semibold text-[#17202E]">
+                    {selectedInspectorCharge.paid_amount.toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#667085]">Hình thức: </span>
+                  <span className="font-medium text-[#17202E]">
+                    {matchedPay?.payment_method === 'TRANSFER' ? 'Chuyển khoản' : matchedPay?.payment_method === 'CASH' ? 'Tiền mặt' : selectedInspectorCharge.status === 'PAID' ? 'Đã thu' : 'Chưa thu'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#667085]">Số biên lai: </span>
+                  <span className="font-mono font-medium text-[#17202E]">
+                    {matchedPay?.receipt_code || '---'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Đối tượng liên quan */}
+            {(selectedInspectorCharge.container_no || selectedInspectorCharge.license_plate || selectedInspectorCharge.customer_name) && (
+              <div className="p-3 rounded-lg border border-[#E5E9F0] bg-[#F8F9FB] space-y-2">
+                <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider block">
+                  Đối tượng
+                </span>
+                <div className="space-y-1.5 text-[11px]">
+                  {selectedInspectorCharge.container_no && (
+                    <div className="flex justify-between">
+                      <span className="text-[#667085]">Container:</span>
+                      <span className="font-mono font-bold text-[#17202E]">{selectedInspectorCharge.container_no}</span>
+                    </div>
+                  )}
+                  {selectedInspectorCharge.license_plate && (
+                    <div className="flex justify-between">
+                      <span className="text-[#667085]">Biển số xe:</span>
+                      <span className="font-mono font-bold text-[#17202E]">{selectedInspectorCharge.license_plate}</span>
+                    </div>
+                  )}
+                  {selectedInspectorCharge.customer_name && (
+                    <div className="flex justify-between">
+                      <span className="text-[#667085]">Khách hàng:</span>
+                      <span className="font-medium text-[#17202E]">{selectedInspectorCharge.customer_name}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          );
+        })()}
+      </RightContextPanel>
 
       {/* ========================================================================= */}
       {/* MODAL THU GỘP NHIỀU KHOẢN PHÍ (BATCH COLLECTION MODAL) */}

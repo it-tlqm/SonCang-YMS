@@ -1,41 +1,55 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { SEED_VEHICLE_TYPES_V5 } from '@/lib/services/yard-service';
-import { VehicleType, VehicleVisit, ContainerVisit, ReeferRequest, VehicleDuplicateCheckResult, TariffItem } from '@/types/domain.types';
+import { 
+  VehicleType, 
+  VehicleVisit, 
+  ContainerVisit, 
+  ReeferRequest, 
+  VehicleDuplicateCheckResult, 
+  TariffItem 
+} from '@/types/domain.types';
 import { validateContainerNumber } from '@/lib/container-validator';
 import { 
   Truck, 
-  Container as ContainerIcon, 
+  Layers, 
   AlertTriangle, 
   CheckCircle2, 
   RefreshCw, 
   ShieldAlert, 
-  ArrowRight,
-  Lock,
-  CreditCard,
-  QrCode,
-  ScanLine,
-  X,
-  Clock,
-  LayoutDashboard,
-  Banknote,
-  Printer,
-  Zap,
-  CopyCheck,
-  AlertOctagon,
-  Info,
-  LogOut
+  CreditCard, 
+  QrCode, 
+  ScanLine, 
+  X, 
+  Clock, 
+  Receipt, 
+  Printer, 
+  Zap, 
+  CopyCheck, 
+  Info, 
+  ChevronRight,
+  ShieldCheck,
+  Check,
+  Building2,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatMoneyInWords, getContainerTypeName } from '@/lib/display-formatters';
 import { generateVietQrUrl } from '@/lib/vietqr-generator';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { SecondaryPanel } from '@/components/workspace/secondary-panel';
+import { RightContextPanel } from '@/components/workspace/right-context-panel';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 export default function EntryGatePage() {
-  const { user, yardId, can, repository, authMode } = useAuth();
+  const { user, yardId, can, repository } = useAuth();
 
-  // Kiểm tra quyền tiếp nhận xe theo mã chuẩn RBAC V5 (vehicle.visit.create)
+  // Quyền tiếp nhận xe theo mã chuẩn RBAC V5 (vehicle.visit.create)
   const isAllowed = can('vehicle.visit.create');
 
   // Form State
@@ -47,36 +61,36 @@ export default function EntryGatePage() {
   const [driverIdCard, setDriverIdCard] = useState<string>('');
   const [note, setNote] = useState<string>('');
 
-  // Quét mã QR CCCD (chuẩn chip Việt Nam)
+  // Quét mã QR CCCD
   const [showIdCardScanner, setShowIdCardScanner] = useState<boolean>(false);
   const [scannerRawInput, setScannerRawInput] = useState<string>('');
   const [scanSuccessMsg, setScanSuccessMsg] = useState<string>('');
 
-  // Form Container khi loại xe là Container lạnh
+  // Container State (chỉ khi là loại xe chở container)
   const [containerCarryMode, setContainerCarryMode] = useState<'SINGLE' | 'DUAL_20FT'>('SINGLE');
   const [containerNo, setContainerNo] = useState<string>('');
   const [containerSize, setContainerSize] = useState<string>('40');
   const [containerType, setContainerType] = useState<string>('RF');
 
-  // Container thứ 2 (khi xe cõng 2 container 20ft)
+  // Container #2
   const [secondContainerNo, setSecondContainerNo] = useState<string>('');
   const [secondContainerType, setSecondContainerType] = useState<string>('RF');
 
-  // Danh sách yêu cầu cắm điện dự kiến do CCKB tiếp nhận trước
+  // Yêu cầu cắm điện dự kiến & Biểu phí
   const [plannedReeferRequests, setPlannedReeferRequests] = useState<ReeferRequest[]>([]);
   const [tariffs, setTariffs] = useState<TariffItem[]>([]);
 
-  // Danh sách Container & Phương tiện đang lưu bãi (IN_YARD) để kiểm tra trùng lặp tức thì (as-you-type)
+  // Dữ liệu bãi đang hoạt động (để kiểm tra trùng lặp)
   const [activeContainers, setActiveContainers] = useState<ContainerVisit[]>([]);
   const [activeVehicles, setActiveVehicles] = useState<VehicleVisit[]>([]);
   const [allKnownVehicles, setAllKnownVehicles] = useState<VehicleVisit[]>([]);
 
-  // Ghi nhận thu tiền vé cổng trực tiếp tại bốt gác An ninh (Quyền SEC_STAFF)
+  // Thanh toán vé cổng
   const [collectPaymentNow, setCollectPaymentNow] = useState<boolean>(true);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'TRANSFER'>('CASH');
   const [receiptCode, setReceiptCode] = useState<string>('');
 
-  // Status & Protection
+  // Trạng thái giao dịch
   const [idempotencyKey, setIdempotencyKey] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -87,10 +101,10 @@ export default function EntryGatePage() {
     containers?: ContainerVisit[];
   } | null>(null);
 
-  // Modal In Vé Vào Cổng
+  // Modal in vé
   const [showPrintTicketModal, setShowPrintTicketModal] = useState<boolean>(false);
 
-  // Kiểm soát Trùng lặp Phương tiện chuyên sâu
+  // Kiểm soát trùng lặp xe
   const [dupCheckResult, setDupCheckResult] = useState<VehicleDuplicateCheckResult | null>(null);
   const [isCheckingDup, setIsCheckingDup] = useState<boolean>(false);
   const [showDupModal, setShowDupModal] = useState<boolean>(false);
@@ -99,67 +113,58 @@ export default function EntryGatePage() {
   const [customReasonText, setCustomReasonText] = useState<string>('');
   const [closePreviousOnEntry, setClosePreviousOnEntry] = useState<boolean>(true);
 
-  // Đếm ngược tự động làm mới đón xe tiếp theo (Công thái học bến bãi)
+  // Đếm ngược tự động làm mới form sau khi tạo vé
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
-  // Hàm tải dữ liệu trạng thái xe & container đang trong bãi
-  const loadYardActiveData = React.useCallback(async () => {
+  // Secondary Panel State
+  const [recentSearch, setRecentSearch] = useState<string>('');
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
+  const [selectedRecentVehicle, setSelectedRecentVehicle] = useState<VehicleVisit | null>(null);
+
+  // Right Context Panel State (Mặc định mở trên Desktop >= 1280px, đóng trên Tablet/Mobile để không che form)
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1280;
+    }
+    return true;
+  });
+
+  // Tải dữ liệu bãi
+  const loadYardActiveData = useCallback(async () => {
     try {
       const [cList, vList] = await Promise.all([
         repository.getContainers(yardId),
         repository.getVehicles(yardId),
       ]);
       setAllKnownVehicles(vList);
-      setActiveContainers(cList.filter(c => c.status === 'IN_YARD'));
-      setActiveVehicles(vList.filter(v => v.status === 'IN_YARD'));
+      setActiveContainers(cList.filter((c) => c.status === 'IN_YARD'));
+      setActiveVehicles(vList.filter((v) => v.status === 'IN_YARD'));
     } catch (err) {
       console.warn('Lỗi nạp danh sách xe/cont đang trong bãi:', err);
     }
   }, [repository, yardId]);
 
-  // Gợi ý thông tin tài xế quen tự động từ lịch sử xe cũ
-  const suggestedDriver = React.useMemo(() => {
-    const clean = licensePlate.trim().toUpperCase();
-    if (clean.length < 3) return null;
-    const match = allKnownVehicles.find(
-      v => v.license_plate?.trim().toUpperCase() === clean && (v.driver_name || v.driver_phone)
-    );
-    if (!match) return null;
-    if (driverName === match.driver_name && driverPhone === (match.driver_phone || '')) return null;
-    return {
-      driverName: match.driver_name || '',
-      driverPhone: match.driver_phone || '',
-    };
-  }, [licensePlate, allKnownVehicles, driverName, driverPhone]);
-
-  // Kiểm tra trùng lặp Container 1 tức thì (As-You-Type)
-  const duplicateContainer = React.useMemo(() => {
+  // Kiểm tra trùng lặp Container 1
+  const duplicateContainer = useMemo(() => {
     const clean = containerNo.trim().toUpperCase();
     if (clean.length < 4) return null;
-    return activeContainers.find(c => c.container_no_current === clean && c.status === 'IN_YARD') || null;
+    return activeContainers.find((c) => c.container_no_current === clean && c.status === 'IN_YARD') || null;
   }, [containerNo, activeContainers]);
 
-  // Kiểm tra trùng lặp Container 2 tức thì (As-You-Type)
-  const duplicateSecondContainer = React.useMemo(() => {
+  // Kiểm tra trùng lặp Container 2
+  const duplicateSecondContainer = useMemo(() => {
     const clean2 = secondContainerNo.trim().toUpperCase();
     if (clean2.length < 4) return null;
     const clean1 = containerNo.trim().toUpperCase();
     if (clean2 === clean1) {
       return { isDuplicateWithFirst: true, container: null };
     }
-    const found = activeContainers.find(c => c.container_no_current === clean2 && c.status === 'IN_YARD');
+    const found = activeContainers.find((c) => c.container_no_current === clean2 && c.status === 'IN_YARD');
     return found ? { isDuplicateWithFirst: false, container: found } : null;
   }, [secondContainerNo, containerNo, activeContainers]);
 
-  // Kiểm tra trùng xe local nhanh tức thì (0ms)
-  const localDuplicateVehicle = React.useMemo(() => {
-    const clean = licensePlate.trim().toUpperCase();
-    if (clean.length < 3) return null;
-    return activeVehicles.find(v => v.license_plate?.trim().toUpperCase() === clean && v.status === 'IN_YARD') || null;
-  }, [licensePlate, activeVehicles]);
-
-  // Kiểm tra trùng lặp phương tiện thời gian thực (Debounce 300ms)
+  // Kiểm tra trùng lặp xe tức thì (Debounced)
   useEffect(() => {
     const clean = licensePlate.trim().toUpperCase();
     if (clean.length < 3) {
@@ -185,7 +190,7 @@ export default function EntryGatePage() {
     return () => clearTimeout(timer);
   }, [licensePlate, selectedType, repository, yardId]);
 
-  // Tải danh mục loại xe, yêu cầu điện dự kiến và danh sách xe/cont đang trong bãi
+  // Tải danh mục loại xe, yêu cầu điện dự kiến và bảng giá
   useEffect(() => {
     let isMounted = true;
     Promise.all([
@@ -194,23 +199,28 @@ export default function EntryGatePage() {
       repository.getTariffs(),
       repository.getContainers(yardId),
       repository.getVehicles(yardId),
-    ]).then(([types, reqs, tariffList, cList, vList]) => {
-      if (isMounted) {
-        if (types.length > 0) setVehicleTypes(types);
-        if (reqs.length > 0) setPlannedReeferRequests(reqs);
-        if (tariffList.length > 0) setTariffs(tariffList);
-        setActiveContainers(cList.filter(c => c.status === 'IN_YARD'));
-        setActiveVehicles(vList.filter(v => v.status === 'IN_YARD'));
-      }
-    }).catch(err => {
-      console.warn('Lỗi nạp dữ liệu cổng vào:', err);
-    });
+    ])
+      .then(([types, reqs, tariffList, cList, vList]) => {
+        if (isMounted) {
+          if (types.length > 0) setVehicleTypes(types);
+          if (reqs.length > 0) setPlannedReeferRequests(reqs);
+          if (tariffList.length > 0) setTariffs(tariffList);
+          setActiveContainers(cList.filter((c) => c.status === 'IN_YARD'));
+          setActiveVehicles(vList.filter((v) => v.status === 'IN_YARD'));
+          setAllKnownVehicles(vList);
+        }
+      })
+      .catch((err) => {
+        console.warn('Lỗi nạp dữ liệu cổng vào:', err);
+      });
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [repository, yardId]);
 
-  // So khớp Yêu cầu cắm điện trước từ CCKB (Pre-arrival Reefer Request)
-  const matchedReeferRequest = React.useMemo(() => {
+  // Khớp yêu cầu cắm điện trước từ CCKB
+  const matchedReeferRequest = useMemo(() => {
     if (!plannedReeferRequests.length) return null;
     const cleanPlate = licensePlate.trim().toUpperCase();
     const cleanCont1 = containerNo.trim().toUpperCase();
@@ -221,15 +231,9 @@ export default function EntryGatePage() {
       const plannedCont = (req.container_no || req.container_no_planned || '').trim().toUpperCase();
       const plannedPlate = req.expected_license_plate?.trim().toUpperCase();
 
-      // Khớp biển số xe
       if (cleanPlate && plannedPlate && cleanPlate === plannedPlate) return true;
-
-      // Khớp cont 1 (chính xác số container đầy đủ theo quy tắc AGENTS.md)
       if (cleanCont1.length >= 4 && cleanCont1 === plannedCont) return true;
-
-      // Khớp cont 2 (chính xác số container đầy đủ theo quy tắc AGENTS.md)
       if (cleanCont2.length >= 4 && cleanCont2 === plannedCont) return true;
-
       return false;
     }) || null;
   }, [plannedReeferRequests, licensePlate, containerNo, secondContainerNo]);
@@ -261,23 +265,20 @@ export default function EntryGatePage() {
     setShowBlockModal(false);
   };
 
-  // Effect tự động đếm ngược làm mới form sau khi tạo phiếu thành công
+  // Tự động đếm ngược làm mới form
   useEffect(() => {
     if (countdown === null || isPaused) return;
-
     if (countdown <= 0) {
       resetForm();
       return;
     }
-
     const timer = setTimeout(() => {
-      setCountdown(prev => (prev !== null ? prev - 1 : null));
+      setCountdown((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [countdown, isPaused]);
 
-  // Trích xuất tự động thông tin từ chuỗi mã QR CCCD gắn chip
+  // Trích xuất CCCD gắn chip
   const parseAndApplyCccdData = (rawText: string) => {
     const text = rawText.trim();
     if (text.includes('|')) {
@@ -287,7 +288,7 @@ export default function EntryGatePage() {
         const fullName = parts[2]?.trim();
         if (cccdNumber) setDriverIdCard(cccdNumber);
         if (fullName) setDriverName(fullName);
-        setScanSuccessMsg(`Đã trích xuất thành công: CCCD ${cccdNumber} - ${fullName}`);
+        setScanSuccessMsg(`Đã trích xuất CCCD ${cccdNumber}: ${fullName}`);
         setShowIdCardScanner(false);
         setScannerRawInput('');
         return true;
@@ -297,15 +298,13 @@ export default function EntryGatePage() {
     return false;
   };
 
-  // Chỉ DUY NHẤT loại xe Container lạnh mới có mang container
-  const currentVehicleType = vehicleTypes.find(t => t.code === selectedType);
+  const currentVehicleType = vehicleTypes.find((t) => t.code === selectedType);
   const isContainerType = selectedType === 'CONT_LANH';
-  const contTariffAmount = tariffs.find(t => t.code === 'VE_CONT_LANH')?.amount ?? 250000;
-  const previewAmount: number | null = isContainerType 
+  const contTariffAmount = tariffs.find((t) => t.code === 'VE_CONT_LANH')?.amount ?? 250000;
+  const previewAmount: number = isContainerType 
     ? contTariffAmount 
     : (selectedType === 'DAU_KEO' ? 0 : (currentVehicleType?.default_ticket_amount ?? 0));
 
-  // Kiểm tra số container theo thời gian thực
   const contValidation = validateContainerNumber(containerNo);
   const secondContValidation = validateContainerNumber(secondContainerNo);
 
@@ -326,7 +325,6 @@ export default function EntryGatePage() {
     ].filter(Boolean).join(' | ');
 
     try {
-      // Gọi giao dịch tiếp nhận (nguyên tử xe + container nếu là loại xe chở container)
       const res = await repository.createVehicleEntry({
         yardId,
         vehicleTypeCode: selectedType,
@@ -346,8 +344,8 @@ export default function EntryGatePage() {
         operatorId: user?.id || 'demo-operator',
         operatorName: user?.fullName || 'Nhân viên Cổng',
         idempotencyKey: activeKey,
-        collectPaymentNow: previewAmount && previewAmount > 0 ? collectPaymentNow : false,
-        paymentMethod: previewAmount && previewAmount > 0 && collectPaymentNow ? paymentMethod : undefined,
+        collectPaymentNow: previewAmount > 0 ? collectPaymentNow : false,
+        paymentMethod: previewAmount > 0 && collectPaymentNow ? paymentMethod : undefined,
         receiptCode: receiptCode.trim() || undefined,
         overrideDuplicate,
         duplicateReason,
@@ -360,7 +358,6 @@ export default function EntryGatePage() {
         return;
       }
 
-      // Nếu có yêu cầu cắm điện trước từ CCKB khớp, tự động liên kết phiếu
       if (matchedReeferRequest) {
         const targetContId = res.container?.id || res.secondContainer?.id;
         if (targetContId) {
@@ -375,14 +372,13 @@ export default function EntryGatePage() {
         }
       }
 
-      // Hoàn tất thành công (cả xe và container nếu có)
       setSuccessResult({
         vehicle: res.vehicle,
         container: res.container || undefined,
         secondContainer: res.secondContainer || undefined,
         containers: res.containers || (res.container ? [res.container] : []),
       });
-      // Làm mới danh sách xe và container đang trong bãi để kiểm tra trùng tức thì
+
       loadYardActiveData();
       setCountdown(8);
       setIsPaused(false);
@@ -390,7 +386,7 @@ export default function EntryGatePage() {
       setShowDupModal(false);
       setShowBlockModal(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Lỗi giao dịch bến bãi.';
+      const msg = err instanceof Error ? err.message : 'Lỗi giao dịch tiếp nhận xe.';
       setErrorMessage(msg);
       setIsSubmitting(false);
     }
@@ -399,24 +395,22 @@ export default function EntryGatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!licensePlate.trim()) {
-      setErrorMessage('Vui lòng nhập biển số xe vào cổng.');
+      setErrorMessage('Vui lòng nhập biển số phương tiện vào cổng.');
       return;
     }
 
     if (isContainerType) {
       if (!containerNo.trim()) {
-        setErrorMessage('Loại xe Container yêu cầu nhập mã số container.');
+        setErrorMessage('Loại xe Container bắt buộc nhập mã số container.');
         return;
       }
       if (!contValidation.isValidFormat) {
         setErrorMessage(`Mã số container chưa đúng định dạng: ${contValidation.message}`);
         return;
       }
-
-      // Chặn trùng lặp Container 1 với cont đang lưu bãi
       if (duplicateContainer) {
         setErrorMessage(
-          `Cảnh báo trùng số container: Container ${duplicateContainer.container_no_current} hiện đang có một lượt lưu bãi khác ở trạng thái IN_YARD trong cùng bãi. Không tự động gộp lượt. Vui lòng xác minh thực tế.`
+          `Cảnh báo trùng số container: Container ${duplicateContainer.container_no_current} đang có lượt lưu bãi IN_YARD. Không tự động gộp lượt.`
         );
         return;
       }
@@ -428,23 +422,16 @@ export default function EntryGatePage() {
         }
         const cont2Validation = validateContainerNumber(secondContainerNo);
         if (!cont2Validation.isValidFormat) {
-          setErrorMessage(`Mã số Container thứ hai chưa đúng định dạng: ${cont2Validation.message}`);
+          setErrorMessage(`Container thứ hai chưa đúng chuẩn: ${cont2Validation.message}`);
           return;
         }
         if (duplicateSecondContainer?.isDuplicateWithFirst) {
           setErrorMessage('Mã số Container #1 và Container #2 không được trùng nhau.');
           return;
         }
-        if (duplicateSecondContainer?.container) {
-          setErrorMessage(
-            `Cảnh báo trùng số container: Container thứ hai ${duplicateSecondContainer.container.container_no_current} hiện đang có lượt lưu bãi IN_YARD trong bãi. Vui lòng xác minh thực tế.`
-          );
-          return;
-        }
       }
     }
 
-    // KIỂM TRA TRÙNG LẶP PHƯƠNG TIỆN CHUYÊN SÂU
     if (dupCheckResult?.has_duplicate) {
       if (!dupCheckResult.can_proceed) {
         setShowBlockModal(true);
@@ -459,1360 +446,597 @@ export default function EntryGatePage() {
     await executeVehicleEntry(false, undefined, false);
   };
 
+  // Danh sách xe vừa tiếp nhận cho Secondary Panel
+  const recentIntakeVehicles = useMemo(() => {
+    return allKnownVehicles
+      .filter((v) => {
+        if (!recentSearch.trim()) return true;
+        const kw = recentSearch.trim().toUpperCase();
+        return (
+          v.license_plate?.toUpperCase().includes(kw) ||
+          v.ticket_code?.toUpperCase().includes(kw)
+        );
+      })
+      .slice(0, 20);
+  }, [allKnownVehicles, recentSearch]);
+
   if (!isAllowed) {
     return (
-      <div className="bg-white rounded p-6 sm:p-8 border border-slate-300 text-center max-w-lg mx-auto shadow-2xs">
-        <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900">Chưa được cấp quyền tiếp nhận xe</h2>
-        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-          Tài khoản <strong>{user?.roleName || 'Chưa chọn vai trò'}</strong> chưa được phân công nhiệm vụ tiếp nhận xe tại cổng. Vui lòng chuyển sang ca trực An ninh hoặc liên hệ quản trị viên.
-        </p>
+      <div className="flex-1 flex items-center justify-center p-6 bg-white">
+        <div className="max-w-md w-full p-6 text-center border border-[#E5E9F0] rounded-xl bg-[#F8F9FB]">
+          <ShieldAlert className="w-10 h-10 text-[#D92D20] mx-auto mb-3" />
+          <h2 className="text-sm font-semibold text-[#17202E]">Chưa được cấp quyền tiếp nhận xe</h2>
+          <p className="text-xs text-[#667085] mt-1.5 leading-relaxed">
+            Tài khoản hiện tại chưa được phân công quyền <code>vehicle.visit.create</code> tại bốt An ninh cổng. Vui lòng liên hệ Trưởng bộ phận An ninh hoặc Quản trị hệ thống.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl xl:max-w-6xl mx-auto space-y-4">
-      {/* Tiêu đề & Thông tin bãi */}
-      <div className="bg-white rounded-lg p-4 border border-slate-300 shadow-xs">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold tracking-wider uppercase text-[#0A9444]">
-              Quy trình Cổng vào (An ninh)
-            </span>
-            <h1 className="text-base sm:text-lg font-bold text-[#223873] mt-0.5">
-              Tiếp nhận Phương tiện & Container
-            </h1>
-          </div>
-          <div className="text-right">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase">Trực ca</span>
-            <div className="text-xs font-bold text-slate-800">{user?.fullName}</div>
-          </div>
-        </div>
-
-        {/* THÔNG BÁO VẬN HÀNH & QUY TẮC VÉ CỔNG */}
-        {process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE !== 'true' && authMode === 'REAL' ? (
-          <div className="mt-3 p-2.5 rounded bg-blue-50 border border-blue-200 text-blue-950 text-xs">
-            <div className="flex items-start space-x-2">
-              <Lock className="w-4 h-4 text-[#223873] shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <strong className="font-bold text-[#223873]">Bản thử nghiệm:</strong>
-                <span className="text-[11px] ml-1 text-slate-700">
-                  Chức năng lưu dữ liệu hiện chưa được mở. Vui lòng chuyển sang Chế độ mô phỏng để trải nghiệm đầy đủ quy trình tiếp nhận.
-                </span>
-              </div>
-            </div>
-          </div>
+    <div className="flex-1 flex overflow-hidden h-full">
+      {/* ============================================================== */}
+      {/* 1. SECONDARY PANEL: HÀNG ĐỢI XE TIẾP NHẬN TRONG CA             */}
+      {/* ============================================================== */}
+      <SecondaryPanel
+        title="Lượt xe gần đây"
+        count={recentIntakeVehicles.length}
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
+        searchSlot={
+          <SearchInput
+            value={recentSearch}
+            onChange={setRecentSearch}
+            placeholder="Tìm biển số, vé cổng..."
+          />
+        }
+      >
+        {recentIntakeVehicles.length === 0 ? (
+          <EmptyState
+            title="Chưa có dữ liệu"
+            description="Chưa ghi nhận lượt xe nào trong ca trực hiện tại."
+            className="py-12"
+          />
         ) : (
-          <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-300 text-amber-900 text-xs">
-            <div className="flex items-start space-x-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <strong className="font-bold text-amber-950">Quy định vé cổng:</strong>
-                <div className="text-[11px] mt-0.5 text-amber-800">
-                  Xe chở container vào bãi áp dụng vé <strong>250.000đ</strong>; Đầu kéo vào không container áp dụng vé <strong>0đ (Miễn phí)</strong>. Hệ thống tự động kiểm soát đúng loại vé theo thực tế phương tiện.
+          recentIntakeVehicles.map((v) => {
+            const isSelected = selectedRecentVehicle?.id === v.id;
+            return (
+              <div
+                key={v.id}
+                onClick={() => {
+                  setSelectedRecentVehicle(v);
+                  setIsRightPanelOpen(true);
+                }}
+                className={`p-3 transition-colors cursor-pointer border-l-3 ${
+                  isSelected
+                    ? 'bg-[#EAF1FD] border-[#326DD8]'
+                    : 'bg-white hover:bg-[#F8F9FB] border-transparent'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <span className="font-mono font-semibold text-xs text-[#17202E]">
+                    {v.license_plate || 'XE-BO-3-BANH'}
+                  </span>
+                  <StatusBadge
+                    label={v.ticket_payment_status === 'PAID' ? 'Đã thu' : (v.ticket_payment_status === 'EXEMPT' ? '0đ' : 'Chưa thu')}
+                    variant={v.ticket_payment_status === 'PAID' ? 'success' : (v.ticket_payment_status === 'EXEMPT' ? 'neutral' : 'warning')}
+                    showDot={false}
+                    className="text-[10px] py-0 px-1.5"
+                  />
                 </div>
+                <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                  <span className="truncate max-w-[130px]">
+                    {getVehicleTypeName(v.vehicle_type)}
+                  </span>
+                  <span className="font-mono">
+                    {new Date(v.entry_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </SecondaryPanel>
+
+      {/* ============================================================== */}
+      {/* 2. MAIN WORKSPACE: BIỂU MẪU TIẾP NHẬN XE CỔNG VÀO (V5)          */}
+      {/* ============================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+        {/* Workspace Header */}
+        <WorkspaceHeader
+          title="Tiếp nhận Phương tiện & Xe Cổng vào"
+          subtitle="Bốt gác An ninh cổng — Kiểm soát lượt xe, số container và thu tiền vé vào bãi"
+          icon={Truck}
+          badge={
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+              Bốt cổng trực tiếp
+            </span>
+          }
+          actions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsRightPanelOpen((prev) => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+                  isRightPanelOpen
+                    ? 'border-[#B2DDFF] bg-[#EFF8FF] text-[#326DD8]'
+                    : 'border-[#E5E9F0] text-[#17202E] hover:bg-[#F8F9FB]'
+                }`}
+                title="Bật/tắt bảng trợ giúp biểu phí và thông tin đối chiếu"
+              >
+                <Info className="w-3.5 h-3.5 text-[#326DD8]" />
+                <span className="hidden sm:inline">Trợ giúp & Biểu phí</span>
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-[#667085]" />
+                <span>Làm mới form</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* THÔNG BÁO HOÀN TẤT THÀNH CÔNG */}
+        {successResult && (
+          <div className="m-5 p-4 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#0A9444] text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <Check className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-[#0A9444]">
+                    Tiếp nhận xe vào bãi thành công!
+                  </h3>
+                  <div className="text-xs text-[#17202E] mt-1 space-y-0.5">
+                    <p>
+                      Biển số: <strong className="font-mono text-sm">{successResult.vehicle.license_plate}</strong> — Mã vé: <strong className="font-mono">{successResult.vehicle.ticket_code || '---'}</strong>
+                    </p>
+                    {successResult.container && (
+                      <p>
+                        Container: <strong className="font-mono">{successResult.container.container_no_current}</strong> ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
+                      </p>
+                    )}
+                    <p className="text-[#667085]">
+                      Thời gian ghi nhận: {new Date(successResult.vehicle.entry_at).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowPrintTicketModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#A6F4C5] text-xs font-semibold text-[#0A9444] hover:bg-[#F0FDF4] transition-colors cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>In vé</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-3 py-1.5 rounded-lg bg-[#0A9444] text-white text-xs font-semibold hover:bg-[#087C3C] transition-colors cursor-pointer"
+                >
+                  Xe tiếp theo {countdown !== null && `(${countdown}s)`}
+                </button>
               </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* THÔNG BÁO TIẾP NHẬN THÀNH CÔNG */}
-      {successResult ? (
-        <div className="max-w-xl mx-auto bg-white rounded-lg p-5 border border-emerald-400 shadow-sm space-y-4">
-          <div className="flex items-center space-x-3 text-emerald-700">
-            <CheckCircle2 className="w-7 h-7 text-[#0A9444] shrink-0" />
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">Tiếp nhận xe vào bãi thành công!</h2>
-              <div className="text-xs text-slate-600">Mã vé: <strong className="font-mono text-slate-900">{successResult.vehicle.ticket_code}</strong></div>
-            </div>
+        {/* THÔNG BÁO LỖI NẾU CÓ */}
+        {errorMessage && (
+          <div className="mx-5 mt-4 p-3.5 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-xs text-[#D92D20] flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span className="flex-1 font-medium">{errorMessage}</span>
+            <button
+              type="button"
+              onClick={() => setErrorMessage('')}
+              className="p-1 text-[#D92D20] hover:bg-[#FEE4E2] rounded"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
+        )}
 
-          <div className="bg-slate-50 rounded p-3 border border-slate-300 text-xs space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Biển số xe:</span>
-              <span className="font-mono font-bold text-slate-900 text-sm">{successResult.vehicle.license_plate}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Loại phương tiện:</span>
-              <span className="font-semibold text-slate-800">
-                {getVehicleTypeName(successResult.vehicle.vehicle_type_name || successResult.vehicle.vehicle_type)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Tiền vé cổng:</span>
-              <div className="text-right">
-                <span className="font-bold text-[#0A9444] text-sm">
-                  {successResult.vehicle.ticket_amount !== null
-                    ? `${successResult.vehicle.ticket_amount.toLocaleString('vi-VN')} đ`
-                    : 'Chưa thiết lập'}
+        {/* FORM TIẾP NHẬN CHÍNH (THEO CHIỀU DỌC CÔNG THÁI HỌC) */}
+        <form onSubmit={handleSubmit} className="p-5 max-w-4xl space-y-6">
+          {/* SECTION 1: THÔNG TIN PHƯƠNG TIỆN */}
+          <div className="border border-[#E5E9F0] rounded-xl p-4 sm:p-5 bg-white shadow-2xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F6]">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-md bg-[#EAF1FD] text-[#326DD8] flex items-center justify-center text-xs font-bold">
+                  1
                 </span>
-                <span className={`ml-2 text-[10px] px-2 py-0.5 rounded font-bold ${
-                  successResult.vehicle.ticket_payment_status === 'PAID'
-                    ? 'bg-emerald-100 text-[#0A9444] border border-emerald-300'
-                    : successResult.vehicle.ticket_payment_status === 'EXEMPT'
-                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                    : 'bg-amber-100 text-amber-800 border border-amber-200'
-                }`}>
-                  {successResult.vehicle.ticket_payment_status === 'PAID'
-                    ? `ĐÃ THU (${paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'})`
-                    : successResult.vehicle.ticket_payment_status === 'EXEMPT'
-                    ? 'Miễn phí hợp lệ'
-                    : 'Chưa thu tiền (Ghi nợ)'}
-                </span>
+                <h3 className="text-sm font-semibold text-[#17202E]">
+                  Thông tin Phương tiện
+                </h3>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowIdCardScanner(!showIdCardScanner)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-[#326DD8] bg-[#EFF8FF] border border-[#B2DDFF] hover:bg-[#EAF1FD] transition-colors cursor-pointer"
+              >
+                <ScanLine className="w-3.5 h-3.5" />
+                <span>Quét CCCD tài xế</span>
+              </button>
             </div>
-            {receiptCode.trim() && (
-              <div className="flex justify-between text-[11px] text-slate-500">
-                <span>Số biên lai / Vé giấy:</span>
-                <span className="font-mono font-bold text-slate-800">{receiptCode.trim()}</span>
+
+            {/* Quét CCCD Popup input */}
+            {showIdCardScanner && (
+              <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-2 animate-in fade-in">
+                <label className="text-xs font-semibold text-[#17202E]">
+                  Nhập hoặc quét chuỗi mã QR CCCD gắn chip:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={scannerRawInput}
+                    onChange={(e) => setScannerRawInput(e.target.value)}
+                    placeholder="Chuỗi QR CCCD (VD: 00109...|...|Nguyễn Văn A|...)"
+                    className="flex-1 h-9 px-3 text-xs bg-white border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => parseAndApplyCccdData(scannerRawInput)}
+                    className="px-3 py-1.5 rounded-lg bg-[#326DD8] text-white text-xs font-semibold hover:bg-[#2557B4] cursor-pointer"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
               </div>
             )}
-            {successResult.containers && successResult.containers.length > 0 ? (
-              <div className="pt-2 border-t border-slate-200 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Container đi kèm ({successResult.containers.length}):</span>
-                  {successResult.containers.length > 1 && (
-                    <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded border border-purple-200">
-                      Cặp 2 vỏ 20 Feet
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {successResult.containers.map((c, idx) => (
-                    <div
-                      key={c.id || idx}
-                      className="font-bold text-blue-900 bg-blue-50/80 px-2.5 py-1.5 rounded border border-blue-200 flex items-center justify-between"
-                    >
-                      <span className="text-[11px] text-blue-600 font-semibold mr-1">Cont #{idx + 1}:</span>
-                      <span className="font-mono">{c.container_no_current}</span>
-                      <span className="text-[11px] text-slate-500 font-medium ml-1">({formatContainerSpec(c.container_size, c.container_type)})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : successResult.container ? (
-              <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
-                <span className="text-slate-500">Container đi kèm:</span>
-                <span className="font-bold font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                  {successResult.container.container_no_current} ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
-                </span>
-              </div>
-            ) : null}
-            <div className="flex justify-between text-[11px] text-slate-400 pt-1">
-              <span>Thời gian vào:</span>
-              <span>{new Date(successResult.vehicle.entry_at).toLocaleTimeString('vi-VN')} {new Date(successResult.vehicle.entry_at).toLocaleDateString('vi-VN')}</span>
-            </div>
-          </div>
 
-          {/* THANH ĐẾM NGƯỢC TỰ ĐỘNG LÀM MỚI (CÔNG THÁI HỌC CỔNG VÀO) */}
-          <div className="bg-emerald-50 rounded p-2.5 border border-emerald-300 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-2 text-emerald-900">
-                <Clock className="w-4 h-4 text-[#0A9444] shrink-0" />
-                <span>
-                  {isPaused ? (
-                    <span className="font-semibold text-slate-700">Đã tạm dừng đếm ngược tự động làm mới.</span>
-                  ) : (
-                    <span>
-                      Tự động sẵn sàng đón xe tiếp theo sau: <strong className="text-emerald-700 font-bold text-sm">{countdown ?? 0}s</strong>
-                    </span>
-                  )}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPaused(!isPaused)}
-                className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline px-2 py-0.5 rounded hover:bg-emerald-100 transition-colors cursor-pointer"
-              >
-                {isPaused ? 'Tiếp tục đếm' : 'Giữ màn hình'}
-              </button>
-            </div>
-
-            {!isPaused && countdown !== null && (
-              <div className="w-full bg-emerald-200/60 rounded h-1.5 overflow-hidden">
-                <div 
-                  className="bg-[#0A9444] h-1.5 transition-all duration-1000 ease-linear rounded"
-                  style={{ width: `${Math.max(0, Math.min(100, (countdown / 8) * 100))}%` }}
-                />
+            {scanSuccessMsg && (
+              <div className="p-2 rounded bg-[#ECFDF3] border border-[#A6F4C5] text-xs text-[#0A9444]">
+                {scanSuccessMsg}
               </div>
             )}
-          </div>
 
-          {/* CÁC THAO TÁC HÀNH ĐỘNG NHANH */}
-          <div className="space-y-2 pt-1">
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsPaused(true);
-                  setShowPrintTicketModal(true);
-                }}
-                className="py-2 px-3 rounded font-bold text-xs text-[#223873] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
-              >
-                <Printer className="w-4 h-4 text-[#223873]" />
-                <span>In vé cổng vào</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={resetForm}
-                className="py-2 px-3 rounded font-bold text-xs text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Đón xe tiếp theo</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/yard"
-                className="py-1.5 px-3 rounded font-bold text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors flex items-center justify-center space-x-1.5 text-center"
-              >
-                <Truck className="w-3.5 h-3.5" />
-                <span>Xem xe trong Bãi →</span>
-              </Link>
-              <Link
-                href="/dashboard"
-                className="py-1.5 px-3 rounded font-bold text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors flex items-center justify-center space-x-1.5 text-center"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>Xem Tổng quan →</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* FORM NHẬP TIẾP NHẬN BỐ CỤC 2 CỘT CÔNG THÁI HỌC CẢNG BẾN BÃI */
-        <form 
-          onSubmit={handleSubmit} 
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-              e.preventDefault();
-              handleSubmit(e as any);
-            }
-          }}
-          className="bg-white rounded-lg p-4 sm:p-5 border border-slate-300 shadow-xs space-y-4"
-        >
-          {errorMessage && (
-            <div className="p-3 rounded bg-rose-50 border border-rose-300 text-rose-800 text-xs font-semibold flex items-start space-x-2 animate-in fade-in">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {/* GRID BỐ CỤC: 2 CỘT TRÊN MÁY TÍNH (7:5) — 1 CỘT TRÊN DI ĐỘNG */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
-            
-            {/* CỘT TRÁI (lg:col-span-7): THÔNG TIN PHƯƠNG TIỆN & CONTAINER */}
-            <div className="lg:col-span-7 space-y-3.5">
-              {/* 1. BIỂN SỐ XE TRỌNG TÂM (HỖ TRỢ VIỆT NAM, TRUNG QUỐC, LÀO) */}
-              <div className="p-3.5 rounded bg-slate-50 border border-slate-300 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                    1. Biển số xe vào cổng <span className="text-rose-500">*</span>
-                  </label>
-                  <span className="text-[11px] text-slate-500 font-medium">VN, TQ (桂A-12345), Lào...</span>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Biển số xe */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#17202E] flex items-center justify-between">
+                  <span>Biển số xe vào cổng <span className="text-[#D92D20]">*</span></span>
+                  {isCheckingDup && (
+                    <span className="text-[10px] text-[#326DD8] animate-pulse">Đang kiểm tra trùng...</span>
+                  )}
+                </label>
                 <input
                   type="text"
-                  value={licensePlate}
-                  onChange={(e) => {
-                    setLicensePlate(e.target.value.toUpperCase());
-                    if (errorMessage) setErrorMessage('');
-                  }}
-                  placeholder="VD: 14C-123.45 hoặc 桂A-12345"
-                  className={`w-full px-3.5 py-2 text-base font-bold tracking-wider text-[#223873] border rounded font-mono focus:outline-none bg-white shadow-2xs transition-colors ${
-                    dupCheckResult?.has_duplicate || localDuplicateVehicle
-                      ? 'border-amber-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
-                      : 'border-slate-300 focus:border-[#0A9444] focus:ring-1 focus:ring-emerald-500'
-                  }`}
                   required
-                  autoFocus
+                  value={licensePlate}
+                  onChange={(e) => setLicensePlate(e.target.value.toUpperCase())}
+                  placeholder="VD: 11C-123.45 hoặc 29H-987.65"
+                  className="w-full h-10 px-3 font-mono font-bold text-sm bg-white text-[#17202E] placeholder-[#98A2B3] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] focus:ring-3 focus:ring-[rgba(50,109,216,0.12)]"
                 />
-                {/* Phím bấm gõ nhanh ký tự biển số xe Trung Quốc phổ biến tại cửa khẩu Tà Lùng */}
-                <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto text-[11px] text-slate-500">
-                  <span className="shrink-0 text-slate-400 font-medium">Gõ nhanh biển TQ:</span>
-                  {[
-                    { label: '桂 (Quảng Tây)', char: '桂' },
-                    { label: '粤 (Quảng Đông)', char: '粤' },
-                    { label: '云 (Vân Nam)', char: '云' },
-                    { label: '湘 (Hồ Nam)', char: '湘' },
-                    { label: '挂 (Moóc)', char: '挂' },
-                  ].map((item) => (
-                    <button
-                      key={item.char}
-                      type="button"
-                      onClick={() => {
-                        setLicensePlate((prev) => item.char === '挂' ? `${prev}挂` : `${item.char}${prev}`);
-                        if (errorMessage) setErrorMessage('');
-                      }}
-                      className="px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-700 font-bold border border-slate-300 transition-colors cursor-pointer shrink-0"
-                      title={`Bấm để chèn ${item.label}`}
-                    >
-                      +{item.char}
-                    </button>
+              </div>
+
+              {/* Loại phương tiện V5 */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#17202E]">
+                  Loại phương tiện <span className="text-[#D92D20]">*</span>
+                </label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full h-10 px-3 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                >
+                  {vehicleTypes.map((t) => (
+                    <option key={t.code} value={t.code}>
+                      {t.name} {t.default_ticket_amount !== null ? `(${t.default_ticket_amount.toLocaleString('vi-VN')} đ)` : ''}
+                    </option>
                   ))}
-                </div>
-
-                {/* GỢI Ý TỰ ĐỘNG THÔNG TIN TÀI XẾ QUEN TỪ LỊCH SỬ XE (CÔNG THÁI HỌC CỔNG VÀO) */}
-                {suggestedDriver && (
-                  <div className="p-2.5 rounded bg-blue-50 border border-blue-200 text-xs flex items-center justify-between gap-2 animate-in fade-in">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-base shrink-0">💡</span>
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-blue-900 truncate">
-                          Tài xế quen đã lưu: {suggestedDriver.driverName}
-                        </div>
-                        <div className="text-[10px] text-blue-700 font-mono truncate">
-                          SĐT: {suggestedDriver.driverPhone || 'Chưa lưu'}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (suggestedDriver.driverName) setDriverName(suggestedDriver.driverName);
-                        if (suggestedDriver.driverPhone) setDriverPhone(suggestedDriver.driverPhone);
-                      }}
-                      className="px-2.5 py-1 rounded bg-[#223873] hover:bg-[#1a2c5a] text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-2xs transition-colors"
-                      title="Bấm để tự động điền thông tin tài xế quen này"
-                    >
-                      Điền ngay ↵
-                    </button>
-                  </div>
-                )}
-
-                {/* CẢNH BÁO TRÙNG LẶP PHƯƠNG TIỆN THỜI GIAN THỰC */}
-                {isCheckingDup && (
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 italic pt-1">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-400" />
-                    <span>Đang kiểm tra biển số trong bãi...</span>
-                  </div>
-                )}
-
-                {/* Cảnh báo nhanh tức thì (0ms) từ bộ nhớ bãi nếu chưa có phản hồi debounce */}
-                {!dupCheckResult?.has_duplicate && localDuplicateVehicle && (
-                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1 animate-in fade-in">
-                    <div className="flex items-center gap-1.5 font-bold">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>PHÁT HIỆN BIỂN SỐ TRONG BÃI (IN_YARD)</span>
-                    </div>
-                    <p className="text-[11px] text-amber-800">
-                      Xe <strong>{localDuplicateVehicle.license_plate}</strong> hiện đang có lượt lưu bãi (vào lúc {new Date(localDuplicateVehicle.entry_at).toLocaleTimeString('vi-VN')} {new Date(localDuplicateVehicle.entry_at).toLocaleDateString('vi-VN')}).
-                    </p>
-                  </div>
-                )}
-
-                {dupCheckResult?.has_duplicate && (
-                  <div className={`p-3 rounded-xl border text-xs space-y-1.5 animate-in fade-in ${
-                    !dupCheckResult.can_proceed 
-                      ? 'bg-rose-50 border-rose-300 text-rose-900' 
-                      : 'bg-amber-50 border-amber-300 text-amber-900'
-                  }`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2">
-                        {!dupCheckResult.can_proceed ? (
-                          <AlertOctagon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                        ) : (
-                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                        )}
-                        <div>
-                          <p className="font-bold">
-                            {!dupCheckResult.can_proceed 
-                              ? 'CẢNH BÁO CHẶN: Phương tiện vi phạm chính sách bến bãi' 
-                              : 'PHÁT HIỆN TRÙNG LẶP: Phương tiện đang có 1 lượt trong bãi'}
-                          </p>
-                          <p className="text-[11px] leading-relaxed mt-0.5">
-                            {dupCheckResult.message}
-                          </p>
-                          {dupCheckResult.has_unpaid_ticket && (
-                            <p className="text-[11px] font-bold text-rose-700 mt-0.5">
-                              ⚠️ Chú ý: Lượt xe cũ chưa thanh toán vé vào cổng ({dupCheckResult.existing_visit?.ticket_amount?.toLocaleString('vi-VN')} đ).
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!dupCheckResult.can_proceed) {
-                            setShowBlockModal(true);
-                          } else {
-                            setShowDupModal(true);
-                          }
-                        }}
-                        className={`text-[11px] font-bold px-2.5 py-1 rounded-lg shrink-0 border transition-colors cursor-pointer ${
-                          !dupCheckResult.can_proceed
-                            ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-300'
-                            : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
-                        }`}
-                      >
-                        {!dupCheckResult.can_proceed ? 'Chi tiết chặn' : 'Xử lý ghi đè'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                </select>
               </div>
 
-              {/* 2. CHỌN LOẠI PHƯƠNG TIỆN */}
-              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-300 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                    2. Chọn loại phương tiện & Biểu phí vé <span className="text-rose-600">*</span>
+              {/* Tên tài xế */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#17202E]">
+                  Họ tên tài xế
+                </label>
+                <input
+                  type="text"
+                  value={driverName}
+                  onChange={(e) => setDriverName(e.target.value)}
+                  placeholder="VD: Nguyễn Văn A"
+                  className="w-full h-9 px-3 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                />
+              </div>
+
+              {/* Số điện thoại */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#17202E]">
+                  Số điện thoại liên hệ
+                </label>
+                <input
+                  type="tel"
+                  value={driverPhone}
+                  onChange={(e) => setDriverPhone(e.target.value)}
+                  placeholder="VD: 0912345678"
+                  className="w-full h-9 px-3 text-xs font-mono bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: THÔNG TIN CONTAINER (HIỂN THỊ KHI LÀ XE CONTAINER) */}
+          {isContainerType && (
+            <div className="border border-[#E5E9F0] rounded-xl p-4 sm:p-5 bg-white shadow-2xs space-y-4 animate-in fade-in">
+              <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F6]">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-md bg-[#ECFDF3] text-[#0A9444] flex items-center justify-center text-xs font-bold">
+                    2
+                  </span>
+                  <h3 className="text-sm font-semibold text-[#17202E]">
+                    Thông tin Container mang theo
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setContainerCarryMode('SINGLE')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      containerCarryMode === 'SINGLE'
+                        ? 'bg-[#EAF1FD] text-[#326DD8] font-semibold border border-[#D0E1FD]'
+                        : 'text-[#667085] hover:bg-[#F8F9FB]'
+                    }`}
+                  >
+                    1 Container (20/40/45ft)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContainerCarryMode('DUAL_20FT')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      containerCarryMode === 'DUAL_20FT'
+                        ? 'bg-[#EAF1FD] text-[#326DD8] font-semibold border border-[#D0E1FD]'
+                        : 'text-[#667085] hover:bg-[#F8F9FB]'
+                    }`}
+                  >
+                    Cõng 2 Cont 20ft
+                  </button>
+                </div>
+              </div>
+
+              {/* Container #1 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-semibold text-[#17202E] flex items-center justify-between">
+                    <span>Mã số Container #1 <span className="text-[#D92D20]">*</span></span>
+                    {containerNo.trim() && (
+                      <span className={`text-[11px] font-semibold ${contValidation.isValidFormat ? 'text-[#0A9444]' : 'text-[#B54708]'}`}>
+                        {contValidation.isValidFormat ? '✓ Đúng chuẩn 11 ký tự' : '⚠️ Kiểm tra định dạng'}
+                      </span>
+                    )}
                   </label>
-                  {isContainerType && (
-                    <span className="text-[11px] text-[#0A9444] font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
-                      Áp dụng vé Container 250.000 đ
-                    </span>
-                  )}
+                  <input
+                    type="text"
+                    required
+                    value={containerNo}
+                    onChange={(e) => setContainerNo(e.target.value.toUpperCase())}
+                    placeholder="VD: MSKU1234567 hoặc BMOU9876543"
+                    className="w-full h-10 px-3 font-mono font-bold text-sm bg-white text-[#17202E] placeholder-[#98A2B3] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {vehicleTypes.map((t) => {
-                    const isSelected = selectedType === t.code;
-                    let priceLabel = 'Chưa có giá';
-                    if (t.code === 'CONT_LANH') {
-                      priceLabel = '250.000 đ';
-                    } else if (t.code === 'DAU_KEO' || t.default_ticket_amount === 0) {
-                      priceLabel = '0 đ (Miễn phí)';
-                    } else if (t.default_ticket_amount !== null && t.default_ticket_amount > 0) {
-                      priceLabel = `${t.default_ticket_amount.toLocaleString('vi-VN')} đ`;
-                    }
-
-                    return (
-                      <button
-                        key={t.code}
-                        type="button"
-                        onClick={() => {
-                          setSelectedType(t.code);
-                          setErrorMessage('');
-                        }}
-                        className={`text-left p-2.5 rounded border transition-colors cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-emerald-50/80 text-emerald-950 border-[#0A9444] ring-1 ring-[#0A9444] font-bold'
-                            : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                        }`}
-                      >
-                        <div className="text-xs font-bold">{t.name}</div>
-                        <div className="flex justify-between items-center mt-1 text-[11px]">
-                          <span className="text-slate-500">Vé lượt</span>
-                          <span className={`font-mono font-bold ${t.code === 'DAU_KEO' || t.default_ticket_amount === 0 ? 'text-blue-700' : 'text-[#0A9444]'}`}>
-                            {priceLabel}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#17202E]">
+                    Chủng loại cont
+                  </label>
+                  <select
+                    value={containerType}
+                    onChange={(e) => setContainerType(e.target.value)}
+                    className="w-full h-10 px-3 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                  >
+                    <option value="RF">Lạnh (Reefer)</option>
+                    <option value="DC">Khô (Dry Container)</option>
+                    <option value="HC">Cao (High Cube)</option>
+                    <option value="OT">Mở nóc (Open Top)</option>
+                  </select>
                 </div>
               </div>
 
-              {/* 3. THÔNG TIN CONTAINER (CHỈ HIỂN THỊ KHI CHỌN XE CONTAINER LẠNH) */}
-              {isContainerType && (
-                <div className="p-3.5 rounded-lg bg-blue-50/40 border border-blue-300 space-y-3">
-                  <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-blue-950 flex items-center space-x-1.5">
-                      <ContainerIcon className="w-4 h-4 text-[#223873]" />
-                      <span>3. Chi tiết Container đi kèm:</span>
-                    </span>
-                    <span className="text-[10px] bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded border border-blue-300">
-                      Vé trọn gói: 250.000 đ
-                    </span>
-                  </div>
-
-                  {/* CẢNH BÁO THÔNG MINH: YÊU CẦU CẮM ĐIỆN DỰ KIẾN TỪ CCKB */}
-                  {matchedReeferRequest && (
-                    <div className="p-3 bg-amber-50 border border-amber-400 rounded text-amber-950 text-xs space-y-1.5 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-amber-900 flex items-center gap-1.5 uppercase tracking-wide">
-                          <Zap className="w-4 h-4 text-amber-600" />
-                          ⚡ CẢNH BÁO CẮM ĐIỆN TRƯỚC TỪ CCKB
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 border border-amber-300">
-                          {matchedReeferRequest.power_mode === 'CONTINUOUS' ? 'Cắm liên tục' : 'Theo giờ'}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] pt-1 border-t border-amber-300">
-                        <div>
-                          <span className="text-amber-700">Cont đăng ký:</span> <b className="font-mono text-amber-950">{matchedReeferRequest.container_no_planned}</b>
-                        </div>
-                        <div>
-                          <span className="text-amber-700">Khách hàng:</span> <b className="text-amber-950">{matchedReeferRequest.customer_name}</b>
-                        </div>
-                        {matchedReeferRequest.temperature_setting && (
-                          <div>
-                            <span className="text-amber-700">Cài đặt nhiệt độ:</span> <b>{matchedReeferRequest.temperature_setting}</b>
-                          </div>
-                        )}
-                        {matchedReeferRequest.notes && (
-                          <div className="sm:col-span-2">
-                            <span className="text-amber-700">Ghi chú CCKB:</span> <i className="text-amber-900">{matchedReeferRequest.notes}</i>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-amber-800 font-bold pt-1">
-                        👉 Đề nghị An ninh: Hướng dẫn tài xế đưa xe vào ngay khu cắm điện lạnh sau khi qua cổng!
-                      </p>
+              {/* Container #2 nếu là cõng 2 cont 20ft */}
+              {containerCarryMode === 'DUAL_20FT' && (
+                <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-3 animate-in fade-in">
+                  <h4 className="text-xs font-semibold text-[#17202E]">
+                    Container thứ hai (20ft)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="text-[11px] font-semibold text-[#475467]">
+                        Mã số Container #2 <span className="text-[#D92D20]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={secondContainerNo}
+                        onChange={(e) => setSecondContainerNo(e.target.value.toUpperCase())}
+                        placeholder="VD: TCLU1234567"
+                        className="w-full h-9 px-3 font-mono font-bold text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                      />
                     </div>
-                  )}
-
-                  {/* FORM NHẬP CONTAINER CHÍNH */}
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="block text-xs font-bold text-slate-800">
-                          {containerCarryMode === 'DUAL_20FT' ? (
-                            <span className="flex items-center gap-1.5 text-[#0A9444]">
-                              <span className="w-4 h-4 rounded bg-[#0A9444] text-white inline-flex items-center justify-center text-[10px] font-bold">1</span>
-                              Mã số Container thứ nhất (20 Feet) <span className="text-rose-600">*</span>
-                            </span>
-                          ) : (
-                            <>
-                              Mã số Container (4 chữ cái + 7 chữ số) <span className="text-rose-600">*</span>
-                            </>
-                          )}
-                        </label>
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          {containerNo.trim().length > 0 ? `${containerNo.trim().length}/11 ký tự` : 'VD: TCLU1234567'}
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={containerNo}
-                          onChange={(e) => {
-                            setContainerNo(e.target.value.toUpperCase().replace(/\s+/g, ''));
-                            if (errorMessage) setErrorMessage('');
-                          }}
-                          placeholder="TCLU1234567"
-                          maxLength={11}
-                          className={`w-full px-3 py-2 text-sm font-bold tracking-widest uppercase font-mono rounded border focus:outline-none transition-colors ${
-                            duplicateContainer
-                              ? 'border-rose-500 text-rose-950 bg-rose-50 ring-1 ring-rose-500'
-                              : contValidation.level === 'SUCCESS'
-                              ? 'border-emerald-500 text-emerald-950 bg-emerald-50/50 ring-1 ring-emerald-500'
-                              : contValidation.level === 'ERROR'
-                              ? 'border-rose-400 text-rose-950 bg-rose-50/50'
-                              : 'border-slate-300 text-slate-900 bg-white focus:border-[#223873]'
-                          }`}
-                          required
-                        />
-                        {duplicateContainer ? (
-                          <AlertOctagon className="w-4 h-4 text-rose-600 absolute right-3 top-1/2 -translate-y-1/2" />
-                        ) : contValidation.level === 'SUCCESS' ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-1/2 -translate-y-1/2" />
-                        ) : null}
-                      </div>
-
-                      {/* CẢNH BÁO TRÙNG SỐ CONTAINER THỜI GIAN THỰC (IN_YARD) */}
-                      {duplicateContainer ? (
-                        <div className="mt-2 p-3 rounded border border-rose-400 bg-rose-50 text-rose-950 text-xs space-y-2">
-                          <div className="flex items-start gap-2">
-                            <AlertOctagon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                            <div>
-                              <p className="font-bold text-rose-800 text-xs uppercase tracking-wide">
-                                CẢNH BÁO: CONTAINER {duplicateContainer.container_no_current} ĐANG CÓ LƯỢT LƯU BÃI (IN_YARD)
-                              </p>
-                              <p className="text-[11px] text-rose-700 leading-relaxed mt-0.5">
-                                Container này hiện đang nằm trong bãi và chưa làm thủ tục xuất bãi. Hệ thống <strong>không tự động gộp lượt</strong> và không cho phép tạo lượt vào mới khi cont cũ chưa rời bãi.
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="bg-white rounded p-2 border border-rose-200 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] font-medium text-slate-700">
-                            <div>
-                              <span className="text-slate-500">Thời gian vào bãi:</span>{' '}
-                              <b className="font-mono text-slate-900">
-                                {duplicateContainer.inbound_at ? new Date(duplicateContainer.inbound_at).toLocaleString('vi-VN') : '—'}
-                              </b>
-                            </div>
-                            <div>
-                              <span className="text-slate-500">Xe chở vào:</span>{' '}
-                              <b className="font-mono text-slate-900">
-                                {duplicateContainer.inbound_license_plate ||
-                                 activeVehicles.find(v => v.id === duplicateContainer.inbound_vehicle_visit_id)?.license_plate ||
-                                 'Hạ bãi không kèm xe'}
-                              </b>
-                            </div>
-                            <div>
-                              <span className="text-slate-500">Quy cách & Vỏ:</span>{' '}
-                              <b>
-                                {duplicateContainer.container_size || '40'}ft — {duplicateContainer.container_type || 'RF'} (
-                                {duplicateContainer.cargo_status === 'HANG' ? 'Có hàng' : duplicateContainer.cargo_status === 'RONG' ? 'Vỏ rỗng' : 'Chưa xác định'})
-                              </b>
-                            </div>
-                            <div>
-                              <span className="text-slate-500">Vị trí lưu bãi:</span>{' '}
-                              <b className="text-[#223873]">
-                                {duplicateContainer.yard_zone ? `Khu ${duplicateContainer.yard_zone}` : 'Chưa xếp khu'}
-                                {duplicateContainer.slot_code ? ` (Ô ${duplicateContainer.slot_code})` : ''}
-                              </b>
-                            </div>
-                          </div>
-
-                          <p className="text-[10px] text-rose-700 font-bold">
-                            👉 Đề nghị An ninh: Kiểm tra lại số container thực tế trên vỏ xe hoặc liên hệ Điều phối viên trước khi cho xe vào!
-                          </p>
-                        </div>
-                      ) : containerNo.trim().length > 0 ? (
-                        <div className={`mt-1.5 p-2 rounded text-[11px] flex items-start gap-1.5 ${
-                          contValidation.level === 'SUCCESS'
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-                            : contValidation.level === 'ERROR'
-                            ? 'bg-rose-50 text-rose-800 border border-rose-300'
-                            : 'bg-slate-100 text-slate-600 border border-slate-300'
-                        }`}>
-                          {contValidation.level === 'SUCCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />}
-                          {contValidation.level === 'ERROR' && <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />}
-                          {contValidation.level === 'INFO' && <span className="w-3.5 h-3.5 shrink-0 text-slate-500 font-bold">ℹ</span>}
-                          <div className="flex-1">
-                            <span>{contValidation.message}</span>
-                          </div>
-                        </div>
-                      ) : null}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-[#475467]">
+                        Loại vỏ #2
+                      </label>
+                      <select
+                        value={secondContainerType}
+                        onChange={(e) => setSecondContainerType(e.target.value)}
+                        className="w-full h-9 px-2 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                      >
+                        <option value="RF">Lạnh (RF)</option>
+                        <option value="DC">Khô (DC)</option>
+                      </select>
                     </div>
-                  </div>
-
-                  <div className="text-[11px] text-slate-500 italic pt-1 border-t border-blue-200/60">
-                    * An ninh chỉ ghi nhận số container. Trạng thái HÀNG hoặc RỖNG do Điều phối viên cập nhật sau khi kiểm tra bãi.
                   </div>
                 </div>
               )}
             </div>
+          )}
 
-            {/* CỘT PHẢI (lg:col-span-5): TÀI XẾ & THU TIỀN VÉ & XÁC NHẬN */}
-            <div className="lg:col-span-5 space-y-4">
-              
-              {/* 4. THÔNG TIN LÁI XE & BỔ SUNG (TÙY CHỌN) */}
-              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-300 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                    {isContainerType ? '4. Thông tin lái xe & Hàng:' : '3. Thông tin lái xe & Hàng:'}
-                  </label>
-                  {scanSuccessMsg && (
-                    <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
-                      {scanSuccessMsg}
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Họ tên tài xế</label>
-                    <input
-                      type="text"
-                      value={driverName}
-                      onChange={(e) => setDriverName(e.target.value)}
-                      placeholder="Nguyễn Văn A"
-                      className="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded focus:border-[#0A9444] focus:outline-none bg-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại</label>
-                    <input
-                      type="tel"
-                      value={driverPhone}
-                      onChange={(e) => setDriverPhone(e.target.value)}
-                      placeholder="0912.345.678"
-                      className="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded focus:border-[#0A9444] focus:outline-none bg-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Ô nhập Số CCCD / Hộ chiếu kèm tính năng quét mã QR CCCD gắn chip */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Số CCCD / Hộ chiếu tài xế
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowIdCardScanner(true)}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0A9444] hover:text-[#087C3C] bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 transition-colors cursor-pointer"
-                    >
-                      <QrCode className="w-3.5 h-3.5" />
-                      <span>Quét CCCD (Mã QR)</span>
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={driverIdCard}
-                      onChange={(e) => parseAndApplyCccdData(e.target.value)}
-                      placeholder="Nhập 12 số CCCD hoặc quét mã QR chip..."
-                      className="w-full pl-8 pr-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded font-mono focus:border-[#0A9444] focus:outline-none bg-white"
-                    />
-                    <CreditCard className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Ghi chú loại hàng / Lượt xe</label>
-                  <input
-                    type="text"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Nông sản xuất khẩu, hàng đông lạnh..."
-                    className="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded focus:border-[#0A9444] focus:outline-none bg-white"
-                  />
-                </div>
-              </div>
-
-              {/* 5. GHI NHẬN THU TIỀN VÉ CỔNG TRỰC TIẾP TẠI BỐT GÁC AN NINH */}
-              <div className="p-3.5 rounded-lg bg-emerald-50/30 border border-emerald-300 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                    {isContainerType ? '5. Thu tiền vé cổng tại bốt gác:' : '4. Thu tiền vé cổng tại bốt gác:'}
-                  </label>
-                  {previewAmount === 0 ? (
-                    <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-300">
-                      Miễn phí (0 đ)
-                    </span>
-                  ) : (
-                    <span className="text-[11px] font-bold text-[#0A9444] bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300 font-mono">
-                      Mức thu: {previewAmount?.toLocaleString('vi-VN')} đ
-                    </span>
-                  )}
-                </div>
-
-                {previewAmount === 0 ? (
-                  <div className="p-2.5 rounded bg-white border border-slate-300 text-xs text-slate-600 flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span>Phương tiện miễn phí vé cổng (0 đ). Không phát sinh thu tiền.</span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {/* 2 Lựa chọn lớn: Thu tiền ngay tại cổng vs Thu sau */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setCollectPaymentNow(true)}
-                        className={`p-2 rounded border text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 ${
-                          collectPaymentNow
-                            ? 'bg-[#0A9444] text-white border-[#0A9444] shadow-2xs'
-                            : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                        }`}
-                      >
-                        <Banknote className="w-3.5 h-3.5" />
-                        <span>Thu tiền ngay</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCollectPaymentNow(false)}
-                        className={`p-2 rounded border text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 ${
-                          !collectPaymentNow
-                            ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
-                            : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                        }`}
-                      >
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>Thu sau (Ghi nợ)</span>
-                      </button>
-                    </div>
-
-                    {/* Nếu chọn Thu tiền ngay: Cho phép chọn Tiền mặt / Chuyển khoản và số seri vé */}
-                    {collectPaymentNow && (
-                      <div className="space-y-2.5 pt-2 border-t border-emerald-200">
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Phương thức thanh toán:
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setPaymentMethod('CASH')}
-                              className={`p-1.5 rounded border text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 ${
-                                paymentMethod === 'CASH'
-                                  ? 'bg-emerald-100 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500'
-                                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400'
-                              }`}
-                            >
-                              <Banknote className="w-3.5 h-3.5 text-[#0A9444]" />
-                              <span>Tiền mặt (CASH)</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setPaymentMethod('TRANSFER')}
-                              className={`p-1.5 rounded border text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 ${
-                                paymentMethod === 'TRANSFER'
-                                  ? 'bg-emerald-100 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500'
-                                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400'
-                              }`}
-                            >
-                              <CreditCard className="w-3.5 h-3.5 text-blue-700" />
-                              <span>Chuyển khoản (CK)</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {paymentMethod === 'TRANSFER' && (previewAmount || 0) > 0 && (
-                          <div className="p-3 bg-blue-50 border border-blue-300 rounded flex items-center gap-3">
-                            <img
-                              src={generateVietQrUrl(
-                                previewAmount || 0,
-                                `VE CONG ${licensePlate.trim().toUpperCase() || 'SON CANG'}`
-                              )}
-                              alt="VietQR Napas 247 Vé vào cổng"
-                              className="w-20 h-20 object-contain bg-white p-1 rounded border border-slate-300 shadow-2xs shrink-0"
-                            />
-                            <div className="text-[11px] space-y-1">
-                              <p className="font-bold text-[#223873] flex items-center gap-1">
-                                <QrCode className="w-3.5 h-3.5 text-blue-600" />
-                                Quét mã VietQR Napas 247
-                              </p>
-                              <p className="text-slate-600">
-                                Thu vé cổng: <span className="font-mono font-bold text-emerald-700">{(previewAmount || 0).toLocaleString('vi-VN')} đ</span>
-                              </p>
-                              <p className="text-[10px] text-slate-500 font-mono">
-                                ND: VE CONG {licensePlate.trim().toUpperCase() || 'SON CANG'}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Số seri vé giấy / Số biên lai thu tiền (Tùy chọn):
-                          </label>
-                          <input
-                            type="text"
-                            value={receiptCode}
-                            onChange={(e) => setReceiptCode(e.target.value.toUpperCase())}
-                            placeholder="VD: VE-00123 hoặc Mã chuẩn chi..."
-                            className="w-full px-3 py-1.5 text-xs font-mono text-slate-800 border border-slate-300 rounded bg-white focus:border-[#0A9444] focus:outline-none"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* TỔNG KẾT VÉ & NÚT TIẾP NHẬN */}
-              <div className="p-4 rounded-lg bg-white border border-slate-300 shadow-xs space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Tổng tiền vé cổng:</span>
-                  <span className="text-lg sm:text-xl font-bold font-mono text-[#0A9444]">
-                    {previewAmount !== null ? `${previewAmount.toLocaleString('vi-VN')} đ` : 'Chưa thiết lập'}
-                  </span>
-                </div>
-
-                {(duplicateContainer || duplicateSecondContainer?.container || duplicateSecondContainer?.isDuplicateWithFirst) && (
-                  <div className="p-2.5 rounded border border-rose-300 bg-rose-50 text-rose-900 text-xs font-bold flex items-center gap-2">
-                    <AlertOctagon className="w-4 h-4 text-rose-600 shrink-0" />
-                    <span>
-                      {duplicateContainer
-                        ? `Không thể tiếp nhận: Container ${duplicateContainer.container_no_current} đang có lượt lưu bãi!`
-                        : duplicateSecondContainer?.isDuplicateWithFirst
-                        ? 'Không thể tiếp nhận: Container #1 và Container #2 trùng nhau!'
-                        : `Không thể tiếp nhận: Container #2 đang có lượt lưu bãi!`}
-                    </span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !!duplicateContainer || !!duplicateSecondContainer?.container || !!duplicateSecondContainer?.isDuplicateWithFirst}
-                  className="w-full py-3 px-4 rounded font-bold text-sm text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors flex items-center justify-center space-x-2 shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer min-h-[44px]"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Đang ghi nhận lượt vào...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>XÁC NHẬN TIẾP NHẬN VÀO CỔNG</span>
-                      <span className="text-[11px] font-normal opacity-85 ml-1 hidden sm:inline">(Ctrl + Enter)</span>
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </>
-                  )}
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </form>
-      )}
-
-      {/* MODAL QUÉT MÃ QR CĂN CƯỚC CÔNG DÂN (CCCD) */}
-      {showIdCardScanner && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full p-5 shadow-xl border border-slate-300 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          {/* SECTION 3: THÔNG TIN VÉ & THANH TOÁN CỔNG */}
+          <div className="border border-[#E5E9F0] rounded-xl p-4 sm:p-5 bg-white shadow-2xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F6]">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded bg-emerald-50 text-[#0A9444] border border-emerald-200">
-                  <QrCode className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Quét Căn cước công dân (CCCD)</h3>
-                  <p className="text-[11px] text-slate-500">Chuẩn mã QR thẻ CCCD gắn chip</p>
-                </div>
+                <span className="w-6 h-6 rounded-md bg-[#FFFAEB] text-[#B54708] flex items-center justify-center text-xs font-bold">
+                  3
+                </span>
+                <h3 className="text-sm font-semibold text-[#17202E]">
+                  Vé vào bãi & Thanh toán cổng
+                </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowIdCardScanner(false);
-                  setScannerRawInput('');
-                }}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 rounded bg-slate-50 border border-slate-300 text-center space-y-3">
-              <div className="w-14 h-14 rounded bg-white border-2 border-dashed border-[#0A9444] flex items-center justify-center mx-auto text-[#0A9444]">
-                <ScanLine className="w-7 h-7" />
-              </div>
-              <div className="text-xs text-slate-700 font-bold">
-                Sẵn sàng nhận dữ liệu máy quét
-              </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Đưa mã QR trên thẻ CCCD trước súng quét mã vạch 2D hoặc dán chuỗi quét vào ô bên dưới:
-              </p>
-              <input
-                type="text"
-                value={scannerRawInput}
-                onChange={(e) => {
-                  setScannerRawInput(e.target.value);
-                  parseAndApplyCccdData(e.target.value);
-                }}
-                placeholder="Nhấp vào đây và bắn máy quét..."
-                className="w-full px-3 py-2 text-xs border border-emerald-400 rounded font-mono focus:outline-none focus:ring-1 focus:ring-[#0A9444] bg-white text-center font-bold"
-                autoFocus
-              />
-            </div>
-
-            <div className="pt-1 flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  parseAndApplyCccdData('001202012345|012345678|NGUYỄN VĂN AN|15051992|Nam|Hà Nội|10012022');
-                }}
-                className="text-[11px] font-bold text-[#0A9444] hover:underline cursor-pointer"
-              >
-                + Thử quét CCCD mẫu
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowIdCardScanner(false);
-                  setScannerRawInput('');
-                }}
-                className="px-4 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL IN VÉ VÀO CỔNG */}
-      {showPrintTicketModal && successResult && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-xl w-full p-6 shadow-xl border border-slate-300 space-y-5 relative print:p-0 print:shadow-none print:max-w-full">
-            {/* Thanh thao tác nhanh (ẩn khi in) */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 print:hidden">
-              <span className="text-sm font-bold text-[#223873] flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-[#0A9444]" />
-                Xem trước Vé xe vào cổng bến bãi
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  In vé ngay
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPrintTicketModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded transition-colors cursor-pointer"
-                >
-                  ✕ Đóng
-                </button>
-              </div>
-            </div>
-
-            {/* Khung nội dung Vé xe vào bãi chuẩn Sơn Cảng */}
-            <div className="border border-slate-300 rounded p-5 space-y-4 bg-white text-slate-900 print:border-none print:p-0">
-              {/* Header đơn vị */}
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-slate-200 pb-3">
-                <div>
-                  <p className="font-bold text-xs uppercase text-[#223873] tracking-wider">
-                    CÔNG TY CỔ PHẦN TÀ LÙNG QUANG MINH
-                  </p>
-                  <p className="text-xs font-semibold text-slate-700 mt-0.5">
-                    Bến bãi & Cảng cạn Sơn Cảng — Cửa khẩu Quốc tế Tà Lùng
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    Huyện Quảng Hòa, Tỉnh Cao Bằng
-                  </p>
-                </div>
-                <div className="text-right sm:self-start">
-                  <p className="text-[11px] font-mono text-slate-500 uppercase">Vé lượt cổng</p>
-                  <p className="text-sm font-bold font-mono text-[#0A9444]">
-                    {successResult.vehicle.ticket_code}
-                  </p>
-                </div>
-              </div>
-
-              {/* Tên vé */}
-              <div className="text-center py-1">
-                <h2 className="text-base sm:text-lg font-bold text-[#223873] uppercase tracking-wide">
-                  VÉ KIỂM SOÁT XE VÀO BÃI
-                </h2>
-                <p className="text-xs italic text-slate-500 mt-0.5">
-                  (Liên lưu giữ trên xe / Xuất trình khi ra cổng)
-                </p>
-              </div>
-
-              {/* Chi tiết xe và container */}
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Biển số phương tiện:</span>
-                  <span className="font-mono font-bold text-sm text-slate-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-300">
-                    {successResult.vehicle.license_plate}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Loại phương tiện:</span>
-                  <span className="font-bold text-slate-800">
-                    {getVehicleTypeName(successResult.vehicle.vehicle_type_name || successResult.vehicle.vehicle_type)}
-                  </span>
-                </div>
-
-                {successResult.containers && successResult.containers.length > 0 ? (
-                  <div className="py-1 border-b border-slate-100 space-y-1">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-slate-500">Container đi kèm ({successResult.containers.length}):</span>
-                      {successResult.containers.length > 1 && (
-                        <span className="text-[10px] text-purple-700 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
-                          Cặp 2 vỏ 20ft
-                        </span>
-                      )}
-                    </div>
-                    <div className="space-y-1 pl-2">
-                      {successResult.containers.map((c, idx) => (
-                        <div key={c.id || idx} className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500">#{idx + 1}:</span>
-                          <span className="font-mono font-bold text-[#223873] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                            {c.container_no_current} ({formatContainerSpec(c.container_size, c.container_type)})
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : successResult.container ? (
-                  <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Container đi kèm:</span>
-                    <span className="font-mono font-bold text-[#223873] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      {successResult.container.container_no_current} ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
-                    </span>
-                  </div>
-                ) : null}
-
-                {successResult.vehicle.driver_name && (
-                  <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Họ tên lái xe:</span>
-                    <span className="font-semibold text-slate-800">{successResult.vehicle.driver_name}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Thời gian vào cổng:</span>
-                  <span className="font-mono font-medium text-slate-800">
-                    {new Date(successResult.vehicle.entry_at).toLocaleString('vi-VN')}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-baseline py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Trạng thái thanh toán:</span>
-                  <span className={`font-bold ${
-                    successResult.vehicle.ticket_payment_status === 'PAID'
-                      ? 'text-[#0A9444]'
-                      : successResult.vehicle.ticket_payment_status === 'EXEMPT'
-                      ? 'text-blue-700'
-                      : 'text-amber-700'
-                  }`}>
-                    {successResult.vehicle.ticket_payment_status === 'PAID'
-                      ? `ĐÃ THU (${paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}${receiptCode ? ` - BL: ${receiptCode}` : ''})`
-                      : successResult.vehicle.ticket_payment_status === 'EXEMPT'
-                      ? 'MIỄN PHÍ HỢP LỆ'
-                      : 'CHƯA THU TIỀN (GHI NỢ)'}
-                  </span>
-                </div>
-
-                <div className="pt-2 flex justify-between items-baseline">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Giá vé cổng:</span>
-                  <span className="text-lg font-bold font-mono text-[#0A9444]">
-                    {successResult.vehicle.ticket_amount !== null
-                      ? `${successResult.vehicle.ticket_amount.toLocaleString('vi-VN')} VNĐ`
-                      : '0 VNĐ'}
-                  </span>
-                </div>
-
-                {successResult.vehicle.ticket_amount !== null && successResult.vehicle.ticket_amount > 0 && (
-                  <div className="text-[11px] text-slate-500 italic text-right">
-                    (Bằng chữ: {formatMoneyInWords(successResult.vehicle.ticket_amount)})
-                  </div>
-                )}
-              </div>
-
-              {/* Phần chữ ký & ghi chú */}
-              <div className="pt-4 border-t border-slate-200 grid grid-cols-2 gap-4 text-center text-xs">
-                <div>
-                  <p className="font-bold text-slate-800">Lái xe nhận vé</p>
-                  <p className="text-[10px] text-slate-400 italic">(Ký nhận)</p>
-                  <div className="h-10" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-800">Nhân viên An ninh Cổng</p>
-                  <p className="text-[10px] text-slate-400 italic">(Ký xác nhận)</p>
-                  <div className="h-10 flex items-end justify-center">
-                    <p className="font-bold text-slate-700">{user?.email || 'An ninh trực cổng'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-dashed border-slate-200 pt-2 text-center text-[10px] text-slate-400">
-                Lưu ý: Quý khách vui lòng giữ vé cẩn thận để đối soát khi phương tiện làm thủ tục rời cổng.
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 1: XÁC NHẬN PHƯƠNG TIỆN TRÙNG LẶP TRONG BÃI (WARN & OVERRIDE) */}
-      {showDupModal && dupCheckResult?.has_duplicate && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-xl w-full shadow-xl border border-slate-300 overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Header Modal */}
-            <div className="px-5 py-3.5 bg-amber-600 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="w-5 h-5 text-white" />
-                <div>
-                  <h3 className="font-bold text-sm leading-tight">Xác Nhận Xe Trùng Lặp Trong Bãi</h3>
-                  <p className="text-[11px] text-amber-100">Kiểm soát an toàn bến bãi Sơn Cảng (V5)</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowDupModal(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Nội dung Modal */}
-            <div className="p-5 overflow-y-auto space-y-3.5 text-xs">
-              <div className="p-3 rounded bg-amber-50 border border-amber-300 text-amber-900 leading-relaxed">
-                Biển số xe <span className="font-mono font-bold text-amber-950 text-sm">[{dupCheckResult.existing_visit?.license_plate}]</span> hiện đang có một lượt xe hoạt động trong bãi. Vui lòng đối chiếu thông tin trước khi tiếp nhận lượt mới:
-              </div>
-
-              {/* So sánh 2 lượt */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Lượt đang có */}
-                <div className="p-3 rounded bg-slate-50 border border-slate-300 space-y-2">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
-                    <span className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">1. Lượt xe đang trong bãi</span>
-                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded border border-amber-300">IN_YARD</span>
-                  </div>
-                  <div className="space-y-1 text-slate-600">
-                    <p><span className="text-slate-400">Loại xe:</span> <span className="font-semibold text-slate-800">{getVehicleTypeName(dupCheckResult.existing_visit?.vehicle_type || '')}</span></p>
-                    <p><span className="text-slate-400">Giờ vào:</span> <span className="font-mono text-slate-700">{new Date(dupCheckResult.existing_visit?.entry_at || '').toLocaleTimeString('vi-VN')} {new Date(dupCheckResult.existing_visit?.entry_at || '').toLocaleDateString('vi-VN')}</span></p>
-                    <p><span className="text-slate-400">Đã đỗ:</span> <span className="font-bold text-blue-700">{dupCheckResult.existing_visit?.duration_display}</span></p>
-                    <p>
-                      <span className="text-slate-400">Vé cổng:</span>{' '}
-                      <span className={`font-mono font-bold ${dupCheckResult.existing_visit?.ticket_payment_status === 'PAID' ? 'text-emerald-700' : 'text-amber-700'}`}>
-                        {dupCheckResult.existing_visit?.ticket_payment_status === 'PAID' ? 'Đã thu' : 'Chưa thu'} ({dupCheckResult.existing_visit?.ticket_amount?.toLocaleString('vi-VN')} đ)
-                      </span>
-                    </p>
-                    {dupCheckResult.existing_visit?.driver_name && (
-                      <p><span className="text-slate-400">Tài xế:</span> {dupCheckResult.existing_visit.driver_name}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Lượt mới sắp vào */}
-                <div className="p-3 rounded bg-blue-50/50 border border-blue-300 space-y-2">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-blue-200">
-                    <span className="font-bold text-blue-900 uppercase tracking-wider text-[11px]">2. Lượt mới tiếp nhận</span>
-                    <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded border border-blue-300">SẮP VÀO</span>
-                  </div>
-                  <div className="space-y-1 text-slate-600">
-                    <p><span className="text-slate-400">Loại xe:</span> <span className="font-semibold text-blue-950">{getVehicleTypeName(selectedType)}</span></p>
-                    <p><span className="text-slate-400">Thời gian:</span> <span className="font-mono text-blue-800">Hiện tại (Ca trực)</span></p>
-                    <p><span className="text-slate-400">Giá vé:</span> <span className="font-mono font-bold text-emerald-700">{previewAmount?.toLocaleString('vi-VN')} đ</span></p>
-                    {isContainerType && (
-                      <p><span className="text-slate-400">Container:</span> <span className="font-mono font-bold text-slate-800">{containerNo}</span></p>
-                    )}
-                    {driverName.trim() && (
-                      <p><span className="text-slate-400">Tài xế:</span> {driverName.trim()}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Lựa chọn Lý do ghi đè */}
-              <div className="p-3 rounded bg-slate-50 border border-slate-300 space-y-2">
-                <label className="block font-bold text-slate-800">
-                  Lý do nghiệp vụ cho phép tiếp nhận lượt mới <span className="text-rose-600">*</span>
-                </label>
-                <select
-                  value={overrideReasonCode}
-                  onChange={(e) => setOverrideReasonCode(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded bg-white font-medium text-slate-800 focus:border-amber-500 focus:outline-none"
-                >
-                  {(dupCheckResult.preset_reasons || []).map((r) => (
-                    <option key={r.code} value={r.code}>
-                      {r.label}
-                    </option>
-                  ))}
-                  <option value="LY_DO_KHAC">Lý do nghiệp vụ khác (Tự nhập)</option>
-                </select>
-
-                {overrideReasonCode === 'LY_DO_KHAC' && (
-                  <input
-                    type="text"
-                    value={customReasonText}
-                    onChange={(e) => setCustomReasonText(e.target.value)}
-                    placeholder="Nhập lý do cụ thể..."
-                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded bg-white font-medium text-slate-800 focus:border-amber-500 focus:outline-none"
-                    autoFocus
-                  />
-                )}
-
-                {/* Checkbox Đóng nhanh lượt cũ */}
-                {dupCheckResult.allow_quick_exit && (
-                  <label className="flex items-start space-x-2 pt-2 border-t border-slate-200 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={closePreviousOnEntry}
-                      onChange={(e) => setClosePreviousOnEntry(e.target.checked)}
-                      className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 mt-0.5"
-                    />
-                    <div>
-                      <span className="font-bold text-slate-800">Đồng thời xác nhận Xuất bãi (đóng) lượt cũ tại Cổng ra</span>
-                      <p className="text-[11px] text-slate-500 leading-tight">
-                        Tự động ghi nhận xe đã rời bãi lượt trước để làm sạch danh sách xe trong bãi (không cần qua Cổng ra thao tác lại).
-                      </p>
-                    </div>
-                  </label>
-                )}
-              </div>
-            </div>
-
-            {/* Footer Modal */}
-            <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2">
-              <button
-                type="button"
-                onClick={() => setShowDupModal(false)}
-                className="px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-300 hover:bg-slate-100 rounded transition-colors cursor-pointer"
-              >
-                Hủy bỏ / Kiểm tra lại
-              </button>
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={async () => {
-                  const selectedReasonObj = dupCheckResult.preset_reasons?.find(r => r.code === overrideReasonCode);
-                  const finalReason = overrideReasonCode === 'LY_DO_KHAC' 
-                    ? (customReasonText.trim() || 'Lý do khác') 
-                    : (selectedReasonObj?.label || overrideReasonCode);
-                  
-                  await executeVehicleEntry(true, finalReason, closePreviousOnEntry);
-                }}
-                className="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors flex items-center space-x-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Đang xử lý...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Xác nhận Cho Vào Lượt Mới</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: PHƯƠNG TIỆN BỊ CHẶN NGHIÊM NGẶT (BLOCK_STRICT / COOLDOWN / NỢ VÉ) */}
-      {showBlockModal && dupCheckResult && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in">
-          <div className="bg-white rounded-lg max-w-md w-full shadow-xl border border-slate-300 overflow-hidden flex flex-col">
-            <div className="px-5 py-3.5 bg-rose-600 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <AlertOctagon className="w-5 h-5 text-white" />
-                <div>
-                  <h3 className="font-bold text-sm leading-tight">Không Thể Tiếp Nhận Phương Tiện</h3>
-                  <p className="text-[11px] text-rose-100">Vi phạm chính sách an toàn bến bãi</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowBlockModal(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3.5 text-xs">
-              <div className="text-center py-1">
-                <span className="text-xl font-bold font-mono tracking-widest text-slate-800 bg-slate-100 px-4 py-1 rounded border border-slate-300">
-                  {licensePlate.toUpperCase()}
+              <div className="text-right">
+                <span className="text-xs text-[#667085] mr-1">Tiền vé:</span>
+                <span className="font-mono font-bold text-base text-[#17202E]">
+                  {previewAmount.toLocaleString('vi-VN')} đ
                 </span>
               </div>
-
-              <div className="p-3 rounded bg-rose-50 border border-rose-300 text-rose-900 leading-relaxed font-medium">
-                {dupCheckResult.block_reason || dupCheckResult.message}
-              </div>
-
-              <div className="p-3 rounded bg-slate-50 border border-slate-300 space-y-1.5 text-slate-600">
-                <p className="font-bold text-slate-800">Hướng dẫn xử lý cho Nhân viên An ninh:</p>
-                {dupCheckResult.is_within_cooldown ? (
-                  <p>• Phương tiện vừa mới vào bãi dưới {dupCheckResult.cooldown_minutes} phút. Vui lòng kiểm tra lại để tránh thao tác lặp hoặc double-click.</p>
-                ) : dupCheckResult.has_unpaid_ticket ? (
-                  <p>• Phương tiện chưa hoàn thành thanh toán vé vào cổng của lượt trước. Yêu cầu tài xế nộp phí hoặc liên hệ Thương vụ CCKB.</p>
-                ) : (
-                  <p>• Phương tiện hiện đang ghi nhận trong bãi. Yêu cầu An ninh Cổng ra làm thủ tục xác nhận Xuất bãi trước khi cho xe vào lượt mới.</p>
-                )}
-              </div>
             </div>
 
-            <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2">
-              <Link
-                href="/exit"
-                className="px-3.5 py-1.5 text-xs font-bold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded transition-colors flex items-center space-x-1 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Xem Cổng ra →</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowBlockModal(false)}
-                className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded transition-colors cursor-pointer"
-              >
-                Đã hiểu / Đóng
-              </button>
+            {previewAmount > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs font-medium text-[#17202E] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={collectPaymentNow}
+                      onChange={(e) => setCollectPaymentNow(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#0A9444] focus:ring-[#0A9444]"
+                    />
+                    <span>Thu tiền vé ngay tại bốt cổng</span>
+                  </label>
+                </div>
+
+                {collectPaymentNow && (
+                  <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] flex flex-wrap items-center gap-4">
+                    <span className="text-xs font-semibold text-[#475467]">Hình thức thanh toán:</span>
+                    <label className="flex items-center gap-1.5 text-xs text-[#17202E] cursor-pointer">
+                      <input
+                        type="radio"
+                        name="payMethod"
+                        value="CASH"
+                        checked={paymentMethod === 'CASH'}
+                        onChange={() => setPaymentMethod('CASH')}
+                        className="text-[#0A9444] focus:ring-[#0A9444]"
+                      />
+                      <span>Tiền mặt</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-xs text-[#17202E] cursor-pointer">
+                      <input
+                        type="radio"
+                        name="payMethod"
+                        value="TRANSFER"
+                        checked={paymentMethod === 'TRANSFER'}
+                        onChange={() => setPaymentMethod('TRANSFER')}
+                        className="text-[#326DD8] focus:ring-[#326DD8]"
+                      />
+                      <span>Chuyển khoản (VietQR)</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] text-xs text-[#667085]">
+                Loại phương tiện này được miễn phí vé cổng theo quy chế biểu phí V5 ({getVehicleTypeName(selectedType)}: 0đ).
+              </div>
+            )}
+          </div>
+
+          {/* ACTION BUTTON BAR */}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="px-4 py-2.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#087C3C] text-white text-xs font-semibold hover:bg-[#076934] transition-colors cursor-pointer shadow-2xs disabled:bg-[#E5E9F0] disabled:text-[#98A2B3]"
+            >
+              {isSubmitting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Đang xử lý giao dịch...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Xác nhận xe vào bãi</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 3. RIGHT CONTEXT PANEL: ĐỐI CHIẾU & CẢNH BÁO CA TRỰC           */}
+      {/* ============================================================== */}
+      <RightContextPanel
+        title="Đối chiếu & Trợ giúp"
+        subtitle="Bốt kiểm soát An ninh cổng"
+        isOpen={isRightPanelOpen}
+        onClose={() => setIsRightPanelOpen(false)}
+      >
+        <div className="space-y-4">
+          {/* Cảnh báo khớp phiếu điện CCKB */}
+          {matchedReeferRequest && (
+            <div className="p-3 bg-[#EFF8FF] rounded-lg border border-[#B2DDFF] space-y-1.5 animate-in fade-in">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#326DD8]">
+                <Zap className="w-3.5 h-3.5" />
+                <span>Khớp yêu cầu cắm điện trước!</span>
+              </div>
+              <p className="text-[11px] text-[#17202E] leading-relaxed">
+                Thương vụ CCKB đã tạo phiếu dự kiến cho cont <strong>{matchedReeferRequest.container_no}</strong>. Hệ thống sẽ tự động ghép lượt khi tiếp nhận.
+              </p>
+              <div className="text-[10px] text-[#667085]">
+                Khách hàng: {matchedReeferRequest.customer_name || 'Vãng lai'} · Chế độ: {matchedReeferRequest.power_mode === 'HOURLY' ? 'Theo giờ' : 'Liên tục'}
+              </div>
+            </div>
+          )}
+
+          {/* Cảnh báo xe trùng lặp nếu phát hiện */}
+          {dupCheckResult?.has_duplicate && (
+            <div className="p-3 bg-[#FFFAEB] rounded-lg border border-[#FEDF89] space-y-1.5 animate-in fade-in">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#B54708]">
+                <CopyCheck className="w-3.5 h-3.5" />
+                <span>Cảnh báo xe trùng lặp!</span>
+              </div>
+              <p className="text-[11px] text-[#17202E] leading-relaxed">
+                Biển số {licensePlate} đang có lượt xe chưa ra khỏi bãi hoặc vào cổng quá gần nhau.
+              </p>
+            </div>
+          )}
+
+          {/* Bảng giá tham chiếu nhanh */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-[#667085] uppercase tracking-wide">
+              Biểu phí vé cổng V5
+            </h4>
+            <div className="divide-y divide-[#F0F2F6] text-xs">
+              {vehicleTypes.map((vt) => (
+                <div key={vt.code} className="py-2 flex items-center justify-between">
+                  <span className="text-[#17202E] truncate max-w-[150px]">{vt.name}</span>
+                  <span className="font-mono font-semibold text-[#475467]">
+                    {vt.default_ticket_amount !== null
+                      ? `${vt.default_ticket_amount.toLocaleString('vi-VN')} đ`
+                      : '0 đ'}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </RightContextPanel>
     </div>
   );
 }

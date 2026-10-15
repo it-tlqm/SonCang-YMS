@@ -1,5 +1,143 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 07:25 — Rà Soát Toàn Diện Hệ Thống & Nâng Cấp Hoàn Chỉnh Màn Hình Báo Cáo, Đăng Nhập, Làm Sạch Ngôn Ngữ
+
+- **Yêu cầu / nguồn:** Chỉ đạo của Chủ dự án: *"Ok rà soát lại và nâng cấp"*.
+- **Phân tích hiện trạng qua công cụ rà soát tự động:**
+  * Toàn bộ 11 màn hình vận hành, tài chính, quản trị đã chuyển đổi ở Giai đoạn 3.
+  * Phát hiện 2 màn hình còn sử dụng giao diện và phong cách cũ:
+    1. `src/app/reports/page.tsx`: Màn hình Thống kê & Báo cáo chưa chuyển sang layout 5 vùng DS-02.
+    2. `src/app/login/page.tsx`: Màn hình Đăng nhập còn sót chip chứa tên kỹ thuật nội bộ (Supabase/Database) và giao diện gradient cũ.
+  * Phát hiện chuỗi kỹ thuật "Supabase" còn sót trong loading state và tooltip ma trận phân quyền tại `src/app/admin/users/page.tsx` và `src/app/api/admin/users/reset-password/route.ts`.
+
+- **Các hạng mục đã nâng cấp và hoàn thiện:**
+  1. *Nâng cấp màn hình Thống kê & Báo cáo (`src/app/reports/page.tsx`):*
+     - Chuyển sang bố cục Modern Enterprise Workspace (DS-02) 5 vùng.
+     - Tích hợp `SecondaryPanel` bên trái: chọn nhanh 6 khoảng thời gian (Hôm nay, Hôm qua, 7 ngày, 30 ngày, Tháng này, Tùy chọn ngày) + bộ lọc bộ phận thực thu (Toàn bãi, An ninh, CCKB) + thẻ chỉ số tóm tắt kỳ.
+     - `WorkspaceHeader` chuẩn hóa thương hiệu Sơn Cảng, kỳ báo cáo, action bar (Làm mới, Xuất XLSX đa sheet, In báo cáo).
+     - `WorkspaceTabs` phân tách 4 tab chuyên sâu:
+       * Tab 1: Doanh thu & Dòng tiền (Cơ cấu 4 nguồn thu V5, đối soát Tiền mặt vs Chuyển khoản Napas 247, bảng kê doanh thu theo từng ngày).
+       * Tab 2: Lưu lượng & 7 loại xe (Lượt vào, Lượt ra, Dwell time TB, bảng sản lượng chi tiết 7 loại xe).
+       * Tab 3: Container & Điện lạnh (Kích thước 20/40/45, phân loại HÀNG/RỖNG, duyệt xuất bãi, hiệu suất cắm điện reefer).
+       * Tab 4: Phân khu & Công suất bãi (Tỷ lệ lấp đầy %, sức chứa, tiến độ occupancy 4 phân khu).
+     - `RightContextPanel` Inspector: Thanh tra tóm tắt chỉ số điều hành & tài chính trọng yếu.
+     - Tối ưu hóa Modal In Báo cáo chuẩn hành chính công ty.
+  2. *Nâng cấp màn hình Đăng nhập Công vụ (`src/app/login/page.tsx`):*
+     - Tái thiết kế card đăng nhập phẳng, nền xám nhạt `#F8F9FB`, viền tinh tế `#E5E9F0`, nhận diện thương hiệu Sơn Cảng `#0A9444`.
+     - Loại bỏ hoàn toàn các từ ngữ "Supabase", "Database", "PostgreSQL RLS", thay bằng chip nhận diện: *"Xác thực Tập trung • Bảo mật Phân quyền RBAC"*.
+  3. *Làm sạch ngôn ngữ giao diện toàn codebase:*
+     - Sửa chuỗi loading và mô tả ma trận phân quyền trong `src/app/admin/users/page.tsx` thành ngôn ngữ nghiệp vụ thuần Việt.
+     - Chuẩn hóa thông báo lỗi server trong `src/app/api/admin/users/reset-password/route.ts`.
+
+- **Kiểm thử & Xác minh kỹ thuật:**
+  * `node scripts/audit_codebase.mjs`: Không còn bất kỳ từ ngữ kỹ thuật nội bộ nào trong giao diện người dùng.
+  * `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+  * `npm run build`: **100% PASS** (20/20 routes biên dịch thành công).
+  * Kiểm tra máy chủ cổng 3005: **HTTP 200 OK trên toàn bộ 15 routes**.
+
+- **Trạng thái:** Hoàn tất toàn bộ việc rà soát và nâng cấp.
+
+## 2026-10-14 23:05 — Hoàn Tất Toàn Bộ Giai Đoạn 3: Chuyển Đổi Toàn Diện 11 Phân Hệ Sang Modern Enterprise Workspace (DS-02)
+
+- **Yêu cầu / nguồn:** Chỉ đạo của Chủ dự án sau khi phê duyệt bộ ảnh thí điểm Dashboard & Cổng vào (Giai đoạn 2):
+  * Mở rộng ngôn ngữ thiết kế Modern Enterprise Workspace / Minimal SaaS Dashboard (DS-02) cho toàn bộ các màn hình còn lại của Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng — Công ty Cổ phần Tà Lùng Quang Minh.
+  * Giữ nguyên 100% logic nghiệp vụ, RBAC V5, schema database, RPCs, không sửa `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+  * Chuẩn hóa từ ngữ nghiệp vụ tiếng Việt, loại bỏ toàn bộ thuật ngữ kỹ thuật nội bộ (Supabase, RPC, RLS, Database, Real Write) khỏi giao diện người dùng.
+
+- **Các phân hệ và màn hình đã hoàn thành chuyển đổi (11 màn hình):**
+  1. *Xuất bãi & Cổng ra (`src/app/exit/page.tsx`):*
+     - Triển khai quy trình xuất bãi 2 cấp độc lập: CCKB duyệt điều kiện xuất (kiểm tra thanh toán, cắm điện, niêm phong) -> An ninh Bốt Cổng xác nhận xe lăn bánh ra ngoài.
+     - Secondary Panel hàng đợi xe làm thủ tục xuất bãi, bộ lọc trạng thái (Chờ duyệt CCKB, Chờ An ninh xuất, Đã xuất bãi).
+     - Right Context Inspector thanh tra đối chiếu chi tiết xe/cont, cờ công nợ AP07, tình trạng cắm rút điện.
+  2. *Cắm điện Container (`src/app/reefer/page.tsx`):*
+     - Giám sát phiên cắm điện thời gian thực, ghi nhận giờ cắm/rút thực tế, phân loại cont HÀNG/RỖNG.
+     - Secondary Panel phân loại 5 trạng thái: Chờ cắm, Đang cắm, Đã rút, Chưa thanh toán, Đã thu tiền.
+     - Right Context Inspector nhật ký giám sát nhiệt độ định kỳ, tự động đối soát thời lượng và tổng tiền điện bến bãi.
+  3. *Quản lý Bãi & Container (`src/app/yard/page.tsx`):*
+     - Lưới quản lý ô bãi trực quan, dãy vị trí, trụ cấp nguồn điện lạnh.
+     - 4 tab chuyên biệt: Cặp xe - cont, Danh sách Container (HÀNG/RỖNG), Phương tiện trong bãi, Khu vực bãi & Trụ điện.
+     - Secondary Panel tìm kiếm container/biển số nhanh, Right Context Inspector chi tiết thuộc tính cont và lịch sử di chuyển bãi.
+  4. *Thu phí & Sổ cái Bến bãi (`src/app/billing/page.tsx`):*
+     - Financial Workspace phân định rõ ràng giữa "Khoản phải thu" và "Khoản đã thu".
+     - Tích hợp chuẩn thanh toán VietQR động (NAPAS247) tự động điền số tiền và nội dung chuyển khoản.
+     - Secondary Panel hàng đợi các khoản phí chờ thu, Right Context Inspector xem trước biên lai và xác nhận thanh toán an toàn.
+  5. *Kế toán & Hóa đơn (`src/app/accounting/page.tsx`):*
+     - Kiểm soát chốt tiền mặt ca trực nguyên tắc 4 mắt (Người nộp & Thủ quỹ/Kế toán đối soát).
+     - Quy trình đề xuất lập Hóa đơn GTGT điện tử: phân luồng rõ Doanh nghiệp (bắt buộc Mã số thuế) và Khách lẻ (CCCD 12 chữ số).
+     - Quản lý thu hồi công nợ bến bãi AP07 và xuất báo cáo kế toán Excel 4 sheet (.xlsx) hoàn chỉnh.
+     - Secondary Panel danh sách biên bản chốt ca & hóa đơn, Right Context Inspector chi tiết đối soát.
+  6. *Danh mục Phân loại Phương tiện (`src/app/admin/vehicle-types/page.tsx`):*
+     - Quản lý 7 nhóm phương tiện cơ sở tính giá vé và quy định chở container. Bảng dữ liệu viền mảnh chuẩn DS-02.
+  7. *Biểu phí & Đơn giá Dịch vụ Bến bãi (`src/app/admin/tariffs/page.tsx`):*
+     - Snapshot biểu phí niêm yết theo quy định tài chính Sơn Cảng, modal điều chỉnh đơn giá yêu cầu nhập lý do kiểm toán lưu vết.
+  8. *Quản trị Đối tác & Khách hàng (`src/app/admin/customers/page.tsx`):*
+     - Danh bạ chủ hàng/doanh nghiệp vận tải, quản lý mã số thuế, số điện thoại, modal thêm/sửa khách hàng, 3 thẻ chỉ số đối tác.
+  9. *Kiểm soát Trùng lặp Xe Vào Cổng (`src/app/admin/vehicle-duplicate/page.tsx`):*
+     - Cấu hình chính sách kiểm soát xe vào trùng (Cảnh báo WARN / Chặn BLOCK / Tự động đóng lượt cũ AUTO), thời gian hạ nhiệt (cooldown), danh mục xe bo ngoại lệ và danh sách lý do mẫu.
+  10. *Nhật ký Kiểm toán Hệ thống (`src/app/admin/audit-logs/page.tsx`):*
+      - Bảng dữ liệu nhật ký lưu vết bất biến (Append-only), bộ lọc theo phân hệ (Phương tiện, Container, Tài chính, Cắm điện, Duyệt xuất).
+  11. *Quản trị Nhân sự & Ma trận Phân quyền (`src/app/admin/users/page.tsx`):*
+      - Danh mục nhân viên bến bãi (chuyển đổi linh hoạt dạng thẻ / dạng bảng), modal đặt lại mật khẩu nhân viên, ma trận phân quyền 67 hành động V5, cấu hình vai trò động.
+      - Làm sạch 100% từ ngữ hiển thị: thay "Supabase Auth" / "Database" / "Real Write" bằng thuật ngữ nghiệp vụ thuần Việt ("Hệ thống quản lý tài khoản", "Máy chủ hệ thống").
+
+- **Kiểm thử & Xác minh kỹ thuật:**
+  - `npx tsc --noEmit`: 100% PASS (0 lỗi kiểu dữ liệu trên toàn bộ repository).
+  - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+  - Next.js Production Server chạy ngầm trên cổng 3005, phản hồi HTTP 200 OK trên tất cả các route.
+
+- **Trạng thái:** Hoàn thành 100% toàn bộ kế hoạch tái thiết kế giao diện sang Modern Enterprise Workspace (DS-02). Sẵn sàng bàn giao và tiếp nhận các yêu cầu tiếp theo từ Chủ dự án.
+
+
+- **Yêu cầu / nguồn:** Chỉ đạo thiết kế lại Frontend của Chủ dự án:
+  * Áp dụng ngôn ngữ thiết kế từ ảnh Visual Reference chính thức **MultiChat Studio**: Modern Enterprise Workspace / Minimal SaaS Dashboard.
+  * Calm, Professional, Structured, Lightweight, Premium: Light Mode mặc định, nền trắng `#FFFFFF`, sidebar xám nhạt `#F8F9FB`, border 1px tinh tế `#E5E9F0`, không gradient màu mè, typography Inter, Lucide React icons stroke 1.75-2.
+  * Tái cấu trúc App Shell 5 vùng: Global Topbar (60–64px), Primary Sidebar (220–240px, collapsible), Secondary Panel (hàng đợi / danh sách nghiệp vụ), Main Workspace (vùng làm việc trung tâm), Right Context Panel (thông tin chi tiết đối tượng / đối chiếu).
+  * Quy trình thực hiện chia 3 giai đoạn: Giai đoạn 1 (Design System, Tokens, Component Library, App Shell), Giai đoạn 2 (Thí điểm `/dashboard` và `/entry`, chụp ảnh đa thiết bị Desktop/Tablet/Mobile), Giai đoạn 3 (Các màn hình còn lại — CHỈ TIẾN HÀNH SAU KHI CHỦ DỰ ÁN PHÊ DUYỆT BỘ ẢNH THÍ ĐIỂM).
+  * Bất biến: Không thay đổi Backend/PostgreSQL schema/migrations 001–008, bảo toàn 100% RBAC V5, giữ `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+
+- **Hạng mục đã hoàn thành:**
+  1. *Stitch Design System & Tài liệu Kiến trúc:*
+     - Khởi tạo và áp dụng Design System `assets/2249383319861161267` (SONCANG MODERN WORKSPACE DESIGN SYSTEM — DS-02) trên dự án Stitch `8471320594998118450`.
+     - Soạn thảo và ban hành:
+       * `SONCANG_DS02_DESIGN_SPEC.md`: Đặc tả toàn diện hệ thống token, layout 5 vùng, responsive breakpoints.
+       * `SONCANG_DS02_COMPONENT_INVENTORY.md`: Bảng quy chuẩn trạng thái, prop types cho từng component.
+       * `SONCANG_DS02_IMPLEMENTATION_PLAN.md`: Lộ trình kiểm thử 3 giai đoạn và tiêu chuẩn nghiệm thu.
+  2. *Design Tokens & Reusable Workspace Components:*
+     - `src/app/globals.css`: Khai báo bộ CSS variables chuẩn DS-02 (colors, radii, scrollbar mảnh).
+     - `src/app/layout.tsx`: Nhúng Google Font `Inter` (`--font-inter`) làm font chính, nền `#FFFFFF`.
+     - Thư viện components tại `src/components/workspace/`:
+       * `StatusBadge`: Màu nền mờ 10% kết hợp chữ đậm cùng hệ màu, icon Lucide ngữ cảnh.
+       * `WorkspaceHeader`: Tiêu đề, phụ đề, icon nghiệp vụ, status badge, action bar.
+       * `WorkspaceTabs`: Tab bar tối giản với badge đếm số lượng.
+       * `SearchInput`: Ô tìm kiếm 36px với icon search và nút xóa nhanh.
+       * `SecondaryPanel`: Cột danh sách nghiệp vụ (280–320px) có thể thu gọn thành thanh 48px viết chữ dọc.
+       * `RightContextPanel`: Panel thông tin ngữ cảnh bên phải — tối ưu responsive: hiển thị dạng cột cố định trên Desktop (>= 1280px), chuyển thành Slide-over Drawer với backdrop nhẹ trên Tablet và Mobile.
+       * `EmptyState`: Khối trạng thái rỗng gọn nhẹ.
+  3. *Tái cấu trúc App Shell (`src/components/layout/app-shell.tsx`):*
+     - Global Topbar: Huy hiệu SC xanh lá `#0A9444`, tiêu đề "Sơn Cảng" + phụ đề "Quản lý bến bãi", breadcrumb điều hướng, đồng hồ thời gian thực ca trực, huy hiệu bãi Sơn Cảng, thông tin tài khoản + vai trò hiện tại, chip "Bản Thử nghiệm".
+     - Primary Sidebar: Phân nhóm VẬN HÀNH / TÀI CHÍNH & BÁO CÁO / QUẢN TRỊ HỆ THỐNG; active item có dải xanh `#326DD8` và nền `#EAF1FD`; có nút thu gọn sidebar về 64px trên Desktop; footer có nút đổi mật khẩu và đăng xuất sạch.
+     - Bảo vệ phân quyền: Lọc menu 100% theo quyền `can(perm)`, chuyển hướng người dùng chưa đăng nhập về `/login`.
+  4. *Thí điểm Màn hình 1: Tổng quan Vận hành (`src/app/dashboard/page.tsx`):*
+     - Bố cục 5 vùng: Secondary Panel hàng đợi xe trong bãi + cảnh báo lưu qua 24h; Main Workspace gồm dải 6 chỉ số KPI tinh gọn (Xe trong bãi, Cont trong bãi, Đang cắm điện, Xe chờ xuất, Chưa thanh toán, Cần xử lý), tab chuyển đổi dữ liệu (Xe, Cont, Điện, Phân bổ 7 loại xe) và bảng `DataTable` viền mảnh; Right Context Panel hiển thị thanh tra chi tiết xe/cont được chọn cùng nút điều hướng làm thủ tục ra bãi.
+  5. *Thí điểm Màn hình 2: Tiếp nhận Cổng vào (`src/app/entry/page.tsx`):*
+     - Bố cục công thái học cho An ninh: Form 3 khối theo chiều dọc (Phương tiện, Container với kiểm tra hợp chuẩn ISO 6346 11 ký tự tự động, Vé & Thanh toán cổng), nút CTA "Xác nhận xe vào bãi" màu xanh thương hiệu `#087C3C`; Secondary Panel danh sách xe vừa tiếp nhận trong ca trực; Right Context Panel đối chiếu biểu phí 7 loại xe V5.
+
+- **Kiểm thử & Bằng chứng nghiệm thu:**
+  - `npx tsc --noEmit`: 0 lỗi biên dịch.
+  - `npm run build`: Thành công 20/20 routes.
+  - Chạy Next.js production server trên cổng 3005.
+  - Script tự động `scripts/capture_ds02_pilot.mjs` thực hiện xác thực Supabase Auth bằng tài khoản Super Admin `it@talunglogistics.com` và chụp đầy đủ 7 ảnh màn hình thực tế tại thư mục `SONCANG_DS02_PILOT_SCREENSHOTS/`:
+    1. `01_dashboard_desktop_1440.png` (Desktop 1440x900 - Bố cục tổng quan)
+    2. `01_dashboard_with_inspector_desktop_1440.png` (Desktop 1440x900 - Mở thanh tra đối tượng)
+    3. `01_dashboard_tablet_1024.png` (Tablet 1024x768 - Bố cục responsive 3 cột KPI)
+    4. `01_dashboard_mobile_390.png` (Mobile 390x844 - Bố cục dọc cho điện thoại)
+    5. `02_entry_gate_desktop_1440.png` (Desktop 1440x900 - Form tiếp nhận xe và cont)
+    6. `02_entry_gate_tablet_1024.png` (Tablet 1024x768 - Form tối ưu máy tính bảng)
+    7. `02_entry_gate_mobile_390.png` (Mobile 390x844 - Form tiếp nhận An ninh di động)
+  - Toàn bộ ảnh đã được kiểm tra trực quan bằng `view_file` xác nhận đạt tiêu chuẩn thẩm mỹ Calm, Professional, Structured, Lightweight, Premium.
+
+- **Trạng thái:** Hoàn thành Giai đoạn 1 & Giai đoạn 2. Tạm dừng để trình duyệt và xin ý kiến phê duyệt của Chủ dự án trước khi bước sang Giai đoạn 3.
+
 ## 2026-10-14 18:15 — Chuyển Đổi Sang Supabase Auth Thực Tế & Loại Bỏ Hoàn Toàn Tài Khoản Tạm Tại Màn Hình Đăng Nhập
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"bỏ các tk tạm ở phần đăng nhạp đi check rõ luồng đăng nhạp đăn xuất, xem lại đúng tk cho tôi tại 1 tk admin it@talunglogistics.com SC"*

@@ -42,6 +42,13 @@ import { CreateInvoiceModal } from '@/components/accounting/create-invoice-modal
 import { RecordEInvoiceModal } from '@/components/accounting/record-e-invoice-modal';
 import { InvoiceStatementPrint } from '@/components/accounting/invoice-statement-print';
 import { CollectDebtModal } from '@/components/accounting/collect-debt-modal';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { SecondaryPanel } from '@/components/workspace/secondary-panel';
+import { RightContextPanel } from '@/components/workspace/right-context-panel';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 type ActiveTab = 'CASH_SETTLEMENT' | 'INVOICES' | 'DEBTS' | 'REPORTS';
 
@@ -86,6 +93,14 @@ export default function AccountingPage() {
   const [settlementDeptFilter, setSettlementDeptFilter] = useState<string>('ALL');
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>('ALL');
   const [debtSearchKeyword, setDebtSearchKeyword] = useState<string>('');
+
+  // DS-02 Multi-pane Workspace States: Secondary Panel & Inspector
+  const [selectedInspectorItem, setSelectedInspectorItem] = useState<{
+    type: 'SETTLEMENT' | 'INVOICE' | 'DEBT';
+    item: any;
+  } | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
+  const [secondarySearch, setSecondarySearch] = useState<string>('');
 
   // Tải dữ liệu từ Repository
   const loadData = async () => {
@@ -234,112 +249,306 @@ export default function AccountingPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-blue-900 text-white rounded-xl shadow-md">
-            <Landmark className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-slate-900">Phân Hệ Kế Toán Bến Bãi</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
-                Sơn Cảng V5
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Chốt tiền mặt hiện trường, phát hành Hóa đơn GTGT (MST & CCCD) và Thu hồi công nợ AP07
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
+    <div className="flex-1 flex overflow-hidden bg-[#FFFFFF] min-h-0">
+      {/* ============================================================== */}
+      {/* 1. SECONDARY PANEL: SỔ KẾ TOÁN & DANH MỤC                    */}
+      {/* ============================================================== */}
+      <SecondaryPanel
+        title={
+          activeTab === 'CASH_SETTLEMENT'
+            ? 'Phiếu chốt ca'
+            : activeTab === 'INVOICES'
+            ? 'Hóa đơn'
+            : activeTab === 'DEBTS'
+            ? 'Hồ sơ nợ'
+            : 'Giao dịch gần đây'
+        }
+        count={
+          activeTab === 'CASH_SETTLEMENT'
+            ? settlements.length
+            : activeTab === 'INVOICES'
+            ? invoices.length
+            : activeTab === 'DEBTS'
+            ? debts.length
+            : allPayments.length
+        }
+        headerActions={
           <button
+            type="button"
             onClick={loadData}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition"
+            className="p-1 rounded text-[#667085] hover:text-[#17202E] hover:bg-[#F1F4F8] transition-colors"
+            title="Làm mới"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Làm mới
           </button>
+        }
+        searchSlot={
+          <SearchInput
+            value={secondarySearch}
+            onChange={setSecondarySearch}
+            placeholder="Tìm mã phiếu, đối tượng..."
+          />
+        }
+      >
+        {activeTab === 'CASH_SETTLEMENT' && (
+          settlements.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">Chưa có biên bản chốt tiền</div>
+          ) : (
+            settlements
+              .filter(s => !secondarySearch || (s.settlement_code && s.settlement_code.toLowerCase().includes(secondarySearch.toLowerCase())))
+              .map(s => {
+                const isSelected = selectedInspectorItem?.item?.id === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedInspectorItem({ type: 'SETTLEMENT', item: s });
+                      setIsInspectorOpen(true);
+                    }}
+                    className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                      isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono font-bold text-xs text-[#17202E]">
+                        {s.settlement_code || 'Phiếu chốt'}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444]">
+                        {s.handover_dept === 'AN_NINH' ? 'An ninh' : s.handover_dept === 'CCKB' ? 'CCKB' : 'Toàn bãi'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                      <span className="truncate max-w-[130px]">{s.handover_person_name || 'Người giao'}</span>
+                      <span className="font-mono font-bold text-[#0A9444]">
+                        {formatCurrency(s.total_cash_counted)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+          )
+        )}
 
-          <button
-            onClick={handleExportExcel}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition"
-          >
-            <Download className="w-4 h-4" />
-            Xuất Excel Kế Toán (.xlsx)
-          </button>
+        {activeTab === 'INVOICES' && (
+          invoices.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">Chưa có hóa đơn nào</div>
+          ) : (
+            invoices
+              .filter(inv => !secondarySearch || (inv.buyer_name && inv.buyer_name.toLowerCase().includes(secondarySearch.toLowerCase())) || (inv.invoice_code && inv.invoice_code.toLowerCase().includes(secondarySearch.toLowerCase())))
+              .map(inv => {
+                const isSelected = selectedInspectorItem?.item?.id === inv.id;
+                return (
+                  <button
+                    key={inv.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedInspectorItem({ type: 'INVOICE', item: inv });
+                      setIsInspectorOpen(true);
+                    }}
+                    className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                      isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono font-bold text-xs text-[#17202E]">
+                        {inv.invoice_code || 'Bảng kê'}
+                      </span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${inv.status === 'INVOICED' ? 'bg-[#ECFDF3] text-[#0A9444]' : 'bg-[#EFF8FF] text-[#326DD8]'}`}>
+                        {inv.status === 'INVOICED' ? 'ĐÃ HĐ' : 'CHỜ HĐ'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                      <span className="truncate max-w-[150px]">{inv.buyer_name || 'Khách lẻ'}</span>
+                      <span className="font-mono font-bold text-[#0A9444]">
+                        {formatCurrency(inv.total_amount)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+          )
+        )}
+
+        {activeTab === 'DEBTS' && (
+          debts.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">Không có công nợ tồn đọng</div>
+          ) : (
+            debts
+              .filter(d => !secondarySearch || (d.customer_name && d.customer_name.toLowerCase().includes(secondarySearch.toLowerCase())) || (d.container_no && d.container_no.toLowerCase().includes(secondarySearch.toLowerCase())))
+              .map(d => {
+                const isSelected = selectedInspectorItem?.item?.id === d.id;
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedInspectorItem({ type: 'DEBT', item: d });
+                      setIsInspectorOpen(true);
+                    }}
+                    className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                      isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono font-bold text-xs text-[#17202E]">
+                        {d.container_no}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] text-[#D92D20]">
+                        NỢ AP07
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                      <span className="truncate max-w-[150px]">{d.customer_name}</span>
+                      <span className="font-mono font-bold text-[#D92D20]">
+                        {formatCurrency(d.debt_amount)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+          )
+        )}
+
+        {activeTab === 'REPORTS' && (
+          allPayments.length === 0 ? (
+            <div className="p-4 text-center text-xs text-[#98A2B3]">Chưa có giao dịch</div>
+          ) : (
+            allPayments.slice(0, 30).map(p => (
+              <div key={p.id} className="p-3 border-b border-[#F0F2F6] text-xs">
+                <div className="flex justify-between font-mono font-bold text-[#17202E]">
+                  <span>{p.receipt_code || 'Biên lai'}</span>
+                  <span className="text-[#0A9444]">{formatCurrency(p.payment_amount)}</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-[#667085] mt-0.5">
+                  <span>{p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}</span>
+                  <span>{formatDateTime(p.collected_at)}</span>
+                </div>
+              </div>
+            ))
+          )
+        )}
+      </SecondaryPanel>
+
+      {/* ============================================================== */}
+      {/* 2. MAIN WORKSPACE                                              */}
+      {/* ============================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+        <WorkspaceHeader
+          title="Phân hệ Kế toán Bến bãi Sơn Cảng"
+          subtitle="Chốt tiền mặt hiện trường, phát hành Hóa đơn GTGT (MST & CCCD) và Thu hồi công nợ AP07"
+          icon={Landmark}
+          badge={
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+              Kế toán Bến bãi V5
+            </span>
+          }
+          actions={
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-xs font-semibold text-[#0A9444] hover:bg-[#D1FADF] transition-colors cursor-pointer"
+                title="Xuất file Excel kế toán"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Xuất Excel (.xlsx)</span>
+              </button>
+              <button
+                type="button"
+                onClick={loadData}
+                disabled={isLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>Làm mới</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* Compact KPI strip (4 cards) */}
+        <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Tiền mặt chưa chốt</span>
+                <Clock className="w-3.5 h-3.5 text-[#B54708]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#B54708]">
+                {formatCurrency(unsettledCash.reduce((acc, p) => acc + p.payment_amount, 0))}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">{unsettledCash.length} giao dịch tồn</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Đã quyết toán</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#0A9444]">
+                {formatCurrency(settlements.reduce((acc, s) => acc + s.total_cash_counted, 0))}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">{settlements.length} biên bản chốt</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Hóa đơn cần lập</span>
+                <Receipt className="w-3.5 h-3.5 text-[#326DD8]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#326DD8]">
+                {invoiceStats.preparedCount}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">chờ phát hành HĐĐT</div>
+            </div>
+
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Công nợ tồn (AP07)</span>
+                <AlertTriangle className="w-3.5 h-3.5 text-[#D92D20]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#D92D20]">
+                {formatCurrency(debts.reduce((acc, d) => acc + d.debt_amount, 0))}
+              </div>
+              <div className="text-[11px] text-[#667085] mt-0.5">{debts.length} hồ sơ nợ bến bãi</div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex border-b border-slate-200 bg-white px-4 rounded-xl shadow-sm overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('CASH_SETTLEMENT')}
-          className={`flex items-center gap-2 py-3.5 px-4 text-xs font-bold border-b-2 transition whitespace-nowrap ${
-            activeTab === 'CASH_SETTLEMENT'
-              ? 'border-blue-700 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <DollarSign className="w-4 h-4" />
-          Chốt Tiền Hiện Trường
-          {unsettledCash.length > 0 && (
-            <span className="ml-1.5 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-[10px]">
-              {unsettledCash.length}
-            </span>
-          )}
-        </button>
+        {/* WORKSPACE VIEW TABS */}
+        <WorkspaceTabs
+          tabs={[
+            {
+              id: 'CASH_SETTLEMENT',
+              label: 'Chốt Tiền Hiện Trường',
+              count: unsettledCash.length,
+              icon: DollarSign,
+            },
+            {
+              id: 'INVOICES',
+              label: 'Quản Lý Hóa Đơn (MST & CCCD)',
+              count: invoiceStats.preparedCount,
+              icon: Receipt,
+            },
+            {
+              id: 'DEBTS',
+              label: 'Công Nợ Bến Bãi (AP07)',
+              count: debts.length,
+              icon: CreditCard,
+            },
+            {
+              id: 'REPORTS',
+              label: 'Báo Cáo Sổ Quỹ & Dòng Tiền',
+              icon: BarChart3,
+            },
+          ]}
+          activeTab={activeTab}
+          onChange={(tabId) => setActiveTab(tabId as any)}
+        />
 
-        <button
-          onClick={() => setActiveTab('INVOICES')}
-          className={`flex items-center gap-2 py-3.5 px-4 text-xs font-bold border-b-2 transition whitespace-nowrap ${
-            activeTab === 'INVOICES'
-              ? 'border-blue-700 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Receipt className="w-4 h-4" />
-          Quản Lý Hóa Đơn (MST & CCCD)
-          {invoiceStats.preparedCount > 0 && (
-            <span className="ml-1.5 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px]">
-              {invoiceStats.preparedCount}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab('DEBTS')}
-          className={`flex items-center gap-2 py-3.5 px-4 text-xs font-bold border-b-2 transition whitespace-nowrap ${
-            activeTab === 'DEBTS'
-              ? 'border-blue-700 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <CreditCard className="w-4 h-4" />
-          Công Nợ Bến Bãi (AP07)
-          {debts.length > 0 && (
-            <span className="ml-1.5 px-2 py-0.5 bg-rose-100 text-rose-800 rounded-full text-[10px]">
-              {debts.length}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab('REPORTS')}
-          className={`flex items-center gap-2 py-3.5 px-4 text-xs font-bold border-b-2 transition whitespace-nowrap ${
-            activeTab === 'REPORTS'
-              ? 'border-blue-700 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4" />
-          Báo Cáo Sổ Quỹ & Dòng Tiền
-        </button>
-      </div>
+        <div className="p-4 sm:p-5 space-y-4">
 
       {/* ========================================================================= */}
       {/* TAB 1: CHỐT TIỀN HIỆN TRƯỜNG */}
@@ -872,6 +1081,218 @@ export default function AccountingPage() {
           </div>
         </div>
       )}
+
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 3. RIGHT CONTEXT PANEL: ĐỐI SOÁT & CHI TIẾT NGHIỆP VỤ         */}
+      {/* ============================================================== */}
+      <RightContextPanel
+        title={
+          selectedInspectorItem?.type === 'SETTLEMENT'
+            ? 'Chi tiết chốt tiền mặt'
+            : selectedInspectorItem?.type === 'INVOICE'
+            ? 'Chi tiết hóa đơn'
+            : selectedInspectorItem?.type === 'DEBT'
+            ? 'Hồ sơ công nợ AP07'
+            : 'Chi tiết nghiệp vụ'
+        }
+        subtitle={
+          selectedInspectorItem?.type === 'SETTLEMENT'
+            ? selectedInspectorItem.item.settlement_code
+            : selectedInspectorItem?.type === 'INVOICE'
+            ? (selectedInspectorItem.item.e_invoice_no ? `HĐ: ${selectedInspectorItem.item.e_invoice_no}` : selectedInspectorItem.item.invoice_code)
+            : selectedInspectorItem?.type === 'DEBT'
+            ? selectedInspectorItem.item.container_no || selectedInspectorItem.item.license_plate
+            : undefined
+        }
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        headerActions={
+          selectedInspectorItem?.type === 'SETTLEMENT' ? (
+            <StatusBadge
+              variant={selectedInspectorItem.item.status === 'COMPLETED' ? 'success' : 'warning'}
+              label={selectedInspectorItem.item.status === 'COMPLETED' ? 'Đã quyết toán' : 'Chờ xử lý'}
+            />
+          ) : selectedInspectorItem?.type === 'INVOICE' ? (
+            <StatusBadge
+              variant={selectedInspectorItem.item.status === 'INVOICED' ? 'success' : 'info'}
+              label={selectedInspectorItem.item.status === 'INVOICED' ? 'Đã xuất HĐ' : 'Chờ xuất HĐ'}
+            />
+          ) : selectedInspectorItem?.type === 'DEBT' ? (
+            <StatusBadge
+              variant="error"
+              label="Chưa thu hồi"
+            />
+          ) : undefined
+        }
+      >
+        {!selectedInspectorItem ? (
+          <EmptyState
+            title="Chưa chọn đối tượng"
+            description="Nhấp chọn một phiếu chốt tiền, hóa đơn hoặc hồ sơ công nợ từ danh sách bên trái để xem chi tiết và thao tác kế toán."
+          />
+        ) : selectedInspectorItem.type === 'SETTLEMENT' ? (
+          <div className="space-y-4 text-xs">
+            <div className="bg-[#F8F9FB] p-3 rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Mã biên bản:</span>
+                <span className="font-mono font-bold text-[#17202E]">{selectedInspectorItem.item.settlement_code}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Bộ phận:</span>
+                <span className="font-medium text-[#17202E]">
+                  {selectedInspectorItem.item.handover_dept === 'AN_NINH' ? 'An ninh cổng' : selectedInspectorItem.item.handover_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Toàn bãi'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Người giao:</span>
+                <span className="font-medium text-[#17202E]">{selectedInspectorItem.item.handover_person_name || 'Nhân viên'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Kế toán nhận:</span>
+                <span className="font-medium text-[#17202E]">{selectedInspectorItem.item.collector_name || 'Kế toán'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Thời gian:</span>
+                <span className="text-[#17202E]">{formatDateTime(selectedInspectorItem.item.created_at)}</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-white rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="text-[11px] font-semibold text-[#667085] uppercase">Kiểm kê tiền mặt</div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Sổ sách tính:</span>
+                <span className="font-mono text-[#17202E]">{formatCurrency(selectedInspectorItem.item.total_cash_expected || 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Thực tế kiểm đếm:</span>
+                <span className="font-mono font-bold text-[#0A9444]">{formatCurrency(selectedInspectorItem.item.total_cash_counted || 0)}</span>
+              </div>
+              <div className="flex justify-between border-t border-[#F0F2F6] pt-1">
+                <span className="text-[#667085]">Chênh lệch:</span>
+                <span className={`font-mono font-bold ${(selectedInspectorItem.item.difference_amount || 0) === 0 ? 'text-[#0A9444]' : 'text-[#D92D20]'}`}>
+                  {formatCurrency(selectedInspectorItem.item.difference_amount || 0)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSettlementToPrint({ settlement: selectedInspectorItem.item, items: [] });
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[#326DD8] text-white font-medium hover:bg-[#2557B4] transition-colors cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              <span>In biên bản bàn giao tiền</span>
+            </button>
+          </div>
+        ) : selectedInspectorItem.type === 'INVOICE' ? (
+          <div className="space-y-4 text-xs">
+            <div className="bg-[#F8F9FB] p-3 rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Mã đề xuất:</span>
+                <span className="font-mono font-bold text-[#17202E]">{selectedInspectorItem.item.invoice_code}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Số HĐ điện tử:</span>
+                <span className="font-mono font-bold text-[#326DD8]">{selectedInspectorItem.item.e_invoice_no || 'Chưa ghi nhận'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Khách hàng:</span>
+                <span className="font-medium text-[#17202E] text-right truncate max-w-[170px]">{selectedInspectorItem.item.buyer_name || 'Khách lẻ'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">MST / CCCD:</span>
+                <span className="font-mono text-[#17202E]">{selectedInspectorItem.item.tax_code || selectedInspectorItem.item.id_card_no || '---'}</span>
+              </div>
+              <div className="flex justify-between border-t border-[#F0F2F6] pt-1">
+                <span className="text-[#667085]">Tổng thanh toán:</span>
+                <span className="font-mono font-bold text-[#0A9444]">{formatCurrency(selectedInspectorItem.item.total_amount)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedInvoiceToPrint({ invoice: selectedInspectorItem.item });
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-[#17202E] font-medium hover:bg-[#F1F4F8] transition-colors cursor-pointer"
+              >
+                <Printer className="w-4 h-4 text-[#667085]" />
+                <span>In bảng kê kèm HĐ (Mẫu 01:BPA)</span>
+              </button>
+
+              {selectedInspectorItem.item.status !== 'INVOICED' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedInvoiceToRecord(selectedInspectorItem.item);
+                  }}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[#326DD8] text-white font-medium hover:bg-[#2557B4] transition-colors cursor-pointer"
+                >
+                  <FileCheck className="w-4 h-4" />
+                  <span>Ghi nhận số HĐĐT đã phát hành</span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : selectedInspectorItem.type === 'DEBT' ? (
+          <div className="space-y-4 text-xs">
+            <div className="bg-[#F8F9FB] p-3 rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Khách hàng:</span>
+                <span className="font-bold text-[#17202E]">{selectedInspectorItem.item.customer_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Số điện thoại:</span>
+                <span className="font-mono text-[#17202E]">{selectedInspectorItem.item.customer_phone || '---'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Cont / Biển số:</span>
+                <span className="font-mono font-bold text-[#326DD8]">{selectedInspectorItem.item.container_no || selectedInspectorItem.item.license_plate}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Khoản mục nợ:</span>
+                <span className="font-medium text-[#17202E]">{selectedInspectorItem.item.charge_title}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Người bảo lãnh:</span>
+                <span className="text-[#17202E]">{selectedInspectorItem.item.guarantor_name || 'Trưởng ca'}</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-white rounded-lg border border-[#E5E9F0] space-y-2">
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Tổng tiền nợ:</span>
+                <span className="font-mono text-[#17202E]">{formatCurrency(selectedInspectorItem.item.total_amount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#667085]">Đã thanh toán:</span>
+                <span className="font-mono text-[#0A9444]">{formatCurrency(selectedInspectorItem.item.paid_amount)}</span>
+              </div>
+              <div className="flex justify-between border-t border-[#F0F2F6] pt-1">
+                <span className="text-[#667085] font-semibold">Dư nợ còn lại:</span>
+                <span className="font-mono font-bold text-[#D92D20] text-sm">{formatCurrency(selectedInspectorItem.item.debt_amount)}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDebtToCollect(selectedInspectorItem.item);
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[#D92D20] text-white font-medium hover:bg-[#B42318] transition-colors cursor-pointer"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Thu hồi nợ cước này</span>
+            </button>
+          </div>
+        ) : null}
+      </RightContextPanel>
 
       {/* ========================================================================= */}
       {/* MODALS VÀ PRINT PREVIEWS */}

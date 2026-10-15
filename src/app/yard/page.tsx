@@ -41,6 +41,13 @@ import {
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { SecondaryPanel } from '@/components/workspace/secondary-panel';
+import { RightContextPanel } from '@/components/workspace/right-context-panel';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
 
 export interface YardPairItem {
   id: string;
@@ -249,6 +256,12 @@ export default function YardMonitorPage() {
   const [socketActionError, setSocketActionError] = useState<string>('');
   const [isSubmittingSocket, setIsSubmittingSocket] = useState<boolean>(false);
   const [socketFilterStatus, setSocketFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'FAULTY'>('ALL');
+
+  // DS-02 Multi-pane Workspace States: Secondary Panel & Inspector
+  const [selectedInspectorPair, setSelectedInspectorPair] = useState<YardPairItem | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
+  const [secondarySearch, setSecondarySearch] = useState<string>('');
+  const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'HANG' | 'RONG' | 'PAIRED' | 'UNPAIRED'>('ALL');
 
   // Tự động đóng Action Dropdown khi click ra ngoài
   useEffect(() => {
@@ -1002,6 +1015,24 @@ export default function YardMonitorPage() {
     return matchQuery && matchCargo && matchType && matchDwell;
   });
 
+  // Lọc dữ liệu danh sách thu nhỏ bên trái (Secondary Panel)
+  const filteredSecondaryItems = pairItems.filter((item) => {
+    const q = secondarySearch.toLowerCase().trim();
+    const v = item.vehicle;
+    const c = item.container;
+    const matchQuery = !q || (
+      (v?.license_plate && v.license_plate.toLowerCase().includes(q)) ||
+      (c?.container_no_current && c.container_no_current.toLowerCase().includes(q))
+    );
+    if (!matchQuery) return false;
+
+    if (secondaryFilter === 'HANG') return c?.cargo_status === 'HANG';
+    if (secondaryFilter === 'RONG') return c?.cargo_status === 'RONG';
+    if (secondaryFilter === 'PAIRED') return !!(v && c);
+    if (secondaryFilter === 'UNPAIRED') return !(v && c);
+    return true;
+  });
+
   // Lọc dữ liệu Xe
   const filteredVehicles = vehicles.filter(v => {
     const q = searchQuery.toLowerCase().trim();
@@ -1215,153 +1246,294 @@ export default function YardMonitorPage() {
   }
 
   return (
-    <div className="space-y-3.5">
-      {/* 1. HEADER & THỐNG KÊ NHANH */}
-      <div className="bg-white rounded-lg p-3.5 sm:p-4 border border-slate-300 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <span className="text-[11px] font-bold tracking-wider uppercase text-[#223873]">
-              Bảng điều khiển Giám sát
+    <div className="flex-1 flex overflow-hidden bg-[#FFFFFF] min-h-0">
+      {/* ============================================================== */}
+      {/* 1. SECONDARY PANEL: DANH MỤC TỒN BÃI                           */}
+      {/* ============================================================== */}
+      <SecondaryPanel
+        title="Danh mục Tồn bãi"
+        count={pairItems.length}
+        headerActions={
+          <button
+            type="button"
+            onClick={handleReload}
+            disabled={isLoading}
+            className="p-1 rounded text-[#667085] hover:text-[#17202E] hover:bg-[#F1F4F8] transition-colors"
+            title="Làm mới"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+        }
+        searchSlot={
+          <SearchInput
+            value={secondarySearch}
+            onChange={setSecondarySearch}
+            placeholder="Tìm số cont, biển số..."
+          />
+        }
+        filterSlot={
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('ALL')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'ALL'
+                  ? 'bg-[#326DD8] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Tất cả ({pairItems.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('HANG')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'HANG'
+                  ? 'bg-[#0A9444] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Hàng ({countHang})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('RONG')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'RONG'
+                  ? 'bg-[#326DD8] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Rỗng ({countRong})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSecondaryFilter('PAIRED')}
+              className={`px-2 py-0.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                secondaryFilter === 'PAIRED'
+                  ? 'bg-[#223873] text-white font-medium'
+                  : 'bg-[#F5F7FA] text-[#667085] hover:bg-[#E5E9F0]'
+              }`}
+            >
+              Có cặp ({countPaired})
+            </button>
+          </div>
+        }
+      >
+        {filteredSecondaryItems.length === 0 ? (
+          <div className="p-4 text-center text-xs text-[#98A2B3]">
+            Không tìm thấy phương tiện/container phù hợp
+          </div>
+        ) : (
+          filteredSecondaryItems.map((item) => {
+            const isSelected = selectedInspectorPair?.id === item.id;
+            const mainLabel = item.container?.container_no_current || item.vehicle?.license_plate || '---';
+            const subLabel = item.isPaired 
+              ? (item.vehicle?.license_plate ? `Xe: ${item.vehicle.license_plate}` : '')
+              : item.container 
+              ? (item.container.slot_code || item.container.yard_zone || 'Hạ bãi cẩu')
+              : (item.vehicle?.vehicle_type_name || 'Xe đơn');
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setSelectedInspectorPair(item);
+                  setIsInspectorOpen(true);
+                }}
+                className={`w-full text-left p-3 transition-colors cursor-pointer border-b border-[#F0F2F6] ${
+                  isSelected ? 'bg-[#EAF1FD]' : 'hover:bg-[#F8F9FB]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-mono font-bold text-xs text-[#17202E]">
+                    {mainLabel}
+                  </span>
+                  {item.container && (
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                      item.container.cargo_status === 'HANG'
+                        ? 'bg-[#ECFDF3] text-[#0A9444]'
+                        : item.container.cargo_status === 'RONG'
+                        ? 'bg-[#EFF8FF] text-[#326DD8]'
+                        : 'bg-[#FFFAEB] text-[#B54708]'
+                    }`}>
+                      {item.container.cargo_status === 'HANG' ? 'HÀNG' : item.container.cargo_status === 'RONG' ? 'RỖNG' : 'CHƯA XĐ'}
+                    </span>
+                  )}
+                  {!item.container && item.vehicle && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] text-[#667085]">
+                      XE LẺ
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-[#667085]">
+                  <span className="truncate max-w-[170px]">{subLabel}</span>
+                  {item.container?.inbound_at && (
+                    <span className="font-mono text-[#326DD8]">
+                      {getDwellHours(item.container.inbound_at)}h
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })
+        )}
+      </SecondaryPanel>
+
+      {/* ============================================================== */}
+      {/* 2. MAIN WORKSPACE                                              */}
+      {/* ============================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+        <WorkspaceHeader
+          title="Quản lý Bến bãi & Tồn bãi Sơn Cảng"
+          subtitle="Giám sát vị trí phương tiện, tồn bãi container, chuyển trạng thái Hàng/Rỗng và sơ đồ phân khu bến bãi"
+          icon={Layers}
+          badge={
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+              Khai thác & Điều độ bến bãi
             </span>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
-              Phương tiện & Container đang trong bãi
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={handleOpenSingleContModal}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#223873] text-white text-xs font-bold hover:bg-[#1a2c5b] transition-colors cursor-pointer shadow-2xs"
-              title="Tiếp nhận container riêng lẻ do cẩu hạ bãi hoặc thuê vỏ ngoài không theo xe vận tải vào cổng"
-            >
-              <PlusCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>+ Tiếp nhận Cont lẻ (Hạ bãi)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => exportYardVehiclesToExcel(vehicles)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-              title="Xuất danh sách phương tiện đang trong bãi sang file Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5 text-blue-600" />
-              <span>Xuất XLSX Xe ({vehicles.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => exportYardContainersToExcel(containers)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-              title="Xuất danh sách container đang trong bãi sang file Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#0A9444]" />
-              <span>Xuất XLSX Cont ({containers.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => exportYardInventoryReportToExcel(vehicles, containers)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded bg-emerald-50 border border-emerald-300 text-xs font-bold text-emerald-900 hover:bg-emerald-100 transition-colors cursor-pointer shadow-2xs"
-              title="Xuất Sổ theo dõi tồn bãi tổng hợp Đa Sheet (Xe & Cont) sang file Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Xuất XLSX Tổng hợp</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleReload}
-              disabled={isLoading}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>{isLoading ? 'Đang tải...' : 'Làm mới'}</span>
-            </button>
+          }
+          actions={
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleOpenSingleContModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#223873] text-white text-xs font-semibold hover:bg-[#1a2c5b] transition-colors cursor-pointer shadow-2xs"
+                title="Tiếp nhận container riêng lẻ do cẩu hạ bãi hoặc thuê vỏ ngoài không theo xe vận tải vào cổng"
+              >
+                <PlusCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <span>+ Tiếp nhận Cont lẻ</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => exportYardVehiclesToExcel(vehicles)}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+                title="Xuất XLSX Xe"
+              >
+                <Download className="w-3.5 h-3.5 text-[#326DD8]" />
+                <span>Xuất XLSX Xe</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => exportYardContainersToExcel(containers)}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+                title="Xuất XLSX Cont"
+              >
+                <Download className="w-3.5 h-3.5 text-[#0A9444]" />
+                <span>Xuất XLSX Cont</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => exportYardInventoryReportToExcel(vehicles, containers)}
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-xs font-medium text-[#0A9444] hover:bg-[#D1FADF] transition-colors cursor-pointer"
+                title="Xuất XLSX Tổng hợp"
+              >
+                <Download className="w-3.5 h-3.5 text-[#0A9444]" />
+                <span>Xuất XLSX Tổng hợp</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleReload}
+                disabled={isLoading}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${isLoading ? 'animate-spin' : ''}`} />
+                <span>{isLoading ? 'Đang tải...' : 'Làm mới'}</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* Compact KPI strip (6 cards) */}
+        <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Xe trong bãi</span>
+                <Truck className="w-3.5 h-3.5 text-[#223873]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#17202E]">{totalVehicles}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">lượt xe đang đỗ</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Container trong bãi</span>
+                <ContainerIcon className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#0A9444]">{totalContainers}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">container lưu bãi</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Cặp Xe — Cont</span>
+                <Layers className="w-3.5 h-3.5 text-[#326DD8]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#326DD8]">{countPaired}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">đã ghép cặp</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Cont có HÀNG</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#0A9444]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#0A9444]">{countHang}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">đang lưu bãi</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Cont RỖNG</span>
+                <ArrowRightLeft className="w-3.5 h-3.5 text-[#326DD8]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#326DD8]">{countRong}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">đang lưu bãi</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+              <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
+                <span>Chưa xác định</span>
+                <AlertCircle className="w-3.5 h-3.5 text-[#B54708]" />
+              </div>
+              <div className="text-xl font-bold font-mono text-[#B54708]">{countChuaXD}</div>
+              <div className="text-[11px] text-[#667085] mt-0.5">chờ cập nhật</div>
+            </div>
           </div>
         </div>
 
-        {/* Thống kê dạng 6 Cards Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 mt-3 pt-3 border-t border-slate-200">
-          <div className="bg-slate-50 p-2.5 rounded border border-slate-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Xe trong bãi</span>
-            <div className="text-lg font-bold font-mono text-[#223873]">{totalVehicles}</div>
-          </div>
-          <div className="bg-slate-50 p-2.5 rounded border border-slate-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Container trong bãi</span>
-            <div className="text-lg font-bold font-mono text-[#0A9444]">{totalContainers}</div>
-          </div>
-          <div className="bg-indigo-50/50 p-2.5 rounded border border-indigo-200">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Cặp Xe — Cont</span>
-            <div className="text-lg font-bold font-mono text-indigo-800">{countPaired}</div>
-          </div>
-          <div className="bg-emerald-50/50 p-2.5 rounded border border-emerald-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Cont có HÀNG</span>
-            <div className="text-lg font-bold font-mono text-emerald-800">{countHang}</div>
-          </div>
-          <div className="bg-blue-50/50 p-2.5 rounded border border-blue-200">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Cont RỖNG</span>
-            <div className="text-lg font-bold font-mono text-blue-800">{countRong}</div>
-          </div>
-          <div className="bg-amber-50/50 p-2.5 rounded border border-amber-300 col-span-2 sm:col-span-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Chưa xác định</span>
-            <div className="text-lg font-bold font-mono text-amber-800">{countChuaXD}</div>
-          </div>
-        </div>
-      </div>
+        {/* WORKSPACE VIEW TABS */}
+        <WorkspaceTabs
+          tabs={[
+            {
+              id: 'pairs',
+              label: 'Tổng hợp Xe & Cont',
+              count: pairItems.length,
+              icon: Layers,
+            },
+            {
+              id: 'containers',
+              label: 'Container',
+              count: totalContainers,
+              icon: ContainerIcon,
+            },
+            {
+              id: 'vehicles',
+              label: 'Phương tiện',
+              count: totalVehicles,
+              icon: Truck,
+            },
+            {
+              id: 'zones',
+              label: 'Sơ đồ Phân khu & Trụ điện',
+              count: yardZones.length,
+              icon: Grid,
+            },
+          ]}
+          activeTab={activeTab}
+          onChange={(tabId) => setActiveTab(tabId as any)}
+        />
 
-      {/* 2. TABS & TÌM KIẾM BỘ LỌC */}
-      <div className="bg-white rounded-lg p-3 border border-slate-300 shadow-2xs space-y-2.5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
-          {/* Tabs Switcher: 4 Tab chuẩn công thái học bến bãi */}
-          <div className="flex p-0.5 bg-slate-100 rounded border border-slate-300 overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab('pairs')}
-              className={`py-1.5 px-3 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                activeTab === 'pairs'
-                  ? 'bg-white text-[#223873] border border-slate-300 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Tổng hợp Xe & Cont ({pairItems.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('containers')}
-              className={`py-1.5 px-3 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                activeTab === 'containers'
-                  ? 'bg-white text-[#223873] border border-slate-300 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <ContainerIcon className="w-3.5 h-3.5" />
-              <span>Container ({totalContainers})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('vehicles')}
-              className={`py-1.5 px-3 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                activeTab === 'vehicles'
-                  ? 'bg-white text-[#223873] border border-slate-300 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Truck className="w-3.5 h-3.5" />
-              <span>Phương tiện ({totalVehicles})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('zones')}
-              className={`py-1.5 px-3 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                activeTab === 'zones'
-                  ? 'bg-white text-[#223873] border border-slate-300 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Grid className="w-3.5 h-3.5 text-amber-600" />
-              <span>Sơ đồ Phân khu ({yardZones.length} khu)</span>
-            </button>
-          </div>
-
+        <div className="p-4 sm:p-5 space-y-4">
           {/* Search Box & Filters */}
-          <div className="flex items-center space-x-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-between gap-2">
             <div className="relative flex-1 sm:w-64 min-w-[200px]">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
               <input
@@ -1443,8 +1615,6 @@ export default function YardMonitorPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
 
       {/* 3. BẢNG TỔNG HỢP XE — CONTAINER (CẶP GHÉP MAPPING BẾN BÃI) */}
       {activeTab === 'pairs' && (
@@ -2581,6 +2751,205 @@ export default function YardMonitorPage() {
           </div>
         </div>
       )}
+
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 3. RIGHT CONTEXT PANEL: CHI TIẾT TỒN BÃI                       */}
+      {/* ============================================================== */}
+      <RightContextPanel
+        isOpen={isInspectorOpen && !!selectedInspectorPair}
+        onClose={() => setIsInspectorOpen(false)}
+        title={
+          selectedInspectorPair?.container?.container_no_current ||
+          selectedInspectorPair?.vehicle?.license_plate ||
+          'Thông tin chi tiết'
+        }
+        subtitle={
+          selectedInspectorPair?.isPaired
+            ? `Cặp Xe — Container (#${selectedInspectorPair.pairIndex || 1})`
+            : selectedInspectorPair?.container
+            ? 'Container tồn bãi'
+            : 'Phương tiện tồn bãi'
+        }
+        headerActions={
+          selectedInspectorPair?.container ? (
+            <StatusBadge
+              variant={
+                selectedInspectorPair.container.cargo_status === 'HANG'
+                  ? 'success'
+                  : selectedInspectorPair.container.cargo_status === 'RONG'
+                  ? 'info'
+                  : 'warning'
+              }
+              label={
+                selectedInspectorPair.container.cargo_status === 'HANG'
+                  ? 'CÓ HÀNG'
+                  : selectedInspectorPair.container.cargo_status === 'RONG'
+                  ? 'RỖNG'
+                  : 'CHƯA XÁC ĐỊNH'
+              }
+            />
+          ) : (
+            <StatusBadge variant="navy" label="XE TRONG BÃI" />
+          )
+        }
+        footerActions={
+          selectedInspectorPair?.container && canUpdateCargo ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedInspectorPair.container) {
+                  setSelectedCont(selectedInspectorPair.container);
+                  setNewCargoStatus(selectedInspectorPair.container.cargo_status === 'HANG' ? 'RONG' : 'HANG');
+                }
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-[#0A9444] text-white text-xs font-semibold hover:bg-[#087C3C] transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5" />
+              <span>Chuyển HÀNG / RỖNG</span>
+            </button>
+          ) : undefined
+        }
+      >
+        {selectedInspectorPair && (
+          <div className="space-y-4 text-xs">
+            {/* Phương tiện liên quan */}
+            {selectedInspectorPair.vehicle && (
+              <div className="p-3 rounded-lg border border-[#E5E9F0] bg-[#F8F9FB] space-y-2">
+                <div className="flex items-center justify-between text-[#667085] text-[11px] font-semibold uppercase tracking-wider">
+                  <span className="flex items-center gap-1">
+                    <Truck className="w-3.5 h-3.5 text-[#223873]" />
+                    Phương tiện vào cổng
+                  </span>
+                  <span className="font-mono text-[#17202E] font-bold">{selectedInspectorPair.vehicle.license_plate}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#E5E9F0] text-[11px]">
+                  <div>
+                    <span className="text-[#667085]">Loại xe: </span>
+                    <span className="font-medium text-[#17202E]">{selectedInspectorPair.vehicle.vehicle_type_name || selectedInspectorPair.vehicle.vehicle_type}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Tài xế: </span>
+                    <span className="font-medium text-[#17202E]">{selectedInspectorPair.vehicle.driver_name || '---'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Giờ vào: </span>
+                    <span className="font-mono text-[#17202E]">{formatDateTime(selectedInspectorPair.vehicle.entry_at)}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Lưu bãi: </span>
+                    <span className="font-semibold text-[#326DD8]">{getDwellHours(selectedInspectorPair.vehicle.entry_at)}h</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Container liên quan */}
+            {selectedInspectorPair.container && (
+              <div className="p-3 rounded-lg border border-[#E5E9F0] bg-[#F8F9FB] space-y-2">
+                <div className="flex items-center justify-between text-[#667085] text-[11px] font-semibold uppercase tracking-wider">
+                  <span className="flex items-center gap-1">
+                    <ContainerIcon className="w-3.5 h-3.5 text-[#0A9444]" />
+                    Container
+                  </span>
+                  <span className="font-mono text-[#17202E] font-bold">{selectedInspectorPair.container.container_no_current}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#E5E9F0] text-[11px]">
+                  <div>
+                    <span className="text-[#667085]">Kích cỡ: </span>
+                    <span className="font-medium text-[#17202E]">{formatContainerSpec(selectedInspectorPair.container.container_size, selectedInspectorPair.container.container_type)}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Hàng/Rỗng: </span>
+                    <span className="font-medium text-[#17202E]">{renderCargoBadge(selectedInspectorPair.container.cargo_status)}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Vị trí: </span>
+                    <span className="font-medium text-[#17202E]">{selectedInspectorPair.container.slot_code || selectedInspectorPair.container.yard_zone || 'Chưa gán'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Điện lạnh: </span>
+                    <span className="font-medium text-[#17202E]">{selectedInspectorPair.container.is_plugged ? 'Đang cắm điện' : 'Không cắm'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Thao tác nghiệp vụ */}
+            <div className="space-y-1.5 pt-2">
+              <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider block">Thao tác nhanh</span>
+              {selectedInspectorPair.container && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenLocationModal('CONTAINER', {
+                    id: selectedInspectorPair.container!.id,
+                    title: selectedInspectorPair.container!.container_no_current,
+                    subtitle: formatContainerSpec(selectedInspectorPair.container!.container_size, selectedInspectorPair.container!.container_type),
+                    yard_zone: selectedInspectorPair.container!.yard_zone,
+                    slot_code: selectedInspectorPair.container!.slot_code,
+                  })}
+                  className="w-full flex items-center justify-between p-2 rounded-lg border border-[#E5E9F0] hover:bg-[#F8F9FB] text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-[#17202E] font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-[#326DD8]" />
+                    Gán vị trí / Ô đỗ
+                  </span>
+                  <span className="text-[11px] text-[#667085]">{selectedInspectorPair.container.slot_code || 'Chưa gán'}</span>
+                </button>
+              )}
+              {selectedInspectorPair.container && canCorrectContainer && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedContForCorrection(selectedInspectorPair.container);
+                    setNewContainerNo(selectedInspectorPair.container!.container_no_current);
+                    setCorrectionReason('');
+                    setCorrectionEvidence('');
+                    setCorrectionError('');
+                  }}
+                  className="w-full flex items-center justify-between p-2 rounded-lg border border-[#E5E9F0] hover:bg-[#F8F9FB] text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-[#17202E] font-medium">
+                    <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                    Sửa số Container
+                  </span>
+                </button>
+              )}
+              {selectedInspectorPair.vehicle && canUpdateVehicle && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedVehForCorrection(selectedInspectorPair.vehicle);
+                    setNewLicensePlate(selectedInspectorPair.vehicle!.license_plate || '');
+                    setPlateCorrectionReason('');
+                    setPlateCorrectionError('');
+                  }}
+                  className="w-full flex items-center justify-between p-2 rounded-lg border border-[#E5E9F0] hover:bg-[#F8F9FB] text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-[#17202E] font-medium">
+                    <Edit3 className="w-3.5 h-3.5 text-[#326DD8]" />
+                    Sửa Biển số xe
+                  </span>
+                </button>
+              )}
+              {selectedInspectorPair.vehicle && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenVehHistoryModal(selectedInspectorPair.vehicle!)}
+                  className="w-full flex items-center justify-between p-2 rounded-lg border border-[#E5E9F0] hover:bg-[#F8F9FB] text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-[#17202E] font-medium">
+                    <History className="w-3.5 h-3.5 text-[#667085]" />
+                    Xem lịch sử & nhật ký xe
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </RightContextPanel>
 
       {/* 5. MODAL ĐIỀU PHỐI CẬP NHẬT HÀNG / RỖNG (CHUẨN HÓA RPC V5: CHỈ HÀNG HOẶC RỖNG) */}
       {selectedCont && (

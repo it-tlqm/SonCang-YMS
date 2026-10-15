@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
-        { success: false, error: 'Chưa cấu hình Supabase Server Environment' },
+        { success: false, error: 'Chưa cấu hình thông tin kết nối máy chủ xác thực' },
         { status: 500 }
       );
     }

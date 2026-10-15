@@ -43,6 +43,12 @@ import {
   Info
 } from 'lucide-react';
 
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { SearchInput } from '@/components/workspace/search-input';
+import { StatusBadge } from '@/components/workspace/status-badge';
+import { EmptyState } from '@/components/workspace/empty-state';
+
 interface PermissionDefinition {
   code: string;
   module: string;
@@ -311,7 +317,7 @@ export default function UsersAndRbacAdminPage() {
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     await Promise.all([loadStaffUsers(), loadRolesAndPermissions()]);
-    setSuccessMsg('✓ Đã đồng bộ dữ liệu mới nhất từ Supabase Cloud (app_staff_users)');
+    setSuccessMsg('✓ Đã đồng bộ dữ liệu mới nhất từ hệ thống bến bãi');
     setTimeout(() => setSuccessMsg(''), 3500);
   };
 
@@ -402,7 +408,7 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`✓ Đã lưu thành công nhân viên "${res.user.full_name}" vào cơ sở dữ liệu Supabase.`);
+        setSuccessMsg(`✓ Đã lưu thành công nhân viên "${res.user.full_name}" vào hệ thống bến bãi.`);
       } else if (selectedStaff) {
         const res = await repository.updateStaffUser({
           id: selectedStaff.id,
@@ -424,7 +430,7 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`✓ Đã cập nhật thành công nhân sự "${res.user.full_name}" trên cơ sở dữ liệu Supabase.`);
+        setSuccessMsg(`✓ Đã cập nhật thành công thông tin nhân sự "${res.user.full_name}".`);
       }
 
       setShowModal(false);
@@ -443,7 +449,7 @@ export default function UsersAndRbacAdminPage() {
     try {
       const res = await repository.toggleStaffUserStatus(staff.id, nextStatus);
       if (res.success) {
-        setSuccessMsg(`✓ Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}" trên Supabase.`);
+        setSuccessMsg(`✓ Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}".`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       }
@@ -454,14 +460,14 @@ export default function UsersAndRbacAdminPage() {
 
   // Xóa nhân sự
   const handleDeleteStaff = async (staff: StaffUser) => {
-    if (!confirm(`XÁC NHẬN: Bạn có chắc chắn muốn xóa nhân viên "${staff.full_name}" (${staff.email}) khỏi cơ sở dữ liệu?`)) {
+    if (!confirm(`XÁC NHẬN: Bạn có chắc chắn muốn xóa nhân viên "${staff.full_name}" (${staff.email}) khỏi danh mục?`)) {
       return;
     }
 
     try {
       const res = await repository.deleteStaffUser(staff.id);
       if (res.success) {
-        setSuccessMsg(`✓ Đã xóa vĩnh viễn nhân sự "${staff.full_name}" khỏi cơ sở dữ liệu Supabase.`);
+        setSuccessMsg(`✓ Đã xóa nhân sự "${staff.full_name}" khỏi hệ thống.`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
@@ -530,7 +536,7 @@ export default function UsersAndRbacAdminPage() {
 
       const res = await repository.toggleRolePermission(roleCode, permissionCode, nextEnabled, 'ALL');
       if (res.success) {
-        setSuccessMsg(`✓ Đã ${nextEnabled ? 'cấp quyền' : 'thu hồi quyền'} [${permissionCode}] cho vai trò [${roleCode}] trên Supabase.`);
+        setSuccessMsg(`✓ Đã ${nextEnabled ? 'cấp quyền' : 'thu hồi quyền'} [${permissionCode}] cho vai trò [${roleCode}].`);
         setTimeout(() => setSuccessMsg(''), 3000);
       } else {
         // Rollback nếu lỗi
@@ -666,144 +672,127 @@ export default function UsersAndRbacAdminPage() {
   const disCount = staffUsers.filter(s => s.role_code.startsWith('DIS_')).length;
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto pb-12">
-      {/* HEADER QUẢN TRỊ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-        <div>
+    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+      {/* 1. WORKSPACE HEADER */}
+      <WorkspaceHeader
+        title="Quản trị Nhân sự & Phân quyền"
+        subtitle="Danh mục tài khoản nhân viên, cấu hình vai trò và ma trận quyền hạn theo vị trí công tác"
+        icon={Users}
+        badge={
+          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
+            Phân quyền V5
+          </span>
+        }
+        actions={
           <div className="flex items-center gap-2">
-            <h1 className="text-base sm:text-lg font-black text-[#223873] tracking-tight">
-              Quản trị Nhân sự & Phân quyền RBAC V5
-            </h1>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-              <Database className="w-3 h-3 text-emerald-600" />
-              <span>Dữ liệu thật Supabase</span>
-            </span>
+            <button
+              type="button"
+              onClick={handleRefreshData}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Làm mới</span>
+            </button>
+
+            <Link
+              href="/admin/customers"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E9F0] text-xs font-medium text-[#17202E] hover:bg-[#F8F9FB] transition-colors"
+            >
+              <Building2 className="w-3.5 h-3.5 text-[#667085]" />
+              <span>Khách hàng</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleOpenCreateModal}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Thêm mới Nhân viên</span>
+            </button>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Quản lý nhân viên trực ca bến bãi, cấu hình vai trò động và kiểm soát 67 quyền thực thi chuẩn V5
-          </p>
-        </div>
+        }
+      />
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={handleRefreshData}
-            disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 transition-colors cursor-pointer"
-            title="Đồng bộ lại danh sách nhân sự từ cơ sở dữ liệu Supabase"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Làm mới</span>
-          </button>
-
-          <Link
-            href="/admin/customers"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 transition-colors"
-          >
-            <Building2 className="w-3.5 h-3.5 text-slate-500" />
-            <span>Quản lý Khách hàng</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-xl shadow-2xs transition-colors cursor-pointer"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Thêm mới Nhân viên</span>
-          </button>
-        </div>
-      </div>
-
-      {/* THÔNG BÁO THÀNH CÔNG */}
-      {successMsg && (
-        <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMsg}</span>
+      {/* KPI Cards Strip */}
+      <div className="p-4 sm:p-5 border-b border-[#E5E9F0] bg-[#F8F9FB]">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-5xl">
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[11px] text-[#667085] block">Tổng số tài khoản</span>
+            <span className="text-xl font-bold font-mono text-[#17202E] mt-0.5 block">{totalStaffCount}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setSuccessMsg('')}
-            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* THẺ THỐNG KÊ NHÂN SỰ */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Tổng số tài khoản</span>
-          <span className="text-xl font-black text-slate-800">{totalStaffCount}</span>
-        </div>
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Đang hoạt động</span>
-          <span className="text-xl font-black text-emerald-600">{activeStaffCount}</span>
-        </div>
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">An ninh Cổng</span>
-          <span className="text-xl font-black text-emerald-700">{secCount}</span>
-        </div>
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Thương vụ CCKB</span>
-          <span className="text-xl font-black text-amber-600">{portCount}</span>
-        </div>
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs col-span-2 sm:col-span-1">
-          <span className="text-[11px] text-slate-500 block">Điều phối Bãi</span>
-          <span className="text-xl font-black text-blue-600">{disCount}</span>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[11px] text-[#667085] block">Đang hoạt động</span>
+            <span className="text-xl font-bold font-mono text-[#0A9444] mt-0.5 block">{activeStaffCount}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[11px] text-[#667085] block">An ninh Cổng</span>
+            <span className="text-xl font-bold font-mono text-[#0A9444] mt-0.5 block">{secCount}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
+            <span className="text-[11px] text-[#667085] block">Thương vụ CCKB</span>
+            <span className="text-xl font-bold font-mono text-[#B54708] mt-0.5 block">{portCount}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-[#E5E9F0] col-span-2 sm:col-span-1">
+            <span className="text-[11px] text-[#667085] block">Điều phối Bãi</span>
+            <span className="text-xl font-bold font-mono text-[#326DD8] mt-0.5 block">{disCount}</span>
+          </div>
         </div>
       </div>
 
-      {/* TABS ĐIỀU HƯỚNG */}
-      <div className="flex border-b border-slate-200 bg-white px-3 pt-2 rounded-t-2xl shadow-2xs">
-        <button
-          type="button"
-          onClick={() => setActiveTab('USERS')}
-          className={`pb-3 px-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-            activeTab === 'USERS'
-              ? 'border-[#223873] text-[#223873]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Users className="w-4 h-4 text-[#223873]" />
-          <span>Danh sách Nhân sự ({staffUsers.length})</span>
-        </button>
+      {/* WORKSPACE VIEW TABS */}
+      <WorkspaceTabs
+        tabs={[
+          {
+            id: 'USERS',
+            label: 'Danh sách Nhân sự',
+            count: staffUsers.length,
+            icon: Users,
+          },
+          {
+            id: 'MATRIX',
+            label: 'Quản lý Vai trò & Ma trận Phân quyền',
+            count: FULL_PERMISSIONS_V5.length,
+            icon: Key,
+          },
+        ]}
+        activeTab={activeTab}
+        onChange={(tabId) => setActiveTab(tabId as any)}
+      />
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('MATRIX')}
-          className={`pb-3 px-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-            activeTab === 'MATRIX'
-              ? 'border-[#223873] text-[#223873]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Key className="w-4 h-4 text-[#0A9444]" />
-          <span>Quản lý Vai trò & Ma trận Phân quyền ({rolesList.length || 7} Vai trò / 67 Quyền)</span>
-        </button>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* TAB 1: DANH SÁCH NHÂN SỰ & VAI TRÒ (HỖ TRỢ DẠNG TABLE & DẠNG CARD)         */}
-      {/* ========================================================================= */}
-      {activeTab === 'USERS' && (
-        <div className="space-y-3">
-          {/* THANH TÌM KIẾM, BỘ LỌC VÀ CHUYỂN ĐỔI GIAO DIỆN */}
-          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Tìm tên nhân viên, email, vai trò, SĐT..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#223873] bg-slate-50/50"
-              />
+      <div className="p-4 sm:p-5 space-y-4 max-w-7xl">
+        {/* THÔNG BÁO THÀNH CÔNG */}
+        {successMsg && (
+          <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span>{successMsg}</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setSuccessMsg('')}
+              className="text-[#0A9444] hover:underline cursor-pointer font-semibold text-xs"
+            >
+              Đóng
+            </button>
+          </div>
+        )}
 
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 flex-wrap justify-end">
+        {/* TAB 1: DANH SÁCH NHÂN SỰ & VAI TRÒ */}
+        {activeTab === 'USERS' && (
+          <div className="space-y-3">
+            {/* THANH TÌM KIẾM, BỘ LỌC VÀ CHUYỂN ĐỔI GIAO DIỆN */}
+            <div className="bg-white p-3 rounded-lg border border-[#E5E9F0] flex flex-col md:flex-row gap-3 items-center justify-between">
+              <div className="w-full md:w-80">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Tìm tên nhân viên, email, vai trò, SĐT..."
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 flex-wrap justify-end">
               <select
                 value={selectedRoleFilter}
                 onChange={(e) => setSelectedRoleFilter(e.target.value)}
@@ -861,7 +850,7 @@ export default function UsersAndRbacAdminPage() {
           {isLoadingStaff ? (
             <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
               <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#223873]" />
-              <span>Đang kết nối cơ sở dữ liệu Supabase tải danh sách nhân sự...</span>
+              <span>Đang tải danh sách nhân sự từ máy chủ hệ thống...</span>
             </div>
           ) : filteredAccounts.length === 0 ? (
             <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
@@ -1237,7 +1226,7 @@ export default function UsersAndRbacAdminPage() {
                   Ma trận Cấp quyền Runtime theo Quyết định V5 (67 Quyền / 206 Grants)
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Click vào từng ô để Bật / Tắt cấp quyền trực tiếp cho vai trò trên cơ sở dữ liệu Supabase Cloud
+                  Click vào từng ô để Bật / Tắt cấp quyền trực tiếp cho vai trò trên hệ thống máy chủ
                 </p>
               </div>
 
@@ -1448,6 +1437,7 @@ export default function UsersAndRbacAdminPage() {
           </div>
         </div>
       )}
+      </div>
 
       {/* ========================================================================= */}
       {/* MODAL THÊM MỚI / CHỈNH SỬA & ĐỔI VAI TRÒ NHÂN SỰ                          */}
