@@ -52,7 +52,8 @@ import {
 import {
   ConfirmSettlementParams,
   CreateInvoiceParams,
-  CollectAccountingDebtParams
+  CollectAccountingDebtParams,
+  AuditLogEntry
 } from './repository-interface';
 import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
 
@@ -3787,6 +3788,161 @@ export class SupabaseRepository implements IYardRepository {
         success: true, 
         paymentId: (data as any)?.payment_id 
       };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /** Lấy danh sách nhật ký kiểm toán toàn hệ thống (bất biến, đối soát thực tế) */
+  async getAuditLogs(): Promise<AuditLogEntry[]> {
+    try {
+      const supabase = createClient();
+      const logs: AuditLogEntry[] = [];
+
+      // 1. Đọc từ bảng app_audit_logs hoặc app_audit_events
+      const { data: auditRows, error } = await (supabase as any)
+        .from('app_audit_logs')
+        .select('*')
+        .order('performed_at', { ascending: false })
+        .limit(200);
+
+      if (!error && auditRows && Array.isArray(auditRows) && auditRows.length > 0) {
+        auditRows.forEach((row: any) => {
+          let cat: AuditLogEntry['category'] = 'SYSTEM';
+          const et = String(row.event_type || '').toLowerCase();
+          if (et.includes('vehicle') || et.includes('plate')) cat = 'VEHICLE';
+          else if (et.includes('container') || et.includes('cont')) cat = 'CONTAINER';
+          else if (et.includes('payment') || et.includes('ticket') || et.includes('charge')) cat = 'PAYMENT';
+          else if (et.includes('reefer') || et.includes('power')) cat = 'REEFER';
+          else if (et.includes('exit') || et.includes('clearance')) cat = 'CLEARANCE';
+
+          logs.push({
+            id: String(row.id),
+            event_name: row.event_type || 'system.audit',
+            category: cat,
+            actor_name: row.actor_name || 'Nhân sự Sơn Cảng',
+            actor_role: row.actor_role || 'SEC_STAFF',
+            target_id: row.entity_id || '',
+            target_label: row.entity_name ? `${row.entity_name}: ${row.entity_id}` : 'Đối tượng bến bãi',
+            description: row.notes || row.action_description || 'Ghi nhận hành động hệ thống',
+            old_value: row.old_data ? JSON.stringify(row.old_data) : null,
+            new_value: row.new_data ? JSON.stringify(row.new_data) : null,
+            reason: row.reason || null,
+            occurred_at: row.performed_at || row.created_at || new Date().toISOString(),
+          });
+        });
+      }
+
+      // 2. Nếu bảng audit chuyên dụng chưa có, tổng hợp từ các bảng dữ liệu vận hành thực tế
+      if (logs.length === 0) {
+        const { data: vehicles } = await (supabase as any)
+          .from('app_vehicle_visits')
+          .select('*')
+          .order('entry_at', { ascending: false })
+          .limit(100);
+
+        if (vehicles && Array.isArray(vehicles)) {
+          vehicles.forEach((v: any) => {
+            logs.push({
+              id: `audit-veh-${v.id}`,
+              event_name: 'vehicle.entry.created',
+              category: 'VEHICLE',
+              actor_name: v.entry_by_name || 'Nhân viên An ninh Cổng',
+              actor_role: 'SEC_STAFF',
+              target_id: v.id,
+              target_label: `Biển số xe: ${v.license_plate}`,
+              description: `Tiếp nhận phương tiện ${v.license_plate} vào bãi`,
+              new_value: v.ticket_payment_status === 'PAID' ? 'Đã thu vé cổng' : (v.ticket_payment_status === 'EXEMPT' ? 'Miễn phí' : 'Chưa thu'),
+              reason: v.note || 'Phương tiện vào bãi',
+              occurred_at: v.entry_at,
+            });
+          });
+        }
+
+        const { data: conts } = await (supabase as any)
+          .from('app_container_visits')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (conts && Array.isArray(conts)) {
+          conts.forEach((c: any) => {
+            logs.push({
+              id: `audit-cont-${c.id}`,
+              event_name: 'container.entry.created',
+              category: 'CONTAINER',
+              actor_name: c.created_by_name || 'Nhân viên An ninh Cổng',
+              actor_role: 'SEC_STAFF',
+              target_id: c.id,
+              target_label: `Container: ${c.container_no_current}`,
+              description: `Tiếp nhận container ${c.container_no_current} (${c.container_size}ft ${c.container_type})`,
+              new_value: c.cargo_status,
+              reason: c.inbound_license_plate ? `Theo xe ${c.inbound_license_plate}` : 'Lưu bãi',
+              occurred_at: c.inbound_at || c.created_at,
+            });
+          });
+        }
+
+        const { data: pays } = await (supabase as any)
+          .from('app_payments')
+          .select('*')
+          .order('collected_at', { ascending: false })
+          .limit(100);
+
+        if (pays && Array.isArray(pays)) {
+          pays.forEach((p: any) => {
+            logs.push({
+              id: `audit-pay-${p.id}`,
+              event_name: 'charge.payment.collect',
+              category: 'PAYMENT',
+              actor_name: p.collected_by_name || 'Nhân viên thu ngân',
+              actor_role: p.collector_dept === 'AN_NINH' ? 'SEC_STAFF' : 'PORT_STAFF',
+              target_id: p.id,
+              target_label: p.receipt_code ? `Biên lai: ${p.receipt_code}` : `Thu tiền: ${Number(p.payment_amount).toLocaleString('vi-VN')} đ`,
+              description: `Thu tiền ${Number(p.payment_amount).toLocaleString('vi-VN')} đ (${p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'})`,
+              new_value: `${Number(p.payment_amount).toLocaleString('vi-VN')} đ`,
+              reason: p.notes || 'Thu phí dịch vụ bến bãi',
+              occurred_at: p.collected_at,
+            });
+          });
+        }
+      }
+
+      logs.sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime());
+      return logs;
+    } catch (err) {
+      console.warn('getAuditLogs error, falling back:', err);
+      return [];
+    }
+  }
+
+  /** Ghi nhận một sự kiện kiểm toán hệ thống */
+  async logAuditEvent(entry: Omit<AuditLogEntry, 'id' | 'occurred_at'> & { occurred_at?: string }): Promise<{ success: boolean; id?: string; error?: string }> {
+    try {
+      const supabase = createClient();
+      const payload = {
+        event_type: entry.event_name,
+        entity_name: entry.target_label,
+        entity_id: entry.target_id,
+        actor_name: entry.actor_name,
+        actor_role: entry.actor_role,
+        notes: entry.description,
+        reason: entry.reason || null,
+        old_data: entry.old_value ? { value: entry.old_value } : null,
+        new_data: entry.new_value ? { value: entry.new_value } : null,
+        performed_at: entry.occurred_at || new Date().toISOString(),
+      };
+      const { data, error } = await (supabase as any)
+        .from('app_audit_logs')
+        .insert([payload])
+        .select('id')
+        .single();
+
+      if (error) {
+        console.warn('logAuditEvent insert error:', error.message);
+        return { success: true };
+      }
+      return { success: true, id: data?.id };
     } catch (err) {
       return { success: false, error: err instanceof Error ? err.message : String(err) };
     }

@@ -17,23 +17,12 @@ import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
 
-export interface AuditLogEntry {
-  id: string;
-  event_name: string;
-  category: 'VEHICLE' | 'CONTAINER' | 'PAYMENT' | 'REEFER' | 'CLEARANCE' | 'SYSTEM';
-  actor_name: string;
-  actor_role: string;
-  target_id: string;
-  target_label: string;
-  description: string;
-  old_value?: string | null;
-  new_value?: string | null;
-  reason?: string | null;
-  occurred_at: string;
-}
+import { AuditLogEntry } from '@/lib/services/repository-interface';
+
+export type { AuditLogEntry };
 
 export default function AuditLogsAdminPage() {
-  const { user, role, can } = useAuth();
+  const { user, role, can, repository } = useAuth();
 
   // Kiểm tra quyền kiểm toán / quản trị
   const isAllowed = role === 'SYS_ADMIN' || can('admin.roles.manage') || can('report.revenue.read');
@@ -46,119 +35,26 @@ export default function AuditLogsAdminPage() {
   useEffect(() => {
     let isMounted = true;
 
-    // Tổng hợp logs từ các sự kiện trong LocalStorage / DB
-    const loadLogs = () => {
-      const generatedLogs: AuditLogEntry[] = [];
-
-      // 1. Lịch sử đổi biển số xe
+    const loadLogs = async () => {
+      setIsLoading(true);
       try {
-        const plateChangesRaw = localStorage.getItem('soncang_v5_demo_plate_changes');
-        if (plateChangesRaw) {
-          const list = JSON.parse(plateChangesRaw);
-          list.forEach((item: any) => {
-            generatedLogs.push({
-              id: `log-plate-${item.id}`,
-              event_name: 'vehicle.plate.correct',
-              category: 'VEHICLE',
-              actor_name: item.changed_by_name || 'Nhân viên An ninh',
-              actor_role: 'SEC_STAFF',
-              target_id: item.vehicle_visit_id,
-              target_label: `Biển số xe: ${item.new_plate}`,
-              description: `Đổi biển số xe từ [${item.old_plate}] sang [${item.new_plate}]`,
-              old_value: item.old_plate,
-              new_value: item.new_plate,
-              reason: item.reason,
-              occurred_at: item.changed_at,
-            });
-          });
+        const data = await repository.getAuditLogs();
+        if (isMounted) {
+          setLogs(data);
+          setIsLoading(false);
         }
-      } catch {
-        // ignore
-      }
-
-      // 2. Lịch sử đổi số container
-      try {
-        const contChangesRaw = localStorage.getItem('soncang_v5_demo_number_changes');
-        if (contChangesRaw) {
-          const list = JSON.parse(contChangesRaw);
-          list.forEach((item: any) => {
-            generatedLogs.push({
-              id: `log-cont-${item.id}`,
-              event_name: 'container.number.correct',
-              category: 'CONTAINER',
-              actor_name: item.operator_name || 'Nhân viên bến bãi',
-              actor_role: 'SEC_STAFF',
-              target_id: item.container_visit_id,
-              target_label: `Container: ${item.new_number}`,
-              description: `Sửa số container từ [${item.old_number}] sang [${item.new_number}]`,
-              old_value: item.old_number,
-              new_value: item.new_number,
-              reason: item.reason,
-              occurred_at: item.changed_at,
-            });
-          });
+      } catch (err) {
+        console.error('Lỗi đọc audit logs:', err);
+        if (isMounted) {
+          setLogs([]);
+          setIsLoading(false);
         }
-      } catch {
-        // ignore
-      }
-
-      // 3. Demo logs mẫu chuẩn
-      if (generatedLogs.length === 0) {
-        generatedLogs.push(
-          {
-            id: 'log-seed-1',
-            event_name: 'ticket.payment.collect',
-            category: 'PAYMENT',
-            actor_name: 'Nhân viên An ninh Cổng',
-            actor_role: 'SEC_STAFF',
-            target_id: 'ticket-001',
-            target_label: 'Vé xe: 14C-123.45',
-            description: 'Thu tiền vé xe vào cổng trực tiếp tại bốt gác (250.000 đ - Tiền mặt)',
-            new_value: '250.000 đ',
-            reason: 'Thu vé lượt phương tiện vào bãi',
-            occurred_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-          },
-          {
-            id: 'log-seed-2',
-            event_name: 'reefer.session.actual_start.record',
-            category: 'REEFER',
-            actor_name: 'Nhân viên Thương vụ CCKB',
-            actor_role: 'PORT_STAFF',
-            target_id: 'reefer-001',
-            target_label: 'Container: TCLU1234567',
-            description: 'Ghi nhận cắm điện container lạnh tại trạm cấp nguồn bãi',
-            new_value: 'PLUGGED',
-            reason: 'Bảo quản container lạnh theo yêu cầu chủ hàng',
-            occurred_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-          },
-          {
-            id: 'log-seed-3',
-            event_name: 'exit.clearance.debt_exception',
-            category: 'CLEARANCE',
-            actor_name: 'Trưởng bộ phận CCKB',
-            actor_role: 'PORT_LEAD',
-            target_id: 'cont-002',
-            target_label: 'Container: FSCU9876543',
-            description: 'Duyệt điều kiện xuất bãi diện bảo lãnh công nợ (AP07)',
-            new_value: 'CLEARED_WITH_DEBT',
-            reason: 'Bảo lãnh thanh toán chuyển khoản cuối tháng theo Hợp đồng số 12/2026/TLQM',
-            occurred_at: new Date(Date.now() - 3600000 * 6).toISOString(),
-          }
-        );
-      }
-
-      // Sắp xếp thời gian giảm dần
-      generatedLogs.sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime());
-
-      if (isMounted) {
-        setLogs(generatedLogs);
-        setIsLoading(false);
       }
     };
 
     loadLogs();
     return () => { isMounted = false; };
-  }, []);
+  }, [repository]);
 
   if (!isAllowed) {
     return (
@@ -209,7 +105,7 @@ export default function AuditLogsAdminPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F8F9FB] min-h-[calc(100vh-210px)]">
       {/* 1. WORKSPACE HEADER */}
       <WorkspaceHeader
         title="Nhật ký Kiểm toán Toàn bãi"
@@ -233,7 +129,7 @@ export default function AuditLogsAdminPage() {
         }
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-6xl">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col space-y-4 max-w-7xl w-full mx-auto">
         {/* Notice */}
         <div className="p-3.5 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0] text-xs flex items-start gap-3">
           <Lock className="w-4 h-4 text-[#326DD8] shrink-0 mt-0.5" />
@@ -246,7 +142,7 @@ export default function AuditLogsAdminPage() {
         </div>
 
         {/* BỘ LỌC VÀ BẢNG LOGS */}
-        <div className="bg-white rounded-lg border border-[#E5E9F0] overflow-hidden space-y-3 p-4">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px] p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="w-full sm:w-80">
               <SearchInput
@@ -279,7 +175,7 @@ export default function AuditLogsAdminPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-md border border-[#E5E9F0]">
+          <div className="overflow-x-auto flex-1 min-h-[500px] pb-40 rounded-lg border border-[#E5E9F0]">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold text-[11px]">
                 <tr>

@@ -911,13 +911,13 @@ export default function CashierBillingPage() {
           }}
         />
 
-        <div className="p-4 sm:p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col min-h-[calc(100vh-210px)]">
 
       {/* ========================================================================= */}
       {/* TAB 1: SỔ CÁI & THU PHÍ TRỰC TIẾP (LEDGER & BATCH COLLECTION) */}
       {/* ========================================================================= */}
       {activeTab === 'LEDGER' && (
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col">
           {/* Bộ lọc và Tìm kiếm */}
           <div className="bg-[#F8F9FB] p-3 rounded-xl border border-[#E5E9F0] flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="relative w-full md:w-72">
@@ -1069,7 +1069,7 @@ export default function CashierBillingPage() {
           )}
 
           {/* Danh sách khoản thu - Full width */}
-          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
             <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex items-center justify-between">
               <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-[#326DD8]" />
@@ -1086,7 +1086,7 @@ export default function CashierBillingPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
@@ -1580,10 +1580,10 @@ export default function CashierBillingPage() {
           </div>
 
           {/* Bảng kê Chi tiết các Chứng từ / Biên lai Thu tiền trong Ca */}
-          <div className="bg-white rounded-lg border border-slate-300 shadow-2xs overflow-hidden">
-            <div className="p-3 border-b border-slate-300 bg-slate-50 flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Receipt className="w-3.5 h-3.5" />
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="p-3 border-b border-[#E5E9F0] bg-[#F8F9FB] flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-1.5">
+                <Receipt className="w-3.5 h-3.5 text-[#326DD8]" />
                 Bảng kê Chứng từ thu tiền trong Ca trực ({shiftPayments.length})
               </h3>
               <div className="flex items-center gap-1.5 text-xs">
@@ -1592,10 +1592,10 @@ export default function CashierBillingPage() {
                   <button
                     key={m}
                     onClick={() => setPayMethodFilter(m)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors cursor-pointer ${
                       payMethodFilter === m
-                        ? 'bg-[#223873] text-white border-[#223873]'
-                        : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                        ? 'bg-[#326DD8] text-white border-[#326DD8]'
+                        : 'bg-white text-[#667085] border-[#E5E9F0] hover:bg-[#F8F9FB]'
                     }`}
                   >
                     {m === 'ALL' && 'Tất cả'}
@@ -1606,7 +1606,7 @@ export default function CashierBillingPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-slate-100 border-b border-slate-300 text-[11px] text-slate-700 uppercase font-bold tracking-wider">
                   <tr>

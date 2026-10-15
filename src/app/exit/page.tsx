@@ -907,13 +907,13 @@ export default function ExitClearancePage() {
           onChange={(tabId) => setActiveTab(tabId as any)}
         />
 
-        <div className="p-4 sm:p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col min-h-[calc(100vh-210px)]">
 
       {/* ========================================================================= */}
       {/* TAB 1: AN NINH CỔNG RA VẬT LÝ — KIỂM SOÁT XUẤT BÃI THEO TỪNG XE          */}
       {/* ========================================================================= */}
       {activeTab === 'GATE_EXIT' && (
-        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#0A9444]" />
@@ -924,7 +924,7 @@ export default function ExitClearancePage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>
@@ -1123,7 +1123,7 @@ export default function ExitClearancePage() {
       {/* TAB 2: THƯƠNG VỤ CCKB DUYỆT ĐIỀU KIỆN XUẤT BÃI (CLEARANCE)               */}
       {/* ========================================================================= */}
       {activeTab === 'CLEARANCE' && (
-        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-[#223873]" />
@@ -1134,7 +1134,7 @@ export default function ExitClearancePage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>
@@ -1264,7 +1264,7 @@ export default function ExitClearancePage() {
       {/* TAB 3: LỊCH SỬ PHƯƠNG TIỆN ĐÃ XUẤT BÃI TRONG NGÀY                         */}
       {/* ========================================================================= */}
       {activeTab === 'EXITED_HISTORY' && (
-        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
@@ -1291,7 +1291,7 @@ export default function ExitClearancePage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                 <tr>

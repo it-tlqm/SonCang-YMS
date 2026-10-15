@@ -548,13 +548,13 @@ export default function AccountingPage() {
           onChange={(tabId) => setActiveTab(tabId as any)}
         />
 
-        <div className="p-4 sm:p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col min-h-[calc(100vh-210px)]">
 
       {/* ========================================================================= */}
       {/* TAB 1: CHỐT TIỀN HIỆN TRƯỜNG */}
       {/* ========================================================================= */}
       {activeTab === 'CASH_SETTLEMENT' && (
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1 flex flex-col">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -615,14 +615,14 @@ export default function AccountingPage() {
           </div>
 
           {/* Settlements Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="px-6 py-4 border-b border-[#E5E9F0] bg-slate-50/50 flex justify-between items-center">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#17202E]">
                 Lịch sử các đợt chốt tiền mặt hiện trường ({filteredSettlements.length} đợt)
               </h2>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                   <tr>
@@ -757,14 +757,14 @@ export default function AccountingPage() {
           </div>
 
           {/* Invoices Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="px-6 py-4 border-b border-[#E5E9F0] bg-slate-50/50 flex justify-between items-center">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#17202E]">
                 Danh sách hóa đơn GTGT đã lập ({filteredInvoices.length} hóa đơn)
               </h2>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                   <tr>
@@ -900,14 +900,14 @@ export default function AccountingPage() {
           </div>
 
           {/* Debts Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="px-6 py-4 border-b border-[#E5E9F0] bg-slate-50/50 flex justify-between items-center">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#17202E]">
                 Danh sách khoản nợ cước bến bãi ({filteredDebts.length} khoản)
               </h2>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                   <tr>

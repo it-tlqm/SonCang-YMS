@@ -53,7 +53,8 @@ import {
   RecordCompletedReeferSessionParams,
   VerifyReeferSessionZaloParams,
   UpdateReeferRequestParams,
-  AdjustVehicleVisitParams
+  AdjustVehicleVisitParams,
+  AuditLogEntry
 } from './repository-interface';
 import { calculateStorageFeeOffline } from './supabase-repository';
 
@@ -409,6 +410,7 @@ export class DemoRepository implements IYardRepository {
   private cashSettlements: CashSettlement[] = [];
   private settlementItems: CashSettlementItem[] = [];
   private yardInvoices: YardInvoice[] = [];
+  private auditLogs: AuditLogEntry[] = [];
   private duplicatePolicy: VehicleDuplicatePolicy = {
     id: 'pol-demo-01',
     yard_id: '20000000-0000-0000-0000-000000000001',
@@ -495,6 +497,10 @@ export class DemoRepository implements IYardRepository {
       if (savedInvoices) {
         try { this.yardInvoices = JSON.parse(savedInvoices); } catch {}
       }
+      const savedAudit = localStorage.getItem('soncang_v5_audit_logs');
+      if (savedAudit) {
+        try { this.auditLogs = JSON.parse(savedAudit); } catch {}
+      }
     }
   }
 
@@ -516,6 +522,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_cash_settlements', JSON.stringify(this.cashSettlements));
       localStorage.setItem('soncang_v5_settlement_items', JSON.stringify(this.settlementItems));
       localStorage.setItem('soncang_v5_yard_invoices', JSON.stringify(this.yardInvoices));
+      localStorage.setItem('soncang_v5_audit_logs', JSON.stringify(this.auditLogs));
     }
   }
 
@@ -2702,6 +2709,188 @@ export class DemoRepository implements IYardRepository {
     return { success: true, paymentId };
   }
 
+  async logAuditEvent(entry: Omit<AuditLogEntry, 'id' | 'occurred_at'> & { occurred_at?: string }): Promise<{ success: boolean; id?: string; error?: string }> {
+    const newLog: AuditLogEntry = {
+      id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      occurred_at: entry.occurred_at || new Date().toISOString(),
+      ...entry,
+    };
+    this.auditLogs.unshift(newLog);
+    if (this.auditLogs.length > 500) {
+      this.auditLogs = this.auditLogs.slice(0, 500);
+    }
+    this.persist();
+    return { success: true, id: newLog.id };
+  }
+
+  async getAuditLogs(): Promise<AuditLogEntry[]> {
+    const allLogs: AuditLogEntry[] = [...this.auditLogs];
+
+    // 1. Đồng bộ lịch sử sửa biển số xe thực tế
+    this.plateChanges.forEach((p) => {
+      const id = `audit-plate-${p.id}`;
+      if (!allLogs.some(l => l.id === id || (l.target_id === p.vehicle_visit_id && l.new_value === p.new_plate))) {
+        allLogs.push({
+          id,
+          event_name: 'vehicle.plate.correct',
+          category: 'VEHICLE',
+          actor_name: p.changed_by_name || 'Nhân viên An ninh',
+          actor_role: 'SEC_STAFF',
+          target_id: p.vehicle_visit_id,
+          target_label: `Biển số xe: ${p.new_plate}`,
+          description: `Đổi biển số xe từ [${p.old_plate}] sang [${p.new_plate}]`,
+          old_value: p.old_plate,
+          new_value: p.new_plate,
+          reason: p.reason,
+          occurred_at: p.changed_at,
+        });
+      }
+    });
+
+    // 2. Đồng bộ lịch sử sửa số container thực tế
+    this.numberChanges.forEach((nc) => {
+      const id = `audit-cont-${nc.id}`;
+      if (!allLogs.some(l => l.id === id || (l.target_id === nc.container_visit_id && l.new_value === nc.new_number))) {
+        allLogs.push({
+          id,
+          event_name: 'container.number.correct',
+          category: 'CONTAINER',
+          actor_name: nc.changed_by_name || 'Nhân viên bến bãi',
+          actor_role: 'SEC_STAFF',
+          target_id: nc.container_visit_id,
+          target_label: `Container: ${nc.new_number}`,
+          description: `Sửa số container từ [${nc.old_number}] sang [${nc.new_number}]`,
+          old_value: nc.old_number,
+          new_value: nc.new_number,
+          reason: nc.reason,
+          occurred_at: nc.changed_at,
+        });
+      }
+    });
+
+    // 3. Tự động đồng bộ các lượt xe thực tế vào bãi & xuất bãi
+    this.vehicles.forEach((v) => {
+      const id = `audit-veh-entry-${v.id}`;
+      if (!allLogs.some(l => l.id === id || (l.target_id === v.id && l.event_name === 'vehicle.entry.created'))) {
+        allLogs.push({
+          id,
+          event_name: 'vehicle.entry.created',
+          category: 'VEHICLE',
+          actor_name: v.entry_by_name || 'Nhân viên An ninh Cổng',
+          actor_role: 'SEC_STAFF',
+          target_id: v.id,
+          target_label: `Biển số xe: ${v.license_plate}`,
+          description: `Tiếp nhận phương tiện ${v.license_plate} vào bãi (${v.vehicle_type_name || v.vehicle_type})`,
+          new_value: v.ticket_payment_status === 'PAID' ? 'Đã thu vé cổng' : (v.ticket_payment_status === 'EXEMPT' ? 'Miễn phí' : 'Chưa thu'),
+          reason: v.note || 'Phương tiện vào bãi làm thủ tục',
+          occurred_at: v.entry_at,
+        });
+      }
+
+      if (v.status === 'EXITED' && v.exit_at) {
+        const exitId = `audit-veh-exit-${v.id}`;
+        if (!allLogs.some(l => l.id === exitId)) {
+          allLogs.push({
+            id: exitId,
+            event_name: 'vehicle.exit.confirm',
+            category: 'CLEARANCE',
+            actor_name: v.exit_by || 'Nhân viên An ninh Cổng ra',
+            actor_role: 'SEC_STAFF',
+            target_id: v.id,
+            target_label: `Biển số xe: ${v.license_plate}`,
+            description: `Xác nhận phương tiện ${v.license_plate} xuất bãi thành công`,
+            new_value: 'EXITED',
+            reason: 'Hoàn tất thủ tục ra cổng',
+            occurred_at: v.exit_at,
+          });
+        }
+      }
+    });
+
+    // 4. Tự động đồng bộ các lượt container thực tế
+    this.containers.forEach((c) => {
+      const id = `audit-cont-entry-${c.id}`;
+      if (!allLogs.some(l => l.id === id || (l.target_id === c.id && l.event_name === 'container.entry.created'))) {
+        allLogs.push({
+          id,
+          event_name: 'container.entry.created',
+          category: 'CONTAINER',
+          actor_name: c.created_by_name || 'Nhân viên An ninh Cổng',
+          actor_role: 'SEC_STAFF',
+          target_id: c.id,
+          target_label: `Container: ${c.container_no_current}`,
+          description: `Tiếp nhận container ${c.container_no_current} (${c.container_size}ft ${c.container_type}) vào bãi`,
+          new_value: c.cargo_status === 'HANG' ? 'Có hàng' : (c.cargo_status === 'RONG' ? 'Vỏ rỗng' : 'Chưa xác định'),
+          reason: c.inbound_license_plate ? `Đi kèm xe ${c.inbound_license_plate}` : 'Hạ bãi lưu kho',
+          occurred_at: c.inbound_at || c.created_at,
+        });
+      }
+    });
+
+    // 5. Tự động đồng bộ các khoản thanh toán thực tế
+    this.payments.forEach((p) => {
+      const id = `audit-pay-${p.id}`;
+      if (!allLogs.some(l => l.id === id)) {
+        allLogs.push({
+          id,
+          event_name: 'charge.payment.collect',
+          category: 'PAYMENT',
+          actor_name: p.collected_by_name || (p.collector_dept === 'AN_NINH' ? 'Nhân viên An ninh' : 'Nhân viên CCKB'),
+          actor_role: p.collector_dept === 'AN_NINH' ? 'SEC_STAFF' : 'PORT_STAFF',
+          target_id: p.id,
+          target_label: p.receipt_code ? `Biên lai: ${p.receipt_code}` : `Khoản thu: ${p.payment_amount.toLocaleString('vi-VN')} đ`,
+          description: `Ghi nhận thu tiền ${p.payment_amount.toLocaleString('vi-VN')} đ (${p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'})`,
+          new_value: `${p.payment_amount.toLocaleString('vi-VN')} đ`,
+          reason: p.notes || 'Thu phí dịch vụ bến bãi',
+          occurred_at: p.collected_at,
+        });
+      }
+    });
+
+    // 6. Tự động đồng bộ các phiên cắm rút điện thực tế
+    this.reeferSessions.forEach((s) => {
+      const plugId = `audit-reefer-plug-${s.id}`;
+      if (!allLogs.some(l => l.id === plugId)) {
+        allLogs.push({
+          id: plugId,
+          event_name: 'reefer.session.plug',
+          category: 'REEFER',
+          actor_name: s.plugged_in_by || 'Nhân viên Kỹ thuật/CCKB',
+          actor_role: 'PORT_STAFF',
+          target_id: s.id,
+          target_label: `Container: ${s.container_no}`,
+          description: `Cắm nguồn điện container lạnh tại ổ cắm ${s.plug_socket_code || '380V'}`,
+          new_value: 'PLUGGED',
+          reason: 'Bảo quản container lạnh theo yêu cầu chủ hàng',
+          occurred_at: s.plugged_in_at,
+        });
+      }
+
+      if (s.unplugged_at) {
+        const unplugId = `audit-reefer-unplug-${s.id}`;
+        if (!allLogs.some(l => l.id === unplugId)) {
+          allLogs.push({
+            id: unplugId,
+            event_name: 'reefer.session.unplug',
+            category: 'REEFER',
+            actor_name: s.unplugged_by || 'Nhân viên Kỹ thuật/CCKB',
+            actor_role: 'PORT_STAFF',
+            target_id: s.id,
+            target_label: `Container: ${s.container_no}`,
+            description: `Rút nguồn điện container lạnh (Thời lượng: ${s.billable_minutes || 0} phút - Cước: ${(s.total_power_amount || 0).toLocaleString('vi-VN')} đ)`,
+            new_value: 'UNPLUGGED',
+            reason: 'Kết thúc phiên cắm điện',
+            occurred_at: s.unplugged_at,
+          });
+        }
+      }
+    });
+
+    // Sắp xếp thời gian giảm dần
+    allLogs.sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime());
+    return allLogs;
+  }
+
   resetDemoData() {
     this.vehicles = [...INITIAL_DEMO_VEHICLES];
     this.containers = [...INITIAL_DEMO_CONTAINERS];
@@ -2712,6 +2901,7 @@ export class DemoRepository implements IYardRepository {
     this.customers = [...INITIAL_DEMO_CUSTOMERS];
     this.staffUsers = [...INITIAL_DEMO_STAFF_USERS];
     this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
+    this.auditLogs = [];
     this.persist();
   }
 }

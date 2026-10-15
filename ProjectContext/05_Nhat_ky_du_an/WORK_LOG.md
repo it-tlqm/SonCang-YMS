@@ -1,5 +1,47 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 14:00 — Xóa Bỏ Dữ Liệu Ảo Giác Trong Nhật Ký Kiểm Toán (`/admin/audit-logs`) & Đồng Bộ Full-Height Table Toàn Hệ Thống
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  1. *"Chỗ nhật ký kiểm toàn này cx đang là ảo giác:)))))Nhật ký Kiểm toán Toàn bãi 3 bản ghi... Hệ thống lưu vết bất biến (Append-only) phục vụ đối soát, tra cứu và hậu kiểm vận hành... Vé xe: 14C-123.45 / Container: TCLU1234567 / Container: FSCU9876543..."*
+  2. *"phần chỗ giải pháp này cũng áp dụng với những chỗ khác đi bạn: Cái bảng này đang chưa full height b ạ nên khi có 1->5 xe thì sẽ bị che mất những cái nút thao tác của xe ấy bạn"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Xóa bỏ triệt để dữ liệu ảo giác trong Nhật ký kiểm toán (`/admin/audit-logs`):**
+     - Bổ sung định nghĩa `AuditLogEntry` và phương thức `getAuditLogs()`, `logAuditEvent()` vào `IYardRepository` (`src/lib/services/repository-interface.ts`).
+     - Triển khai trong `DemoRepository`:
+       * Thay thế 3 bản ghi tĩnh cứng (`14C-123.45`, `TCLU1234567`, `FSCU9876543`) bằng cơ chế tổng hợp động từ 100% dữ liệu thực tế đang tồn tại trong bãi.
+       * Tự động phản ánh các lượt xe vào/ra thực tế (`云桂桂桂`, `桂桂桂`, `湘湘湘`...), lượt container thực tế (`TTTT1111111`...), lịch sử sửa biển số xe và container (`plateChanges`, `numberChanges`), các phiếu thu tiền thật (`250.000 đ`, `200.000 đ`...), các phiên cắm/rút điện lạnh.
+       * Lưu vết bổ sung bất biến (Append-only) vào `localStorage` qua key `soncang_v5_audit_logs`.
+     - Triển khai trong `SupabaseRepository`: Đọc từ bảng `app_audit_logs` kết hợp tổng hợp đối soát dự phòng từ các bảng dữ liệu vận hành thực tế.
+     - Cập nhật trang `/admin/audit-logs`: Gọi trực tiếp `repository.getAuditLogs()`, lọc và tìm kiếm theo dữ liệu thật.
+  2. **Đồng bộ giải pháp Full-Height Table & Chống che nút thao tác trên toàn bộ 6 màn hình bảng:**
+     - Thiết lập khung bảng `flex-1 flex flex-col min-h-[540px]` và vùng cuộn `overflow-x-auto flex-1 min-h-[500px] pb-40`, outer container `flex-1 flex flex-col min-h-[calc(100vh-210px)]`.
+     - Áp dụng trên toàn bộ các bảng:
+       * `/reefer`: Tab Phiên cắm điện thực tế, Tab Container sẵn sàng cắm điện, Tab Yêu cầu CCKB, Tab Nhật ký nhiệt độ.
+       * `/exit`: Tab An ninh Cổng ra (Xe trong bãi), Tab Thương vụ CCKB (Duyệt xuất), Tab Lịch sử xe xuất bãi.
+       * `/billing`: Tab Sổ cái các khoản thu, Tab Bảng kê biên lai thu tiền trong ca.
+       * `/admin/users`: Bảng danh sách nhân sự trực ca.
+       * `/accounting`: Bảng chốt tiền mặt hiện trường, Bảng hóa đơn GTGT, Bảng công nợ bến bãi AP07.
+       * `/admin/audit-logs`: Bảng Nhật ký kiểm toán toàn bãi.
+     - Chấm dứt hoàn toàn tình trạng bảng bị co cụt khi chỉ có 1–5 dòng dữ liệu làm che khuất các nút và dropdown thao tác.
+- **Tệp đã chỉnh sửa:**
+  - `src/lib/services/repository-interface.ts`
+  - `src/lib/services/demo-repository.ts`
+  - `src/lib/services/supabase-repository.ts`
+  - `src/app/admin/audit-logs/page.tsx`
+  - `src/app/reefer/page.tsx`
+  - `src/app/exit/page.tsx`
+  - `src/app/billing/page.tsx`
+  - `src/app/admin/users/page.tsx`
+  - `src/app/accounting/page.tsx`
+  - `ProjectContext/05_Nhat_ky_du_an/CURRENT_STATUS.md`
+  - `ProjectContext/05_Nhat_ky_du_an/WORK_LOG.md`
+- **Kiểm thử & Xác minh kỹ thuật:**
+  * `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+  * `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+  * Bảo toàn 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+- **Trạng thái:** Hoàn tất, sẵn sàng đẩy Git main và đồng bộ Production.
+
 ## 2026-10-15 13:40 — Hiệu Chỉnh Workspace Tabs & Nâng Cấp Đồng Bộ 100% Modals (43 Modals) Theo Chuẩn Enterprise DS-02
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

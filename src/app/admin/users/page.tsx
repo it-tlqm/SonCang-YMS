@@ -761,7 +761,7 @@ export default function UsersAndRbacAdminPage() {
         onChange={(tabId) => setActiveTab(tabId as any)}
       />
 
-      <div className="p-4 sm:p-5 space-y-4 max-w-7xl">
+      <div className="p-4 sm:p-5 space-y-4 max-w-7xl w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
         {/* THÔNG BÁO THÀNH CÔNG */}
         {successMsg && (
           <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">
@@ -860,8 +860,8 @@ export default function UsersAndRbacAdminPage() {
             /* =============================================================== */
             /* DẠNG BẢNG (TABLE VIEW) — CHUẨN MỰC NGHIỆP VỤ BẾN BÃI            */
             /* =============================================================== */
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+              <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">

@@ -40,8 +40,34 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 13:40 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH TOÀN DIỆN HIỆU CHỈNH WORKSPACE TABS & NÂNG CẤP ĐỒNG BỘ 100% DIALOG/MODAL TRÊN TOÀN HỆ THỐNG THEO CHUẨN THIẾT KẾ HIỆN ĐẠI ENTERPRISE DS-02**:
+- **Cập nhật lúc:** 15/10/2026 14:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **XÓA BỎ TRIỆT ĐỂ DỮ LIỆU ẢO GIÁC TRONG NHẬT KÝ KIỂM TOÁN (`/admin/audit-logs`) & ĐỒNG BỘ FULL-HEIGHT TABLE + CƠ CHẾ NÚT THAO TÁC TRÊN TOÀN BỘ PHÂN HỆ**:
+  * **Xóa bỏ triệt để "ảo giác" trong Nhật ký kiểm toán:**
+    1. Bổ sung phương thức `getAuditLogs()` và `logAuditEvent()` vào `IYardRepository` chuẩn mực (`src/lib/services/repository-interface.ts`).
+    2. Trong `DemoRepository`: Thay thế mảng mẫu tĩnh giả định (`14C-123.45`, `TCLU1234567`, `FSCU9876543`) bằng cơ chế đọc và tổng hợp động từ 100% dữ liệu thực tế đang có trong bãi:
+       - Các lượt xe vào bãi / xuất bãi thực tế (`云桂桂桂`, `桂桂桂`, `湘湘湘`...).
+       - Các container thực tế theo xe (`TTTT1111111`...).
+       - Lịch sử sửa biển số xe và sửa số container thực tế từ `plateChanges` và `numberChanges`.
+       - Toàn bộ phiếu thu tiền thực tế (`250.000 đ`, `200.000 đ`...).
+       - Toàn bộ phiên cắm điện, rút điện, tính cước điện container thực tế.
+       - Lưu vết bất biến (Append-only) trong `soncang_v5_audit_logs`.
+    3. Trong `SupabaseRepository`: Đọc từ bảng lưu vết `app_audit_logs` kết hợp đối soát dữ liệu thực tế từ các bảng `app_vehicle_visits`, `app_container_visits`, `app_payments`.
+    4. Trong trang `/admin/audit-logs`: Gọi trực tiếp `repository.getAuditLogs()`, bộ lọc và tìm kiếm hoạt động 100% trên dữ liệu đối soát thực tế.
+  * **Đồng bộ giải pháp Full-Height Table & Chống che nút thao tác trên toàn bộ các bảng hệ thống:**
+    1. Áp dụng chuẩn layout `flex-1 flex flex-col min-h-[calc(100vh-210px)]`, table card `flex-1 flex flex-col min-h-[540px]` và vùng cuộn `overflow-x-auto flex-1 min-h-[500px] pb-40` cho tất cả các bảng:
+       - `/reefer`: Tab Phiên cắm điện thực tế, Tab Container sẵn sàng cắm điện, Tab Yêu cầu CCKB, Tab Nhật ký nhiệt độ.
+       - `/exit`: Tab An ninh Cổng ra (Xe trong bãi), Tab Thương vụ CCKB (Duyệt xuất), Tab Lịch sử xe xuất bãi.
+       - `/billing`: Tab Sổ cái các khoản thu, Tab Bảng kê biên lai thu tiền trong ca.
+       - `/admin/users`: Bảng danh sách nhân sự trực ca.
+       - `/accounting`: Bảng chốt tiền mặt hiện trường, Bảng hóa đơn GTGT, Bảng công nợ bến bãi AP07.
+       - `/admin/audit-logs`: Bảng Nhật ký kiểm toán toàn bãi.
+    2. Chấm dứt hoàn toàn tình trạng bảng bị co cụt khi chỉ có 1–5 dòng dữ liệu làm che khuất các nút và dropdown thao tác.
+  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
+    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+    - Bảo toàn 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+
+- **Mốc trước đó (15/10/2026 13:40):** **HOÀN THÀNH TOÀN DIỆN HIỆU CHỈNH WORKSPACE TABS & NÂNG CẤP ĐỒNG BỘ 100% DIALOG/MODAL TRÊN TOÀN HỆ THỐNG THEO CHUẨN THIẾT KẾ HIỆN ĐẠI ENTERPRISE DS-02**:
   * **Giải quyết triệt để lỗi Workspace Tabs co rúm & dính mép trái:**
     1. Nâng cấp component lõi `src/components/workspace/workspace-tabs.tsx`: bổ sung padding trái phải `px-4 sm:px-5`, chiều cao chuẩn `py-2.5`, viền đáy `border-b border-[#E5E9F0]`, chống co kéo `shrink-0` và cuộn ngang mượt `no-scrollbar`.
     2. Đồng bộ trải nghiệm thông thoáng, cân đối trên toàn bộ 7 phân hệ: `/yard` (Quản lý bến bãi), `/reefer` (Container điện lạnh), `/exit` (Kiểm soát cổng ra), `/billing` (Sổ cái thu phí), `/accounting` (Kế toán bến bãi), `/reports` (Báo cáo vận hành), `/admin/users` (Quản trị nhân sự).

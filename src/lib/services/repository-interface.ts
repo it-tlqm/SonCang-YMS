@@ -583,8 +583,29 @@ export interface IYardRepository {
   /** Kế toán trực tiếp thu hồi nợ cước bến bãi AP07 */
   collectAccountingDebt(params: CollectAccountingDebtParams): Promise<{ success: boolean; paymentId?: string; error?: string }>;
 
+  /** Lấy danh sách nhật ký kiểm toán toàn hệ thống (bất biến, đối soát thực tế) */
+  getAuditLogs(): Promise<AuditLogEntry[]>;
+
+  /** Ghi nhận một sự kiện kiểm toán hệ thống */
+  logAuditEvent(entry: Omit<AuditLogEntry, 'id' | 'occurred_at'> & { occurred_at?: string }): Promise<{ success: boolean; id?: string; error?: string }>;
+
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  event_name: string;
+  category: 'VEHICLE' | 'CONTAINER' | 'PAYMENT' | 'REEFER' | 'CLEARANCE' | 'SYSTEM';
+  actor_name: string;
+  actor_role: string;
+  target_id: string;
+  target_label: string;
+  description: string;
+  old_value?: string | null;
+  new_value?: string | null;
+  reason?: string | null;
+  occurred_at: string;
 }
 
 

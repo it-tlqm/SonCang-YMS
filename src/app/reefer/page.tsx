@@ -1351,13 +1351,13 @@ export default function ReeferMonitoringPage() {
           onChange={(tabId) => setActiveTab(tabId as any)}
         />
 
-        <div className="p-4 sm:p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col min-h-[calc(100vh-210px)]">
 
       {/* ========================================================================= */}
       {/* TAB 1: PHIÊN CẮM ĐIỆN THỰC TẾ (SESSIONS)                                  */}
       {/* ========================================================================= */}
       {activeTab === 'SESSIONS' && (
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col">
           {/* Banner thông báo cont chờ cắm điện nếu có */}
           {unpluggedContainersInYard.length > 0 && (
             <div className="p-3 rounded-xl bg-[#EFF8FF] border border-[#B2DDFF] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#17202E]">
@@ -1420,8 +1420,8 @@ export default function ReeferMonitoringPage() {
           </div>
 
           {/* Danh sách phiên cắm điện */}
-          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
@@ -1632,7 +1632,7 @@ export default function ReeferMonitoringPage() {
       {/* TAB 2: CONTAINER SẴN SÀNG CẮM ĐIỆN (UNPLUGGED)                           */}
       {/* ========================================================================= */}
       {activeTab === 'UNPLUGGED' && (
-        <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
           <div className="bg-[#F8F9FB] px-4 py-3 border-b border-[#E5E9F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-[#326DD8]" />
@@ -1668,7 +1668,7 @@ export default function ReeferMonitoringPage() {
               <span>Hiện tại không có container nào trong bãi đang chờ cắm điện.</span>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
@@ -1799,8 +1799,8 @@ export default function ReeferMonitoringPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
@@ -1902,8 +1902,8 @@ export default function ReeferMonitoringPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-[#E5E9F0] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
+            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
