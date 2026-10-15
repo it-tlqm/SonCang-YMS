@@ -1,5 +1,38 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-15 13:00 — Tối Ưu Hóa Chiều Cao Bảng (Full Height) & Cơ Chế Mở Menu Thao Tác Thông Minh Màn Hình Quản Lý Bãi (/yard)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án: *"Cái bảng này đang chưa full heignt b ạ nên khi có 1->5 xe thì sẽ bị che mất những cái nút thao tác của xe ấy bạn"* kèm trích dẫn dữ liệu 3 xe trong bãi (`云桂桂桂`, `桂桂桂`, `湘湘湘`).
+- **Phân tích nguyên nhân kỹ thuật:**
+  1. Thẻ bao quanh bảng (`div.bg-white.rounded-xl.border`) trước đây không có chiều cao tối thiểu (`min-height`) và chưa sử dụng `flex-1`, dẫn đến khi chỉ có 1–5 bản ghi, chiều cao của bảng co lại chỉ còn ~180px.
+  2. Dropdown menu "Thao tác" của mỗi dòng có chiều cao tự nhiên ~240px và mở mặc định theo hướng chúc xuống (`top-full mt-1`).
+  3. Bảng dữ liệu được bọc trong container có thanh cuộn ngang `overflow-x-auto`. Trong CSS/trình duyệt, phần tử có overflow scroll/auto sẽ cắt xén (clip) bất kỳ nội dung con nào vươn ra ngoài ranh giới hình học theo phương thẳng đứng. Do đó, các nút thao tác phía dưới của menu (Hiệu chỉnh ca trực, Nhật ký xe, Gán ô đỗ) bị cắt cụt hoàn toàn.
+- **Giải pháp & Các hạng mục đã triển khai:**
+  1. *Khung chứa toàn trang & Thẻ bảng:*
+     - Khung chính tab content được nâng cấp lên `flex-1 flex flex-col min-h-[calc(100vh-210px)]` để chiếm trọn vẹn chiều cao màn hình làm việc.
+     - Cả 3 thẻ bảng (Tab Cặp xe — Container, Tab Phương tiện, Tab Container) được thiết lập `flex-1 flex flex-col min-h-[540px]`.
+     - Container cuộn bảng được trang bị `flex-1 min-h-[500px] pb-40`, tạo không gian thoáng đãng 160px đệm dưới đáy bảng.
+  2. *Cơ chế mở Popup thông minh (Smart Dynamic Dropdown Placement):*
+     - Bổ sung chỉ số index dòng (`idx`, `vIdx`) khi duyệt danh sách xe/cont.
+     - Tính toán logic vị trí: `const isNearBottom = idx >= Math.max(1, list.length - 2) && list.length > 2;`.
+     - Nếu dòng nằm ở các vị trí áp chót/cuối bảng: Menu tự động mở ngược lên trên (`bottom-full mb-1`).
+     - Nếu dòng nằm ở các vị trí phía trên: Menu mở chúc xuống dưới (`top-full mt-1`).
+     - Menu luôn hiển thị trọn vẹn 100% trong viewport, không bao giờ bị cắt cụt dù bãi chỉ có 1 xe hay nhiều xe.
+  3. *Chuẩn hóa Design Tokens DS-02 cho Menu:*
+     - Nút "Thao tác": `rounded-lg bg-white hover:bg-[#F8F9FB] text-[#17202E] font-medium text-xs border border-[#E5E9F0]`.
+     - Dropdown panel: `w-52 bg-white rounded-xl shadow-xl border border-[#E5E9F0] py-1.5 z-50 text-left divide-y divide-[#E5E9F0]`.
+     - Icon & màu chức năng: Sửa biển số (`#B54708`), Hiệu chỉnh ca (`#326DD8`), Nhật ký xe (`#326DD8`), Gán ô đỗ (`#667085`).
+- **Tệp đã chỉnh sửa:**
+  - `src/app/yard/page.tsx`
+  - `.gitignore` (bổ sung bỏ qua tệp khóa tạm thời `~$*` của MS Office)
+  - `ProjectContext/05_Nhat_ky_du_an/CURRENT_STATUS.md`
+  - `ProjectContext/05_Nhat_ky_du_an/WORK_LOG.md`
+- **Kiểm thử & Xác minh kỹ thuật:**
+  * `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+  * `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+  * Bảo toàn tuyệt đối: Không can thiệp DB/RPC, bảo toàn RBAC V5 và an toàn dữ liệu.
+- **Trạng thái:** Hoàn tất, đẩy lên Git main và Vercel Production.
+
 ## 2026-10-15 12:45 — Xuất Bản Tài Liệu Mô Tả Hệ Thống Bằng Microsoft Word (.docx) Chuẩn Doanh Nghiệp
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án: *"Giờ hãy tạo cho tôi 1 tài liệu mô tả về hệ thống bằng word đi bạn"*.

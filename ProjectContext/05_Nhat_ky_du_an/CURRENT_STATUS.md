@@ -40,8 +40,19 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 12:45 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **XUẤT BẢN TÀI LIỆU MÔ TẢ HỆ THỐNG PHẦN MỀM QUẢN LÝ BẾN BÃI/CẢNG CẠN SƠN CẢNG BẰNG MICROSOFT WORD (.DOCX) CHUẨN DOANH NGHIỆP**:
+- **Cập nhật lúc:** 15/10/2026 13:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH TỐI ƯU HÓA CHIỀU CAO (FULL HEIGHT) VÀ CƠ CHẾ POPUP THAO TÁC CHO BẢNG QUẢN LÝ BẾN BÃI & TỒN BÃI (`/yard`)**:
+  * **Giải quyết triệt để lỗi che khuất nút/menu thao tác khi có 1–5 xe:**
+    1. **Khắc phục lỗi co hẹp & cắt mép:** Trước đây khi bãi chỉ có 1–5 xe/cont, card bảng co cụt lại theo số dòng (~180px) khiến dropdown menu "Thao tác" (chiều cao ~240px) bị tràn mép và bị thuộc tính `overflow-x-auto` cắt cụt mất các nút chức năng bên dưới.
+    2. **Layout Full Height & Flex Fill:** Nâng cấp container bảng và khung trang thành flex column co giãn tối đa (`flex-1 flex flex-col min-h-[calc(100vh-210px)]`), thiết lập chiều cao tối thiểu cho card bảng (`min-h-[540px]`) và vùng cuộn (`min-h-[500px] pb-40`) trên cả 3 tab: `Cặp xe — Container`, `Phương tiện trong bãi` và `Container tồn bãi`.
+    3. **Cơ chế mở Popup thông minh (Smart Dropdown Direction):** Tự động xác định các dòng cuối bảng (`idx >= length - 2 && length > 2`) để tự động mở ngược lên trên (`bottom-full mb-1`), các dòng phía trên mở xuống dưới (`top-full mt-1`). Đảm bảo menu thao tác luôn nằm trọn vẹn trong tầm nhìn người dùng ở mọi độ phân giải màn hình.
+    4. **Chuẩn hóa Design Tokens DS-02:** Nâng cấp menu popup và nút bấm sang bo góc `rounded-xl`, viền `#E5E9F0`, đổ bóng mềm mại `shadow-xl`, các mục chức năng mang màu văn bản `#17202E`, phụ đề `#667085`, hover `#F8F9FB` / `#EFF8FF`.
+  * **Kiểm tra kỹ thuật & Xác minh toàn diện:**
+    - `npx tsc --noEmit`: **100% PASS** (0 lỗi kiểu dữ liệu).
+    - `npm run build`: **100% PASS** (biên dịch thành công 20/20 routes tĩnh và động).
+    - Bảo toàn 100% logic nghiệp vụ Supabase Auth, PostgreSQL RLS, RBAC V5, `NEXT_PUBLIC_ENABLE_REAL_WRITE=false`.
+
+- **Mốc trước đó (15/10/2026 12:45):** **XUẤT BẢN TÀI LIỆU MÔ TẢ HỆ THỐNG PHẦN MỀM QUẢN LÝ BẾN BÃI/CẢNG CẠN SƠN CẢNG BẰNG MICROSOFT WORD (.DOCX) CHUẨN DOANH NGHIỆP**:
   * **Tệp tài liệu:** `docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` (bản sao tại thư mục gốc: `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx`).
   * **Nội dung 7 chương chi tiết:** Bối cảnh thay thế AppSheet; Kiến trúc Next.js + Supabase Cloud + PWA; Chi tiết 5 phân hệ vận hành; Biểu phí 9 mục và quy tắc thu tiền; Ma trận phân quyền 7 vai trò RBAC V5; Kế hoạch triển khai & đào tạo 4 giai đoạn đến 31/12/2026; Thông tin truy cập Production Cloud và khối ký duyệt Ban Giám đốc.
 
