@@ -40,8 +40,24 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 15:35 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TÁI TẠO TOÀN DIỆN BỘ TÀI LIỆU DỰ ÁN (.DOCX & .PDF) CẬP NHẬT ĐẦY ĐỦ CÁC QUYẾT ĐỊNH NÂNG CẤP MỚI NHẤT**:
+- **Cập nhật lúc:** 16/10/2026 17:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHUẨN HÓA PHÂN BỔ 4 PHÂN KHU BẾN BÃI THEO SYSTEM DESIGN, NÂNG CẤP NÚT THAO TÁC CONTAINER TAB 3 VÀ LOẠI BỎ 100% EMOJI SANG SVG LUCIDE ICONS**:
+  * **1. Phân bổ 4 Phân khu theo đúng System Design Sơn Cảng:**
+    - Khởi tạo và liên kết 70 xe và 65 container thực tế vào 4 phân khu chuẩn: Khu A (Reefer 380V - 25 cont lạnh/xe), Khu B (Dry vỏ khô - 15 cont), Khu C (Xe bo 8 tấn 2 chân sang tải nông sản - 5 xe bo), Khu D (Chờ chuyến/chờ xuất - 20 xe/cont), 5 xe và 7 cont chưa gán để test điều chuyển.
+    - Cài đặt tính năng `autoAllocateYardZones()` tự động nhận diện quy hoạch bến bãi.
+    - 4 Card phân khu trên Tab Sơ đồ bãi có thể bấm để kích hoạt lọc tức thì (`selectedZoneFilter`).
+    - Nâng cấp khối "Chi tiết phân bổ xe & container theo phân khu" với toolbar lọc Tabs, ô tìm kiếm và nút `Tự động phân bổ theo quy hoạch`.
+  * **2. Nâng cấp Menu Thao tác Container (Tab 3 Bảng Container `/yard`):**
+    - Bổ sung cột header `Phân khu & Vị trí` hiển thị huy hiệu phân khu và ô/trụ đỗ (`c.yard_zone` kèm `c.slot_code`).
+    - Nâng cấp cột Tác vụ thành Dropdown Menu `Thao tác ▾` gom đầy đủ 5 tác vụ nghiệp vụ: AP05 Sửa mã số cont, Cập nhật HÀNG/RỖNG, Gán phân khu/ô đỗ, Lịch sử đổi số, Theo dõi điện lạnh CCKB song song nút nhanh `Sửa số`.
+  * **3. Chuẩn hóa giao diện doanh nghiệp — Loại bỏ 100% emoji:**
+    - Quét và thay thế triệt để 100% emoji trang trí trên toàn bộ các trang (`/yard`, `/billing`, `/exit`, `/reefer`, `/entry`, `/admin/users`) bằng Lucide React SVG icons chuẩn (`Banknote`, `CreditCard`, `CheckCircle2`, `AlertTriangle`, `Zap`, `Clock`, `X`, `Package`, `User`, `Sparkles`, `Phone`, `Plus`...).
+    - Toàn bộ codebase `src/**/*.tsx` hiện đạt **0 matches emoji Unicode**.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 16:10):** **CHUẨN HÓA TOÀN DIỆN DANH XƯNG BỘ PHẬN: ĐỔI 'THƯƠNG VỤ CCKB' THÀNH 'NGHIỆP VỤ CỔNG CẢNG KHO BÃI' (NGHIỆP VỤ CCKB)**:
   * **Cập nhật nội dung toàn diện 4 ấn phẩm tài liệu:**
     1. **Quy tắc cước điện mới (D-021):** Bỏ làm tròn 15 phút, tính theo phút thực tế ngoài bãi, làm tròn thành tiền đến 5.000đ, không tiền lẻ.
     2. **Cấu trúc 4 Tab `/reefer`:** (1) Yêu cầu cắm điện CCKB, (2) Sẵn sàng cắm điện, (3) Phiên cắm điện thực tế, (4) Nhật ký nhiệt độ.

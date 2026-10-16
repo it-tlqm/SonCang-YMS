@@ -589,6 +589,9 @@ export interface IYardRepository {
   /** Ghi nhận một sự kiện kiểm toán hệ thống */
   logAuditEvent(entry: Omit<AuditLogEntry, 'id' | 'occurred_at'> & { occurred_at?: string }): Promise<{ success: boolean; id?: string; error?: string }>;
 
+  /** Tự động phân bổ xe và container vào các phân khu chức năng theo quy hoạch bến bãi */
+  autoAllocateYardZones?(): Promise<{ success: boolean; allocatedCount: number; error?: string }>;
+
   /** Khôi phục dữ liệu demo về mặc định (chỉ có ở Demo) */
   resetDemoData?(): void;
 

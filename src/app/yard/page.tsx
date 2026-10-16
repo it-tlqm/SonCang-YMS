@@ -38,7 +38,10 @@ import {
   PowerOff,
   Check,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  Banknote,
+  CreditCard,
+  Sparkles
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -146,6 +149,11 @@ export default function YardMonitorPage() {
 
   const [pageVehicles, setPageVehicles] = useState<number>(1);
   const [pageSizeVehicles, setPageSizeVehicles] = useState<number>(20);
+
+  // Bộ lọc Phân khu tương tác trên Tab Sơ đồ bãi
+  const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>('ALL');
+  const [zoneSearchQuery, setZoneSearchQuery] = useState<string>('');
+  const [isAutoAllocating, setIsAutoAllocating] = useState<boolean>(false);
 
   // Modal gán phân khu & vị trí đỗ bãi
   const [locationModalItem, setLocationModalItem] = useState<{
@@ -415,6 +423,21 @@ export default function YardMonitorPage() {
       setLocationError(err?.message || 'Lỗi khi lưu vị trí bãi.');
     } finally {
       setIsUpdatingLocation(false);
+    }
+  };
+
+  const handleAutoAllocate = async () => {
+    if (!repository.autoAllocateYardZones) return;
+    setIsAutoAllocating(true);
+    try {
+      const res = await repository.autoAllocateYardZones();
+      if (res.success) {
+        handleReload();
+      }
+    } catch (err) {
+      console.error('Lỗi phân bổ tự động:', err);
+    } finally {
+      setIsAutoAllocating(false);
     }
   };
 
@@ -2139,13 +2162,14 @@ export default function YardMonitorPage() {
                     <th className="px-3.5 py-2.5">Số Container</th>
                     <th className="px-3.5 py-2.5">Kích cỡ / Loại</th>
                     <th className="px-3.5 py-2.5">Tình trạng Hàng</th>
+                    <th className="px-3.5 py-2.5">Phân khu & Vị trí</th>
                     <th className="px-3.5 py-2.5">Xe đưa vào</th>
                     <th className="px-3.5 py-2.5">Thời gian vào</th>
                     <th className="px-3.5 py-2.5 text-right">Tác vụ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E9F0]">
-                  {pagedContainers.map((c) => (
+                  {pagedContainers.map((c, cIdx) => (
                     <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center space-x-2">
@@ -2172,6 +2196,28 @@ export default function YardMonitorPage() {
                         {renderCargoBadge(c.cargo_status)}
                       </td>
                       <td className="px-3.5 py-2.5">
+                        <div className="space-y-0.5">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            c.yard_zone === 'KHU_A_REEFER'
+                              ? 'bg-amber-50 text-amber-800 border-amber-300'
+                              : c.yard_zone === 'KHU_C_TRANSFER'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : c.yard_zone === 'KHU_D_TRACTOR'
+                              ? 'bg-purple-50 text-purple-800 border-purple-300'
+                              : c.yard_zone === 'KHU_B_DRY'
+                              ? 'bg-blue-50 text-blue-800 border-blue-300'
+                              : 'bg-slate-100 text-slate-600 border-slate-300'
+                          }`}>
+                            {yardZones.find(z => z.code === c.yard_zone)?.name?.split('—')[0]?.trim() || c.yard_zone || 'Chưa gán'}
+                          </span>
+                          {c.slot_code && (
+                            <div className="text-[10px] font-mono font-bold text-[#B54708]">
+                              {c.yard_zone === 'KHU_A_REEFER' ? `Trụ ${c.slot_code}` : `Ô ${c.slot_code}`}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3.5 py-2.5">
                         {c.inbound_license_plate ? (
                           <div className="space-y-0.5">
                             <span className="font-mono font-bold text-[#17202E] text-xs bg-[#F5F7FA] px-1.5 py-0.5 rounded border border-[#E5E9F0]">
@@ -2195,33 +2241,114 @@ export default function YardMonitorPage() {
                           <div>{renderDwellBadge(c.inbound_at, true)}</div>
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-right">
+                      <td className="px-3.5 py-2.5 text-right relative">
                         <div className="flex items-center justify-end space-x-1.5">
                           {canCorrectContainer && (
                             <button
                               type="button"
                               onClick={() => handleOpenCorrectionModal(c)}
                               className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#FFFAEB] text-[#B54708] hover:bg-[#FEDF89] transition-colors font-semibold text-xs cursor-pointer border border-[#FEDF89]"
+                              title="Hiệu chỉnh số container theo quy trình kiểm toán AP05"
                             >
                               <Edit3 className="w-3 h-3" />
                               <span>Sửa số</span>
                             </button>
                           )}
-                          {canUpdateCargo && (
+
+                          {/* Dropdown Menu Thao tác container gom đầy đủ tác vụ */}
+                          <div className="relative inline-block text-left" data-action-dropdown>
                             <button
                               type="button"
-                              onClick={() => handleOpenCargoModal(c)}
-                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#EFF8FF] text-[#326DD8] hover:bg-[#D1E9FF] transition-colors font-semibold text-xs cursor-pointer border border-[#B2DDFF]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenActionDropdownId(openActionDropdownId === 'cont-' + c.id ? null : 'cont-' + c.id);
+                              }}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#F8F9FB] text-[#17202E] font-medium text-xs border border-[#E5E9F0] shadow-2xs transition-colors cursor-pointer"
+                              title="Mở danh sách thao tác container"
                             >
-                              <Edit3 className="w-3 h-3" />
-                              <span>HÀNG/RỖNG</span>
+                              <span>Thao tác</span>
+                              <ChevronDown className="w-3.5 h-3.5 text-[#667085]" />
                             </button>
-                          )}
-                          {!canCorrectContainer && !canUpdateCargo && (
-                            <span className="text-[11px] text-[#98A2B3] font-medium italic">
-                              Chỉ xem
-                            </span>
-                          )}
+
+                            {openActionDropdownId === 'cont-' + c.id && (
+                              <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className={`absolute right-0 ${
+                                  cIdx >= pagedContainers.length - 3 ? 'bottom-full mb-1' : 'top-full mt-1'
+                                } w-52 bg-white rounded-xl shadow-xl border border-[#E5E9F0] py-1.5 z-50 text-left divide-y divide-[#E5E9F0] animate-in fade-in zoom-in-95`}
+                              >
+                                <div className="py-1">
+                                  <div className="px-3 py-1 text-[10px] font-semibold text-[#667085] uppercase tracking-wider">
+                                    Container: {c.container_no_current}
+                                  </div>
+                                  {canCorrectContainer && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenActionDropdownId(null);
+                                        handleOpenCorrectionModal(c);
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-[#B54708] hover:bg-[#FFFAEB] font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5 text-[#B54708]" />
+                                      <span>Sửa mã số container (AP05)</span>
+                                    </button>
+                                  )}
+                                  {canUpdateCargo && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenActionDropdownId(null);
+                                        handleOpenCargoModal(c);
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-[#326DD8] hover:bg-[#EFF8FF] font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                    >
+                                      <ArrowRightLeft className="w-3.5 h-3.5 text-[#326DD8]" />
+                                      <span>Cập nhật HÀNG / RỖNG</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenActionDropdownId(null);
+                                      handleOpenLocationModal('CONTAINER', {
+                                        id: c.id,
+                                        title: c.container_no_current,
+                                        subtitle: formatContainerSpec(c.container_size, c.container_type),
+                                        yard_zone: c.yard_zone,
+                                        slot_code: c.slot_code,
+                                      });
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-[#0A9444] hover:bg-[#ECFDF3] font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <MapPin className="w-3.5 h-3.5 text-[#0A9444]" />
+                                    <span>Gán phân khu / Ô đỗ</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenActionDropdownId(null);
+                                      handleOpenHistoryModal(c);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-xs text-[#17202E] hover:bg-[#F8F9FB] font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                  >
+                                    <History className="w-3.5 h-3.5 text-[#667085]" />
+                                    <span>Lịch sử đổi số ({c.number_changes_count || 0})</span>
+                                  </button>
+                                  {c.container_type === 'RF' && (
+                                    <Link
+                                      href={`/reefer?search=${encodeURIComponent(c.container_no_current)}`}
+                                      onClick={() => setOpenActionDropdownId(null)}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-[#D97706] hover:bg-[#FFFBEB] font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                                    >
+                                      <Zap className="w-3.5 h-3.5 text-[#D97706]" />
+                                      <span>Theo dõi điện lạnh CCKB</span>
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -2487,18 +2614,29 @@ export default function YardMonitorPage() {
               const zoneContainers = containers.filter(c => c.yard_zone === zone.code);
               const totalCount = zoneVehicles.length + zoneContainers.length;
               const percent = zone.capacity > 0 ? Math.min(100, Math.round((totalCount / zone.capacity) * 100)) : 0;
+              const isSelected = selectedZoneFilter === zone.code;
 
               return (
-                <div key={zone.code} className="bg-white rounded-xl border border-[#E5E9F0] p-4 shadow-xs space-y-3 flex flex-col justify-between hover:border-[#D0D5DD] transition-colors">
+                <div 
+                  key={zone.code} 
+                  onClick={() => setSelectedZoneFilter(prev => prev === zone.code ? 'ALL' : zone.code)}
+                  className={`bg-white rounded-xl border p-4 shadow-xs space-y-3 flex flex-col justify-between transition-all cursor-pointer ${
+                    isSelected 
+                      ? 'border-[#0A9444] ring-2 ring-[#0A9444]/40 bg-[#ECFDF3]/20 shadow-sm' 
+                      : 'border-[#E5E9F0] hover:border-[#326DD8] hover:shadow-xs'
+                  }`}
+                  title={isSelected ? `Đang lọc: ${zone.name} (Bấm để bỏ lọc)` : `Bấm để lọc xe & container tại ${zone.name}`}
+                >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${zone.color_badge || 'bg-[#F8F9FB] text-[#344054] border-[#E5E9F0]'}`}>
                         {zone.code}
                       </span>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
                         {zone.has_power_outlets && (
                           <span className="text-[10px] font-semibold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] px-1.5 py-0.5 rounded flex items-center space-x-1">
-                            <span>⚡ Trụ 380V</span>
+                            <Zap className="w-3 h-3 text-[#B54708] fill-current" />
+                            <span>Trụ 380V</span>
                           </span>
                         )}
                         <button
@@ -2519,7 +2657,14 @@ export default function YardMonitorPage() {
                         </button>
                       </div>
                     </div>
-                    <h3 className="font-semibold text-xs text-[#17202E]">{zone.name}</h3>
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className="font-semibold text-xs text-[#17202E]">{zone.name}</h3>
+                      {isSelected && (
+                        <span className="text-[10px] font-semibold text-[#0A9444] bg-[#ECFDF3] px-1.5 py-0.2 rounded border border-[#A6F4C5]">
+                          Đang lọc
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-[#667085] leading-relaxed mt-0.5">
                       {zone.description}
                     </p>
@@ -2709,8 +2854,9 @@ export default function YardMonitorPage() {
                               <span className="font-bold">{cont?.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}</span>
                             </div>
                           </div>
-                          <div className="text-[9px] text-amber-800 font-semibold text-center bg-amber-100/70 rounded py-0.5 border border-amber-200 group-hover:bg-amber-200">
-                            ⚡ Bấm để thao tác
+                          <div className="text-[9px] text-amber-800 font-semibold text-center bg-amber-100/70 rounded py-0.5 border border-amber-200 group-hover:bg-amber-200 flex items-center justify-center gap-1">
+                            <Zap className="w-2.5 h-2.5 text-amber-600 fill-current" />
+                            <span>Bấm để thao tác</span>
                           </div>
                         </div>
                       );
@@ -2741,8 +2887,9 @@ export default function YardMonitorPage() {
                               {socket.voltage} / {socket.amperage}
                             </div>
                           </div>
-                          <div className="text-[9px] text-rose-800 font-semibold text-center bg-rose-100 rounded py-0.5 border border-rose-200">
-                            🛠️ Bấm để mở lại
+                          <div className="text-[9px] text-rose-800 font-semibold text-center bg-rose-100 rounded py-0.5 border border-rose-200 flex items-center justify-center gap-1">
+                            <Wrench className="w-2.5 h-2.5 text-rose-600" />
+                            <span>Bấm để mở lại</span>
                           </div>
                         </div>
                       );
@@ -2768,8 +2915,9 @@ export default function YardMonitorPage() {
                           <div className="font-mono font-semibold text-slate-700">{socket.voltage} • {socket.amperage}</div>
                           <div className="text-emerald-700 font-medium">Sẵn sàng 3 pha</div>
                         </div>
-                        <div className="text-[9px] text-slate-500 font-semibold text-center bg-slate-50 rounded py-0.5 border border-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-900 group-hover:border-emerald-300">
-                          ⚡ Bấm để cắm cont
+                        <div className="text-[9px] text-slate-500 font-semibold text-center bg-slate-50 rounded py-0.5 border border-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-900 group-hover:border-emerald-300 flex items-center justify-center gap-1">
+                          <Zap className="w-2.5 h-2.5 text-emerald-600 fill-current" />
+                          <span>Bấm để cắm cont</span>
                         </div>
                       </div>
                     );
@@ -2780,95 +2928,263 @@ export default function YardMonitorPage() {
           })()}
 
           {/* Chi tiết từng phân khu và danh sách xe / cont đang đỗ */}
-          <div className="bg-white rounded-lg border border-slate-300 p-4 shadow-2xs space-y-3.5">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Chi tiết phân bổ xe & container theo phân khu</h3>
-              <p className="text-xs text-slate-500">Điều phối viên và An ninh có thể gán hoặc điều chuyển vị trí đỗ (Khu A - D và ô đỗ/trụ điện)</p>
-            </div>
+          {(() => {
+            // Lọc xe theo phân khu và search query
+            const filteredZoneVehicles = vehicles.filter(v => {
+              if (selectedZoneFilter === 'UNASSIGNED') {
+                if (v.yard_zone && v.yard_zone !== 'Chưa gán') return false;
+              } else if (selectedZoneFilter !== 'ALL') {
+                if (v.yard_zone !== selectedZoneFilter) return false;
+              }
+              if (zoneSearchQuery.trim()) {
+                const q = zoneSearchQuery.trim().toLowerCase();
+                const matchPlate = v.license_plate?.toLowerCase().includes(q);
+                const matchType = (v.vehicle_type_name || v.vehicle_type)?.toLowerCase().includes(q);
+                const matchSlot = v.slot_code?.toLowerCase().includes(q);
+                if (!matchPlate && !matchType && !matchSlot) return false;
+              }
+              return true;
+            });
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Cột Xe */}
-              <div className="border border-slate-300 rounded p-3 bg-slate-50 space-y-2">
-                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
-                  <div className="flex items-center space-x-1.5 font-bold text-xs text-slate-800">
-                    <Truck className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Phương tiện trong bãi ({vehicles.length})</span>
+            // Lọc cont theo phân khu và search query
+            const filteredZoneContainers = containers.filter(c => {
+              if (selectedZoneFilter === 'UNASSIGNED') {
+                if (c.yard_zone && c.yard_zone !== 'Chưa gán') return false;
+              } else if (selectedZoneFilter !== 'ALL') {
+                if (c.yard_zone !== selectedZoneFilter) return false;
+              }
+              if (zoneSearchQuery.trim()) {
+                const q = zoneSearchQuery.trim().toLowerCase();
+                const matchCont = c.container_no_current?.toLowerCase().includes(q);
+                const matchPlate = c.inbound_license_plate?.toLowerCase().includes(q);
+                const matchSlot = c.slot_code?.toLowerCase().includes(q);
+                if (!matchCont && !matchPlate && !matchSlot) return false;
+              }
+              return true;
+            });
+
+            const unassignedVehiclesCount = vehicles.filter(v => !v.yard_zone || v.yard_zone === 'Chưa gán').length;
+            const unassignedContainersCount = containers.filter(c => !c.yard_zone || c.yard_zone === 'Chưa gán').length;
+            const totalUnassignedCount = unassignedVehiclesCount + unassignedContainersCount;
+
+            return (
+              <div className="bg-white rounded-xl border border-[#E5E9F0] p-4 shadow-xs space-y-4">
+                {/* Header với Tiêu đề và Nút Phân bổ Tự động */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E5E9F0]">
+                  <div>
+                    <h3 className="text-sm font-semibold text-[#17202E] flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-[#326DD8]" />
+                      <span>Chi tiết phân bổ xe & container theo phân khu</span>
+                    </h3>
+                    <p className="text-xs text-[#667085] mt-0.5">
+                      Điều phối viên và An ninh có thể gán hoặc điều chuyển vị trí đỗ (Khu A - D và ô đỗ/trụ điện)
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      disabled={isAutoAllocating}
+                      onClick={handleAutoAllocate}
+                      className="px-3 py-1.5 rounded-lg bg-[#326DD8] hover:bg-[#2557B4] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      title="Tự động phân bổ các xe/cont chưa có vị trí vào phân khu phù hợp theo quy hoạch Sơn Cảng"
+                    >
+                      {isAutoAllocating ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Đang phân bổ...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Tự động phân bổ theo quy hoạch</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
 
-                <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1 text-xs">
-                  {vehicles.map(v => (
-                    <div key={v.id} className="p-2 bg-white rounded border border-slate-300 flex items-center justify-between hover:border-slate-400">
-                      <div>
-                        <div className="font-mono font-bold text-slate-900">{v.license_plate}</div>
-                        <div className="text-[11px] text-slate-500">{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</div>
-                        <div className="text-[10px] text-slate-600 mt-0.5">
-                          Khu: <span className="font-bold text-blue-700">{v.yard_zone || 'Chưa gán'}</span>
-                          {v.slot_code && <span> — Ô: <span className="font-bold text-amber-700">{v.slot_code}</span></span>}
-                        </div>
-                      </div>
+                {/* Toolbar Bộ lọc Phân khu & Tìm kiếm */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
+                  {/* Tabs phân khu */}
+                  <div className="flex items-center gap-1 flex-wrap text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedZoneFilter('ALL')}
+                      className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                        selectedZoneFilter === 'ALL'
+                          ? 'bg-[#326DD8] text-white shadow-xs'
+                          : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
+                      }`}
+                    >
+                      Tất cả ({vehicles.length + containers.length})
+                    </button>
+
+                    {yardZones.map(z => {
+                      const zCount = vehicles.filter(v => v.yard_zone === z.code).length + containers.filter(c => c.yard_zone === z.code).length;
+                      const isActive = selectedZoneFilter === z.code;
+                      return (
+                        <button
+                          key={z.code}
+                          type="button"
+                          onClick={() => setSelectedZoneFilter(z.code)}
+                          className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-[#0A9444] text-white shadow-xs'
+                              : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
+                          }`}
+                        >
+                          {z.code.replace('KHU_', 'Khu ').replace('_REEFER', ' (Lạnh)').replace('_DRY', ' (Khô)').replace('_TRANSFER', ' (Xe bo)').replace('_TRACTOR', ' (Chờ xuất)')} ({zCount})
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedZoneFilter('UNASSIGNED')}
+                      className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                        selectedZoneFilter === 'UNASSIGNED'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : totalUnassignedCount > 0 
+                            ? 'bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100'
+                            : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
+                      }`}
+                    >
+                      Chưa gán ({totalUnassignedCount})
+                    </button>
+                  </div>
+
+                  {/* Ô tìm kiếm */}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-3.5 h-3.5 text-[#98A2B3] absolute left-2.5 top-2.5" />
+                    <input
+                      type="text"
+                      value={zoneSearchQuery}
+                      onChange={(e) => setZoneSearchQuery(e.target.value)}
+                      placeholder="Tìm biển số xe, cont, ô đỗ..."
+                      className="w-full h-8 pl-8 pr-7 text-xs bg-white text-[#17202E] placeholder-[#98A2B3] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                    />
+                    {zoneSearchQuery && (
                       <button
                         type="button"
-                        onClick={() => handleOpenLocationModal('VEHICLE', {
-                          id: v.id,
-                          title: v.license_plate || 'XE',
-                          subtitle: getVehicleTypeName(v.vehicle_type_name || v.vehicle_type),
-                          yard_zone: v.yard_zone,
-                          slot_code: v.slot_code,
-                        })}
-                        className="px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-[11px] border border-blue-300 cursor-pointer flex items-center space-x-1"
+                        onClick={() => setZoneSearchQuery('')}
+                        className="absolute right-2 top-2 text-[#98A2B3] hover:text-[#17202E]"
                       >
-                        <MapPin className="w-3 h-3" />
-                        <span>Gán vị trí</span>
+                        <X className="w-3.5 h-3.5" />
                       </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Cột Container */}
-              <div className="border border-slate-300 rounded p-3 bg-slate-50 space-y-2">
-                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
-                  <div className="flex items-center space-x-1.5 font-bold text-xs text-slate-800">
-                    <ContainerIcon className="w-3.5 h-3.5 text-[#0A9444]" />
-                    <span>Container trong bãi ({containers.length})</span>
+                    )}
                   </div>
                 </div>
 
-                <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1 text-xs">
-                  {containers.map(c => (
-                    <div key={c.id} className="p-2 bg-white rounded border border-slate-300 flex items-center justify-between hover:border-slate-400">
-                      <div>
-                        <div className="font-mono font-bold text-blue-900">{c.container_no_current}</div>
-                        <div className="text-[11px] text-slate-500">
-                          {formatContainerSpec(c.container_size, c.container_type)} — {renderCargoBadge(c.cargo_status)}
-                          {c.is_plugged && <span className="ml-1 text-amber-600 font-bold">⚡ Đang cắm</span>}
-                        </div>
-                        <div className="text-[10px] text-slate-600 mt-0.5">
-                          Khu: <span className="font-bold text-emerald-700">{c.yard_zone || 'Chưa gán'}</span>
-                          {c.slot_code && <span> — Ô/Trụ: <span className="font-bold text-amber-700">{c.slot_code}</span></span>}
-                        </div>
+                {/* 2 Cột Danh sách Xe và Container */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Cột Xe */}
+                  <div className="border border-[#E5E9F0] rounded-xl p-3 bg-[#F8F9FB] space-y-2">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-[#E5E9F0]">
+                      <div className="flex items-center space-x-1.5 font-bold text-xs text-[#17202E]">
+                        <Truck className="w-3.5 h-3.5 text-[#326DD8]" />
+                        <span>Phương tiện trong bãi ({filteredZoneVehicles.length})</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenLocationModal('CONTAINER', {
-                          id: c.id,
-                          title: c.container_no_current,
-                          subtitle: formatContainerSpec(c.container_size, c.container_type),
-                          yard_zone: c.yard_zone,
-                          slot_code: c.slot_code,
-                        })}
-                        className="px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-[11px] border border-emerald-300 cursor-pointer flex items-center space-x-1"
-                      >
-                        <MapPin className="w-3 h-3" />
-                        <span>Gán vị trí</span>
-                      </button>
+                      {selectedZoneFilter !== 'ALL' && (
+                        <span className="text-[10px] text-[#667085] font-medium">Lọc theo phân khu</span>
+                      )}
                     </div>
-                  ))}
+
+                    <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1 text-xs">
+                      {filteredZoneVehicles.length === 0 ? (
+                        <div className="text-center py-6 text-xs text-[#98A2B3]">
+                          Không có phương tiện nào phù hợp với bộ lọc.
+                        </div>
+                      ) : (
+                        filteredZoneVehicles.map(v => (
+                          <div key={v.id} className="p-2.5 bg-white rounded-lg border border-[#E5E9F0] flex items-center justify-between hover:border-[#D0D5DD] transition-colors">
+                            <div>
+                              <div className="font-mono font-bold text-[#17202E]">{v.license_plate}</div>
+                              <div className="text-[11px] text-[#667085]">{getVehicleTypeName(v.vehicle_type_name || v.vehicle_type)}</div>
+                              <div className="text-[10px] text-[#475467] mt-0.5">
+                                Khu: <span className="font-bold text-[#326DD8]">{v.yard_zone || 'Chưa gán'}</span>
+                                {v.slot_code && <span> — Ô: <span className="font-bold text-[#B54708]">{v.slot_code}</span></span>}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenLocationModal('VEHICLE', {
+                                id: v.id,
+                                title: v.license_plate || 'XE',
+                                subtitle: getVehicleTypeName(v.vehicle_type_name || v.vehicle_type),
+                                yard_zone: v.yard_zone,
+                                slot_code: v.slot_code,
+                              })}
+                              className="px-2.5 py-1 rounded-lg bg-[#EFF8FF] text-[#175CD3] hover:bg-[#D1E9FF] font-semibold text-[11px] border border-[#B2DDFF] cursor-pointer flex items-center space-x-1 transition-colors"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span>Gán vị trí</span>
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Cột Container */}
+                  <div className="border border-[#E5E9F0] rounded-xl p-3 bg-[#F8F9FB] space-y-2">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-[#E5E9F0]">
+                      <div className="flex items-center space-x-1.5 font-bold text-xs text-[#17202E]">
+                        <ContainerIcon className="w-3.5 h-3.5 text-[#0A9444]" />
+                        <span>Container trong bãi ({filteredZoneContainers.length})</span>
+                      </div>
+                      {selectedZoneFilter !== 'ALL' && (
+                        <span className="text-[10px] text-[#667085] font-medium">Lọc theo phân khu</span>
+                      )}
+                    </div>
+
+                    <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1 text-xs">
+                      {filteredZoneContainers.length === 0 ? (
+                        <div className="text-center py-6 text-xs text-[#98A2B3]">
+                          Không có container nào phù hợp với bộ lọc.
+                        </div>
+                      ) : (
+                        filteredZoneContainers.map(c => (
+                          <div key={c.id} className="p-2.5 bg-white rounded-lg border border-[#E5E9F0] flex items-center justify-between hover:border-[#D0D5DD] transition-colors">
+                            <div>
+                              <div className="font-mono font-bold text-[#17202E]">{c.container_no_current}</div>
+                              <div className="text-[11px] text-[#667085] flex items-center gap-1.5 flex-wrap">
+                                <span>{formatContainerSpec(c.container_size, c.container_type)} — {renderCargoBadge(c.cargo_status)}</span>
+                                {c.is_plugged && (
+                                  <span className="text-[#B54708] font-bold inline-flex items-center gap-0.5 bg-[#FFFAEB] px-1.5 py-0.2 rounded border border-[#FEDF89] text-[10px]">
+                                    <Zap className="w-2.5 h-2.5 fill-current" />
+                                    <span>Đang cắm</span>
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-[#475467] mt-0.5">
+                                Khu: <span className="font-bold text-[#0A9444]">{c.yard_zone || 'Chưa gán'}</span>
+                                {c.slot_code && <span> — Ô/Trụ: <span className="font-bold text-[#B54708]">{c.slot_code}</span></span>}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenLocationModal('CONTAINER', {
+                                id: c.id,
+                                title: c.container_no_current,
+                                subtitle: formatContainerSpec(c.container_size, c.container_type),
+                                yard_zone: c.yard_zone,
+                                slot_code: c.slot_code,
+                              })}
+                              className="px-2.5 py-1 rounded-lg bg-[#ECFDF3] text-[#0A9444] hover:bg-[#D1FADF] font-semibold text-[11px] border border-[#A6F4C5] cursor-pointer flex items-center space-x-1 transition-colors"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span>Gán vị trí</span>
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
         </div>
       )}
 
@@ -4201,7 +4517,8 @@ export default function YardMonitorPage() {
                         onChange={() => setAdjPaymentMethod('CASH')}
                         className="sr-only"
                       />
-                      <span>💵 Tiền mặt</span>
+                      <Banknote className="w-3.5 h-3.5" />
+                      <span>Tiền mặt</span>
                     </label>
                     <label className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border cursor-pointer font-semibold text-xs transition-colors ${
                       adjPaymentMethod === 'TRANSFER'
@@ -4216,7 +4533,8 @@ export default function YardMonitorPage() {
                         onChange={() => setAdjPaymentMethod('TRANSFER')}
                         className="sr-only"
                       />
-                      <span>🏦 Chuyển khoản</span>
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span>Chuyển khoản</span>
                     </label>
                     <label className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border cursor-pointer font-semibold text-xs transition-colors ${
                       adjPaymentMethod === 'OTHER'
@@ -4231,7 +4549,8 @@ export default function YardMonitorPage() {
                         onChange={() => setAdjPaymentMethod('OTHER')}
                         className="sr-only"
                       />
-                      <span>📝 Khác / Đối trừ</span>
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Khác / Đối trừ</span>
                     </label>
                   </div>
                 </div>
@@ -4559,18 +4878,29 @@ export default function YardMonitorPage() {
               </div>
               <div>
                 <span className="text-[#667085] block text-[10px] font-semibold uppercase">Tình trạng</span>
-                <span className={`inline-block font-bold text-[11px] px-2 py-0.5 rounded-full ${
+                <span className={`inline-flex items-center gap-1 font-bold text-[11px] px-2 py-0.5 rounded-full ${
                   selectedSocket.status === 'IN_USE'
                     ? 'bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89]'
                     : selectedSocket.status === 'MAINTENANCE' || selectedSocket.status === 'FAULTY'
                     ? 'bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]'
                     : 'bg-[#ECFDF3] text-[#027A48] border border-[#ABEFC6]'
                 }`}>
-                  {selectedSocket.status === 'IN_USE'
-                    ? '⚡ Đang cắm điện'
-                    : selectedSocket.status === 'MAINTENANCE' || selectedSocket.status === 'FAULTY'
-                    ? '🛠️ Bảo trì / Khóa'
-                    : '✓ Trống — Sẵn sàng'}
+                  {selectedSocket.status === 'IN_USE' ? (
+                    <>
+                      <Zap className="w-3 h-3 text-[#B54708] fill-current" />
+                      <span>Đang cắm điện</span>
+                    </>
+                  ) : selectedSocket.status === 'MAINTENANCE' || selectedSocket.status === 'FAULTY' ? (
+                    <>
+                      <Wrench className="w-3 h-3 text-[#B42318]" />
+                      <span>Bảo trì / Khóa</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-3 h-3 text-[#027A48]" />
+                      <span>Trống — Sẵn sàng</span>
+                    </>
+                  )}
                 </span>
               </div>
             </div>
@@ -4615,7 +4945,7 @@ export default function YardMonitorPage() {
                       className="flex-1 py-2 px-3 rounded-lg font-semibold text-white bg-[#D92D20] hover:bg-[#B42318] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       <PowerOff className="w-3.5 h-3.5" />
-                      <span>⚡ Rút điện ngay (CCKB)</span>
+                      <span>Rút điện ngay (CCKB)</span>
                     </button>
                     <button
                       type="button"
@@ -4649,7 +4979,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
-                    <span>👉 Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
+                    <span>Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
                   </Link>
 
                   <button
@@ -4693,7 +5023,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2"
                   >
                     <Check className="w-4 h-4" />
-                    <span>✓ Hoàn tất bảo trì & Mở lại trụ</span>
+                    <span>Hoàn tất bảo trì & Mở lại trụ</span>
                   </button>
 
                   <button

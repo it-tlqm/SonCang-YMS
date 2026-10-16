@@ -23,7 +23,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 31075006091 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-f0765011",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R01"
   },
   {
     "id": "c5a00000-0000-4000-a000-00002917e9cf",
@@ -44,7 +46,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031089001744 - Tân Minh, Hải Phòng",
     "idempotency_key": "APPSHEET-V-2917e9cf",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R02"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001391d72a",
@@ -65,7 +69,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031084001036 - Việt Khê, Hải Phòng",
     "idempotency_key": "APPSHEET-V-1391d72a",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000093a03711",
@@ -86,7 +92,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034082007383 - Thái Thụy, Thái Bình",
     "idempotency_key": "APPSHEET-V-93a03711",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R04"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000d58bb169",
@@ -107,7 +115,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 030076005554 - Nam Sách, Hải Dương",
     "idempotency_key": "APPSHEET-V-d58bb169",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R05"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c47f6f80",
@@ -128,7 +138,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034087003380 - Thái Bình",
     "idempotency_key": "APPSHEET-V-c47f6f80",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R06"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000f237cf60",
@@ -149,7 +161,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-f237cf60",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R07"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000e7c9f474",
@@ -170,7 +184,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 022067000325 - TP Quảng Ninh",
     "idempotency_key": "APPSHEET-V-e7c9f474",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R08"
   },
   {
     "id": "c5a00000-0000-4000-a000-000036d65aa1",
@@ -191,7 +207,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031084010623 - An Lão, Hải Phòng",
     "idempotency_key": "APPSHEET-V-36d65aa1",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R09"
   },
   {
     "id": "c5a00000-0000-4000-a000-000034828534",
@@ -212,7 +230,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 30075008399 - Kinh Môn, Hải Dương",
     "idempotency_key": "APPSHEET-V-34828534",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R10"
   },
   {
     "id": "c5a00000-0000-4000-a000-00007ee0cc8f",
@@ -233,7 +253,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 081077007508 - HẢI PHÒNG",
     "idempotency_key": "APPSHEET-V-7ee0cc8f",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R11"
   },
   {
     "id": "c5a00000-0000-4000-a000-00007019d518",
@@ -254,7 +276,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031047004913 - HẢI PHÒNG",
     "idempotency_key": "APPSHEET-V-7019d518",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R12"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000bd9cefd1",
@@ -275,7 +299,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 036082007958 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-bd9cefd1",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R13"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000fc1d8947",
@@ -296,7 +322,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-fc1d8947",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R14"
   },
   {
     "id": "c5a00000-0000-4000-a000-000032b3fa99",
@@ -317,7 +345,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031088002988 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-32b3fa99",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R15"
   },
   {
     "id": "c5a00000-0000-4000-a000-000037debda9",
@@ -338,7 +368,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 030089002102 - Hồng Châu, Hải Phòng",
     "idempotency_key": "APPSHEET-V-37debda9",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R16"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b18e6d61",
@@ -359,7 +391,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034082007383 - Thái Thụy, Thái Bình",
     "idempotency_key": "APPSHEET-V-b18e6d61",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R17"
   },
   {
     "id": "c5a00000-0000-4000-a000-000040c0961f",
@@ -380,7 +414,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-40c0961f",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_C_TRANSFER",
+    "slot_code": "C-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000bc209dcb",
@@ -401,7 +437,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 030071004434 - Thành Đông, Hải Phòng",
     "idempotency_key": "APPSHEET-V-bc209dcb",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R18"
   },
   {
     "id": "c5a00000-0000-4000-a000-00005eb88903",
@@ -422,7 +460,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-5eb88903",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R19"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b54c4714",
@@ -443,7 +483,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031080005363 - Tiên Lãng, Hải Phòng",
     "idempotency_key": "APPSHEET-V-b54c4714",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R20"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000d3ce7f72",
@@ -464,7 +506,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031085005068 - Thủy Nguyên, Hải Phòng",
     "idempotency_key": "APPSHEET-V-d3ce7f72",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R21"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001ad25468",
@@ -485,7 +529,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 052090014541 - An Nhơn, Bình Định",
     "idempotency_key": "APPSHEET-V-1ad25468",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R22"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c1224ca6",
@@ -506,7 +552,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 026079002056 - Vĩnh Phúc",
     "idempotency_key": "APPSHEET-V-c1224ca6",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R23"
   },
   {
     "id": "c5a00000-0000-4000-a000-000012e8a4e4",
@@ -527,7 +575,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-12e8a4e4",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R24"
   },
   {
     "id": "c5a00000-0000-4000-a000-000075a5e24c",
@@ -548,7 +598,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-75a5e24c",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_C_TRANSFER",
+    "slot_code": "C-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000bc238bac",
@@ -569,7 +621,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-bc238bac",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_C_TRANSFER",
+    "slot_code": "C-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000f6d95568",
@@ -590,7 +644,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-f6d95568",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_C_TRANSFER",
+    "slot_code": "C-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001f3976dd",
@@ -611,7 +667,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031079005639 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-1f3976dd",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R25"
   },
   {
     "id": "c5a00000-0000-4000-a000-000032f9fdcd",
@@ -632,7 +690,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031076005164 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-32f9fdcd",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-000058fc6cae",
@@ -653,7 +713,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-58fc6cae",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b8dd81f9",
@@ -674,7 +736,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031085001465 - Tiên Lãng, Hải Phòng",
     "idempotency_key": "APPSHEET-V-b8dd81f9",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b37ca4ca",
@@ -695,7 +759,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-b37ca4ca",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_C_TRANSFER",
+    "slot_code": "C-05"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000ad75e317",
@@ -716,7 +782,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034090006931 - Tiền Hải, Thái Bình",
     "idempotency_key": "APPSHEET-V-ad75e317",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-000070cf68b4",
@@ -737,7 +805,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031084009456 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-70cf68b4",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-05"
   },
   {
     "id": "c5a00000-0000-4000-a000-00004a238374",
@@ -758,7 +828,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 042083013760 - Hà Tĩnh",
     "idempotency_key": "APPSHEET-V-4a238374",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-06"
   },
   {
     "id": "c5a00000-0000-4000-a000-00003c198499",
@@ -779,7 +851,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 036085008543 - Ninh Bình",
     "idempotency_key": "APPSHEET-V-3c198499",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-07"
   },
   {
     "id": "c5a00000-0000-4000-a000-000069576440",
@@ -800,7 +874,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031082004924 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-69576440",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-08"
   },
   {
     "id": "c5a00000-0000-4000-a000-00008637ab70",
@@ -821,7 +897,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 020091007741 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-8637ab70",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-09"
   },
   {
     "id": "c5a00000-0000-4000-a000-000093ce035d",
@@ -842,7 +920,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031081027383 - Vĩnh Bảo, Hải Phòng",
     "idempotency_key": "APPSHEET-V-93ce035d",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-10"
   },
   {
     "id": "c5a00000-0000-4000-a000-00009c42924a",
@@ -863,7 +943,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031091008239 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-9c42924a",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-11"
   },
   {
     "id": "c5a00000-0000-4000-a000-00008f0039ae",
@@ -884,7 +966,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 30078012281 - Kim Thành, Hải Dương",
     "idempotency_key": "APPSHEET-V-8f0039ae",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-12"
   },
   {
     "id": "c5a00000-0000-4000-a000-00000a16da37",
@@ -905,7 +989,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031090011798 - Thủy Nguyên, Hải Phòng",
     "idempotency_key": "APPSHEET-V-0a16da37",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-13"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c056e725",
@@ -926,7 +1012,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 042082014765 - Hương Sơn, Hà Tĩnh",
     "idempotency_key": "APPSHEET-V-c056e725",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-14"
   },
   {
     "id": "c5a00000-0000-4000-a000-00002d5f0a52",
@@ -947,7 +1035,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031084013854 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-2d5f0a52",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-15"
   },
   {
     "id": "c5a00000-0000-4000-a000-00000b4491a2",
@@ -968,7 +1058,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-0b4491a2",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-16"
   },
   {
     "id": "c5a00000-0000-4000-a000-00003a0ec775",
@@ -989,7 +1081,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031088001654 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-3a0ec775",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-17"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000653c5cd1",
@@ -1010,7 +1104,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031086021612 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-653c5cd1",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-18"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000a40ed48b",
@@ -1031,7 +1127,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031083024181 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-a40ed48b",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-19"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000df560f17",
@@ -1052,7 +1150,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031083005648 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-df560f17",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-20"
   },
   {
     "id": "c5a00000-0000-4000-a000-00002a113a60",
@@ -1073,7 +1173,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034084007758 - Ngọc Lâm, Hưng Yên",
     "idempotency_key": "APPSHEET-V-2a113a60",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-00002326137a",
@@ -1094,7 +1196,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 30085018425 - PHÚ THÁI, HẢI PHÒNG",
     "idempotency_key": "APPSHEET-V-2326137a",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000e0a67557",
@@ -1115,7 +1219,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 038086000302 - Ngô Quyền, Hải Phòng",
     "idempotency_key": "APPSHEET-V-e0a67557",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000007a4768d",
@@ -1136,7 +1242,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 020084005936 - Bắc Ninh",
     "idempotency_key": "APPSHEET-V-07a4768d",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001aaa2f86",
@@ -1157,7 +1265,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031081006866 - HẢI PHÒNG",
     "idempotency_key": "APPSHEET-V-1aaa2f86",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-05"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000adefb5ae",
@@ -1178,7 +1288,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031073000372 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-adefb5ae",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-06"
   },
   {
     "id": "c5a00000-0000-4000-a000-00009bf11d5d",
@@ -1199,7 +1311,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031082007489 - Ngô Quyền, Hải Phòng",
     "idempotency_key": "APPSHEET-V-9bf11d5d",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-07"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000219dff3e",
@@ -1220,7 +1334,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031073004209 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-219dff3e",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-08"
   },
   {
     "id": "c5a00000-0000-4000-a000-000024d1dfc2",
@@ -1241,7 +1357,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 082086000302 - NGÔ QUYỀN HẢI PHÒNG",
     "idempotency_key": "APPSHEET-V-24d1dfc2",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-09"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000536711b5",
@@ -1262,7 +1380,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 31086013974 - Thủy Nguyên, Hải Phòng",
     "idempotency_key": "APPSHEET-V-536711b5",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-10"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001dd08549",
@@ -1283,7 +1403,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 030085000811 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-1dd08549",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-11"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000e4eaf558",
@@ -1304,7 +1426,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 31090006429 - Hải Phòng",
     "idempotency_key": "APPSHEET-V-e4eaf558",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-12"
   },
   {
     "id": "c5a00000-0000-4000-a000-000001afcd5e",
@@ -1325,7 +1449,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 024070000112 - Ngô Quyền, Hải Phòng",
     "idempotency_key": "APPSHEET-V-01afcd5e",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-13"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000cea2b70b",
@@ -1346,7 +1472,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031075005459 - Kiến An, Hải Phòng",
     "idempotency_key": "APPSHEET-V-cea2b70b",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-14"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000fd82a051",
@@ -1367,7 +1495,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 036085008543 - Ninh Bình",
     "idempotency_key": "APPSHEET-V-fd82a051",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-15"
   },
   {
     "id": "c5a00000-0000-4000-a000-00008aea0108",
@@ -1388,7 +1518,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 035084000238 - Thanh Liêm, Hà Nam",
     "idempotency_key": "APPSHEET-V-8aea0108",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5a00000-0000-4000-a000-0000be4a8139",
@@ -1409,7 +1541,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[AppSheet Import]",
     "idempotency_key": "APPSHEET-V-be4a8139",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5a00000-0000-4000-a000-000004b5a2f4",
@@ -1430,7 +1564,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034079003103 - Tiên Hưng, Hưng Yên",
     "idempotency_key": "APPSHEET-V-04b5a2f4",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c2cd9e12",
@@ -1451,7 +1587,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 034077010109 - Vũ Lạc, Thái Bình",
     "idempotency_key": "APPSHEET-V-c2cd9e12",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5a00000-0000-4000-a000-00001b37dcc6",
@@ -1472,7 +1610,9 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "exit_by": null,
     "note": "[Sổ KT Ánh Bé] CCCD: 031086004993 - Tiên Lãng, Hải Phòng",
     "idempotency_key": "APPSHEET-V-1b37dcc6",
-    "plate_changes_count": 0
+    "plate_changes_count": 0,
+    "yard_zone": null,
+    "slot_code": null
   }
 ];
 
@@ -1505,7 +1645,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-11T10:21:37.000Z",
-    "updated_at": "2026-09-11T10:21:37.000Z"
+    "updated_at": "2026-09-11T10:21:37.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-0000a750c538",
@@ -1532,7 +1674,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-13T09:37:11.000Z",
-    "updated_at": "2026-09-13T09:37:11.000Z"
+    "updated_at": "2026-09-13T09:37:11.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000008c57f83",
@@ -1559,7 +1703,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-19T15:16:28.000Z",
-    "updated_at": "2026-09-19T15:16:28.000Z"
+    "updated_at": "2026-09-19T15:16:28.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R02"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c6c91591",
@@ -1586,7 +1732,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-23T12:59:49.000Z",
-    "updated_at": "2026-09-23T12:59:49.000Z"
+    "updated_at": "2026-09-23T12:59:49.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R03"
   },
   {
     "id": "c5b00000-0000-4000-a000-00003a07632c",
@@ -1613,7 +1761,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-23T23:04:40.000Z",
-    "updated_at": "2026-09-23T23:04:40.000Z"
+    "updated_at": "2026-09-23T23:04:40.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R04"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005db0e629",
@@ -1640,7 +1790,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-24T14:16:34.000Z",
-    "updated_at": "2026-09-24T14:16:34.000Z"
+    "updated_at": "2026-09-24T14:16:34.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R05"
   },
   {
     "id": "c5b00000-0000-4000-a000-00008a2fc21a",
@@ -1667,7 +1819,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-26T08:37:46.000Z",
-    "updated_at": "2026-09-26T08:37:46.000Z"
+    "updated_at": "2026-09-26T08:37:46.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R06"
   },
   {
     "id": "c5b00000-0000-4000-a000-000070c1c8b9",
@@ -1694,7 +1848,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-26T13:55:25.000Z",
-    "updated_at": "2026-09-26T13:55:25.000Z"
+    "updated_at": "2026-09-26T13:55:25.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R07"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000195a5f2a",
@@ -1721,7 +1877,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-26T14:54:36.000Z",
-    "updated_at": "2026-09-26T14:54:36.000Z"
+    "updated_at": "2026-09-26T14:54:36.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R08"
   },
   {
     "id": "c5b00000-0000-4000-a000-000048eaf89b",
@@ -1748,7 +1906,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-26T15:01:34.000Z",
-    "updated_at": "2026-09-26T15:01:34.000Z"
+    "updated_at": "2026-09-26T15:01:34.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R09"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000dd8ab50c",
@@ -1775,7 +1935,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-26T15:33:29.000Z",
-    "updated_at": "2026-09-26T15:33:29.000Z"
+    "updated_at": "2026-09-26T15:33:29.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R10"
   },
   {
     "id": "c5b00000-0000-4000-a000-000048fc4242",
@@ -1802,7 +1964,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-27T14:21:59.000Z",
-    "updated_at": "2026-09-27T14:21:59.000Z"
+    "updated_at": "2026-09-27T14:21:59.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R11"
   },
   {
     "id": "c5b00000-0000-4000-a000-00009f0498ab",
@@ -1829,7 +1993,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-27T14:47:38.000Z",
-    "updated_at": "2026-09-27T14:47:38.000Z"
+    "updated_at": "2026-09-27T14:47:38.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R12"
   },
   {
     "id": "c5b00000-0000-4000-a000-000046e5a154",
@@ -1856,7 +2022,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-29T09:15:44.000Z",
-    "updated_at": "2026-09-29T09:15:44.000Z"
+    "updated_at": "2026-09-29T09:15:44.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R13"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c07a8821",
@@ -1883,7 +2051,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-29T12:03:35.000Z",
-    "updated_at": "2026-09-29T12:03:35.000Z"
+    "updated_at": "2026-09-29T12:03:35.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R14"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f75cfd00",
@@ -1910,7 +2080,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-29T15:34:55.000Z",
-    "updated_at": "2026-09-29T15:34:55.000Z"
+    "updated_at": "2026-09-29T15:34:55.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R15"
   },
   {
     "id": "c5b00000-0000-4000-a000-000049b427e4",
@@ -1937,7 +2109,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-29T18:14:27.000Z",
-    "updated_at": "2026-09-29T18:14:27.000Z"
+    "updated_at": "2026-09-29T18:14:27.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R16"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005004923e",
@@ -1964,7 +2138,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-29T18:25:24.000Z",
-    "updated_at": "2026-09-29T18:25:24.000Z"
+    "updated_at": "2026-09-29T18:25:24.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R17"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c8ff9d4d",
@@ -1991,7 +2167,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T10:43:00.000Z",
-    "updated_at": "2026-09-30T10:43:00.000Z"
+    "updated_at": "2026-09-30T10:43:00.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R18"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004c0f9810",
@@ -2018,7 +2196,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T11:18:22.000Z",
-    "updated_at": "2026-09-30T11:18:22.000Z"
+    "updated_at": "2026-09-30T11:18:22.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R19"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c2522536",
@@ -2045,7 +2225,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T17:11:46.000Z",
-    "updated_at": "2026-09-30T17:11:46.000Z"
+    "updated_at": "2026-09-30T17:11:46.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R20"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000a1beab01",
@@ -2072,7 +2254,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T17:14:56.000Z",
-    "updated_at": "2026-09-30T17:14:56.000Z"
+    "updated_at": "2026-09-30T17:14:56.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R21"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e52ea74f",
@@ -2099,7 +2283,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T17:18:00.000Z",
-    "updated_at": "2026-09-30T17:18:00.000Z"
+    "updated_at": "2026-09-30T17:18:00.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R22"
   },
   {
     "id": "c5b00000-0000-4000-a000-00007b4af448",
@@ -2126,7 +2312,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T17:21:59.000Z",
-    "updated_at": "2026-09-30T17:21:59.000Z"
+    "updated_at": "2026-09-30T17:21:59.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R23"
   },
   {
     "id": "c5b00000-0000-4000-a000-000009649e4c",
@@ -2153,7 +2341,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-09-30T17:24:04.000Z",
-    "updated_at": "2026-09-30T17:24:04.000Z"
+    "updated_at": "2026-09-30T17:24:04.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R24"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e71e114d",
@@ -2180,7 +2370,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-01T07:39:07.000Z",
-    "updated_at": "2026-10-01T07:39:07.000Z"
+    "updated_at": "2026-10-01T07:39:07.000Z",
+    "yard_zone": "KHU_A_REEFER",
+    "slot_code": "R25"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004313b143",
@@ -2207,7 +2399,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-01T13:06:06.000Z",
-    "updated_at": "2026-10-01T13:06:06.000Z"
+    "updated_at": "2026-10-01T13:06:06.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004ef939cb",
@@ -2234,7 +2428,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-01T13:15:38.000Z",
-    "updated_at": "2026-10-01T13:15:38.000Z"
+    "updated_at": "2026-10-01T13:15:38.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-00008c9f91ed",
@@ -2261,7 +2457,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-01T14:11:42.000Z",
-    "updated_at": "2026-10-01T14:11:42.000Z"
+    "updated_at": "2026-10-01T14:11:42.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000adc7cb1f",
@@ -2288,7 +2486,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-02T07:03:55.000Z",
-    "updated_at": "2026-10-02T07:03:55.000Z"
+    "updated_at": "2026-10-02T07:03:55.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-04"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000973b137f",
@@ -2315,7 +2515,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-02T07:38:37.000Z",
-    "updated_at": "2026-10-02T07:38:37.000Z"
+    "updated_at": "2026-10-02T07:38:37.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-05"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f0af1ed7",
@@ -2342,7 +2544,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-02T10:39:50.000Z",
-    "updated_at": "2026-10-02T10:39:50.000Z"
+    "updated_at": "2026-10-02T10:39:50.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-06"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000b01073fd",
@@ -2369,7 +2573,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-03T11:04:15.000Z",
-    "updated_at": "2026-10-03T11:04:15.000Z"
+    "updated_at": "2026-10-03T11:04:15.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-07"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005a20efd7",
@@ -2396,7 +2602,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-03T12:03:44.000Z",
-    "updated_at": "2026-10-03T12:03:44.000Z"
+    "updated_at": "2026-10-03T12:03:44.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-08"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000930ac57e",
@@ -2423,7 +2631,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-03T14:47:04.000Z",
-    "updated_at": "2026-10-03T14:47:04.000Z"
+    "updated_at": "2026-10-03T14:47:04.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-09"
   },
   {
     "id": "c5b00000-0000-4000-a000-00001c931524",
@@ -2450,7 +2660,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-03T18:11:38.000Z",
-    "updated_at": "2026-10-03T18:11:38.000Z"
+    "updated_at": "2026-10-03T18:11:38.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-10"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000153fb1a8",
@@ -2477,7 +2689,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-04T14:28:37.000Z",
-    "updated_at": "2026-10-04T14:28:37.000Z"
+    "updated_at": "2026-10-04T14:28:37.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-11"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000827c3f6b",
@@ -2504,7 +2718,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-06T09:39:46.000Z",
-    "updated_at": "2026-10-06T09:39:46.000Z"
+    "updated_at": "2026-10-06T09:39:46.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-12"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000d64ff14a",
@@ -2531,7 +2747,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-06T14:08:47.000Z",
-    "updated_at": "2026-10-06T14:08:47.000Z"
+    "updated_at": "2026-10-06T14:08:47.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-13"
   },
   {
     "id": "c5b00000-0000-4000-a000-000051c24fa5",
@@ -2558,7 +2776,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-08T10:58:22.000Z",
-    "updated_at": "2026-10-08T10:58:22.000Z"
+    "updated_at": "2026-10-08T10:58:22.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-15"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e893e53c",
@@ -2585,7 +2805,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-08T11:08:43.000Z",
-    "updated_at": "2026-10-08T11:08:43.000Z"
+    "updated_at": "2026-10-08T11:08:43.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-16"
   },
   {
     "id": "c5b00000-0000-4000-a000-000056ff4069",
@@ -2612,7 +2834,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-08T11:09:31.000Z",
-    "updated_at": "2026-10-08T11:09:31.000Z"
+    "updated_at": "2026-10-08T11:09:31.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-17"
   },
   {
     "id": "c5b00000-0000-4000-a000-000071a21a55",
@@ -2639,7 +2863,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-09T09:12:03.000Z",
-    "updated_at": "2026-10-09T09:12:03.000Z"
+    "updated_at": "2026-10-09T09:12:03.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-18"
   },
   {
     "id": "c5b00000-0000-4000-a000-00007cc097ac",
@@ -2666,7 +2892,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-09T09:41:00.000Z",
-    "updated_at": "2026-10-09T09:41:00.000Z"
+    "updated_at": "2026-10-09T09:41:00.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-19"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000fb07a6bf",
@@ -2693,7 +2921,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-09T23:48:28.000Z",
-    "updated_at": "2026-10-09T23:48:28.000Z"
+    "updated_at": "2026-10-09T23:48:28.000Z",
+    "yard_zone": "KHU_D_TRACTOR",
+    "slot_code": "D-20"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f47ef785",
@@ -2720,7 +2950,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-11T10:46:55.000Z",
-    "updated_at": "2026-10-11T10:46:55.000Z"
+    "updated_at": "2026-10-11T10:46:55.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005c1cbc6e",
@@ -2747,7 +2979,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-11T13:32:23.000Z",
-    "updated_at": "2026-10-11T13:32:23.000Z"
+    "updated_at": "2026-10-11T13:32:23.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004d2eff0e",
@@ -2774,7 +3008,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-11T15:00:47.000Z",
-    "updated_at": "2026-10-11T15:00:47.000Z"
+    "updated_at": "2026-10-11T15:00:47.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000a3070a7c",
@@ -2801,7 +3037,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-13T17:07:17.000Z",
-    "updated_at": "2026-10-13T17:07:17.000Z"
+    "updated_at": "2026-10-13T17:07:17.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e2c900a8",
@@ -2828,7 +3066,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-14T10:43:34.000Z",
-    "updated_at": "2026-10-14T10:43:34.000Z"
+    "updated_at": "2026-10-14T10:43:34.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-05"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000927db458",
@@ -2855,7 +3095,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-14T12:50:08.000Z",
-    "updated_at": "2026-10-14T12:50:08.000Z"
+    "updated_at": "2026-10-14T12:50:08.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-06"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000ffbc96ed",
@@ -2882,7 +3124,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-14T13:48:01.000Z",
-    "updated_at": "2026-10-14T13:48:01.000Z"
+    "updated_at": "2026-10-14T13:48:01.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-07"
   },
   {
     "id": "c5b00000-0000-4000-a000-00003dc3b0d3",
@@ -2909,7 +3153,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T08:16:11.000Z",
-    "updated_at": "2026-10-15T08:16:11.000Z"
+    "updated_at": "2026-10-15T08:16:11.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-08"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000a1b0e44b",
@@ -2936,7 +3182,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T09:34:40.000Z",
-    "updated_at": "2026-10-15T09:34:40.000Z"
+    "updated_at": "2026-10-15T09:34:40.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-09"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e8942d4d",
@@ -2963,7 +3211,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T09:48:28.000Z",
-    "updated_at": "2026-10-15T09:48:28.000Z"
+    "updated_at": "2026-10-15T09:48:28.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-10"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000378a3089",
@@ -2990,7 +3240,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T12:09:58.000Z",
-    "updated_at": "2026-10-15T12:09:58.000Z"
+    "updated_at": "2026-10-15T12:09:58.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-11"
   },
   {
     "id": "c5b00000-0000-4000-a000-00006c1e06de",
@@ -3017,7 +3269,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T12:10:45.000Z",
-    "updated_at": "2026-10-15T12:10:45.000Z"
+    "updated_at": "2026-10-15T12:10:45.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-12"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f77e43c4",
@@ -3044,7 +3298,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T12:12:38.000Z",
-    "updated_at": "2026-10-15T12:12:38.000Z"
+    "updated_at": "2026-10-15T12:12:38.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-13"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004d3337c9",
@@ -3071,7 +3327,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T12:51:11.000Z",
-    "updated_at": "2026-10-15T12:51:11.000Z"
+    "updated_at": "2026-10-15T12:51:11.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-14"
   },
   {
     "id": "c5b00000-0000-4000-a000-000020d72494",
@@ -3098,7 +3356,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T13:31:32.000Z",
-    "updated_at": "2026-10-15T13:31:32.000Z"
+    "updated_at": "2026-10-15T13:31:32.000Z",
+    "yard_zone": "KHU_B_DRY",
+    "slot_code": "B-15"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000d4046472",
@@ -3125,7 +3385,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-15T19:27:59.000Z",
-    "updated_at": "2026-10-15T19:27:59.000Z"
+    "updated_at": "2026-10-15T19:27:59.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-00002025f116",
@@ -3152,7 +3414,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-16T10:21:17.000Z",
-    "updated_at": "2026-10-16T10:21:17.000Z"
+    "updated_at": "2026-10-16T10:21:17.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-0000d4d38073",
@@ -3179,7 +3443,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-16T10:28:42.000Z",
-    "updated_at": "2026-10-16T10:28:42.000Z"
+    "updated_at": "2026-10-16T10:28:42.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f51605c5",
@@ -3206,7 +3472,9 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-16T10:29:07.000Z",
-    "updated_at": "2026-10-16T10:29:07.000Z"
+    "updated_at": "2026-10-16T10:29:07.000Z",
+    "yard_zone": null,
+    "slot_code": null
   },
   {
     "id": "c5b00000-0000-4000-a000-0000911ab7e7",
@@ -3233,6 +3501,8 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "plug_socket_code": null,
     "created_by": "ffdbbd4d-4939-4594-901d-c0c30d162594",
     "created_at": "2026-10-16T10:39:08.000Z",
-    "updated_at": "2026-10-16T10:39:08.000Z"
+    "updated_at": "2026-10-16T10:39:08.000Z",
+    "yard_zone": null,
+    "slot_code": null
   }
 ];

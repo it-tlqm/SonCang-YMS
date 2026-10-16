@@ -21,6 +21,7 @@ import {
   QrCode,
   CreditCard,
   Download,
+  Banknote,
   X
 } from 'lucide-react';
 import { getVehicleTypeName, formatMoneyInWords } from '@/lib/display-formatters';
@@ -1065,8 +1066,9 @@ export default function ExitClearancePage() {
                                   <>
                                     <span className="text-[10px] text-[#667085] font-medium">Đã rút điện</span>
                                     {attachedCont.clearance_status === 'CLEARED' && (
-                                      <span className="text-[10px] text-[#0A9444] font-semibold bg-[#ECFDF3] px-1.5 py-0.5 rounded border border-[#A6F4C5]">
-                                        ✓ Đã duyệt
+                                      <span className="text-[10px] text-[#0A9444] font-semibold bg-[#ECFDF3] px-1.5 py-0.5 rounded border border-[#A6F4C5] inline-flex items-center gap-0.5">
+                                        <Check className="w-2.5 h-2.5" />
+                                        <span>Đã duyệt</span>
                                       </span>
                                     )}
                                     {attachedCont.clearance_status === 'CLEARED_WITH_DEBT' && (
@@ -1106,22 +1108,22 @@ export default function ExitClearancePage() {
                               </span>
                             )}
                             <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-[#667085]">
-                              <span className={isTicketOk ? 'text-[#0A9444] font-medium' : 'text-[#D92D20] font-semibold'}>
-                                Vé: {isTicketOk ? '✓' : 'Chưa thu'}
+                              <span className={isTicketOk ? 'text-[#0A9444] font-medium inline-flex items-center gap-0.5' : 'text-[#D92D20] font-semibold'}>
+                                Vé: {isTicketOk ? <Check className="w-3 h-3 text-[#0A9444]" /> : 'Chưa thu'}
                               </span>
                               {attachedCont && (
                                 <>
                                   <span>•</span>
-                                  <span className={!isContPlugged ? 'text-[#0A9444] font-medium' : 'text-[#D92D20] font-semibold animate-pulse'}>
-                                    Điện: {!isContPlugged ? '✓' : '⚡Cắm'}
+                                  <span className={!isContPlugged ? 'text-[#0A9444] font-medium inline-flex items-center gap-0.5' : 'text-[#D92D20] font-semibold animate-pulse inline-flex items-center gap-0.5'}>
+                                    Điện: {!isContPlugged ? <Check className="w-3 h-3 text-[#0A9444]" /> : <><Zap className="w-2.5 h-2.5 text-[#D92D20] fill-current" />Cắm</>}
                                   </span>
                                 </>
                               )}
                               {attachedCont && isAttachedContReefer && (
                                 <>
                                   <span>•</span>
-                                  <span className={isClearanceOk ? 'text-[#0A9444] font-medium' : 'text-[#B54708] font-semibold'}>
-                                    CCKB: {isClearanceOk ? '✓' : 'Chờ duyệt'}
+                                  <span className={isClearanceOk ? 'text-[#0A9444] font-medium inline-flex items-center gap-0.5' : 'text-[#B54708] font-semibold'}>
+                                    CCKB: {isClearanceOk ? <Check className="w-3 h-3 text-[#0A9444]" /> : 'Chờ duyệt'}
                                   </span>
                                 </>
                               )}
@@ -1287,7 +1289,12 @@ export default function ExitClearancePage() {
                                 <span className="text-xs text-[#98A2B3] italic">Chờ CCKB duyệt</span>
                               );
                             }
-                            return <span className="text-xs text-[#0A9444] font-semibold">✓ Đã duyệt</span>;
+                            return (
+                              <span className="text-xs text-[#0A9444] font-semibold inline-flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Đã duyệt</span>
+                              </span>
+                            );
                           })()}
                         </td>
                       </tr>
@@ -1633,19 +1640,82 @@ export default function ExitClearancePage() {
                   <div className="grid grid-cols-4 gap-1.5 text-[11px]">
                     <div className={`p-1.5 rounded border text-center ${modalTicketOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800 font-bold'}`}>
                       <div className="text-[10px] text-slate-500">1. Vé cổng</div>
-                      <div className="font-bold truncate mt-0.5">{modalTicketOk ? '✓ Đã thu' : '⚠️ Chưa thu'}</div>
+                      <div className="font-bold truncate mt-0.5 inline-flex items-center justify-center gap-1">
+                        {modalTicketOk ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Đã thu</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-3 h-3 text-rose-600" />
+                            <span>Chưa thu</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className={`p-1.5 rounded border text-center ${modalPowerOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-100 border-rose-400 text-rose-900 font-bold animate-pulse'}`}>
                       <div className="text-[10px] text-slate-500">2. Điện lạnh</div>
-                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer ? '✓ Không cont' : !isTrailingContPlugged ? '✓ Đã ngắt' : '🚨 Đang cắm'}</div>
+                      <div className="font-bold truncate mt-0.5 inline-flex items-center justify-center gap-1">
+                        {!hasTrailingContainer ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Không cont</span>
+                          </>
+                        ) : !isTrailingContPlugged ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Đã ngắt</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3 h-3 text-rose-600 fill-current animate-pulse" />
+                            <span>Đang cắm</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className={`p-1.5 rounded border text-center ${modalClearanceOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-300 text-amber-900 font-bold'}`}>
                       <div className="text-[10px] text-slate-500">3. CCKB</div>
-                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer || !hasTrailingContReefer ? '✓ Miễn duyệt' : isTrailingContCleared ? '✓ Đã duyệt' : '⏳ Chờ duyệt'}</div>
+                      <div className="font-bold truncate mt-0.5 inline-flex items-center justify-center gap-1">
+                        {!hasTrailingContainer || !hasTrailingContReefer ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Miễn duyệt</span>
+                          </>
+                        ) : isTrailingContCleared ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Đã duyệt</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-3 h-3 text-amber-600" />
+                            <span>Chờ duyệt</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className={`p-1.5 rounded border text-center ${modalStorageOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-300 text-amber-900 font-bold'}`}>
                       <div className="text-[10px] text-slate-500">4. Lưu bãi</div>
-                      <div className="font-bold truncate mt-0.5">{!hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0 ? '✓ 0đ' : paidAtGate ? '⚡ Thu cổng' : '⚠️ Chưa thu'}</div>
+                      <div className="font-bold truncate mt-0.5 inline-flex items-center justify-center gap-1">
+                        {!hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0 ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>0đ</span>
+                          </>
+                        ) : paidAtGate ? (
+                          <>
+                            <Zap className="w-3 h-3 text-amber-600 fill-current" />
+                            <span>Thu cổng</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                            <span>Chưa thu</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -1799,7 +1869,7 @@ export default function ExitClearancePage() {
                                 title="Bấm để chọn nhanh container này sau khi đối soát đúng thực tế tại hiện trường"
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                                <span>👉 Chọn nhanh cont này</span>
+                                <span>Chọn nhanh cont này</span>
                               </button>
                             </div>
                           )}
@@ -1809,7 +1879,7 @@ export default function ExitClearancePage() {
                               type="text"
                               value={trailingContSearch}
                               onChange={(e) => setTrailingContSearch(e.target.value)}
-                              placeholder="🔍 Hoặc gõ tìm số container khác trong bãi..."
+                              placeholder="Hoặc gõ tìm số container khác trong bãi..."
                               className="w-full px-2.5 py-1 border border-slate-300 rounded text-xs font-mono"
                             />
                             <select
@@ -1820,9 +1890,9 @@ export default function ExitClearancePage() {
                               <option value="">-- Bấm chọn Container kéo ra --</option>
                               {inYardContainers
                                 .filter(c => {
-                                  if (!trailingContSearch.trim()) return true;
-                                  const q = trailingContSearch.toLowerCase();
-                                  return c.container_no_current.toLowerCase().includes(q) || (c.inbound_license_plate && c.inbound_license_plate.toLowerCase().includes(q));
+                                   if (!trailingContSearch.trim()) return true;
+                                   const q = trailingContSearch.toLowerCase();
+                                   return c.container_no_current.toLowerCase().includes(q) || (c.inbound_license_plate && c.inbound_license_plate.toLowerCase().includes(q));
                                 })
                                 .map((c) => (
                                   <option key={c.id} value={c.id}>
@@ -1839,8 +1909,8 @@ export default function ExitClearancePage() {
                         <div className="space-y-1.5 pt-0.5">
                           {isTrailingContPlugged && (
                             <div className="p-2 rounded bg-rose-50 border border-rose-300 text-rose-900 flex items-center gap-2 font-bold animate-bounce">
-                              <Zap className="w-4 h-4 text-rose-600 shrink-0" />
-                              <span>⚠️ CONTAINER ĐANG CẮM ĐIỆN! Bắt buộc rút điện trước khi ra bãi!</span>
+                              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                              <span>CONTAINER ĐANG CẮM ĐIỆN! Bắt buộc rút điện trước khi ra bãi!</span>
                             </div>
                           )}
 
@@ -2203,9 +2273,10 @@ export default function ExitClearancePage() {
                 <button
                   type="button"
                   onClick={() => setExitReceipt(null)}
-                  className="py-2 px-3.5 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
+                  className="py-2 px-3.5 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer inline-flex items-center gap-1"
                 >
-                  ✕ Đóng
+                  <X className="w-3.5 h-3.5" />
+                  <span>Đóng</span>
                 </button>
               </div>
             </div>
@@ -2270,7 +2341,7 @@ export default function ExitClearancePage() {
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
                   <span className="text-[#667085] sm:w-40 flex-shrink-0 font-medium">Hình thức thanh toán:</span>
                   <span className="font-semibold text-[#17202E]">
-                    {exitReceipt.payMethod === 'BANK_TRANSFER' ? '📱 Chuyển khoản ngân hàng (QR / CK)' : '💵 Tiền mặt'}
+                    {exitReceipt.payMethod === 'BANK_TRANSFER' ? 'Chuyển khoản ngân hàng (QR / CK)' : 'Tiền mặt'}
                   </span>
                 </div>
 
@@ -2386,7 +2457,10 @@ export default function ExitClearancePage() {
                       onChange={() => setQuickCollectMethod('CASH')}
                       className="text-[#0A9444] focus:ring-[#0A9444]"
                     />
-                    <span className="font-medium">💵 Tiền mặt</span>
+                    <span className="font-medium inline-flex items-center gap-1">
+                      <Banknote className="w-3.5 h-3.5 text-[#0A9444]" />
+                      <span>Tiền mặt</span>
+                    </span>
                   </label>
                   <label className="flex items-center space-x-2 text-xs text-[#344054] cursor-pointer">
                     <input
@@ -2397,7 +2471,10 @@ export default function ExitClearancePage() {
                       onChange={() => setQuickCollectMethod('BANK_TRANSFER')}
                       className="text-[#0A9444] focus:ring-[#0A9444]"
                     />
-                    <span className="font-medium">📱 Chuyển khoản (VietQR / CK)</span>
+                    <span className="font-medium inline-flex items-center gap-1">
+                      <QrCode className="w-3.5 h-3.5 text-[#326DD8]" />
+                      <span>Chuyển khoản (VietQR / CK)</span>
+                    </span>
                   </label>
                 </div>
 

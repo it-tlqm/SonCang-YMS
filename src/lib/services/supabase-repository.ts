@@ -3991,6 +3991,10 @@ export class SupabaseRepository implements IYardRepository {
     }
   }
 
+  async autoAllocateYardZones(): Promise<{ success: boolean; allocatedCount: number; error?: string }> {
+    return { success: true, allocatedCount: 0 };
+  }
+
   async resetYardToClean(): Promise<{ success: boolean; error?: string }> {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('soncang_v5_demo_vehicles');

@@ -1087,7 +1087,7 @@ export default function ReeferMonitoringPage() {
       setReqError(`Đã tạo yêu cầu nhưng lỗi kích hoạt cắm điện: ${plugRes.error}`);
     } else {
       setShowCreateReqModal(false);
-      setActionSuccessMsg(`⚡ Đã lập yêu cầu và kích hoạt cắm điện thành công cho container ${cleanCont}!`);
+      setActionSuccessMsg(`Đã lập yêu cầu và kích hoạt cắm điện thành công cho container ${cleanCont}!`);
       setActiveTab('SESSIONS');
       handleManualRefresh();
     }
@@ -1497,9 +1497,9 @@ export default function ReeferMonitoringPage() {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span>{s.container_no}</span>
                               {s.plug_socket_code && (
-                                <span className="text-[10px] font-sans font-bold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                  <span>⚡ Trụ:</span>
-                                  <strong>{s.plug_socket_code}</strong>
+                                <span className="text-[10px] font-sans font-bold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                  <Zap className="w-3 h-3 text-amber-600 fill-current" />
+                                  <span>Trụ: <strong>{s.plug_socket_code}</strong></span>
                                 </span>
                               )}
                             </div>
@@ -2232,7 +2232,7 @@ export default function ReeferMonitoringPage() {
                         </optgroup>
                       )}
                       {otherUnpluggedInYard.length > 0 && (
-                        <optgroup label={`📦 CONTAINER TRONG BÃI CHƯA CÓ YÊU CẦU (${otherUnpluggedInYard.length})`}>
+                        <optgroup label={`CONTAINER TRONG BÃI CHƯA CÓ YÊU CẦU (${otherUnpluggedInYard.length})`}>
                           {otherUnpluggedInYard.map((c) => (
                             <option key={c.id} value={c.id}>
                               {c.container_no_current}{c.inbound_license_plate ? ` (Xe: ${c.inbound_license_plate})` : ''} - Cắm phát sinh
@@ -2285,7 +2285,7 @@ export default function ReeferMonitoringPage() {
                         value={code} 
                         disabled={isDisabled}
                       >
-                        {code} — {isMaintenance ? `⚠️ Đang bảo trì / Khóa (${socket.notes || 'Sự cố'})` : isBusy ? `🔴 Bận (${activeSession?.container_no || 'Đang cắm'})` : `🟢 Trống (${socket.voltage || '380V'} / ${socket.amperage || '32A'})`}
+                        {code} — {isMaintenance ? `[Bảo trì / Khóa] (${socket.notes || 'Sự cố'})` : isBusy ? `[Bận] (${activeSession?.container_no || 'Đang cắm'})` : `[Trống] (${socket.voltage || '380V'} / ${socket.amperage || '32A'})`}
                       </option>
                     );
                   })}
@@ -2428,7 +2428,8 @@ export default function ReeferMonitoringPage() {
                     </div>
                   ) : (
                     <p className="text-[11px] text-[#D92D20] font-semibold pt-1 border-t border-[#FEDF89]/60 flex items-center gap-1">
-                      <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#D92D20] shrink-0" />
+                      <span>Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
                 </div>
@@ -2696,7 +2697,7 @@ export default function ReeferMonitoringPage() {
                         </optgroup>
                       )}
                       {otherUnpluggedInYard.length > 0 && (
-                        <optgroup label={`📦 CONTAINER TRONG BÃI CHƯA CÓ YÊU CẦU (${otherUnpluggedInYard.length})`}>
+                        <optgroup label={`CONTAINER TRONG BÃI CHƯA CÓ YÊU CẦU (${otherUnpluggedInYard.length})`}>
                           {otherUnpluggedInYard.map((c) => (
                             <option key={c.id} value={c.id}>
                               {c.container_no_current}{c.inbound_license_plate ? ` (Xe: ${c.inbound_license_plate})` : ''} - Cắm phát sinh
@@ -2974,9 +2975,10 @@ export default function ReeferMonitoringPage() {
                         setVerifyStatus('PLUGGED');
                         setVerifyPreview(null);
                       }}
-                      className="text-[10px] text-[#D92D20] font-semibold hover:underline cursor-pointer"
+                      className="text-[10px] text-[#D92D20] font-semibold hover:underline cursor-pointer inline-flex items-center gap-0.5"
                     >
-                      ✕ Xóa giờ rút (đang cắm)
+                      <X className="w-3 h-3" />
+                      <span>Xóa giờ rút (đang cắm)</span>
                     </button>
                   )}
                 </div>
@@ -3544,7 +3546,8 @@ export default function ReeferMonitoringPage() {
                     </div>
                   ) : (
                     <p className="text-[11px] text-[#D92D20] font-semibold pt-1 border-t border-[#FEDF89]/60 flex items-center gap-1">
-                      <span>⚠️ Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#D92D20] shrink-0" />
+                      <span>Bắt buộc nhập số giờ dự kiến cắm điện (tối thiểu 1h).</span>
                     </p>
                   )}
                 </div>
@@ -3581,7 +3584,7 @@ export default function ReeferMonitoringPage() {
                       title="Tạo yêu cầu và kích hoạt cắm điện ngay trong 1 chạm"
                     >
                       <Zap className="w-3.5 h-3.5 fill-current" />
-                      <span>⚡ Lưu & Cắm điện ngay</span>
+                      <span>Lưu & Cắm điện ngay</span>
                     </button>
                   )}
                   <button
@@ -3639,7 +3642,7 @@ export default function ReeferMonitoringPage() {
                 >
                   {containers.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.container_no_current} ({c.container_size || '40'}ft {c.container_type || 'RF'}{c.is_plugged ? ' — Đang cắm điện ⚡' : ''})
+                      {c.container_no_current} ({c.container_size || '40'}ft {c.container_type || 'RF'}{c.is_plugged ? ' — Đang cắm điện' : ''})
                     </option>
                   ))}
                 </select>

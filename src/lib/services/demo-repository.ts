@@ -126,7 +126,7 @@ export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
   },
 ];
 
-export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c';
+export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_zones_v3';
 
 const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [...SEED_IN_YARD_VEHICLES];
 const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [...SEED_IN_YARD_CONTAINERS];
@@ -1713,6 +1713,56 @@ export class DemoRepository implements IYardRepository {
     cont.slot_code = params.slotCode;
     this.persist();
     return { success: true };
+  }
+
+  async autoAllocateYardZones(): Promise<{ success: boolean; allocatedCount: number; error?: string }> {
+    let count = 0;
+    const vToC = new Map<string, ContainerVisit>();
+    this.containers.forEach(c => {
+      if (c.inbound_vehicle_visit_id) vToC.set(c.inbound_vehicle_visit_id, c);
+    });
+
+    let reeferIdx = 1;
+    let transferIdx = 1;
+    let bufferIdx = 1;
+    let dryIdx = 1;
+
+    this.vehicles.forEach(v => {
+      if (v.status !== 'IN_YARD') return;
+      const cont = vToC.get(v.id);
+
+      if (v.vehicle_type === 'XE_BO_8_TAN_2_CHAN') {
+        v.yard_zone = 'KHU_C_TRANSFER';
+        v.slot_code = `C-${String(transferIdx++).padStart(2, '0')}`;
+        count++;
+      } else if (cont && (cont.is_plugged || cont.container_type === 'RF' || v.vehicle_type === 'CONT_LANH')) {
+        if (reeferIdx <= 25) {
+          const slot = `R${String(reeferIdx++).padStart(2, '0')}`;
+          v.yard_zone = 'KHU_A_REEFER';
+          v.slot_code = slot;
+          cont.yard_zone = 'KHU_A_REEFER';
+          cont.slot_code = slot;
+          count += 2;
+        } else if (bufferIdx <= 20) {
+          const slot = `D-${String(bufferIdx++).padStart(2, '0')}`;
+          v.yard_zone = 'KHU_D_TRACTOR';
+          v.slot_code = slot;
+          cont.yard_zone = 'KHU_D_TRACTOR';
+          cont.slot_code = slot;
+          count += 2;
+        } else {
+          const slot = `B-${String(dryIdx++).padStart(2, '0')}`;
+          v.yard_zone = 'KHU_B_DRY';
+          v.slot_code = slot;
+          cont.yard_zone = 'KHU_B_DRY';
+          cont.slot_code = slot;
+          count += 2;
+        }
+      }
+    });
+
+    this.persist();
+    return { success: true, allocatedCount: count };
   }
 
   async recordReeferTemperatureLog(params: Omit<ReeferTemperatureLog, 'id'>): Promise<{ success: boolean; error?: string }> {

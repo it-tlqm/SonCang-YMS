@@ -719,8 +719,9 @@ export default function EntryGatePage() {
                     Áp dụng
                   </button>
                 </div>
-                <p className="text-[10px] text-[#667085] italic">
-                  💡 Máy quét 2D/QR cắm cổng USB hoạt động như bàn phím gõ siêu tốc (Typing). Khi quét xong sẽ tự động bóc tách Số CCCD & Họ tên vào form ngay tức thì.
+                <p className="text-[10px] text-[#667085] italic flex items-center gap-1">
+                  <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <span>Máy quét 2D/QR cắm cổng USB hoạt động như bàn phím gõ siêu tốc (Typing). Khi quét xong sẽ tự động bóc tách Số CCCD & Họ tên vào form ngay tức thì.</span>
                 </p>
               </div>
             )}
@@ -774,8 +775,15 @@ export default function EntryGatePage() {
               <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider mb-2.5 flex items-center justify-between">
                 <span>Thông tin Tài xế & Định danh CCCD</span>
                 {driverIdCard && (
-                  <span className="text-[11px] font-semibold text-[#0A9444] bg-[#ECFDF3] px-2 py-0.5 rounded-md border border-[#A6F4C5]">
-                    {driverIdCard.length === 12 ? '✓ Đủ 12 số CCCD hợp lệ' : `Định danh: ${driverIdCard}`}
+                  <span className="text-[11px] font-semibold text-[#0A9444] bg-[#ECFDF3] px-2 py-0.5 rounded-md border border-[#A6F4C5] inline-flex items-center gap-1">
+                    {driverIdCard.length === 12 ? (
+                      <>
+                        <CheckCircle2 className="w-3 h-3 text-[#0A9444]" />
+                        <span>Đủ 12 số CCCD hợp lệ</span>
+                      </>
+                    ) : (
+                      <span>Định danh: {driverIdCard}</span>
+                    )}
                   </span>
                 )}
               </div>
@@ -816,9 +824,9 @@ export default function EntryGatePage() {
                         type="button"
                         onClick={() => setDriverIdCard('')}
                         title="Xóa nhanh số CCCD"
-                        className="absolute right-2.5 top-2 text-[#98A2B3] hover:text-[#D92D20] text-xs font-bold cursor-pointer"
+                        className="absolute right-2.5 top-2.5 text-[#98A2B3] hover:text-[#D92D20] cursor-pointer"
                       >
-                        ✕
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
@@ -885,8 +893,18 @@ export default function EntryGatePage() {
                   <label className="text-xs font-semibold text-[#17202E] flex items-center justify-between">
                     <span>Mã số Container #1 <span className="text-[#D92D20]">*</span></span>
                     {containerNo.trim() && (
-                      <span className={`text-[11px] font-semibold ${contValidation.isValidFormat ? 'text-[#0A9444]' : 'text-[#B54708]'}`}>
-                        {contValidation.isValidFormat ? '✓ Đúng chuẩn 11 ký tự' : '⚠️ Kiểm tra định dạng'}
+                      <span className={`text-[11px] font-semibold inline-flex items-center gap-1 ${contValidation.isValidFormat ? 'text-[#0A9444]' : 'text-[#B54708]'}`}>
+                        {contValidation.isValidFormat ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Đúng chuẩn 11 ký tự</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-3 h-3" />
+                            <span>Kiểm tra định dạng</span>
+                          </>
+                        )}
                       </span>
                     )}
                   </label>

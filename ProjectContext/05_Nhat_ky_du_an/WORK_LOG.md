@@ -1,5 +1,47 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 17:15 — Chuẩn Hóa Phân Bổ 4 Phân Khu Bến Bãi Theo System Design, Nâng Cấp Nút Thao Tác Container Tab 3 Và Loại Bỏ 100% Emoji Sang SVG Lucide Icons
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  1. *"CHỗ này chưa đúng systemdesign: Chi tiết phân bổ xe & container theo phân khu. Phương tiện trong bãi (70) Khu: Chưa gán..."*
+  2. *"CHỗ này nữa btn sửa số ấy: Số Container Kích cỡ / Loại Tình trạng Hàng Xe đưa vào Thời gian vào Tác vụ ... Sửa số"*
+  3. *"k sửa dụng emoji thay thế icnon mà: [paste text có ⏱️, 📅, 💵, 📱, ➔]"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Chuẩn hóa Phân bổ 4 Phân khu theo System Design Sơn Cảng:**
+     - `src/data/seed-in-yard-data.ts`: Phân bổ 70 xe và 65 container thực tế vào 4 phân khu chức năng theo đúng quy hoạch bến bãi:
+       * **Khu A (KHU_A_REEFER):** 25 container lạnh và các xe tương ứng đỗ tại các trụ điện 380V (R01..R25).
+       * **Khu B (KHU_B_DRY):** 15 container vỏ / khô rỗng tại các ô B-01..B-15.
+       * **Khu C (KHU_C_TRANSFER):** 5 xe bo 8 tấn 2 chân chuyên sang tải nông sản tại các ô C-01..C-05.
+       * **Khu D (KHU_D_TRACTOR):** 20 xe đầu kéo và container chờ chuyến/bãi đệm chờ xuất bãi tại ô D-01..D-20.
+       * 5 xe và 7 container để trạng thái 'Chưa gán' phục vụ nghiệp vụ thực tế điều chuyển vị trí của Điều phối.
+     - `src/lib/services/demo-repository.ts` & `src/lib/services/supabase-repository.ts`:
+       * Nâng cấp seed version `v5_appsheet_70v_65c_zones_v3` để client tự động cập nhật phân khu chuẩn.
+       * Cài đặt phương thức `autoAllocateYardZones()` để tự động nhận diện xe bo sang tải -> Khu C, cont lạnh/xe lạnh -> Khu A, cont vỏ -> Khu B, xe lưu lâu chờ xuất -> Khu D.
+     - `src/app/yard/page.tsx`:
+       * 4 Card Phân khu A, B, C, D có thể bấm để kích hoạt lọc phân khu tương tác ngay lập tức (`selectedZoneFilter`).
+       * Nâng cấp khối "Chi tiết phân bổ xe & container theo phân khu": Bổ sung thanh Tab lọc nhanh (Tất cả, Khu A Reefer, Khu B Dry, Khu C Xe bo, Khu D Chờ xuất, Chưa gán), ô tìm kiếm biển số/số cont, và nút `Tự động phân bổ theo quy hoạch (Auto Allocate)`.
+  2. **Nâng cấp Cột Tác vụ Container (Tab 3 Bảng Container `/yard`):**
+     - Bổ sung cột header `Phân khu & Vị trí` hiển thị huy hiệu phân khu và ô/trụ đỗ (`c.yard_zone` kèm `c.slot_code`).
+     - Nâng cấp cột Tác vụ thành Dropdown Menu `Thao tác ▾` gom đầy đủ 5 tác vụ nghiệp vụ:
+       * Sửa mã số container theo quy trình kiểm toán AP05.
+       * Cập nhật HÀNG / RỖNG.
+       * Gán phân khu / ô đỗ.
+       * Xem lịch sử đổi số container.
+       * Theo dõi điện lạnh CCKB (liên kết nhanh sang `/reefer`).
+       * Song song duy trì nút nhanh `Sửa số` nổi bật để thao tác tức thì.
+  3. **Loại bỏ 100% Emoji sang SVG Lucide React Icons trên Toàn Hệ Thống:**
+     - Rà soát quét toàn bộ codebase `src/` và thay thế triệt để toàn bộ emoji trang trí (`⏱️`, `📅`, `💵`, `📱`, `➔`, `⚡`, `🟢`, `🔴`, `🚨`, `⏳`, `✓`, `✕`, `📦`, `👤`, `🎲`, `📞`, `➕`) bằng SVG Lucide icons chuẩn doanh nghiệp:
+       * `src/app/yard/page.tsx`: Thay các emoji thanh toán `💵`, `🏦`, `📝` -> `Banknote`, `CreditCard`, `FileText`; các emoji trụ điện `⚡`, `🛠️`, `✓`, `👉` -> `Zap`, `Wrench`, `Check`.
+       * `src/app/billing/page.tsx`: Thay `📦`, `👤`, `✕` -> `Package`, `User`, `X`.
+       * `src/app/exit/page.tsx`: Thay toàn bộ `✓`, `⚡`, `⚠️`, `🚨`, `⏳`, `👉`, `🔍`, `💵`, `📱`, `✕` trong bảng duyệt xuất, modal 4 điều kiện xuất bãi và biên lai -> `CheckCircle2`, `AlertTriangle`, `Zap`, `Clock`, `Banknote`, `QrCode`, `X`.
+       * `src/app/reefer/page.tsx`: Thay `⚡`, `📦`, `⚠️`, `✕`, `🟢`, `🔴` -> `Zap`, `AlertTriangle`, `X`, nhãn chữ chuẩn `[Trống]`, `[Bận]`, `[Bảo trì]`.
+       * `src/app/entry/page.tsx`: Thay `💡`, `✓`, `✕`, `⚠️` -> `Info`, `CheckCircle2`, `X`, `AlertTriangle`.
+       * `src/app/admin/users/page.tsx`: Bỏ `✓` thừa trong thông báo toast (đã có sẵn icon SVG CheckCircle2), thay `🟢`, `🔴`, `📞`, `➕`, `🎲` -> `Phone`, `Plus`, `Sparkles`.
+- **Kiểm thử xác thực:**
+  - Quét regex toàn bộ `src/**/*.tsx` tìm ký tự Unicode emoji: **0 matches** (hoàn toàn sạch 100%).
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch hoàn chỉnh).
+
 ## 2026-10-16 16:10 — Chuẩn Hóa Toàn Diện Danh Xưng Bộ Phận: Đổi 'Thương vụ CCKB' Thành 'Nghiệp vụ Cổng cảng Kho bãi' (Nghiệp vụ CCKB) Trên Toàn Hệ Thống & Tài Liệu
 
 - **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:

@@ -40,7 +40,8 @@ import {
   KeyRound,
   X,
   Database,
-  Info
+  Info,
+  Sparkles
 } from 'lucide-react';
 
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
@@ -317,7 +318,7 @@ export default function UsersAndRbacAdminPage() {
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     await Promise.all([loadStaffUsers(), loadRolesAndPermissions()]);
-    setSuccessMsg('✓ Đã đồng bộ dữ liệu mới nhất từ hệ thống bến bãi');
+    setSuccessMsg('Đã đồng bộ dữ liệu mới nhất từ hệ thống bến bãi');
     setTimeout(() => setSuccessMsg(''), 3500);
   };
 
@@ -408,7 +409,7 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`✓ Đã lưu thành công nhân viên "${res.user.full_name}" vào hệ thống bến bãi.`);
+        setSuccessMsg(`Đã lưu thành công nhân viên "${res.user.full_name}" vào hệ thống bến bãi.`);
       } else if (selectedStaff) {
         const res = await repository.updateStaffUser({
           id: selectedStaff.id,
@@ -430,7 +431,7 @@ export default function UsersAndRbacAdminPage() {
           return;
         }
 
-        setSuccessMsg(`✓ Đã cập nhật thành công thông tin nhân sự "${res.user.full_name}".`);
+        setSuccessMsg(`Đã cập nhật thành công thông tin nhân sự "${res.user.full_name}".`);
       }
 
       setShowModal(false);
@@ -449,7 +450,7 @@ export default function UsersAndRbacAdminPage() {
     try {
       const res = await repository.toggleStaffUserStatus(staff.id, nextStatus);
       if (res.success) {
-        setSuccessMsg(`✓ Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}".`);
+        setSuccessMsg(`Đã ${nextStatus ? 'kích hoạt lại' : 'tạm khóa'} tài khoản "${staff.full_name}".`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       }
@@ -467,7 +468,7 @@ export default function UsersAndRbacAdminPage() {
     try {
       const res = await repository.deleteStaffUser(staff.id);
       if (res.success) {
-        setSuccessMsg(`✓ Đã xóa nhân sự "${staff.full_name}" khỏi hệ thống.`);
+        setSuccessMsg(`Đã xóa nhân sự "${staff.full_name}" khỏi hệ thống.`);
         await loadStaffUsers();
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
@@ -507,7 +508,7 @@ export default function UsersAndRbacAdminPage() {
         return;
       }
 
-      setSuccessMsg(`✓ Đã tạo thành công vai trò mới "${cleanName}" (${cleanCode}) vào bảng app_roles.`);
+      setSuccessMsg(`Đã tạo thành công vai trò mới "${cleanName}" (${cleanCode}) vào bảng app_roles.`);
       setShowCreateRoleModal(false);
       setNewRoleCode('');
       setNewRoleName('');
@@ -536,7 +537,7 @@ export default function UsersAndRbacAdminPage() {
 
       const res = await repository.toggleRolePermission(roleCode, permissionCode, nextEnabled, 'ALL');
       if (res.success) {
-        setSuccessMsg(`✓ Đã ${nextEnabled ? 'cấp quyền' : 'thu hồi quyền'} [${permissionCode}] cho vai trò [${roleCode}].`);
+        setSuccessMsg(`Đã ${nextEnabled ? 'cấp quyền' : 'thu hồi quyền'} [${permissionCode}] cho vai trò [${roleCode}].`);
         setTimeout(() => setSuccessMsg(''), 3000);
       } else {
         // Rollback nếu lỗi
@@ -599,7 +600,7 @@ export default function UsersAndRbacAdminPage() {
       });
 
       if (res.success) {
-        setSuccessMsg(`✓ Đã đặt lại mật khẩu cho [${resetPwdStaff.full_name}] thành công! Mật khẩu mới: ${newStaffPassword}`);
+        setSuccessMsg(`Đã đặt lại mật khẩu cho [${resetPwdStaff.full_name}] thành công! Mật khẩu mới: ${newStaffPassword}`);
         await loadStaffUsers();
         setResetPwdStaff(null);
         setNewStaffPassword('');
@@ -818,8 +819,8 @@ export default function UsersAndRbacAdminPage() {
                 className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none"
               >
                 <option value="ALL">Tất cả trạng thái</option>
-                <option value="ACTIVE">🟢 Đang hoạt động</option>
-                <option value="LOCKED">🔴 Đã tạm khóa</option>
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="LOCKED">Đã tạm khóa</option>
               </select>
 
               {/* NÚT CHUYỂN ĐỔI CHẾ ĐỘ HIỂN THỊ (TABLE / CARD) */}
@@ -1081,7 +1082,10 @@ export default function UsersAndRbacAdminPage() {
                           </div>
                           <p className="text-[11px] font-mono text-slate-500 mt-0.5">{acc.email}</p>
                           {acc.phone && (
-                            <p className="text-[11px] text-slate-600 mt-0.5 font-mono">📞 {acc.phone}</p>
+                            <p className="text-[11px] text-slate-600 mt-0.5 font-mono flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-slate-400" />
+                              <span>{acc.phone}</span>
+                            </p>
                           )}
                         </div>
                       </div>
@@ -1203,7 +1207,7 @@ export default function UsersAndRbacAdminPage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#223873] hover:bg-[#1a2c5a] rounded-xl shadow-2xs cursor-pointer transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>➕ Tạo mới Vai trò</span>
+                <span>Tạo mới Vai trò</span>
               </button>
             </div>
 
@@ -1866,7 +1870,8 @@ export default function UsersAndRbacAdminPage() {
                       className="text-[10px] font-semibold text-[#7E22CE] hover:text-[#6B21A8] bg-[#FAF5FF] hover:bg-[#F3E8FF] px-2 py-0.5 rounded-md border border-[#E9D5FF] transition-colors cursor-pointer flex items-center gap-1"
                       title="Tự động tạo mật khẩu mạnh ngẫu nhiên"
                     >
-                      <span>🎲 Tạo ngẫu nhiên</span>
+                      <Sparkles className="w-3 h-3 text-[#7E22CE]" />
+                      <span>Tạo ngẫu nhiên</span>
                     </button>
                     <button
                       type="button"
