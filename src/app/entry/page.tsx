@@ -678,25 +678,50 @@ export default function EntryGatePage() {
             {/* Quét CCCD Popup input */}
             {showIdCardScanner && (
               <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] space-y-2 animate-in fade-in">
-                <label className="text-xs font-semibold text-[#17202E]">
-                  Nhập hoặc quét chuỗi mã QR CCCD gắn chip:
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#17202E]">
+                    Sẵn sàng quét mã QR CCCD gắn chip (Chế độ Typing/Bàn phím ảo):
+                  </label>
+                  <span className="text-[10px] text-[#667085]">
+                    Cắm súng quét USB và bắn trực tiếp
+                  </span>
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="text"
+                    autoFocus
                     value={scannerRawInput}
-                    onChange={(e) => setScannerRawInput(e.target.value)}
-                    placeholder="Chuỗi QR CCCD (VD: 00109...|...|Nguyễn Văn A|...)"
-                    className="flex-1 h-9 px-3 text-xs bg-white border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setScannerRawInput(val);
+                      // Tự động nhận diện nếu súng quét bắn chuỗi QR có phân tách pipe '|' đủ 7 trường
+                      if (val.includes('|') && val.split('|').length >= 3) {
+                        parseAndApplyCccdData(val);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Máy quét luôn gửi kèm phím Enter khi kết thúc chuỗi
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (scannerRawInput.trim()) {
+                          parseAndApplyCccdData(scannerRawInput);
+                        }
+                      }
+                    }}
+                    placeholder="Đặt con trỏ tại đây và bấm máy quét 'tít' vào mã QR CCCD..."
+                    className="flex-1 h-9 px-3 text-xs bg-white text-[#17202E] border border-[#326DD8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20"
                   />
                   <button
                     type="button"
                     onClick={() => parseAndApplyCccdData(scannerRawInput)}
-                    className="px-3 py-1.5 rounded-lg bg-[#326DD8] text-white text-xs font-semibold hover:bg-[#2557B4] cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#326DD8] text-white text-xs font-semibold hover:bg-[#2557B4] cursor-pointer shadow-2xs shrink-0"
                   >
                     Áp dụng
                   </button>
                 </div>
+                <p className="text-[10px] text-[#667085] italic">
+                  💡 Máy quét 2D/QR cắm cổng USB hoạt động như bàn phím gõ siêu tốc (Typing). Khi quét xong sẽ tự động bóc tách Số CCCD & Họ tên vào form ngay tức thì.
+                </p>
               </div>
             )}
 
