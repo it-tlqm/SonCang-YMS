@@ -260,7 +260,7 @@ def create_system_doc(output_path):
     
     goals = [
         "Kiểm soát chặt chẽ 100% lượt phương tiện và container ra/vào bãi bằng mã vé điện tử định danh.",
-        "Thiết lập quy trình kiểm soát xuất bãi 2 cấp độc lập: Thương vụ CCKB duyệt cước điện & công nợ trước, An ninh Bốt Cổng xác nhận cho xe rời bãi sau.",
+        "Thiết lập quy trình kiểm soát xuất bãi 2 cấp độc lập: Nghiệp vụ Cổng cảng Kho bãi duyệt cước điện & công nợ trước, An ninh Bốt Cổng xác nhận cho xe rời bãi sau.",
         "Tự động hóa hoàn toàn thuật toán tính phí dịch vụ theo biểu phí ban hành, loại bỏ sai sót tính nhẩm của con người.",
         "Bảo đảm an toàn dữ liệu tuyệt đối qua ma trận phân quyền 7 vai trò chuẩn RBAC V5 và cơ sở dữ liệu đám mây PostgreSQL bảo mật.",
         "Cung cấp báo cáo điều hành trực quan theo thời gian thực về sản lượng, công suất bãi và dòng tiền cho Ban Giám đốc."
@@ -414,8 +414,8 @@ def create_system_doc(output_path):
     add_callout(
         doc,
         "Quy trình kiểm soát xuất bãi 2 cấp độc lập:\n"
-        "• CẤP 1 (Thương vụ CCKB): Kiểm tra đối soát tiền cước điện lạnh và tiền lưu bãi. Nếu chủ hàng thanh toán đầy đủ hoặc được phê duyệt ghi nợ bảo lãnh hợp lệ (có lý do), CCKB ký duyệt điều kiện xuất bãi trên phần mềm.\n"
-        "• CẤP 2 (An ninh Bốt Cổng ra): Kiểm tra checklist điện tử trên màn hình: Vé cổng đã thu (✓), Đã rút giắc điện (✓), CCKB đã duyệt (✓). Xác nhận xe lăn bánh ra cổng và in biên lai xuất bãi.",
+        "• CẤP 1 (Nghiệp vụ CCKB): Kiểm tra đối soát tiền cước điện lạnh và tiền lưu bãi. Nếu chủ hàng thanh toán đầy đủ hoặc được phê duyệt ghi nợ bảo lãnh hợp lệ (có lý do), Nghiệp vụ CCKB ký duyệt điều kiện xuất bãi trên phần mềm.\n"
+        "• CẤP 2 (An ninh Bốt Cổng ra): Kiểm tra checklist điện tử trên màn hình: Vé cổng đã thu (✓), Đã rút giắc điện (✓), Nghiệp vụ CCKB đã duyệt (✓). Xác nhận xe lăn bánh ra cổng và in biên lai xuất bãi.",
         title="QUY TRÌNH KIỂM SOÁT XUẤT BÃI 2 CẤP ĐỘC LẬP",
         border_color="223873",
         bg_color="EFF8FF"
@@ -506,7 +506,7 @@ def create_system_doc(output_path):
         ("KTT", "Kế toán trưởng / Kế toán", "Quản lý sổ cái thu phí bến bãi, đối soát doanh thu, kiểm tra biên bản ca trực, chốt sổ kế toán định kỳ."),
         ("THUNGAN", "Thu ngân Bến bãi", "Lập phiếu thu, thu tiền mặt/chuyển khoản, in biên lai, thực hiện kết toán và bàn giao quỹ ca trực."),
         ("DIEUDO", "Điều độ Bến bãi", "Quản lý tồn bãi, sơ đồ phân khu, vị trí container, gán ô đỗ, cập nhật phân loại HÀNG/RỖNG."),
-        ("CCKB", "Kỹ thuật / Thương vụ CCKB", "Lập yêu cầu cắm điện, quản lý phiên cắm/rút, ghi nhật ký nhiệt độ, duyệt điều kiện xuất bãi hoặc bảo lãnh nợ."),
+        ("CCKB", "Nghiệp vụ Cổng cảng Kho bãi", "Lập yêu cầu cắm điện, quản lý phiên cắm/rút, ghi nhật ký nhiệt độ, duyệt điều kiện xuất bãi hoặc bảo lãnh nợ."),
         ("ANNINH", "An ninh Bốt Cổng (Vào/Ra)", "Check-in xe vào bãi, thu vé cổng, in vé, kiểm soát điều kiện xuất bãi, thu phí lưu bãi và xác nhận xe ra cổng.")
     ]
     
@@ -612,8 +612,8 @@ def create_system_doc(output_path):
     uat_data = [
         ("An ninh Cổng trực ca (SEC_STAFF)", "An Ninh Sơn Cảng", "anninh.talunglogistics@gmail.com", "Anninh@2026"),
         ("Trưởng BP An ninh (SEC_LEAD)", "Lương Duy Thái", "thaild@talunglogistics.com", "Thaild@2026"),
-        ("Thương vụ CCKB (PORT_STAFF)", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026"),
-        ("Trưởng BP CCKB (PORT_LEAD)", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026"),
+        ("Nghiệp vụ CCKB (PORT_STAFF)", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026"),
+        ("Trưởng BP Nghiệp vụ CCKB (PORT_LEAD)", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026"),
         ("Điều phối viên Bãi (DIS_STAFF)", "Điều phối", "dieuphoi.talunglogistics@gmail.com", "Dieuphoi@2026"),
         ("Quản trị viên Hệ thống (SYS_ADMIN)", "Ban Quản trị IT", "it@talunglogistics.com", "Admin@2026"),
     ]

@@ -504,7 +504,7 @@ export default function ReportsManagementPage() {
             >
               <option value="ALL">Toàn bãi Sơn Cảng</option>
               <option value="AN_NINH">Bộ phận An ninh Cổng</option>
-              <option value="CCKB">Thương vụ CCKB</option>
+              <option value="CCKB">Nghiệp vụ Cổng cảng Kho bãi</option>
             </select>
           </div>
 
@@ -563,7 +563,7 @@ export default function ReportsManagementPage() {
           badge={
             <StatusBadge
               variant="neutral"
-              label={deptFilter === 'ALL' ? 'Toàn bãi Sơn Cảng' : deptFilter === 'AN_NINH' ? 'An ninh Cổng' : 'Thương vụ CCKB'}
+              label={deptFilter === 'ALL' ? 'Toàn bãi Sơn Cảng' : deptFilter === 'AN_NINH' ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'}
             />
           }
           actions={
@@ -1192,7 +1192,7 @@ export default function ReportsManagementPage() {
                   Kỳ báo cáo: <span className="font-bold text-slate-900 font-mono">{periodDisplayTitle}</span>
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  Bộ phận đối soát: {deptFilter === 'ALL' ? 'Toàn bãi Sơn Cảng' : deptFilter === 'AN_NINH' ? 'Bộ phận An ninh Cổng' : 'Thương vụ CCKB'}
+                  Bộ phận đối soát: {deptFilter === 'ALL' ? 'Toàn bãi Sơn Cảng' : deptFilter === 'AN_NINH' ? 'Bộ phận An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'}
                 </p>
               </div>
 
@@ -1268,7 +1268,7 @@ export default function ReportsManagementPage() {
                       <tr>
                         <td className="p-2 font-mono">2</td>
                         <td className="p-2 font-semibold text-slate-900">Tiền điện Container Lạnh (Reefer)</td>
-                        <td className="p-2 text-slate-700">Thương vụ CCKB</td>
+                        <td className="p-2 text-slate-700">Nghiệp vụ Cổng cảng Kho bãi</td>
                         <td className="p-2 text-right font-mono text-slate-900">{revenueBreakdown.reefer.toLocaleString('vi-VN')}</td>
                         <td className="p-2 text-right font-mono text-slate-700">{totalRevenue > 0 ? Math.round((revenueBreakdown.reefer / totalRevenue) * 100) : 0}%</td>
                       </tr>

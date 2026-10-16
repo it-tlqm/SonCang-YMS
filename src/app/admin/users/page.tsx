@@ -168,18 +168,18 @@ const ROLES_V5_METADATA = [
   },
   {
     code: 'PORT_STAFF' as RoleCode,
-    name: 'Nhân viên Thương vụ CCKB',
+    name: 'Nhân viên Nghiệp vụ Cổng cảng Kho bãi',
     deptCode: 'CCKB' as DepartmentCode,
-    deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    deptName: 'Bộ phận Nghiệp vụ Cổng cảng Kho bãi',
     description: 'Tiếp nhận yêu cầu cắm điện trước, ghi nhận giờ cắm/rút điện, thu tiền điện, duyệt điều kiện xuất bãi.',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
     avatarBg: 'bg-amber-600',
   },
   {
     code: 'PORT_LEAD' as RoleCode,
-    name: 'Trưởng bộ phận CCKB',
+    name: 'Trưởng bộ phận Nghiệp vụ Cổng cảng Kho bãi',
     deptCode: 'CCKB' as DepartmentCode,
-    deptName: 'Bộ phận Thương vụ & Cảng cạn CCKB',
+    deptName: 'Bộ phận Nghiệp vụ Cổng cảng Kho bãi',
     description: 'Duyệt điều chỉnh giờ điện đã thu, duyệt xuất bãi ngoại lệ nợ (AP07), chốt doanh thu điện cont.',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
     avatarBg: 'bg-amber-700',
@@ -731,7 +731,7 @@ export default function UsersAndRbacAdminPage() {
             <span className="text-xl font-bold font-mono text-[#0A9444] mt-0.5 block">{secCount}</span>
           </div>
           <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
-            <span className="text-[11px] text-[#667085] block">Thương vụ CCKB</span>
+            <span className="text-[11px] text-[#667085] block">Nghiệp vụ CCKB</span>
             <span className="text-xl font-bold font-mono text-[#B54708] mt-0.5 block">{portCount}</span>
           </div>
           <div className="bg-white p-3 rounded-lg border border-[#E5E9F0] col-span-2 sm:col-span-1">
@@ -1280,10 +1280,10 @@ export default function UsersAndRbacAdminPage() {
                     <th className="py-2.5 px-2 text-center text-emerald-900 min-w-[70px]" title="Trưởng bộ phận An ninh">
                       SEC_LEAD
                     </th>
-                    <th className="py-2.5 px-2 text-center text-amber-800 min-w-[70px]" title="Nhân viên Thương vụ CCKB">
+                    <th className="py-2.5 px-2 text-center text-amber-800 min-w-[70px]" title="Nhân viên Nghiệp vụ Cổng cảng Kho bãi">
                       PORT_STAFF
                     </th>
-                    <th className="py-2.5 px-2 text-center text-amber-900 min-w-[70px]" title="Trưởng bộ phận Thương vụ CCKB">
+                    <th className="py-2.5 px-2 text-center text-amber-900 min-w-[70px]" title="Trưởng bộ phận Nghiệp vụ Cổng cảng Kho bãi">
                       PORT_LEAD
                     </th>
                     <th className="py-2.5 px-2 text-center text-blue-800 min-w-[70px]" title="Nhân viên Điều phối Bãi">
@@ -1685,7 +1685,7 @@ export default function UsersAndRbacAdminPage() {
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-semibold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
                   <option value="AN_NINH">Bộ phận An ninh & Bảo vệ (AN_NINH)</option>
-                  <option value="CCKB">Bộ phận Thương vụ & Cảng cạn CCKB (CCKB)</option>
+                  <option value="CCKB">Bộ phận Nghiệp vụ Cổng cảng Kho bãi (CCKB)</option>
                   <option value="DIEU_PHOI">Bộ phận Điều phối & Hiện trường (DIEU_PHOI)</option>
                   <option value="HE_THONG">Ban Quản trị & Công nghệ (HE_THONG)</option>
                 </select>

@@ -499,7 +499,7 @@ export default function ExitClearancePage() {
         }
 
         if (!isTrailingContCleared) {
-          setExitError('Container có phát sinh cắm điện nhưng chưa được Thương vụ CCKB phê duyệt điều kiện xuất bãi (Clearance)! Vui lòng liên hệ CCKB kiểm tra và duyệt trên hệ thống.');
+          setExitError('Container có phát sinh cắm điện nhưng chưa được Nghiệp vụ Cổng cảng Kho bãi phê duyệt điều kiện xuất bãi (Clearance)! Vui lòng liên hệ Nghiệp vụ CCKB kiểm tra và duyệt trên hệ thống.');
           setIsSubmittingExit(false);
           return;
         }
@@ -818,7 +818,7 @@ export default function ExitClearancePage() {
           icon={LogOut}
           badge={
             <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
-              Bốt Cổng ra & Thương vụ CCKB
+              Bốt Cổng ra & Nghiệp vụ Cổng cảng Kho bãi
             </span>
           }
           actions={
@@ -924,7 +924,7 @@ export default function ExitClearancePage() {
             },
             {
               id: 'CLEARANCE',
-              label: 'Thương vụ CCKB: Duyệt xuất',
+              label: 'Nghiệp vụ CCKB: Duyệt xuất',
               count: reeferPendingCount,
               icon: FileCheck,
             },
@@ -1160,14 +1160,14 @@ export default function ExitClearancePage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: THƯƠNG VỤ CCKB DUYỆT ĐIỀU KIỆN XUẤT BÃI (CLEARANCE)               */}
+      {/* TAB 2: NGHIỆP VỤ CCKB DUYỆT ĐIỀU KIỆN XUẤT BÃI (CLEARANCE)               */}
       {/* ========================================================================= */}
       {activeTab === 'CLEARANCE' && (
         <div className="bg-white rounded-xl border border-[#E5E9F0] flex-1 flex flex-col min-h-[540px]">
           <div className="p-3.5 border-b border-[#E5E9F0] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h2 className="text-xs font-semibold text-[#17202E] uppercase tracking-wider flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-[#223873]" />
-              Thương vụ CCKB: Kiểm soát tài chính & Duyệt xuất bãi Container
+              Nghiệp vụ Cổng cảng Kho bãi: Kiểm soát tài chính & Duyệt xuất bãi Container
             </h2>
             <span className="text-[11px] text-[#667085] font-medium">
               Kiểm tra cước điện lạnh, công nợ, duyệt bảo lãnh trước khi container ra cổng
@@ -2052,7 +2052,7 @@ export default function ExitClearancePage() {
           <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 border border-[#E5E9F0]">
             <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB</span>
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Nghiệp vụ Cổng cảng Kho bãi</span>
                 <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
                   <FileCheck className="w-5 h-5 text-[#326DD8]" />
                   Duyệt Điều Kiện Xuất Bãi

@@ -58,7 +58,7 @@ export function CreateSettlementModal({
 
       setPeriodFrom(formatLocalISO(todayStart));
       setPeriodTo(formatLocalISO(now));
-      setHandoverPersonName(handoverDept === 'AN_NINH' ? 'Hoàng Văn Tuấn (Ca trưởng An ninh)' : 'Lê Thị Dung (Thương vụ CCKB)');
+      setHandoverPersonName(handoverDept === 'AN_NINH' ? 'Hoàng Văn Tuấn (Ca trưởng An ninh)' : 'Lê Thị Dung (Nghiệp vụ CCKB)');
       setErrorMessage('');
       setDifferenceReason('');
       setNotes('');
@@ -203,7 +203,7 @@ export function CreateSettlementModal({
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <option value="AN_NINH">Bốt An ninh Cổng vào/ra</option>
-                <option value="CCKB">Quầy Thương vụ CCKB</option>
+                <option value="CCKB">Quầy Nghiệp vụ Cổng cảng Kho bãi</option>
                 <option value="ALL">Toàn bộ Hiện trường</option>
               </select>
             </div>

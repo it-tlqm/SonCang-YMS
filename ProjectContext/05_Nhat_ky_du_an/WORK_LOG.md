@@ -1,5 +1,41 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 16:10 — Chuẩn Hóa Toàn Diện Danh Xưng Bộ Phận: Đổi 'Thương vụ CCKB' Thành 'Nghiệp vụ Cổng cảng Kho bãi' (Nghiệp vụ CCKB) Trên Toàn Hệ Thống & Tài Liệu
+
+- **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:
+  *"alo nhầm rồi tất cả chỗ ghi Thương vụ CCKB mà đúng là Nghiệp vụ Cổng cảng Kho bãi sửa lại tất cả đi"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Khảo sát cơ sở dữ liệu & Tên gọi nghiệp vụ chuẩn:**
+     - Kiểm tra trực tiếp bảng `app_departments` trên Supabase PostgreSQL Cloud: Bộ phận có mã `CCKB` vốn có tên chính thức là `"Bộ phận Nghiệp vụ cổng cảng kho bãi"`.
+     - Danh xưng "Thương vụ CCKB" là sự nhầm lẫn câu chữ trong giao diện trước đây. Cần chuẩn hóa đồng bộ 100% sang: **"Nghiệp vụ Cổng cảng Kho bãi"** (hoặc viết gọn ngữ cảnh: **"Nghiệp vụ CCKB"**).
+     - Giữ nguyên các mã định danh nội bộ hệ thống (`PORT_STAFF`, `PORT_LEAD`, `CCKB`) để không làm ảnh hưởng đến RLS, quyền hạn RBAC hay cơ sở dữ liệu.
+  2. **Cập nhật đồng bộ trên toàn bộ Codebase (21 tệp nguồn):**
+     - `src/types/auth.types.ts`: Đổi `roleName: 'Nhân viên Nghiệp vụ Cổng cảng Kho bãi'`, `fullName: 'Lê Thị Dung (Nghiệp vụ CCKB)'`, `departmentName: 'Bộ phận Nghiệp vụ Cổng cảng Kho bãi'`, `roleName: 'Trưởng bộ phận Nghiệp vụ Cổng cảng Kho bãi'`.
+     - `src/contexts/auth-context.tsx`: Đổi `resolvedDepartmentName = 'Bộ phận Nghiệp vụ Cổng cảng Kho bãi'`.
+     - `src/lib/services/demo-repository.ts` & `src/lib/services/supabase-repository.ts`: Đổi `collected_by_name` và nhãn hiển thị vai trò `PORT_STAFF` / `PORT_LEAD`.
+     - `src/lib/export-excel.ts`: Đổi tiêu đề xuất Excel bộ phận bàn giao và đối soát sang `'Nghiệp vụ Cổng cảng Kho bãi'`.
+     - `src/app/accounting/page.tsx`: Cập nhật bộ lọc dropdown, bảng kiểm kê bàn giao, KPI card (`Quầy Nghiệp vụ Cổng cảng Kho bãi`).
+     - `src/app/admin/users/page.tsx`: Cập nhật master roles, KPI cards theo bộ phận, ma trận phân quyền RBAC và modal tạo vai trò.
+     - `src/app/billing/page.tsx`: Cập nhật bộ lọc thu ngân, bảng thu phí, modal thu gộp nhiều khoản, modal duyệt bảo lãnh nợ AP07.
+     - `src/app/entry/page.tsx`: Cập nhật thông báo ghép phiếu yêu cầu điện cắm trước.
+     - `src/app/exit/page.tsx`: Cập nhật badge bốt cổng (`Bốt Cổng ra & Nghiệp vụ Cổng cảng Kho bãi`), Tab 2 (`Nghiệp vụ CCKB: Duyệt xuất`), cảnh báo kiểm tra tài chính container và modal duyệt xuất bãi.
+     - `src/app/reefer/page.tsx`: Cập nhật các banner hướng dẫn, kicker modal chỉnh sửa cắm/rút thực tế và modal tạo yêu cầu cắm điện.
+     - `src/app/reports/page.tsx`: Cập nhật bộ lọc phân loại báo cáo, huy hiệu trạng thái, bảng kê cơ cấu doanh thu theo dịch vụ và bản in báo cáo kỳ.
+     - `src/app/yard/page.tsx`: Cập nhật quy trình và nút liên kết cắm điện container tại modal trụ điện 380V.
+     - `src/components/accounting/create-settlement-modal.tsx`: Cập nhật người bàn giao mặc định (`Lê Thị Dung (Nghiệp vụ CCKB)`) và dropdown quầy thu nộp quỹ.
+     - `src/components/accounting/settlement-receipt-print.tsx`: Cập nhật nhãn bộ phận bàn giao và cột thu ngân trong phiếu in biên bản bàn giao tiền mặt.
+     - `src/data/seed-accounting-data.ts`: Chuẩn hóa 154 bản ghi lịch sử `collected_by_name` sang `'Nghiệp vụ CCKB (Ánh Bé)'`.
+  3. **Cập nhật Scripts & Tái tạo toàn bộ 4 Tài liệu Dự Án:**
+     - `scripts/generate_system_doc.py` & `scripts/generate_user_guide_doc.py`: Đổi toàn bộ các vị trí đề cập vai trò, quy trình 2 cấp độc lập và danh sách tài khoản UAT.
+     - Chạy lại các script tạo file:
+       * `Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx` & `.pdf` (4.58 MB)
+       * `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` & `.pdf` (4.45 MB)
+       * Copy đầy đủ cả 2 file `.pdf` ra thư mục gốc để thuận tiện tra cứu.
+- **Kiểm thử xác thực:**
+  - Quét regex toàn bộ thư mục `src` và `scripts`: Hoàn toàn KHÔNG còn chuỗi "Thương vụ", "Thương Vụ" hay "thương vụ" (0 matches).
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
 ## 2026-10-16 15:35 — Tái Tạo Toàn Diện Bộ Tài Liệu Dự Án (.DOCX & .PDF) Cập Nhật Đầy Đủ Các Quyết Định Nâng Cấp Mới Nhất
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:

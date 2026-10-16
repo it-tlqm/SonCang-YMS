@@ -1575,7 +1575,7 @@ export class SupabaseRepository implements IYardRepository {
           payment_amount: Number(p.payment_amount) || 0,
           payment_method: p.payment_method,
           collected_by: p.collected_by,
-          collected_by_name: p.collected_by_name || (p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Thương vụ CCKB'),
+          collected_by_name: p.collected_by_name || (p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'),
           collector_dept: p.collector_dept,
           collected_at: p.collected_at,
           receipt_code: p.receipt_code,
@@ -3326,8 +3326,8 @@ export class SupabaseRepository implements IYardRepository {
     return [
       { code: 'SEC_STAFF', name: 'Nhân viên An ninh Cổng', department_code: 'AN_NINH', description: 'Trực ca bốt cổng vào & cổng ra', is_active: true, permissions_count: 26 },
       { code: 'SEC_LEAD', name: 'Trưởng bộ phận An ninh', department_code: 'AN_NINH', description: 'Giám sát ca trực an ninh, duyệt điều chỉnh', is_active: true, permissions_count: 31 },
-      { code: 'PORT_STAFF', name: 'Nhân viên Thương vụ CCKB', department_code: 'CCKB', description: 'Quản lý yêu cầu điện, thu tiền điện container', is_active: true, permissions_count: 31 },
-      { code: 'PORT_LEAD', name: 'Trưởng bộ phận CCKB', department_code: 'CCKB', description: 'Trưởng ca CCKB, phê duyệt công nợ và clearance', is_active: true, permissions_count: 38 },
+      { code: 'PORT_STAFF', name: 'Nhân viên Nghiệp vụ Cổng cảng Kho bãi', department_code: 'CCKB', description: 'Quản lý yêu cầu điện, thu tiền điện container', is_active: true, permissions_count: 31 },
+      { code: 'PORT_LEAD', name: 'Trưởng bộ phận Nghiệp vụ Cổng cảng Kho bãi', department_code: 'CCKB', description: 'Trưởng ca CCKB, phê duyệt công nợ và clearance', is_active: true, permissions_count: 38 },
       { code: 'DIS_STAFF', name: 'Nhân viên Điều phối Bãi', department_code: 'DIEU_PHOI', description: 'Cập nhật tình trạng HÀNG/RỖNG hiện trường', is_active: true, permissions_count: 9 },
       { code: 'DIS_LEAD', name: 'Trưởng bộ phận Điều phối', department_code: 'DIEU_PHOI', description: 'Trưởng ca điều phối bến bãi', is_active: true, permissions_count: 11 },
       { code: 'SYS_ADMIN', name: 'Quản trị viên Hệ thống', department_code: 'HE_THONG', description: 'Toàn quyền cấu hình, tài khoản và audit logs', is_active: true, permissions_count: 60 }

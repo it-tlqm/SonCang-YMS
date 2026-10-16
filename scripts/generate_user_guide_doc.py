@@ -333,8 +333,8 @@ def generate_user_guide_doc(output_path):
     accounts_data = [
         ("An ninh Cổng trực ca", "An Ninh Sơn Cảng", "anninh.talunglogistics@gmail.com", "Anninh@2026", "SEC_STAFF (26 quyền)"),
         ("Trưởng bộ phận An ninh", "Lương Duy Thái", "thaild@talunglogistics.com", "Thaild@2026", "SEC_LEAD (31 quyền)"),
-        ("Nhân viên Thương vụ CCKB", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026", "PORT_STAFF (31 quyền)"),
-        ("Trưởng bộ phận CCKB", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026", "PORT_LEAD (38 quyền)"),
+        ("Nhân viên Nghiệp vụ Cổng cảng Kho bãi", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026", "PORT_STAFF (31 quyền)"),
+        ("Trưởng bộ phận Nghiệp vụ Cổng cảng Kho bãi", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026", "PORT_LEAD (38 quyền)"),
         ("Nhân viên Điều phối bãi", "Điều phối", "dieuphoi.talunglogistics@gmail.com", "Dieuphoi@2026", "DIS_STAFF (9 quyền)"),
         ("Quản trị viên Hệ thống", "Ban Quản trị IT", "it@talunglogistics.com", "Admin@2026", "SYS_ADMIN (63 quyền)"),
     ]
@@ -423,7 +423,7 @@ def generate_user_guide_doc(output_path):
     doc.add_paragraph(
         "Hệ thống hỗ trợ đầy đủ trường hợp xe đầu kéo kéo mooc chở cùng lúc 2 container 20ft (chế độ 'Cặp 2 container 20ft'). "
         "Mỗi container được cấp một mã lượt độc lập (`container_visit_id`), đảm bảo tính toán tiền điện và phí lưu bãi chính xác từng cont.\n"
-        "Đồng thời, nếu Thương vụ CCKB đã lập phiếu cắm điện dự kiến trước, hệ thống sẽ hiển thị thẻ thông báo màu xanh dương nổi bật "
+        "Đồng thời, nếu Nghiệp vụ Cổng cảng Kho bãi đã lập phiếu cắm điện dự kiến trước, hệ thống sẽ hiển thị thẻ thông báo màu xanh dương nổi bật "
         "tại cột 'Đối chiếu & Trợ giúp' để An ninh ghép nối 1-chạm."
     )
 
@@ -571,7 +571,7 @@ def generate_user_guide_doc(output_path):
         "3 ĐIỀU KIỆN XUẤT BÃI BẮT BUỘC:\n"
         "1. Vé vào bãi: Đã thanh toán tiền vé vào bãi (PAID) hoặc thuộc diện Miễn phí hợp lệ (EXEMPT).\n"
         "2. Rút điện an toàn: Container lạnh KHÔNG CÒN CẮM ĐIỆN VẬT LÝ ngoài bãi (Phải rút điện trước khi lăn bánh).\n"
-        "3. Xác nhận Thương vụ CCKB: CCKB đã xác nhận đủ điều kiện tài chính hoặc chấp thuận Bảo lãnh công nợ có lý do.",
+        "3. Xác nhận Nghiệp vụ CCKB: Nghiệp vụ CCKB đã xác nhận đủ điều kiện tài chính hoặc chấp thuận Bảo lãnh công nợ có lý do.",
         "3 ĐIỀU KIỆN XUẤT BÃI KHÔNG THỂ BỎ QUA"
     )
 
@@ -599,15 +599,15 @@ def generate_user_guide_doc(output_path):
     add_h2("5.2. Nghiệp vụ CCKB Duyệt xuất bãi (Bảo lãnh công nợ AP07)")
     doc.add_paragraph(
         "Trường hợp chủ hàng container lạnh chưa kịp thanh toán tiền điện nhưng xin bảo lãnh cho xe ra trước để kịp giờ giao hàng: "
-        "Cán bộ CCKB chuyển sang tab 'Thương vụ CCKB (Duyệt xuất)' → Chọn container → Bấm 'Duyệt xuất bãi (Bảo lãnh nợ)' → "
+        "Cán bộ Nghiệp vụ CCKB chuyển sang tab 'Nghiệp vụ CCKB: Duyệt xuất' → Chọn container → Bấm 'Duyệt xuất bãi (Bảo lãnh nợ)' → "
         "Bắt buộc chọn Khách hàng công nợ và nhập Lý do bảo lãnh. Hệ thống ghi nhận khoản nợ vào Sổ công nợ AP07 để Kế toán thu hồi sau."
     )
 
     add_image_placeholder(doc,
         code="IMG-EXIT-02",
-        title="Tab Thương vụ CCKB Duyệt xuất bãi & Hộp thoại Bảo lãnh Công nợ (/exit)",
+        title="Tab Nghiệp vụ CCKB Duyệt xuất bãi & Hộp thoại Bảo lãnh Công nợ (/exit)",
         description="Giao diện duyệt điều kiện tài chính của CCKB và modal bảo lãnh công nợ có lý do bắt buộc.",
-        focus_note="Tab 'Thương vụ CCKB (Duyệt xuất)', nút 'Duyệt xuất bảo lãnh' và ô chọn đối tác công nợ AP07."
+        focus_note="Tab 'Nghiệp vụ CCKB: Duyệt xuất', nút 'Duyệt xuất bảo lãnh' và ô chọn đối tác công nợ AP07."
     )
 
     # -------------------------------------------------------------
@@ -735,7 +735,7 @@ def generate_user_guide_doc(output_path):
         ("IMG-REEFER-02", "Hộp thoại Rút điện Chốt cước (Tròn đến 5k)", "/reefer", "CCKB Điện lạnh"),
         ("IMG-REEFER-03", "Phiếu điện dự kiến & Nhật ký nhiệt độ", "/reefer", "CCKB Điện lạnh"),
         ("IMG-EXIT-01", "Kiểm soát Xuất bãi & Checklist điều kiện", "/exit", "An ninh Cổng ra"),
-        ("IMG-EXIT-02", "Thương vụ CCKB Duyệt xuất bảo lãnh nợ", "/exit", "CCKB & An ninh"),
+        ("IMG-EXIT-02", "Nghiệp vụ CCKB Duyệt xuất bảo lãnh nợ", "/exit", "CCKB & An ninh"),
         ("IMG-BILLING-01", "Sổ cái thu phí & Thu gộp nhiều khoản", "/billing", "Kế toán / Thu ngân"),
         ("IMG-ACCOUNTING-01", "Chốt tiền mặt hiện trường & Sổ Hóa đơn", "/accounting", "Kế toán bến bãi"),
         ("IMG-REPORTS-01", "Báo cáo Vận hành & Phân tích Dòng tiền", "/reports", "Ban Giám đốc & TBP"),

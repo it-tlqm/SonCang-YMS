@@ -829,7 +829,7 @@ export default function ReeferMonitoringPage() {
             status: 'PLUGGED',
           });
         } else {
-          // Tự động tạo yêu cầu cắm điện để đồng bộ hồ sơ thương vụ CCKB
+          // Tự động tạo yêu cầu cắm điện để đồng bộ hồ sơ Nghiệp vụ Cổng cảng Kho bãi
           await repository.createReeferRequest({
             yardId,
             containerNo: targetCont.container_no_current,
@@ -2247,7 +2247,7 @@ export default function ReeferMonitoringPage() {
                       <div className="mt-1.5 p-2.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-lg text-[11px] text-[#175CD3] flex items-start gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#326DD8] shrink-0 mt-0.5" />
                         <span>
-                          Container này chưa có yêu cầu trước. Hệ thống sẽ tự động lập phiếu yêu cầu CCKB tương ứng khi cắm điện để lưu đầy đủ chứng từ thương vụ!
+                          Container này chưa có yêu cầu trước. Hệ thống sẽ tự động lập phiếu yêu cầu CCKB tương ứng khi cắm điện để lưu đầy đủ chứng từ nghiệp vụ!
                         </span>
                       </div>
                     )}
@@ -2711,7 +2711,7 @@ export default function ReeferMonitoringPage() {
                       <div className="mt-1.5 p-2.5 bg-[#EFF8FF] border border-[#B2DDFF] rounded-lg text-[11px] text-[#175CD3] flex items-start gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#326DD8] shrink-0 mt-0.5" />
                         <span>
-                          Container này chưa có yêu cầu trước. Khi xác nhận, hệ thống sẽ tự động lập phiếu yêu cầu CCKB hoàn tất tương ứng để lưu đầy đủ chứng từ thương vụ!
+                          Container này chưa có yêu cầu trước. Khi xác nhận, hệ thống sẽ tự động lập phiếu yêu cầu CCKB hoàn tất tương ứng để lưu đầy đủ chứng từ nghiệp vụ!
                         </span>
                       </div>
                     )}
@@ -2864,7 +2864,7 @@ export default function ReeferMonitoringPage() {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB Bến bãi</span>
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Nghiệp vụ Cổng cảng Kho bãi</span>
                 <h3 className="text-base font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
                   <Pencil className="w-5 h-5 text-[#326DD8]" />
                   Sửa Cắm / Rút Thực tế & Khớp Giờ Zalo
@@ -3347,7 +3347,7 @@ export default function ReeferMonitoringPage() {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-[#E5E9F0] space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Thương vụ CCKB Bến bãi</span>
+                <span className="text-[10px] font-bold uppercase text-[#326DD8] tracking-wider">Nghiệp vụ Cổng cảng Kho bãi</span>
                 <h3 className="text-base font-bold text-[#17202E] flex items-center gap-1.5 mt-0.5">
                   <Zap className="w-5 h-5 text-[#D97706] fill-current" />
                   Tạo yêu cầu Cắm điện Container

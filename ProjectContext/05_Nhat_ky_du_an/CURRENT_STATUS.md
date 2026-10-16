@@ -1567,8 +1567,11 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
   - **Gói chuyển giao & Báo cáo:**
     * Bundle ZIP: `phase1d_01_pwa_bundle.zip` (SHA-256: `FAC4D6D9AC8D0EA8F208876191CE20DDE69C6D6789146EDC54DA26AA5E63A743`).
     * Báo cáo chi tiết: `ProjectContext/06_Kien_truc_va_kiem_thu/PHASE1D_01_PWA_DEMO_REPORT.md`.
-- **Trạng thái Môi trường & Cam kết Tuyệt đối:**
-  - Supabase Cloud DEV: Giữ nguyên vẹn 100%, không ghi bất kỳ giao dịch thật nào.
-  - Server PWA: Đang phục vụ tại `http://localhost:3000` để Chủ dự án nghiệm thu trực quan.
-  - **Cam kết:** DỪNG BẮT BUỘC, chờ ý kiến đánh giá giao diện từ Người dùng.
+- **Cập nhật lúc:** 16/10/2026 16:15
+- **Mốc hiện tại:** **HOÀN THÀNH CHUẨN HÓA TOÀN DIỆN DANH XƯNG BỘ PHẬN: ĐỔI 'THƯƠNG VỤ CCKB' THÀNH 'NGHIỆP VỤ CỔNG CẢNG KHO BÃI' (NGHIỆP VỤ CCKB) TRÊN TOÀN BỘ HỆ THỐNG CODEBASE, GIAO DIỆN & TÁI TẠO 4 BỘ TÀI LIỆU DỰ ÁN (DOCX & PDF) — KIỂM THỬ TSC PASS, BUILD 20/20 ROUTES THÀNH CÔNG.**
+- **Chi tiết Triển khai:**
+  - Chuẩn hóa 100% các hiển thị nhãn, filter, modal, receipt print và seed data sang **"Nghiệp vụ Cổng cảng Kho bãi"** (viết gọn: **"Nghiệp vụ CCKB"**) theo đúng hồ sơ gốc `app_departments` (mã `CCKB`: `"Bộ phận Nghiệp vụ cổng cảng kho bãi"`).
+  - Giữ nguyên các mã định danh kỹ thuật nội bộ (`PORT_STAFF`, `PORT_LEAD`, `CCKB`) bảo đảm RLS và phân quyền RBAC hoạt động ổn định.
+  - Tái tạo 4 tài liệu dự án (.docx & .pdf) bằng LibreOffice, copy bản sao PDF ra thư mục gốc (`Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf` và `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.pdf`).
+  - Kiểm tra toàn diện: TypeScript `tsc --noEmit` PASS, Next.js Production Build `npm run build` PASS (20/20 routes).
 

@@ -398,7 +398,7 @@ export default function CashierBillingPage() {
         receiptCode,
         payMethod,
         payDate: new Date().toISOString(),
-        operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Thương vụ CCKB'),
+        operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'),
         notes: payNotes,
       });
       handleManualRefresh();
@@ -412,7 +412,7 @@ export default function CashierBillingPage() {
       receiptCode: fallbackCode,
       payMethod: 'CASH',
       payDate: charge.created_at || new Date().toISOString(),
-      operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Thương vụ CCKB'),
+      operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'),
       notes: charge.notes || '',
     });
   };
@@ -480,7 +480,7 @@ export default function CashierBillingPage() {
     // Kiểm tra nếu có khoản điện mà là an ninh
     const hasReefer = selectedChargesList.some(c => c.charge_type === 'REEFER');
     if (hasReefer && isSecurityRole) {
-      alert('Cảnh báo phân quyền: Danh sách chọn có khoản tiền điện Container Lạnh thuộc thẩm quyền thu của Thương vụ CCKB! Vui lòng bỏ chọn khoản điện để tiếp tục thu vé/lưu bãi.');
+      alert('Cảnh báo phân quyền: Danh sách chọn có khoản tiền điện Container Lạnh thuộc thẩm quyền thu của Nghiệp vụ Cổng cảng Kho bãi! Vui lòng bỏ chọn khoản điện để tiếp tục thu vé/lưu bãi.');
       return;
     }
 
@@ -531,7 +531,7 @@ export default function CashierBillingPage() {
         receiptCode: batchReceiptCode,
         payMethod: batchPayMethod,
         payDate: new Date().toISOString(),
-        operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Thương vụ CCKB'),
+        operatorName: user?.email || (isSecurityRole ? 'Nhân viên An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'),
         totalAmount: res.totalAmount,
         notes: batchNotes,
       });
@@ -794,7 +794,7 @@ export default function CashierBillingPage() {
         <WorkspaceHeader
           title={
             isCCKBRole
-              ? 'Thu phí Cước điện Container — Thương vụ CCKB'
+              ? 'Thu phí Cước điện Container — Nghiệp vụ Cổng cảng Kho bãi'
               : isSecurityRole
               ? 'Thu phí Vé xe & Tra cứu Lưu bãi — An ninh'
               : 'Sổ cái Tài chính & Thu ngân Bến bãi'
@@ -809,7 +809,7 @@ export default function CashierBillingPage() {
           icon={Receipt}
           badge={
             <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EFF8FF] text-[#326DD8] border border-[#B2DDFF]">
-              {isCCKBRole ? 'Thương vụ CCKB' : isSecurityRole ? 'An ninh Cổng' : 'Tài chính Thu ngân'}
+              {isCCKBRole ? 'Nghiệp vụ Cổng cảng Kho bãi' : isSecurityRole ? 'An ninh Cổng' : 'Tài chính Thu ngân'}
             </span>
           }
           actions={
@@ -1154,7 +1154,7 @@ export default function CashierBillingPage() {
                       const isForbidden = !canCollectCharge(c);
                       let forbiddenReason = '';
                       if (isForbidden) {
-                        if (isReefer) forbiddenReason = 'Khoản thu điện lạnh thuộc thẩm quyền Thương vụ CCKB';
+                        if (isReefer) forbiddenReason = 'Khoản thu điện lạnh thuộc thẩm quyền Nghiệp vụ Cổng cảng Kho bãi';
                         else if (isStorage) forbiddenReason = 'Phí lưu bãi container chỉ thu tại Cổng ra (/exit)';
                         else if (isTicket) forbiddenReason = 'Khoản thu vé xe cổng thuộc phân hệ An ninh';
                       }
@@ -1444,7 +1444,7 @@ export default function CashierBillingPage() {
                 >
                   <option value="ALL">Tất cả bộ phận (Toàn bãi)</option>
                   <option value="AN_NINH">Bộ phận An ninh Cổng (Vé xe & Lưu bãi)</option>
-                  <option value="CCKB">Thương vụ CCKB (Điện Lạnh & Clearance)</option>
+                  <option value="CCKB">Nghiệp vụ Cổng cảng Kho bãi (Điện Lạnh & Clearance)</option>
                 </select>
               </div>
             </div>
@@ -1698,7 +1698,7 @@ export default function CashierBillingPage() {
                         <td className="px-3 py-2.5 text-slate-600">
                           <p className="font-semibold text-slate-800">{p.collected_by_name || 'Nhân viên trực ca'}</p>
                           <p className="text-[10px] text-slate-500">
-                            {p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Thương vụ CCKB'}
+                            {p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'}
                           </p>
                         </td>
                       </tr>
@@ -1845,7 +1845,7 @@ export default function CashierBillingPage() {
           <div className="bg-white rounded-2xl border border-[#E5E9F0] max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
               <div>
-                <span className="text-[10px] font-bold uppercase text-[#D97706] tracking-wider">Thương vụ Thu ngân</span>
+                <span className="text-[10px] font-bold uppercase text-[#D97706] tracking-wider">Nghiệp vụ Cổng cảng Kho bãi</span>
                 <h3 className="text-sm font-bold text-[#17202E] flex items-center gap-2 mt-0.5">
                   <Layers className="w-4 h-4 text-[#D97706]" />
                   Thu Gộp Nhiều Khoản Phí Bến Bãi
@@ -2052,7 +2052,7 @@ export default function CashierBillingPage() {
             <div className="bg-[#F8F9FB] border border-[#E5E9F0] p-3.5 rounded-xl space-y-1 text-xs">
               <p><span className="text-[#667085]">Khoản thu:</span> <span className="font-bold text-[#17202E]">{selectedCharge.title}</span></p>
               <p><span className="text-[#667085]">Số tiền cần thu:</span> <span className="font-mono font-bold text-base text-[#027A48]">{(selectedCharge.amount - selectedCharge.paid_amount).toLocaleString()} VNĐ</span></p>
-              <p><span className="text-[#667085]">Bộ phận thu:</span> <span className="font-semibold text-[#17202E]">{isSecurityRole ? 'An ninh Cổng' : 'Thương vụ CCKB'}</span></p>
+              <p><span className="text-[#667085]">Bộ phận thu:</span> <span className="font-semibold text-[#17202E]">{isSecurityRole ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'}</span></p>
             </div>
 
             <form onSubmit={handleConfirmCollect} className="space-y-3.5 text-xs">
@@ -2530,7 +2530,7 @@ export default function CashierBillingPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-slate-500 font-mono text-[11px]">
                   <div>Thời gian chốt sổ: {currentDateTimeStr || reportDate}</div>
-                  <div>Bộ phận trực: {deptFilter === 'ALL' ? 'Toàn bãi' : deptFilter === 'AN_NINH' ? 'An ninh Cổng' : 'Thương vụ CCKB'}</div>
+                  <div>Bộ phận trực: {deptFilter === 'ALL' ? 'Toàn bãi' : deptFilter === 'AN_NINH' ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi'}</div>
                 </div>
               </div>
 

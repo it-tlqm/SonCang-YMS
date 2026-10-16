@@ -608,7 +608,7 @@ export default function AccountingPage() {
               <span className="text-xl font-black font-mono text-amber-700 block mt-1">
                 {formatCurrency(pendingCashCCKB)}
               </span>
-              <span className="text-[11px] text-slate-400 mt-1 block">Quầy Thương vụ cảng cạn</span>
+              <span className="text-[11px] text-slate-400 mt-1 block">Quầy Nghiệp vụ Cổng cảng Kho bãi</span>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -639,7 +639,7 @@ export default function AccountingPage() {
               >
                 <option value="ALL">Tất cả bộ phận</option>
                 <option value="AN_NINH">An ninh Cổng</option>
-                <option value="CCKB">Thương vụ CCKB</option>
+                <option value="CCKB">Nghiệp vụ Cổng cảng Kho bãi</option>
               </select>
             </div>
 
@@ -693,7 +693,7 @@ export default function AccountingPage() {
                         <td className="px-4 py-3 text-slate-600">{formatDateTime(s.created_at)}</td>
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
-                            {s.handover_dept === 'AN_NINH' ? 'An ninh cổng' : s.handover_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Toàn bãi'}
+                            {s.handover_dept === 'AN_NINH' ? 'An ninh cổng' : s.handover_dept === 'CCKB' ? 'Nghiệp vụ Cổng cảng Kho bãi' : 'Toàn bãi'}
                           </span>
                         </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{s.handover_person_name}</td>
@@ -1130,7 +1130,7 @@ export default function AccountingPage() {
                       <td className="px-4 py-2.5 text-slate-600">{formatDateTime(p.collected_at)}</td>
                       <td className="px-4 py-2.5">
                         <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
-                          {p.collector_dept === 'AN_NINH' ? 'An ninh cổng' : p.collector_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Kế toán'}
+                          {p.collector_dept === 'AN_NINH' ? 'An ninh cổng' : p.collector_dept === 'CCKB' ? 'Nghiệp vụ Cổng cảng Kho bãi' : 'Kế toán'}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-slate-700">{p.collected_by_name || 'Nhân viên'}</td>
@@ -1211,7 +1211,7 @@ export default function AccountingPage() {
               <div className="flex justify-between">
                 <span className="text-[#667085]">Bộ phận:</span>
                 <span className="font-medium text-[#17202E]">
-                  {selectedInspectorItem.item.handover_dept === 'AN_NINH' ? 'An ninh cổng' : selectedInspectorItem.item.handover_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Toàn bãi'}
+                  {selectedInspectorItem.item.handover_dept === 'AN_NINH' ? 'An ninh cổng' : selectedInspectorItem.item.handover_dept === 'CCKB' ? 'Nghiệp vụ Cổng cảng Kho bãi' : 'Toàn bãi'}
                 </span>
               </div>
               <div className="flex justify-between">

@@ -125,7 +125,7 @@ async function fetchRealUserProfile(
 
   // Tên bộ phận hiển thị
   if (resolvedDepartmentCode === 'AN_NINH') resolvedDepartmentName = 'Bộ phận An ninh & Bảo vệ';
-  else if (resolvedDepartmentCode === 'CCKB') resolvedDepartmentName = 'Bộ phận Thương vụ & Cảng cạn CCKB';
+  else if (resolvedDepartmentCode === 'CCKB') resolvedDepartmentName = 'Bộ phận Nghiệp vụ Cổng cảng Kho bãi';
   else if (resolvedDepartmentCode === 'DIEU_PHOI') resolvedDepartmentName = 'Bộ phận Điều phối & Hiện trường';
   else if (resolvedDepartmentCode === 'KE_TOAN') resolvedDepartmentName = 'Bộ phận Kế toán - Tài chính';
   else if (resolvedDepartmentCode === 'HE_THONG') resolvedDepartmentName = 'Ban Quản trị & Công nghệ';

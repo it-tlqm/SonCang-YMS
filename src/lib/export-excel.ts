@@ -333,7 +333,7 @@ export async function exportShiftPaymentsToExcel(payments: PaymentRecord[], shif
       p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản',
       amount,
       p.collected_by_name || '',
-      p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Thương vụ CCKB',
+      p.collector_dept === 'AN_NINH' ? 'An ninh Cổng' : 'Nghiệp vụ Cổng cảng Kho bãi',
       p.notes || '',
     ];
   });
@@ -702,7 +702,7 @@ export async function exportReeferSessionsToExcel(sessions: ReeferPowerSession[]
     'BÁO CÁO GIÁM SÁT DỊCH VỤ ĐIỆN CONTAINER LẠNH (REEFER)',
     columns,
     rows,
-    `Thương vụ CCKB bến bãi (${sessions.length} phiên cắm)`,
+    `Nghiệp vụ Cổng cảng Kho bãi (${sessions.length} phiên cắm)`,
     summaryRow
   );
 
@@ -1050,7 +1050,7 @@ export async function exportAccountingReportExcel(params: {
   let sumPaymentAmount = 0;
   const sheet1Rows = payments.map((p, idx) => {
     sumPaymentAmount += p.payment_amount;
-    const deptStr = p.collector_dept === 'AN_NINH' ? 'An ninh cổng' : p.collector_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Kế toán';
+    const deptStr = p.collector_dept === 'AN_NINH' ? 'An ninh cổng' : p.collector_dept === 'CCKB' ? 'Nghiệp vụ Cổng cảng Kho bãi' : 'Kế toán';
     const methodStr = p.payment_method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản (VietQR)';
     return [
       idx + 1,
@@ -1113,7 +1113,7 @@ export async function exportAccountingReportExcel(params: {
     sumCashCounted += s.total_cash_counted;
     sumDiff += s.difference_amount;
     sumTransferSettle += s.total_transfer_amount;
-    const deptStr = s.handover_dept === 'AN_NINH' ? 'An ninh cổng' : s.handover_dept === 'CCKB' ? 'Thương vụ CCKB' : 'Toàn bãi';
+    const deptStr = s.handover_dept === 'AN_NINH' ? 'An ninh cổng' : s.handover_dept === 'CCKB' ? 'Nghiệp vụ Cổng cảng Kho bãi' : 'Toàn bãi';
 
     return [
       idx + 1,

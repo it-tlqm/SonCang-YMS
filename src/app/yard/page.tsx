@@ -4638,7 +4638,7 @@ export default function YardMonitorPage() {
                   <div>
                     <span className="font-bold">Quy trình cắm điện Container Lạnh</span>
                     <p className="text-[11px] text-[#93370D] mt-0.5">
-                      Theo quy trình chuẩn Sơn Cảng, thao tác lập phiếu cắm điện, quản lý nhiệt độ và tính cước được thực hiện tại phân hệ <b>Thương vụ CCKB</b>.
+                      Theo quy trình chuẩn Sơn Cảng, thao tác lập phiếu cắm điện, quản lý nhiệt độ và tính cước được thực hiện tại phân hệ <b>Nghiệp vụ Cổng cảng Kho bãi</b>.
                     </p>
                   </div>
                 </div>
@@ -4649,7 +4649,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
-                    <span>👉 Mở Thương vụ CCKB lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
+                    <span>👉 Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
                   </Link>
 
                   <button

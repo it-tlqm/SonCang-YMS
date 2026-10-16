@@ -72,7 +72,7 @@ export function SettlementReceiptPrint({ settlement, items = [], onClose }: Sett
   const getDeptName = (dept: string) => {
     switch (dept) {
       case 'AN_NINH': return 'Bốt An ninh Cổng';
-      case 'CCKB': return 'Quầy Thương vụ Cảng cạn CCKB';
+      case 'CCKB': return 'Quầy Nghiệp vụ Cổng cảng Kho bãi';
       default: return 'Toàn bộ Bến bãi Hiện trường';
     }
   };
@@ -268,7 +268,7 @@ export function SettlementReceiptPrint({ settlement, items = [], onClose }: Sett
                       <td className="border border-slate-300 px-2 py-1 text-center">{idx + 1}</td>
                       <td className="border border-slate-300 px-2 py-1 font-mono font-medium">{it.receipt_code || it.id.substring(0, 13)}</td>
                       <td className="border border-slate-300 px-2 py-1 text-center text-slate-600">{formatDateTime(it.collected_at)}</td>
-                      <td className="border border-slate-300 px-2 py-1">{it.collector_dept === 'AN_NINH' ? 'An ninh cổng' : 'CCKB thương vụ'}</td>
+                      <td className="border border-slate-300 px-2 py-1">{it.collector_dept === 'AN_NINH' ? 'An ninh cổng' : 'Nghiệp vụ CCKB'}</td>
                       <td className="border border-slate-300 px-2 py-1 text-slate-700">{it.collected_by_name || 'Nhân viên'}</td>
                       <td className="border border-slate-300 px-2 py-1 text-right font-mono font-medium">{formatCurrency(it.payment_amount)}</td>
                     </tr>

@@ -1072,7 +1072,7 @@ export default function EntryGatePage() {
                 <span>Khớp yêu cầu cắm điện trước!</span>
               </div>
               <p className="text-[11px] text-[#17202E] leading-relaxed">
-                Thương vụ CCKB đã tạo phiếu dự kiến cho cont <strong>{matchedReeferRequest.container_no}</strong>. Hệ thống sẽ tự động ghép lượt khi tiếp nhận.
+                Nghiệp vụ Cổng cảng Kho bãi đã tạo phiếu dự kiến cho cont <strong>{matchedReeferRequest.container_no}</strong>. Hệ thống sẽ tự động ghép lượt khi tiếp nhận.
               </p>
               <div className="text-[10px] text-[#667085]">
                 Khách hàng: {matchedReeferRequest.customer_name || 'Vãng lai'} · Chế độ: {matchedReeferRequest.power_mode === 'HOURLY' ? 'Theo giờ' : 'Liên tục'}
