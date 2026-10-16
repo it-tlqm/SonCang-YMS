@@ -398,9 +398,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authMode: AuthMode = user?.authMode || 'DEMO';
   const isDemoMode = authMode === 'DEMO';
-  // Luôn kết nối Supabase Cloud thực tế khi có cấu hình Supabase URL hoặc cờ REAL_WRITE
+  // Khi authMode === 'REAL' (đăng nhập bằng tài khoản Supabase Auth thật) -> SUPABASE
+  // Khi authMode === 'DEMO' (đăng nhập 1-chạm kiểm thử theo vai trò) -> DEMO
   const repository = getYardRepository(
-    authMode === 'REAL' || process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true' || Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
+    authMode === 'REAL' || process.env.NEXT_PUBLIC_FORCE_SUPABASE_ALL === 'true'
       ? 'SUPABASE'
       : 'DEMO'
   );

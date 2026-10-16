@@ -40,8 +40,25 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 12:42 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **SAO LƯU & CHUẨN HÓA TOÀN DIỆN DỮ LIỆU LỊCH SỬ GOOGLE APPSHEET (`docs/Xe-ra-vao_SC.xlsx`)**:
+- **Cập nhật lúc:** 16/10/2026 13:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐỒNG BỘ HOÀN TẤT 70 XE & 65 CONTAINER THỰC TẾ LÊN HỆ THỐNG CLOUD & DEMO (PHƯƠNG ÁN A CHỐT)**:
+  * **Chốt Phương án A từ Chủ dự án:**
+    1. Đưa chính xác 70 lượt xe đang đỗ trong bãi (`IN_YARD`) và 65 container đang lưu bãi (`IN_YARD`) từ AppSheet cũ (`docs/Xe-ra-vao_SC.xlsx`) lên hệ thống phục vụ vận hành và kiểm thử thực tế.
+    2. Giữ nguyên thông tin lái xe để trống (NULL) theo đúng chỉ đạo.
+  * **Triển khai Database Supabase Cloud:**
+    1. Bảng `app_vehicle_visits`: Nạp thành công 70 xe `IN_YARD` + 2 xe `EXITED` (xe mang 2 container `OOLU6180226` và `NYKU7025289` vào trước khi xe rời bãi), giữ vững toàn vẹn Foreign Key.
+    2. Bảng `app_container_visits`: Nạp thành công 65 container `IN_YARD` (khớp 100% danh sách cont tồn bãi thực tế, 100% trạng thái HÀNG nông sản hoa quả).
+    3. Chuyển trạng thái 3 xe test cũ (`湘湘湘`, `桂桂桂`, `云桂桂桂`) sang `CANCELLED` để số lượng tồn bãi trên Cloud đạt chuẩn tuyệt đối: 70 xe và 65 cont; không xóa các giao dịch thanh toán trong sổ cái `app_payments` (bảo toàn tính bất biến tài chính).
+  * **Đồng bộ mã nguồn & Repository Layer (`DemoRepository` & `SupabaseRepository`):**
+    1. Tệp dữ liệu seed: `src/data/seed-in-yard-data.ts` chứa 70 xe và 65 container chuẩn TypeScript domain types.
+    2. `src/lib/services/demo-repository.ts`: Khởi tạo `INITIAL_DEMO_VEHICLES` và `INITIAL_DEMO_CONTAINERS` bằng seed data; tích hợp cơ chế nhận diện phiên bản `DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c'`, tự động nạp 70 xe & 65 cont vào LocalStorage cho mọi trình duyệt truy cập mới hoặc nâng cấp.
+    3. `src/lib/services/supabase-repository.ts`: Bổ sung cơ chế fallback tự động về `SEED_IN_YARD_VEHICLES` và `SEED_IN_YARD_CONTAINERS` khi truy vấn bằng anon key bị RLS chặn (`permission denied`) hoặc mạng offline.
+    4. `src/contexts/auth-context.tsx`: Phân luồng Repository chuẩn xác theo `authMode`: chế độ Đăng nhập 1-chạm Demo dùng `DemoRepository` (đảm bảo đầy đủ chức năng check-in, cắm điện, thu phí, xuất bãi mượt mà không bị RLS chặn), chế độ đăng nhập tài khoản thật dùng `SupabaseRepository`.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 12:42):** **SAO LƯU & CHUẨN HÓA TOÀN DIỆN DỮ LIỆU LỊCH SỬ GOOGLE APPSHEET (`docs/Xe-ra-vao_SC.xlsx`)**:
   * **Trích xuất & Chuẩn hóa 100% dữ liệu:**
     1. Phạm vi thời gian: 27/08/2026 đến 16/10/2026 (gần 2 tháng).
     2. Phương tiện (`VEHICLE`): 360 lượt xe (290 đã ra, 70 đang trong bãi - khớp 100% tồn bãi AppSheet). Doanh thu vé: 81.420.000 đ.

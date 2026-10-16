@@ -132,14 +132,18 @@ export interface ContainerVisit {
   container_type: string | null;
   status: ContainerVisitStatus;
   cargo_status: CargoStatus;
+  cargo_status_updated_at?: string | null;
+  cargo_status_updated_by?: string | null;
   inbound_vehicle_visit_id: string | null;
   inbound_license_plate?: string | null;
+  outbound_vehicle_visit_id?: string | null;
   inbound_at: string;
   outbound_at: string | null;
   created_at: string;
+  updated_at?: string;
   created_by: string;
   created_by_name?: string;
-  number_changes_count: number;
+  number_changes_count?: number;
   clearance_status?: 'PENDING' | 'CLEARED' | 'CLEARED_WITH_DEBT' | 'REJECTED';
   clearance_notes?: string | null;
   cleared_at?: string | null;
@@ -152,6 +156,9 @@ export interface ContainerVisit {
   is_plugged?: boolean;
   plug_socket_code?: string | null;
   notes?: string | null;
+  is_legacy_import?: boolean;
+  legacy_import_notes?: string | null;
+  idempotency_key?: string | null;
 }
 
 export interface YardZoneInfo {

@@ -57,6 +57,7 @@ import {
   AuditLogEntry
 } from './repository-interface';
 import { calculateStorageFeeOffline } from './supabase-repository';
+import { SEED_IN_YARD_VEHICLES, SEED_IN_YARD_CONTAINERS } from '@/data/seed-in-yard-data';
 
 // 7 loại xe chuẩn V5 khởi tạo từ Migration 004
 export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
@@ -125,8 +126,10 @@ export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
   },
 ];
 
-const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [];
-const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [];
+export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c';
+
+const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [...SEED_IN_YARD_VEHICLES];
+const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [...SEED_IN_YARD_CONTAINERS];
 const INITIAL_DEMO_PAYMENTS: PaymentRecord[] = [];
 
 export const SEED_YARD_ZONES_SON_CANG: YardZoneInfo[] = [
@@ -252,6 +255,7 @@ export class DemoRepository implements IYardRepository {
 
   constructor() {
     if (typeof window !== 'undefined') {
+      const savedVersion = localStorage.getItem('soncang_v5_seed_version');
       const savedV = localStorage.getItem('soncang_v5_demo_vehicles');
       const savedC = localStorage.getItem('soncang_v5_demo_containers');
       const savedNC = localStorage.getItem('soncang_v5_demo_number_changes');
@@ -263,11 +267,21 @@ export class DemoRepository implements IYardRepository {
       const savedPAY = localStorage.getItem('soncang_v5_demo_payments');
       const savedTL = localStorage.getItem('soncang_v5_demo_temperature_logs');
       const savedCust = localStorage.getItem('soncang_v5_customers');
-      if (savedV) {
-        try { this.vehicles = JSON.parse(savedV); } catch {}
-      }
-      if (savedC) {
-        try { this.containers = JSON.parse(savedC); } catch {}
+
+      if (savedVersion !== DEMO_DATA_SEED_VERSION && savedVersion !== 'CLEANED') {
+        // Tự động nạp 70 xe và 65 container thực tế từ AppSheet nếu chưa có version này
+        this.vehicles = [...INITIAL_DEMO_VEHICLES];
+        this.containers = [...INITIAL_DEMO_CONTAINERS];
+        localStorage.setItem('soncang_v5_demo_vehicles', JSON.stringify(this.vehicles));
+        localStorage.setItem('soncang_v5_demo_containers', JSON.stringify(this.containers));
+        localStorage.setItem('soncang_v5_seed_version', DEMO_DATA_SEED_VERSION);
+      } else {
+        if (savedV) {
+          try { this.vehicles = JSON.parse(savedV); } catch {}
+        }
+        if (savedC) {
+          try { this.containers = JSON.parse(savedC); } catch {}
+        }
       }
       if (savedNC) {
         try { this.numberChanges = JSON.parse(savedNC); } catch {}
@@ -2742,6 +2756,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.removeItem('soncang_v5_settlement_items');
       localStorage.removeItem('soncang_v5_yard_invoices');
       localStorage.removeItem('soncang_v5_audit_logs');
+      localStorage.setItem('soncang_v5_seed_version', 'CLEANED');
     }
     this.persist();
     return { success: true };

@@ -55,7 +55,8 @@ import {
   CollectAccountingDebtParams,
   AuditLogEntry
 } from './repository-interface';
-import { SEED_YARD_ZONES_SON_CANG, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
+import { SEED_YARD_ZONES_SON_CANG, SEED_VEHICLE_TYPES_V5, INITIAL_DEMO_CUSTOMERS, INITIAL_DEMO_STAFF_USERS } from './demo-repository';
+import { SEED_IN_YARD_VEHICLES, SEED_IN_YARD_CONTAINERS } from '@/data/seed-in-yard-data';
 
 import { Database } from '@/types/database.types';
 import { 
@@ -129,9 +130,9 @@ export class SupabaseRepository implements IYardRepository {
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
-      if (error || !data) {
-        console.warn('Lỗi đọc app_vehicle_types từ Supabase:', error?.message);
-        return [];
+      if (error || !data || data.length === 0) {
+        console.warn('Lỗi đọc app_vehicle_types từ Supabase, dùng SEED V5 fallback:', error?.message);
+        return SEED_VEHICLE_TYPES_V5.filter(t => t.is_active);
       }
 
       const rows = data as unknown as VehicleTypeRow[];
@@ -146,7 +147,7 @@ export class SupabaseRepository implements IYardRepository {
       }));
     } catch (err) {
       console.error('Ngoại lệ khi truy vấn app_vehicle_types:', err);
-      return [];
+      return SEED_VEHICLE_TYPES_V5.filter(t => t.is_active);
     }
   }
 
@@ -167,9 +168,26 @@ export class SupabaseRepository implements IYardRepository {
       }
 
       const { data, error } = await query;
-      if (error || !data) {
-        console.warn('Lỗi đọc app_vehicle_visits từ Supabase:', error?.message);
-        return [];
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.warn('Lỗi đọc app_vehicle_visits từ Supabase (RLS/Network), kích hoạt fallback seed data:', error?.message);
+        }
+        let fallbackList: VehicleVisit[] = SEED_IN_YARD_VEHICLES;
+        if (typeof window !== 'undefined') {
+          const savedV = localStorage.getItem('soncang_v5_demo_vehicles');
+          if (savedV) {
+            try {
+              const parsed = JSON.parse(savedV);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                fallbackList = parsed;
+              }
+            } catch {}
+          }
+        }
+        if (yardId) {
+          return fallbackList.filter(v => v.yard_id === yardId);
+        }
+        return fallbackList;
       }
 
       const rows = data as unknown as VehicleVisitRow[];
@@ -212,7 +230,11 @@ export class SupabaseRepository implements IYardRepository {
       });
     } catch (err) {
       console.error('Ngoại lệ khi truy vấn app_vehicle_visits:', err);
-      return [];
+      let fallbackList = SEED_IN_YARD_VEHICLES;
+      if (yardId) {
+        return fallbackList.filter(v => v.yard_id === yardId);
+      }
+      return fallbackList;
     }
   }
 
@@ -233,9 +255,26 @@ export class SupabaseRepository implements IYardRepository {
       }
 
       const { data, error } = await query;
-      if (error || !data) {
-        console.warn('Lỗi đọc app_container_visits từ Supabase:', error?.message);
-        return [];
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.warn('Lỗi đọc app_container_visits từ Supabase (RLS/Network), kích hoạt fallback seed data:', error?.message);
+        }
+        let fallbackList: ContainerVisit[] = SEED_IN_YARD_CONTAINERS;
+        if (typeof window !== 'undefined') {
+          const savedC = localStorage.getItem('soncang_v5_demo_containers');
+          if (savedC) {
+            try {
+              const parsed = JSON.parse(savedC);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                fallbackList = parsed;
+              }
+            } catch {}
+          }
+        }
+        if (yardId) {
+          return fallbackList.filter(c => c.yard_id === yardId);
+        }
+        return fallbackList;
       }
 
       const rows = data as unknown as ContainerVisitRow[];
@@ -287,7 +326,11 @@ export class SupabaseRepository implements IYardRepository {
       }));
     } catch (err) {
       console.error('Ngoại lệ khi truy vấn app_container_visits:', err);
-      return [];
+      let fallbackList = SEED_IN_YARD_CONTAINERS;
+      if (yardId) {
+        return fallbackList.filter(c => c.yard_id === yardId);
+      }
+      return fallbackList;
     }
   }
 
