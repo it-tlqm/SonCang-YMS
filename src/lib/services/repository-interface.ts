@@ -28,6 +28,7 @@ import {
   StaffUser,
   PowerSocket,
   PowerSocketStatus,
+  PowerCabinetInfo,
   AppRole,
   AppRolePermission,
   CashSettlement,
@@ -498,6 +499,9 @@ export interface IYardRepository {
   /** Ghi nhận audit log khi người dùng đổi mật khẩu cá nhân */
   recordPasswordChangeAudit(email: string, reason?: string): Promise<{ success: boolean; error?: string }>;
 
+  /** Lấy danh mục các tủ điện container lạnh 380V */
+  getPowerCabinets?(): Promise<PowerCabinetInfo[]>;
+
   /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
   getPowerSockets(zoneCode?: string): Promise<PowerSocket[]>;
 
@@ -506,6 +510,9 @@ export interface IYardRepository {
     socketCode: string;
     socketName: string;
     zoneCode?: string;
+    cabinetCode?: string;
+    cabinetName?: string;
+    socketIndex?: number;
     voltage?: string;
     amperage?: string;
     phase?: string;
@@ -518,6 +525,9 @@ export interface IYardRepository {
     params: Partial<{
       socketName: string;
       zoneCode: string;
+      cabinetCode: string;
+      cabinetName: string;
+      socketIndex: number;
       voltage: string;
       amperage: string;
       phase: string;

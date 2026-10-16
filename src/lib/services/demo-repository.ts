@@ -27,6 +27,7 @@ import {
   StaffUser,
   PowerSocket,
   PowerSocketStatus,
+  PowerCabinetInfo,
   AppRole,
   AppRolePermission,
   CashSettlement,
@@ -126,7 +127,7 @@ export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
   },
 ];
 
-export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_zones_v3';
+export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_13cabinets_50sockets_v5';
 
 const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [...SEED_IN_YARD_VEHICLES];
 const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [...SEED_IN_YARD_CONTAINERS];
@@ -136,7 +137,7 @@ export const SEED_YARD_ZONES_SON_CANG: YardZoneInfo[] = [
   {
     code: 'KHU_A_REEFER',
     name: 'Khu A — Bãi Container Lạnh (Reefer)',
-    description: 'Bãi cắm điện chuyên dụng, trang bị 30 trụ điện 3 pha công nghiệp 380V (R01 - R30)',
+    description: 'Bãi cắm điện chuyên dụng, trang bị 13 Tủ điện với 50 ổ cắm/giắc 3 pha công nghiệp 380V (T01 - T13)',
     capacity: 30,
     has_power_outlets: true,
     color_badge: 'bg-amber-100 text-amber-800 border-amber-300',
@@ -197,20 +198,42 @@ export const INITIAL_DEMO_STAFF_USERS: StaffUser[] = [
   }
 ];
 
-export const INITIAL_DEMO_POWER_SOCKETS: PowerSocket[] = Array.from({ length: 30 }, (_, i) => {
-  const code = `R${String(i + 1).padStart(2, '0')}`;
-  return {
-    id: `socket-${code}`,
-    socket_code: code,
-    socket_name: `Trụ điện ${code}`,
-    zone_code: 'KHU_A_REEFER',
-    voltage: '380V',
-    amperage: '32A',
-    phase: '3_PHASE',
-    status: 'AVAILABLE',
-    notes: 'Trụ cấp điện container lạnh chuyên dụng 380V/32A chuẩn công nghiệp 3 pha',
-    is_active: true,
-  };
+export const YARD_POWER_CABINETS: PowerCabinetInfo[] = [
+  { cabinet_code: 'T01', cabinet_name: 'Tủ 01', total_sockets: 3, description: 'Tủ điện T01 — 3 ổ cắm 380V (T01-01 -> T01-03)' },
+  { cabinet_code: 'T02', cabinet_name: 'Tủ 02', total_sockets: 4, description: 'Tủ điện T02 — 4 ổ cắm 380V (T02-01 -> T02-04)' },
+  { cabinet_code: 'T03', cabinet_name: 'Tủ 03', total_sockets: 4, description: 'Tủ điện T03 — 4 ổ cắm 380V (T03-01 -> T03-04)' },
+  { cabinet_code: 'T04', cabinet_name: 'Tủ 04', total_sockets: 3, description: 'Tủ điện T04 — 3 ổ cắm 380V (T04-01 -> T04-03)' },
+  { cabinet_code: 'T05', cabinet_name: 'Tủ 05', total_sockets: 8, description: 'Tủ điện T05 — 8 ổ cắm 380V công suất lớn (T05-01 -> T05-08)' },
+  { cabinet_code: 'T06', cabinet_name: 'Tủ 06', total_sockets: 3, description: 'Tủ điện T06 — 3 ổ cắm 380V (T06-01 -> T06-03)' },
+  { cabinet_code: 'T07', cabinet_name: 'Tủ 07', total_sockets: 3, description: 'Tủ điện T07 — 3 ổ cắm 380V (T07-01 -> T07-03)' },
+  { cabinet_code: 'T08', cabinet_name: 'Tủ 08', total_sockets: 2, description: 'Tủ điện T08 — 2 ổ cắm 380V (T08-01 -> T08-02)' },
+  { cabinet_code: 'T09', cabinet_name: 'Tủ 09', total_sockets: 5, description: 'Tủ điện T09 — 5 ổ cắm 380V (T09-01 -> T09-05)' },
+  { cabinet_code: 'T10', cabinet_name: 'Tủ 10', total_sockets: 3, description: 'Tủ điện T10 — 3 ổ cắm 380V (T10-01 -> T10-03)' },
+  { cabinet_code: 'T11', cabinet_name: 'Tủ 11', total_sockets: 4, description: 'Tủ điện T11 — 4 ổ cắm 380V (T11-01 -> T11-04)' },
+  { cabinet_code: 'T12', cabinet_name: 'Tủ 12', total_sockets: 4, description: 'Tủ điện T12 — 4 ổ cắm 380V (T12-01 -> T12-04)' },
+  { cabinet_code: 'T13', cabinet_name: 'Tủ 13', total_sockets: 4, description: 'Tủ điện T13 — 4 ổ cắm 380V (T13-01 -> T13-04)' },
+];
+
+export const INITIAL_DEMO_POWER_SOCKETS: PowerSocket[] = YARD_POWER_CABINETS.flatMap((cab) => {
+  return Array.from({ length: cab.total_sockets }, (_, i) => {
+    const sIndex = i + 1;
+    const sCode = `${cab.cabinet_code}-${String(sIndex).padStart(2, '0')}`;
+    return {
+      id: `socket-${sCode}`,
+      socket_code: sCode,
+      socket_name: `${cab.cabinet_name} — Ổ ${sIndex}`,
+      zone_code: 'KHU_A_REEFER',
+      cabinet_code: cab.cabinet_code,
+      cabinet_name: cab.cabinet_name,
+      socket_index: sIndex,
+      voltage: '380V',
+      amperage: '32A',
+      phase: '3_PHASE',
+      status: 'AVAILABLE' as PowerSocketStatus,
+      notes: `${cab.cabinet_name} ổ số ${sIndex} (Chuẩn 3 pha 380V/32A bến bãi Sơn Cảng)`,
+      is_active: true,
+    };
+  });
 });
 
 export class DemoRepository implements IYardRepository {
@@ -269,11 +292,13 @@ export class DemoRepository implements IYardRepository {
       const savedCust = localStorage.getItem('soncang_v5_customers');
 
       if (savedVersion !== DEMO_DATA_SEED_VERSION && savedVersion !== 'CLEANED') {
-        // Tự động nạp 70 xe và 65 container thực tế từ AppSheet nếu chưa có version này
+        // Tự động nạp 70 xe, 65 container thực tế từ AppSheet và 13 tủ điện 50 ổ cắm chuẩn bến bãi
         this.vehicles = [...INITIAL_DEMO_VEHICLES];
         this.containers = [...INITIAL_DEMO_CONTAINERS];
+        this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
         localStorage.setItem('soncang_v5_demo_vehicles', JSON.stringify(this.vehicles));
         localStorage.setItem('soncang_v5_demo_containers', JSON.stringify(this.containers));
+        localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
         localStorage.setItem('soncang_v5_seed_version', DEMO_DATA_SEED_VERSION);
       } else {
         if (savedV) {
@@ -324,7 +349,17 @@ export class DemoRepository implements IYardRepository {
       }
       const savedSockets = localStorage.getItem('soncang_v5_power_sockets');
       if (savedSockets) {
-        try { this.powerSockets = JSON.parse(savedSockets); } catch {}
+        try {
+          const parsed = JSON.parse(savedSockets);
+          if (Array.isArray(parsed) && parsed.length === 50 && parsed[0]?.cabinet_code) {
+            this.powerSockets = parsed;
+          } else {
+            this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
+            localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
+          }
+        } catch {
+          this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
+        }
       }
       const savedSettlements = localStorage.getItem('soncang_v5_cash_settlements');
       if (savedSettlements) {
@@ -2201,6 +2236,10 @@ export class DemoRepository implements IYardRepository {
     return { success: true };
   }
 
+  async getPowerCabinets(): Promise<PowerCabinetInfo[]> {
+    return [...YARD_POWER_CABINETS];
+  }
+
   async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {
     if (!zoneCode || zoneCode === 'ALL') {
       return [...this.powerSockets];
@@ -2212,6 +2251,9 @@ export class DemoRepository implements IYardRepository {
     socketCode: string;
     socketName: string;
     zoneCode?: string;
+    cabinetCode?: string;
+    cabinetName?: string;
+    socketIndex?: number;
     voltage?: string;
     amperage?: string;
     phase?: string;
@@ -2219,13 +2261,16 @@ export class DemoRepository implements IYardRepository {
   }): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
     const cleanCode = params.socketCode.trim().toUpperCase();
     if (this.powerSockets.some(s => s.socket_code === cleanCode)) {
-      return { success: false, error: `Mã trụ điện ${cleanCode} đã tồn tại` };
+      return { success: false, error: `Mã ổ cắm/giắc điện ${cleanCode} đã tồn tại` };
     }
     const newSocket: PowerSocket = {
       id: `socket-${Date.now()}-${cleanCode}`,
       socket_code: cleanCode,
-      socket_name: params.socketName.trim() || `Trụ điện ${cleanCode}`,
+      socket_name: params.socketName.trim() || `Ổ cắm ${cleanCode}`,
       zone_code: params.zoneCode || 'KHU_A_REEFER',
+      cabinet_code: params.cabinetCode || cleanCode.split('-')[0] || 'T01',
+      cabinet_name: params.cabinetName || `Tủ ${params.cabinetCode || cleanCode.split('-')[0] || '01'}`,
+      socket_index: params.socketIndex || 1,
       voltage: params.voltage || '380V',
       amperage: params.amperage || '32A',
       phase: params.phase || '3_PHASE',
@@ -2246,6 +2291,9 @@ export class DemoRepository implements IYardRepository {
     params: Partial<{
       socketName: string;
       zoneCode: string;
+      cabinetCode: string;
+      cabinetName: string;
+      socketIndex: number;
       voltage: string;
       amperage: string;
       phase: string;
@@ -2256,13 +2304,16 @@ export class DemoRepository implements IYardRepository {
   ): Promise<{ success: boolean; socket?: PowerSocket; error?: string }> {
     const idx = this.powerSockets.findIndex(s => s.socket_code === socketCode);
     if (idx === -1) {
-      return { success: false, error: `Không tìm thấy trụ điện ${socketCode}` };
+      return { success: false, error: `Không tìm thấy ổ cắm/giắc điện ${socketCode}` };
     }
     const cur = this.powerSockets[idx];
     const updated: PowerSocket = {
       ...cur,
       socket_name: params.socketName !== undefined ? params.socketName.trim() : cur.socket_name,
       zone_code: params.zoneCode || cur.zone_code,
+      cabinet_code: params.cabinetCode !== undefined ? params.cabinetCode : cur.cabinet_code,
+      cabinet_name: params.cabinetName !== undefined ? params.cabinetName : cur.cabinet_name,
+      socket_index: params.socketIndex !== undefined ? params.socketIndex : cur.socket_index,
       voltage: params.voltage || cur.voltage,
       amperage: params.amperage || cur.amperage,
       phase: params.phase || cur.phase,

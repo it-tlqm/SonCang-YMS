@@ -27,7 +27,9 @@ import {
   Pencil,
   Edit3,
   Download,
-  X
+  X,
+  Cpu,
+  Wrench
 } from 'lucide-react';
 import { exportReeferSessionsToExcel } from '@/lib/export-excel';
 import { formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
@@ -55,7 +57,7 @@ export default function ReeferMonitoringPage() {
   const canApproveAmendment = can('reefer.session.amendment.approve'); // TBP duyệt điều chỉnh
   const canRecordTemp = can('reefer.field_work.note'); // An ninh / Kỹ thuật đo nhiệt độ hiện trường
 
-  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'UNPLUGGED' | 'SESSIONS' | 'TEMP_LOGS'>('REQUESTS');
+  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'UNPLUGGED' | 'SESSIONS' | 'TEMP_LOGS' | 'SOCKETS'>('REQUESTS');
 
   const [sessions, setSessions] = useState<ReeferPowerSession[]>([]);
   const [containers, setContainers] = useState<ContainerVisit[]>([]);
@@ -1388,6 +1390,12 @@ export default function ReeferMonitoringPage() {
               count: temperatureLogs.length,
               icon: Thermometer,
             },
+            {
+              id: 'SOCKETS',
+              label: '13 Tủ / 50 Giắc 380V',
+              count: powerSockets.length,
+              icon: Cpu,
+            },
           ]}
           activeTab={activeTab}
           onChange={(tabId) => setActiveTab(tabId as any)}
@@ -2042,6 +2050,263 @@ export default function ReeferMonitoringPage() {
         </div>
       )}
 
+      {/* ========================================================================= */}
+      {/* TAB 5: SƠ ĐỒ 13 TỦ ĐIỆN & 50 GIẮC CẮM 380V (SOCKETS)                       */}
+      {/* ========================================================================= */}
+      {activeTab === 'SOCKETS' && (
+        <div className="space-y-4 flex-1 flex flex-col">
+          {(() => {
+            const pluggedSessionMap = new Map<string, ReeferPowerSession>();
+            sessions.forEach(s => {
+              if (s.power_status === 'PLUGGED' && s.plug_socket_code) {
+                pluggedSessionMap.set(s.plug_socket_code, s);
+              }
+            });
+
+            const resolvedSockets = powerSockets.map(s => {
+              const activeSes = pluggedSessionMap.get(s.socket_code);
+              const isBusy = Boolean(activeSes) || s.status === 'IN_USE';
+              return {
+                ...s,
+                status: isBusy ? ('IN_USE' as const) : s.status,
+                activeSession: activeSes || null,
+              };
+            });
+
+            const total = resolvedSockets.length;
+            const inUse = resolvedSockets.filter(s => s.status === 'IN_USE').length;
+            const maint = resolvedSockets.filter(s => s.status === 'MAINTENANCE' || s.status === 'FAULTY').length;
+            const avail = Math.max(0, total - inUse - maint);
+            const loadPct = total > 0 ? Math.round((inUse / total) * 100) : 0;
+
+            // Gom nhóm theo 13 Tủ điện
+            const cabMap = new Map<string, {
+              cabinetCode: string;
+              cabinetName: string;
+              sockets: typeof resolvedSockets;
+              total: number;
+              inUse: number;
+              avail: number;
+              maint: number;
+              loadPct: number;
+            }>();
+
+            resolvedSockets.forEach(s => {
+              const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+              const cabName = s.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
+              if (!cabMap.has(cabCode)) {
+                cabMap.set(cabCode, {
+                  cabinetCode: cabCode,
+                  cabinetName: cabName,
+                  sockets: [],
+                  total: 0,
+                  inUse: 0,
+                  avail: 0,
+                  maint: 0,
+                  loadPct: 0,
+                });
+              }
+              const cab = cabMap.get(cabCode)!;
+              cab.sockets.push(s);
+              cab.total++;
+              if (s.status === 'IN_USE') cab.inUse++;
+              else if (s.status === 'MAINTENANCE' || s.status === 'FAULTY') cab.maint++;
+              else cab.avail++;
+              cab.loadPct = cab.total > 0 ? Math.round((cab.inUse / cab.total) * 100) : 0;
+            });
+
+            const cabList = Array.from(cabMap.values()).sort((a, b) => a.cabinetCode.localeCompare(b.cabinetCode));
+
+            return (
+              <div className="space-y-4">
+                {/* Thanh thống kê tải tủ điện */}
+                <div className="p-3 bg-white rounded-xl border border-[#E5E9F0] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-wrap text-xs">
+                    <span className="font-bold text-[#17202E] flex items-center gap-1.5">
+                      <Cpu className="w-4 h-4 text-[#326DD8]" />
+                      <span>Hệ thống 13 Tủ điện</span>
+                    </span>
+                    <span className="text-[#D0D5DD]">•</span>
+                    <span className="text-[#667085]">Quy mô: <strong>{total} giắc 3 pha 380V</strong></span>
+                    <span className="text-[#D0D5DD]">•</span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] font-semibold flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-[#B54708] fill-current" />
+                      <span>Đang cắm: {inUse}</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-[#0A9444]" />
+                      <span>Trống: {avail}</span>
+                    </span>
+                    {maint > 0 && (
+                      <span className="px-2 py-0.5 rounded-md bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA] font-semibold flex items-center gap-1">
+                        <Wrench className="w-3 h-3 text-[#B42318]" />
+                        <span>Bảo trì: {maint}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#667085]">
+                      Tải bãi cont lạnh: <strong className="text-[#17202E]">{loadPct}%</strong>
+                    </span>
+                    <Link
+                      href="/yard"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] text-xs font-semibold flex items-center gap-1 transition-colors"
+                    >
+                      <span>Sơ đồ tổng bến bãi</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Grid 13 Tủ điện */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                  {cabList.map((cab) => (
+                    <div
+                      key={cab.cabinetCode}
+                      className="bg-white rounded-xl border border-[#E5E9F0] p-3 shadow-2xs hover:shadow-xs transition-shadow space-y-2.5 flex flex-col justify-between"
+                    >
+                      <div>
+                        {/* Header của từng tủ */}
+                        <div className="flex items-center justify-between pb-2 border-b border-[#F2F4F7]">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF] flex items-center justify-center font-bold font-mono text-xs">
+                              {cab.cabinetCode}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-[#17202E] flex items-center gap-1.5">
+                                <span>{cab.cabinetName}</span>
+                                <span className="text-[10px] font-semibold text-[#667085] bg-[#F2F4F7] px-1.5 py-0.2 rounded">
+                                  {cab.total} giắc
+                                </span>
+                                {cab.total >= 8 && (
+                                  <span className="text-[9px] font-bold text-[#B54708] bg-[#FFFAEB] border border-[#FEDF89] px-1.5 py-0.2 rounded">
+                                    Công suất lớn
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-[#667085] mt-0.5">
+                                Đang cắm: <strong className="text-[#B54708]">{cab.inUse}</strong> • Trống: <strong className="text-[#0A9444]">{cab.avail}</strong>
+                                {cab.maint > 0 && <span> • Bảo trì: <strong className="text-[#B42318]">{cab.maint}</strong></span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                              cab.loadPct >= 80 ? 'bg-[#FEF3F2] text-[#B42318]' : cab.loadPct > 0 ? 'bg-[#FFFAEB] text-[#B54708]' : 'bg-[#ECFDF3] text-[#027A48]'
+                            }`}>
+                              {cab.loadPct}% tải
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Thanh mini progress của tủ */}
+                        <div className="w-full bg-[#EAECF0] h-1.5 rounded-full overflow-hidden mt-1.5">
+                          <div
+                            className={`h-full transition-all duration-300 ${
+                              cab.loadPct >= 80 ? 'bg-[#D92D20]' : cab.loadPct > 0 ? 'bg-[#F79009]' : 'bg-[#12B76A]'
+                            }`}
+                            style={{ width: `${Math.max(5, cab.loadPct)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Danh sách các giắc cắm trong tủ */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-1.5 pt-1">
+                        {cab.sockets.map((socket) => {
+                          const isInUse = socket.status === 'IN_USE';
+                          const isMaint = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
+                          const ses = socket.activeSession;
+
+                          if (isInUse) {
+                            return (
+                              <button
+                                key={socket.socket_code}
+                                type="button"
+                                onClick={() => {
+                                  if (ses) {
+                                    setSelectedSessionForInspector(ses);
+                                    setIsInspectorOpen(true);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg border border-[#FDB022] bg-[#FFFAEB] hover:bg-[#FEF0C7] text-left transition-all cursor-pointer shadow-2xs group relative"
+                                title={`Ổ ${socket.socket_code} đang cắm cho cont ${ses?.container_no || ''}`}
+                              >
+                                <div className="flex items-center justify-between mb-0.5">
+                                  <span className="font-mono font-bold text-[10px] text-[#7A2E0E] bg-[#FEDF89] px-1 rounded">
+                                    {socket.socket_code}
+                                  </span>
+                                  <Zap className="w-3 h-3 text-[#D97706] fill-current animate-pulse" />
+                                </div>
+                                <div className="font-mono font-bold text-[11px] text-[#17202E] truncate">
+                                  {ses?.container_no || 'Đang cắm'}
+                                </div>
+                                <div className="text-[9px] text-[#667085] truncate">
+                                  {ses?.plugged_in_at ? formatTime(ses.plugged_in_at) : '380V'}
+                                </div>
+                              </button>
+                            );
+                          }
+
+                          if (isMaint) {
+                            return (
+                              <div
+                                key={socket.socket_code}
+                                className="p-1.5 rounded-lg border border-[#FECDCA] bg-[#FEF3F2] text-left shadow-2xs opacity-80"
+                                title={`Ổ ${socket.socket_code} đang bảo trì`}
+                              >
+                                <div className="flex items-center justify-between mb-0.5">
+                                  <span className="font-mono font-bold text-[10px] text-[#7A271A] bg-[#FECDCA] px-1 rounded">
+                                    {socket.socket_code}
+                                  </span>
+                                  <Wrench className="w-2.5 h-2.5 text-[#B42318]" />
+                                </div>
+                                <div className="text-[10px] font-bold text-[#B42318] truncate">
+                                  Bảo trì
+                                </div>
+                                <div className="text-[9px] text-[#98A2B3] truncate">
+                                  Tạm khóa
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <button
+                              key={socket.socket_code}
+                              type="button"
+                              onClick={() => {
+                                setPlugSocketCode(socket.socket_code);
+                                handleOpenPlugModal(unpluggedContainersInYard[0]?.id);
+                              }}
+                              className="p-1.5 rounded-lg border border-dashed border-[#D0D5DD] bg-white hover:bg-[#ECFDF3] hover:border-[#6CE9A6] text-left transition-all cursor-pointer shadow-2xs group"
+                              title={`Ổ ${socket.socket_code} đang trống — Bấm để cắm cont`}
+                            >
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="font-mono font-bold text-[10px] text-[#344054] bg-[#F2F4F7] px-1 rounded group-hover:bg-[#D1FADF] group-hover:text-[#027A48]">
+                                  {socket.socket_code}
+                                </span>
+                                <CheckCircle2 className="w-2.5 h-2.5 text-[#12B76A]" />
+                              </div>
+                              <div className="text-[10px] font-bold text-[#027A48]">
+                                Trống
+                              </div>
+                              <div className="text-[9px] text-[#98A2B3] font-mono">
+                                Cắm nhanh
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
         </div>
       </div>
 
@@ -2255,14 +2520,14 @@ export default function ReeferMonitoringPage() {
                 )}
               </div>
 
-              {/* VỊ TRÍ TRỤ / GIẮC CẮM ĐIỆN 380V (KHU A REEFER) */}
+              {/* VỊ TRÍ TỦ / GIẮC CẮM ĐIỆN 380V (KHU A REEFER) */}
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-semibold text-[#344054]">
-                    Vị trí Trụ / Giắc cắm điện 380V (Khu A) <span className="text-[#D92D20]">*</span>
+                    Vị trí Tủ / Giắc cắm điện 380V (Khu A) <span className="text-[#D92D20]">*</span>
                   </label>
                   <span className="text-[10px] font-bold text-[#B54708] bg-[#FFFAEB] px-2 py-0.5 rounded border border-[#FEDF89]">
-                    {powerSockets.length} Trụ 3 pha
+                    13 Tủ — {powerSockets.length} Giắc 3 pha
                   </span>
                 </div>
                 <select
@@ -2270,25 +2535,50 @@ export default function ReeferMonitoringPage() {
                   onChange={(e) => setPlugSocketCode(e.target.value)}
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-bold font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                 >
-                  {powerSockets.map((socket) => {
-                    const code = socket.socket_code;
-                    const activeSession = sessions.find(
-                      (s) => s.power_status === 'PLUGGED' && s.plug_socket_code === code
-                    );
-                    const isBusy = Boolean(activeSession) || socket.status === 'IN_USE';
-                    const isMaintenance = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
-                    const isDisabled = (isBusy && activeSession?.container_visit_id !== selectedContId) || isMaintenance;
+                  {(() => {
+                    const cabMap = new Map<string, PowerSocket[]>();
+                    powerSockets.forEach(s => {
+                      const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+                      if (!cabMap.has(cabCode)) cabMap.set(cabCode, []);
+                      cabMap.get(cabCode)!.push(s);
+                    });
 
-                    return (
-                      <option 
-                        key={code} 
-                        value={code} 
-                        disabled={isDisabled}
-                      >
-                        {code} — {isMaintenance ? `[Bảo trì / Khóa] (${socket.notes || 'Sự cố'})` : isBusy ? `[Bận] (${activeSession?.container_no || 'Đang cắm'})` : `[Trống] (${socket.voltage || '380V'} / ${socket.amperage || '32A'})`}
-                      </option>
-                    );
-                  })}
+                    return Array.from(cabMap.entries()).map(([cabCode, sList]) => {
+                      const cabName = sList[0]?.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
+                      const busyCount = sList.filter(s => {
+                        const hasActive = sessions.some(ses => ses.power_status === 'PLUGGED' && ses.plug_socket_code === s.socket_code);
+                        return hasActive || s.status === 'IN_USE';
+                      }).length;
+                      const availInCab = sList.length - busyCount;
+
+                      return (
+                        <optgroup
+                          key={cabCode}
+                          label={`${cabName} (${sList.length} giắc — Còn ${availInCab} trống)`}
+                        >
+                          {sList.map((socket) => {
+                            const code = socket.socket_code;
+                            const activeSession = sessions.find(
+                              (s) => s.power_status === 'PLUGGED' && s.plug_socket_code === code
+                            );
+                            const isBusy = Boolean(activeSession) || socket.status === 'IN_USE';
+                            const isMaintenance = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
+                            const isDisabled = (isBusy && activeSession?.container_visit_id !== selectedContId) || isMaintenance;
+
+                            return (
+                              <option 
+                                key={code} 
+                                value={code} 
+                                disabled={isDisabled}
+                              >
+                                {code} — {isMaintenance ? `[Bảo trì / Khóa] (${socket.notes || 'Sự cố'})` : isBusy ? `[Bận] (${activeSession?.container_no || 'Đang cắm'})` : `[Trống] (${socket.voltage || '380V'} / ${socket.amperage || '32A'})`}
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      );
+                    });
+                  })()}
                 </select>
                 <p className="text-[11px] text-[#667085] mt-1">
                   Hệ thống kiểm soát chống cắm trùng giắc. Khi rút điện, giắc cắm sẽ tự động được giải phóng về trạng thái trống.
@@ -2310,8 +2600,9 @@ export default function ReeferMonitoringPage() {
                   />
                 </div>
                 {plugInTime && (
-                  <div className="text-[11px] text-[#027A48] font-mono mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Định dạng đã chọn:</span>
+                  <div className="text-[11px] text-[#027A48] font-mono mt-1 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#027A48]" />
+                    <span>Định dạng đã chọn:</span>
                     <strong className="bg-[#ECFDF3] px-1.5 py-0.5 rounded border border-[#ABEFC6]">{formatDateTime(plugInTime)}</strong>
                   </div>
                 )}
@@ -2516,8 +2807,9 @@ export default function ReeferMonitoringPage() {
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#D97706]/20 focus:border-[#D97706] transition-all"
                 />
                 {unplugTime && (
-                  <p className="text-[11px] font-mono text-[#B54708] mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Định dạng đã chọn:</span>
+                  <p className="text-[11px] font-mono text-[#B54708] mt-1 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#B54708]" />
+                    <span>Định dạng đã chọn:</span>
                     <span className="bg-[#FFFAEB] text-[#B54708] px-1.5 py-0.5 rounded border border-[#FEDF89]">
                       {formatDateTime(unplugTime)}
                     </span>
@@ -2736,8 +3028,9 @@ export default function ReeferMonitoringPage() {
                     className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                   {compPlugTime && (
-                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1">
-                      <span>⏱️ Cắm:</span>
+                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#027A48]" />
+                      <span>Cắm:</span>
                       <span className="bg-[#ECFDF3] text-[#027A48] px-1.5 py-0.5 rounded border border-[#ABEFC6]">
                         {formatDateTime(compPlugTime)}
                       </span>
@@ -2780,8 +3073,9 @@ export default function ReeferMonitoringPage() {
                     className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm font-mono text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
                   />
                   {compUnplugTime && (
-                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1">
-                      <span>⏱️ Rút:</span>
+                    <p className="text-[11px] font-mono text-[#027A48] mt-1 font-semibold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#027A48]" />
+                      <span>Rút:</span>
                       <span className="bg-[#ECFDF3] text-[#027A48] px-1.5 py-0.5 rounded border border-[#ABEFC6]">
                         {formatDateTime(compUnplugTime)}
                       </span>
@@ -2929,8 +3223,9 @@ export default function ReeferMonitoringPage() {
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] font-mono transition-all"
                 />
                 {verifyPlugTime && (
-                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Cắm:</span>
+                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#175CD3]" />
+                    <span>Cắm:</span>
                     <span className="bg-[#EFF8FF] text-[#175CD3] px-1.5 py-0.5 rounded border border-[#B2DDFF]">
                       {formatDateTime(verifyPlugTime)}
                     </span>
@@ -2997,8 +3292,9 @@ export default function ReeferMonitoringPage() {
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs sm:text-sm text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] font-mono transition-all"
                 />
                 {verifyUnplugTime && (
-                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1">
-                    <span>⏱️ Rút:</span>
+                  <p className="text-[11px] font-mono text-[#175CD3] mt-1 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#175CD3]" />
+                    <span>Rút:</span>
                     <span className="bg-[#EFF8FF] text-[#175CD3] px-1.5 py-0.5 rounded border border-[#B2DDFF]">
                       {formatDateTime(verifyUnplugTime)}
                     </span>

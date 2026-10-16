@@ -39,9 +39,32 @@
 Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết định khi mới chỉ là gợi ý kỹ thuật.
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
+ 
+- **Cập nhật lúc:** 16/10/2026 17:45 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **QUY HOẠCH HỆ THỐNG CẤP ĐIỆN KHU A THEO 13 TỦ ĐIỆN / 50 GIẮC CẮM 380V HIỆN TRƯỜNG THỰC TẾ & HOÀN TẤT LOẠI BỎ 100% EMOJI (QUYẾT ĐỊNH D-023)**:
+  * **1. Cấu trúc lại Hạ tầng Cấp điện Khu A thành 13 Tủ điện / 50 Giắc cắm 380V:**
+    - Thay thế mô hình 30 trụ điện phẳng cũ (`R01..R30`) bằng phân cấp chuẩn thực tế: **13 Tủ điện (Cabinet T01 - T13)** chứa đúng **50 ổ cắm / giắc 380V công nghiệp**.
+    - Phân bổ thực tế: T01 (3 ổ), T02 (4 ổ), T03 (4 ổ), T04 (3 ổ), T05 (8 ổ - Tủ công suất lớn), T06 (3 ổ), T07 (3 ổ), T08 (2 ổ), T09 (5 ổ), T10 (3 ổ), T11 (4 ổ), T12 (4 ổ), T13 (4 ổ). Tổng cộng: 50 ổ cắm.
+    - Mã định danh giắc cắm chuẩn công nghiệp: `T01-01` .. `T13-04`.
+    - Mở rộng domain types (`PowerCabinetInfo`, `PowerSocket`), cập nhật `DemoRepository` & `SupabaseRepository`. Nâng cấp seed version `v5_appsheet_70v_65c_13cabinets_50sockets_v5` kèm cơ chế tự động di chuyển localStorage nếu data cũ không hợp lệ hoặc thiếu 50 ổ.
+  * **2. Nâng cấp Giao diện Quản lý Bến bãi (`/yard`):**
+    - Tiêu đề khối: **"Hệ thống Cấp điện Container Lạnh 380V — 13 Tủ điện / 50 Giắc cắm (Khu A)"**.
+    - Bộ chuyển chế độ xem: `Theo Tủ điện (13 Tủ)` (Card từng tủ với thanh đo % tải và các slot giắc trực quan) hoặc `Lưới ổ cắm (50 Giắc)` (lưới 50 giắc phẳng).
+    - Bộ lọc nhanh theo từng Tủ điện (`selectedCabinetFilter` T01..T13) và theo trạng thái (Tất cả, Đang cắm, Trống, Bảo trì).
+    - Nâng cấp Modal Chi tiết ổ cắm và Modal Thêm/Sửa ổ cắm: có dropdown chọn Tủ điện thuộc về (T01..T13), tự động gợi ý mã giắc kế tiếp (`T01-04`, `T02-05`...).
+  * **3. Nâng cấp Giao diện Điện lạnh (`/reefer`):**
+    - Bổ sung Tab 5 mới trong `WorkspaceTabs`: **"13 Tủ / 50 Giắc 380V"** (`activeTab === 'SOCKETS'`), hiển thị toàn bộ 13 Tủ điện kèm các giắc cắm trực quan, hỗ trợ bấm giắc trống để cắm cont nhanh hoặc bấm giắc bận để mở Inspector.
+    - Modal Cắm điện (`showPlugModal`): Dropdown chọn vị trí cắm điện gom nhóm theo `<optgroup>` của 13 Tủ điện (kèm chỉ số trống/bận của từng tủ).
+    - Thay thế toàn bộ các emoji đồng hồ `⏱️` còn sót ở các modal lùi giờ/xác nhận giờ Zalo sang `Clock` SVG.
+  * **4. Xuất Báo cáo Excel Sạch Tuyệt Đối 100% Emoji (`src/lib/export-excel.ts`):**
+    - Loại bỏ toàn bộ `🚨`, `⚠️`, `✓`, `⚡` trong text xuất Excel báo cáo tồn bãi, chỉ dùng format màu sắc và text chuẩn.
+  * **Kiểm thử xác nhận:**
+    - Quét regex emoji toàn bộ codebase `src/`: **0 matches** (hoàn toàn sạch 100%).
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
 
-- **Cập nhật lúc:** 16/10/2026 17:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **CHUẨN HÓA PHÂN BỔ 4 PHÂN KHU BẾN BÃI THEO SYSTEM DESIGN, NÂNG CẤP NÚT THAO TÁC CONTAINER TAB 3 VÀ LOẠI BỎ 100% EMOJI SANG SVG LUCIDE ICONS**:
+- **Mốc trước đó (16/10/2026 17:15):** **CHUẨN HÓA PHÂN BỔ 4 PHÂN KHU BẾN BÃI THEO SYSTEM DESIGN, NÂNG CẤP NÚT THAO TÁC CONTAINER TAB 3 VÀ LOẠI BỎ 100% EMOJI SANG SVG LUCIDE ICONS**:
+
   * **1. Phân bổ 4 Phân khu theo đúng System Design Sơn Cảng:**
     - Khởi tạo và liên kết 70 xe và 65 container thực tế vào 4 phân khu chuẩn: Khu A (Reefer 380V - 25 cont lạnh/xe), Khu B (Dry vỏ khô - 15 cont), Khu C (Xe bo 8 tấn 2 chân sang tải nông sản - 5 xe bo), Khu D (Chờ chuyến/chờ xuất - 20 xe/cont), 5 xe và 7 cont chưa gán để test điều chuyển.
     - Cài đặt tính năng `autoAllocateYardZones()` tự động nhận diện quy hoạch bến bãi.

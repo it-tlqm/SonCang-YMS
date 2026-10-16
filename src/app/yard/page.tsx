@@ -41,7 +41,8 @@ import {
   ShieldCheck,
   Banknote,
   CreditCard,
-  Sparkles
+  Sparkles,
+  Cpu
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatDateTime, formatDate, formatTime } from '@/lib/display-formatters';
 import { exportYardVehiclesToExcel, exportYardContainersToExcel, exportYardInventoryReportToExcel } from '@/lib/export-excel';
@@ -298,6 +299,9 @@ export default function YardMonitorPage() {
   const [socketActionError, setSocketActionError] = useState<string>('');
   const [isSubmittingSocket, setIsSubmittingSocket] = useState<boolean>(false);
   const [socketFilterStatus, setSocketFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'FAULTY'>('ALL');
+  const [socketViewMode, setSocketViewMode] = useState<'BY_CABINET' | 'GRID'>('BY_CABINET');
+  const [selectedCabinetFilter, setSelectedCabinetFilter] = useState<string>('ALL');
+  const [socketFormCabinet, setSocketFormCabinet] = useState<string>('T01');
 
   // DS-02 Multi-pane Workspace States: Secondary Panel & Inspector
   const [selectedInspectorPair, setSelectedInspectorPair] = useState<YardPairItem | null>(null);
@@ -598,29 +602,39 @@ export default function YardMonitorPage() {
     }
   };
 
-  // --- TÁC VỤ QUẢN LÝ TRỤ ĐIỆN & GIẮC CẮM 380V ---
+  // --- TÁC VỤ QUẢN LÝ TỦ ĐIỆN & GIẮC CẮM 380V ---
   const handleOpenCreateSocketModal = () => {
-    // Tự động gợi ý mã trụ tiếp theo
-    const currentCodes = powerSockets.map(s => s.socket_code);
-    let nextNum = 1;
-    while (currentCodes.includes(`R${String(nextNum).padStart(2, '0')}`)) {
-      nextNum++;
-    }
-    const suggestedCode = `R${String(nextNum).padStart(2, '0')}`;
+    // Tự động gợi ý mã ổ cắm tiếp theo theo tủ được chọn
+    const defaultCab = socketFormCabinet || 'T01';
+    const cabSockets = powerSockets.filter(s => (s.cabinet_code || s.socket_code.split('-')[0]) === defaultCab);
+    const nextNum = cabSockets.length + 1;
+    const suggestedCode = `${defaultCab}-${String(nextNum).padStart(2, '0')}`;
+    setSocketFormCabinet(defaultCab);
     setSocketFormCode(suggestedCode);
-    setSocketFormName(`Trụ điện ${suggestedCode}`);
+    setSocketFormName(`Tủ ${defaultCab.replace(/^T0?/, '')} — Ổ ${nextNum}`);
     setSocketFormZone('KHU_A_REEFER');
     setSocketFormVoltage('380V');
     setSocketFormAmperage('32A');
-    setSocketFormNotes('Trụ cấp điện container lạnh chuyên dụng 380V/32A chuẩn công nghiệp 3 pha');
+    setSocketFormNotes(`Ổ cắm số ${nextNum} thuộc Tủ điện ${defaultCab} (Chuẩn công nghiệp 3 pha 380V/32A)`);
     setSocketActionError('');
     setIsCreateSocketModalOpen(true);
+  };
+
+  const handleCabinetChangeInModal = (cabCode: string) => {
+    setSocketFormCabinet(cabCode);
+    const cabSockets = powerSockets.filter(s => (s.cabinet_code || s.socket_code.split('-')[0]) === cabCode);
+    const nextNum = cabSockets.length + 1;
+    const suggestedCode = `${cabCode}-${String(nextNum).padStart(2, '0')}`;
+    setSocketFormCode(suggestedCode);
+    setSocketFormName(`Tủ ${cabCode.replace(/^T0?/, '')} — Ổ ${nextNum}`);
+    setSocketFormNotes(`Ổ cắm số ${nextNum} thuộc Tủ điện ${cabCode} (Chuẩn công nghiệp 3 pha 380V/32A)`);
   };
 
   const handleOpenEditSocketModal = (socket: PowerSocket) => {
     setSocketFormCode(socket.socket_code);
     setSocketFormName(socket.socket_name);
     setSocketFormZone(socket.zone_code);
+    setSocketFormCabinet(socket.cabinet_code || socket.socket_code.split('-')[0] || 'T01');
     setSocketFormVoltage(socket.voltage || '380V');
     setSocketFormAmperage(socket.amperage || '32A');
     setSocketFormNotes(socket.notes || '');
@@ -632,7 +646,7 @@ export default function YardMonitorPage() {
     e.preventDefault();
     const cleanCode = socketFormCode.trim().toUpperCase();
     if (!cleanCode) {
-      setSocketActionError('Vui lòng nhập mã trụ điện (VD: R31).');
+      setSocketActionError('Vui lòng nhập mã ổ cắm (VD: T01-04).');
       return;
     }
     setIsSubmittingSocket(true);
@@ -640,22 +654,24 @@ export default function YardMonitorPage() {
     try {
       const res = await repository.createPowerSocket({
         socketCode: cleanCode,
-        socketName: socketFormName.trim() || `Trụ điện ${cleanCode}`,
+        socketName: socketFormName.trim() || `Ổ cắm ${cleanCode}`,
         zoneCode: socketFormZone,
+        cabinetCode: socketFormCabinet,
+        cabinetName: `Tủ ${socketFormCabinet.replace(/^T0?/, '')}`,
         voltage: socketFormVoltage,
         amperage: socketFormAmperage,
         phase: '3_PHASE',
         notes: socketFormNotes.trim() || undefined,
       });
       if (!res.success) {
-        setSocketActionError(res.error || 'Lỗi khi tạo trụ điện.');
+        setSocketActionError(res.error || 'Lỗi khi tạo ổ cắm điện.');
         setIsSubmittingSocket(false);
         return;
       }
       setIsCreateSocketModalOpen(false);
       handleReload();
     } catch (err: any) {
-      setSocketActionError(err?.message || 'Lỗi ngoại lệ khi tạo trụ điện.');
+      setSocketActionError(err?.message || 'Lỗi ngoại lệ khi tạo ổ cắm điện.');
     } finally {
       setIsSubmittingSocket(false);
     }
@@ -670,6 +686,8 @@ export default function YardMonitorPage() {
       const res = await repository.updatePowerSocket(socketFormCode, {
         socketName: socketFormName.trim(),
         zoneCode: socketFormZone,
+        cabinetCode: socketFormCabinet,
+        cabinetName: `Tủ ${socketFormCabinet.replace(/^T0?/, '')}`,
         voltage: socketFormVoltage,
         amperage: socketFormAmperage,
         notes: socketFormNotes.trim(),
@@ -2701,7 +2719,7 @@ export default function YardMonitorPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BẢNG ĐIỀU KHIỂN & QUẢN TRỊ TRỤ ĐIỆN CONTAINER LẠNH 380V (KHU A REEFER) */}
+          {/* BẢNG ĐIỀU KHIỂN & QUẢN TRỊ 13 TỦ ĐIỆN / 50 GIẮC CẮM 380V (KHU A REEFER)    */}
           {/* ========================================================================= */}
           {(() => {
             // Lấy danh sách socket đang bận dựa trên DB hoặc container đang cắm
@@ -2726,8 +2744,50 @@ export default function YardMonitorPage() {
             const inUseCount = resolvedSockets.filter(s => s.status === 'IN_USE').length;
             const maintCount = resolvedSockets.filter(s => s.status === 'MAINTENANCE' || s.status === 'FAULTY').length;
             const availCount = Math.max(0, totalSockets - inUseCount - maintCount);
+            const loadPercent = totalSockets > 0 ? Math.round((inUseCount / totalSockets) * 100) : 0;
 
+            // Gom nhóm theo 13 Tủ điện
+            const cabinetMap = new Map<string, {
+              cabinetCode: string;
+              cabinetName: string;
+              sockets: typeof resolvedSockets;
+              total: number;
+              inUse: number;
+              avail: number;
+              maint: number;
+              loadPct: number;
+            }>();
+
+            resolvedSockets.forEach(s => {
+              const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+              const cabName = s.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
+              if (!cabinetMap.has(cabCode)) {
+                cabinetMap.set(cabCode, {
+                  cabinetCode: cabCode,
+                  cabinetName: cabName,
+                  sockets: [],
+                  total: 0,
+                  inUse: 0,
+                  avail: 0,
+                  maint: 0,
+                  loadPct: 0,
+                });
+              }
+              const cab = cabinetMap.get(cabCode)!;
+              cab.sockets.push(s);
+              cab.total++;
+              if (s.status === 'IN_USE') cab.inUse++;
+              else if (s.status === 'MAINTENANCE' || s.status === 'FAULTY') cab.maint++;
+              else cab.avail++;
+              cab.loadPct = cab.total > 0 ? Math.round((cab.inUse / cab.total) * 100) : 0;
+            });
+
+            const cabinetList = Array.from(cabinetMap.values()).sort((a, b) => a.cabinetCode.localeCompare(b.cabinetCode));
+
+            // Lọc theo cabinetFilter và socketFilterStatus
             const displaySockets = resolvedSockets.filter(s => {
+              const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+              if (selectedCabinetFilter !== 'ALL' && cabCode !== selectedCabinetFilter) return false;
               if (socketFilterStatus === 'ALL') return true;
               if (socketFilterStatus === 'IN_USE') return s.status === 'IN_USE';
               if (socketFilterStatus === 'AVAILABLE') return s.status === 'AVAILABLE';
@@ -2741,21 +2801,49 @@ export default function YardMonitorPage() {
                   <div>
                     <h3 className="text-sm font-semibold text-[#17202E] flex items-center gap-2">
                       <Zap className="w-4 h-4 text-amber-500 fill-current" />
-                      <span>Quản lý & Giám sát Trụ điện Container Lạnh 380V (Khu A Reefer)</span>
+                      <span>Hệ thống Cấp điện Container Lạnh 380V — 13 Tủ điện / {totalSockets} Giắc cắm (Khu A)</span>
                     </h3>
                     <p className="text-xs text-[#667085] mt-0.5">
-                      Dữ liệu cơ sở dữ liệu động. Bấm vào từng trụ để xem chi tiết, cắm điện nhanh, rút điện hoặc bật chế độ bảo trì/sửa chữa.
+                      Cấu trúc hiện trường bến bãi Sơn Cảng phân bổ theo 13 Tủ điện. Bấm vào từng giắc cắm để xem chi tiết, cắm/rút cont hoặc bật chế độ bảo trì.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
+                    {/* Switch View Mode */}
+                    <div className="flex items-center p-0.5 bg-[#F1F4F8] rounded-lg border border-[#E5E9F0]">
+                      <button
+                        type="button"
+                        onClick={() => setSocketViewMode('BY_CABINET')}
+                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                          socketViewMode === 'BY_CABINET'
+                            ? 'bg-white text-[#223873] shadow-xs'
+                            : 'text-[#667085] hover:text-[#17202E]'
+                        }`}
+                      >
+                        <Cpu className="w-3.5 h-3.5" />
+                        <span>13 Tủ điện</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSocketViewMode('GRID')}
+                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                          socketViewMode === 'GRID'
+                            ? 'bg-white text-[#223873] shadow-xs'
+                            : 'text-[#667085] hover:text-[#17202E]'
+                        }`}
+                      >
+                        <Grid className="w-3.5 h-3.5" />
+                        <span>Lưới {totalSockets} Giắc</span>
+                      </button>
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleOpenCreateSocketModal}
                       className="px-2.5 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
-                      title="Thêm trụ điện mới vào danh mục bến bãi"
+                      title="Thêm ổ cắm/giắc điện mới vào tủ"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Thêm trụ mới</span>
+                      <span>Thêm ổ cắm</span>
                     </button>
                     <Link
                       href="/reefer"
@@ -2768,9 +2856,12 @@ export default function YardMonitorPage() {
                 </div>
 
                 {/* THỐNG KÊ THỜI GIAN THỰC & BỘ LỌC TRẠNG THÁI */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
                   <div className="flex items-center gap-2 flex-wrap text-xs">
-                    <span className="font-semibold text-[#344054]">Tổng: {totalSockets} trụ</span>
+                    <span className="font-semibold text-[#344054] flex items-center gap-1">
+                      <Cpu className="w-3.5 h-3.5 text-[#326DD8]" />
+                      <strong>13 Tủ điện</strong> ({totalSockets} giắc 380V)
+                    </span>
                     <span className="text-[#D0D5DD]">•</span>
                     <span className="px-2 py-0.5 rounded-md bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] font-semibold flex items-center gap-1">
                       <Zap className="w-3 h-3 text-[#B54708] fill-current" />
@@ -2783,146 +2874,329 @@ export default function YardMonitorPage() {
                     {maintCount > 0 && (
                       <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-semibold flex items-center gap-1">
                         <Wrench className="w-3 h-3 text-rose-600" />
-                        <span>Bảo trì/Khóa: {maintCount}</span>
+                        <span>Bảo trì: {maintCount}</span>
                       </span>
                     )}
+                    <span className="text-[#D0D5DD]">•</span>
+                    <span className="text-[11px] text-[#667085] font-medium">
+                      Tải toàn bãi: <strong className="text-[#17202E]">{loadPercent}%</strong>
+                    </span>
                   </div>
 
-                  {/* Tabs lọc */}
-                  <div className="flex items-center gap-1 text-[11px]">
-                    {(['ALL', 'AVAILABLE', 'IN_USE', 'MAINTENANCE'] as const).map(st => {
-                      const labels = {
-                        ALL: `Tất cả (${totalSockets})`,
-                        AVAILABLE: `Trống (${availCount})`,
-                        IN_USE: `Đang cắm (${inUseCount})`,
-                        MAINTENANCE: `Bảo trì (${maintCount})`,
-                      };
-                      const isActive = socketFilterStatus === st;
+                  {/* Lọc nhanh Tủ và Trạng thái */}
+                  <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                    {/* Dropdown Lọc Tủ */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-[#667085] font-medium">Tủ:</span>
+                      <select
+                        value={selectedCabinetFilter}
+                        onChange={(e) => setSelectedCabinetFilter(e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-[#D0D5DD] bg-white text-xs font-semibold text-[#17202E] focus:outline-none focus:ring-1 focus:ring-[#326DD8]"
+                      >
+                        <option value="ALL">Tất cả 13 Tủ</option>
+                        {cabinetList.map((cab) => (
+                          <option key={cab.cabinetCode} value={cab.cabinetCode}>
+                            {cab.cabinetName} ({cab.inUse}/{cab.total} cắm)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Tabs lọc trạng thái */}
+                    <div className="flex items-center gap-1">
+                      {(['ALL', 'AVAILABLE', 'IN_USE', 'MAINTENANCE'] as const).map(st => {
+                        const labels = {
+                          ALL: `Tất cả (${totalSockets})`,
+                          AVAILABLE: `Trống (${availCount})`,
+                          IN_USE: `Cắm (${inUseCount})`,
+                          MAINTENANCE: `Bảo trì (${maintCount})`,
+                        };
+                        const isActive = socketFilterStatus === st;
+                        return (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() => setSocketFilterStatus(st)}
+                            className={`px-2 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                              isActive
+                                ? 'bg-[#326DD8] text-white shadow-xs'
+                                : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
+                            }`}
+                          >
+                            {labels[st]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ============================================================== */}
+                {/* CHẾ ĐỘ 1: XEM THEO 13 TỦ ĐIỆN HIỆN TRƯỜNG (BY_CABINET)         */}
+                {/* ============================================================== */}
+                {socketViewMode === 'BY_CABINET' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                    {cabinetList
+                      .filter(cab => selectedCabinetFilter === 'ALL' || cab.cabinetCode === selectedCabinetFilter)
+                      .map((cab) => {
+                        const filteredCabSockets = cab.sockets.filter(s => {
+                          if (socketFilterStatus === 'ALL') return true;
+                          if (socketFilterStatus === 'IN_USE') return s.status === 'IN_USE';
+                          if (socketFilterStatus === 'AVAILABLE') return s.status === 'AVAILABLE';
+                          if (socketFilterStatus === 'MAINTENANCE') return s.status === 'MAINTENANCE' || s.status === 'FAULTY';
+                          return true;
+                        });
+
+                        return (
+                          <div
+                            key={cab.cabinetCode}
+                            className="bg-[#FCFCFD] rounded-xl border border-[#E5E9F0] p-3 shadow-2xs hover:shadow-xs transition-shadow space-y-2.5 flex flex-col justify-between"
+                          >
+                            {/* Card Header Tủ điện */}
+                            <div>
+                              <div className="flex items-center justify-between pb-2 border-b border-[#F2F4F7]">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF] flex items-center justify-center font-bold font-mono text-xs">
+                                    {cab.cabinetCode}
+                                  </div>
+                                  <div>
+                                    <div className="text-xs font-bold text-[#17202E] flex items-center gap-1.5">
+                                      <span>{cab.cabinetName}</span>
+                                      <span className="text-[10px] font-semibold text-[#667085] bg-[#F2F4F7] px-1.5 py-0.2 rounded">
+                                        {cab.total} giắc 380V
+                                      </span>
+                                      {cab.total >= 8 && (
+                                        <span className="text-[9px] font-bold text-[#B54708] bg-[#FFFAEB] border border-[#FEDF89] px-1.5 py-0.2 rounded">
+                                          Tủ lớn
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-[10px] text-[#667085] mt-0.5">
+                                      Đang cắm: <strong className="text-[#B54708]">{cab.inUse}</strong> • Trống: <strong className="text-[#0A9444]">{cab.avail}</strong>
+                                      {cab.maint > 0 && <span> • Bảo trì: <strong className="text-[#B42318]">{cab.maint}</strong></span>}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="text-right">
+                                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                    cab.loadPct >= 80 ? 'bg-[#FEF3F2] text-[#B42318]' : cab.loadPct > 0 ? 'bg-[#FFFAEB] text-[#B54708]' : 'bg-[#ECFDF3] text-[#027A48]'
+                                  }`}>
+                                    {cab.loadPct}% tải
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Progress bar của tủ */}
+                              <div className="w-full bg-[#EAECF0] h-1.5 rounded-full overflow-hidden mt-1.5">
+                                <div
+                                  className={`h-full transition-all duration-300 ${
+                                    cab.loadPct >= 80 ? 'bg-[#D92D20]' : cab.loadPct > 0 ? 'bg-[#F79009]' : 'bg-[#12B76A]'
+                                  }`}
+                                  style={{ width: `${Math.max(5, cab.loadPct)}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Danh sách các ổ cắm trong tủ */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-1.5 pt-1">
+                              {filteredCabSockets.map((socket) => {
+                                const isInUse = socket.status === 'IN_USE';
+                                const isMaint = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
+                                const cont = socket.pluggedCont;
+
+                                if (isInUse) {
+                                  return (
+                                    <button
+                                      key={socket.socket_code}
+                                      type="button"
+                                      onClick={() => setSelectedSocket(socket)}
+                                      className="p-1.5 rounded-lg border border-[#FDB022] bg-[#FFFAEB] hover:bg-[#FEF0C7] text-left transition-all cursor-pointer shadow-2xs group relative"
+                                      title={`Ổ cắm ${socket.socket_code} đang cấp điện cho cont ${cont?.container_no_current || ''}`}
+                                    >
+                                      <div className="flex items-center justify-between mb-0.5">
+                                        <span className="font-mono font-bold text-[10px] text-[#7A2E0E] bg-[#FEDF89] px-1 rounded">
+                                          {socket.socket_code}
+                                        </span>
+                                        <Zap className="w-3 h-3 text-[#D97706] fill-current animate-pulse" />
+                                      </div>
+                                      <div className="font-mono font-bold text-[11px] text-[#17202E] truncate">
+                                        {cont?.container_no_current || 'Đang cắm'}
+                                      </div>
+                                      <div className="text-[9px] text-[#667085] truncate">
+                                        {cont?.inbound_license_plate ? `Xe: ${cont.inbound_license_plate}` : '380V/32A'}
+                                      </div>
+                                    </button>
+                                  );
+                                }
+
+                                if (isMaint) {
+                                  return (
+                                    <button
+                                      key={socket.socket_code}
+                                      type="button"
+                                      onClick={() => setSelectedSocket(socket)}
+                                      className="p-1.5 rounded-lg border border-[#FECDCA] bg-[#FEF3F2] hover:bg-[#FEE4E2] text-left transition-all cursor-pointer shadow-2xs group"
+                                      title={`Ổ cắm ${socket.socket_code} đang bảo trì / khóa`}
+                                    >
+                                      <div className="flex items-center justify-between mb-0.5">
+                                        <span className="font-mono font-bold text-[10px] text-[#7A271A] bg-[#FECDCA] px-1 rounded">
+                                          {socket.socket_code}
+                                        </span>
+                                        <Wrench className="w-2.5 h-2.5 text-[#B42318]" />
+                                      </div>
+                                      <div className="text-[10px] font-bold text-[#B42318] truncate">
+                                        Bảo trì
+                                      </div>
+                                      <div className="text-[9px] text-[#98A2B3] truncate">
+                                        Tạm khóa
+                                      </div>
+                                    </button>
+                                  );
+                                }
+
+                                return (
+                                  <button
+                                    key={socket.socket_code}
+                                    type="button"
+                                    onClick={() => setSelectedSocket(socket)}
+                                    className="p-1.5 rounded-lg border border-dashed border-[#D0D5DD] bg-white hover:bg-[#ECFDF3] hover:border-[#6CE9A6] text-left transition-all cursor-pointer shadow-2xs group"
+                                    title={`Ổ cắm ${socket.socket_code} đang trống — Bấm để cắm cont`}
+                                  >
+                                    <div className="flex items-center justify-between mb-0.5">
+                                      <span className="font-mono font-bold text-[10px] text-[#344054] bg-[#F2F4F7] px-1 rounded group-hover:bg-[#D1FADF] group-hover:text-[#027A48]">
+                                        {socket.socket_code}
+                                      </span>
+                                      <CheckCircle2 className="w-2.5 h-2.5 text-[#12B76A]" />
+                                    </div>
+                                    <div className="text-[10px] font-bold text-[#027A48]">
+                                      Trống
+                                    </div>
+                                    <div className="text-[9px] text-[#98A2B3] font-mono">
+                                      380V sẵn sàng
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+
+                {/* ============================================================== */}
+                {/* CHẾ ĐỘ 2: LƯỚI TOÀN BỘ 50 GIẮC CẮM (GRID)                      */}
+                {/* ============================================================== */}
+                {socketViewMode === 'GRID' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
+                    {displaySockets.map((socket) => {
+                      const isInUse = socket.status === 'IN_USE';
+                      const isMaint = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
+                      const cont = socket.pluggedCont;
+                      const cabName = socket.cabinet_name || `Tủ ${socket.socket_code.split('-')[0] || ''}`;
+
+                      if (isInUse) {
+                        return (
+                          <div
+                            key={socket.socket_code}
+                            onClick={() => setSelectedSocket(socket)}
+                            className="p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/90 shadow-2xs space-y-1.5 transition-all hover:shadow-md cursor-pointer hover:border-amber-500 relative group"
+                            title="Bấm để xem chi tiết / rút điện container"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono font-bold text-xs text-amber-950 bg-amber-200/80 px-1.5 py-0.5 rounded border border-amber-300">
+                                {socket.socket_code}
+                              </span>
+                              <span className="text-[10px] font-bold text-amber-800 flex items-center gap-0.5 animate-pulse">
+                                <Zap className="w-3 h-3 fill-current text-amber-600" />
+                                <span>Đang cắm</span>
+                              </span>
+                            </div>
+                            <div>
+                              <div className="font-mono font-bold text-xs text-blue-950 truncate" title={cont?.container_no_current || 'Đang cấp điện'}>
+                                {cont?.container_no_current || 'Cont đang cắm'}
+                              </div>
+                              {cont?.inbound_license_plate && (
+                                <div className="text-[10px] text-slate-600 font-semibold truncate">
+                                  Xe: {cont.inbound_license_plate}
+                                </div>
+                              )}
+                              <div className="text-[10px] text-amber-900 font-medium mt-0.5 flex items-center justify-between">
+                                <span>{cabName}</span>
+                                <span className="font-bold">{cont?.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}</span>
+                              </div>
+                            </div>
+                            <div className="text-[9px] text-amber-800 font-semibold text-center bg-amber-100/70 rounded py-0.5 border border-amber-200 group-hover:bg-amber-200 flex items-center justify-center gap-1">
+                              <Zap className="w-2.5 h-2.5 text-amber-600 fill-current" />
+                              <span>Bấm để thao tác</span>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      if (isMaint) {
+                        return (
+                          <div
+                            key={socket.socket_code}
+                            onClick={() => setSelectedSocket(socket)}
+                            className="p-2.5 rounded-lg border-2 border-rose-300 bg-rose-50/70 shadow-2xs space-y-1.5 transition-all hover:shadow-md cursor-pointer hover:border-rose-400 flex flex-col justify-between"
+                            title="Bấm để xem sự cố / hoàn tất bảo trì"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono font-bold text-xs text-rose-950 bg-rose-200 px-1.5 py-0.5 rounded border border-rose-300">
+                                {socket.socket_code}
+                              </span>
+                              <span className="text-[10px] font-bold text-rose-700 flex items-center gap-0.5">
+                                <Wrench className="w-3 h-3 text-rose-600" />
+                                <span>Bảo trì</span>
+                              </span>
+                            </div>
+                            <div>
+                              <div className="text-[11px] font-bold text-rose-900 truncate" title={socket.notes || 'Sự cố / Bảo dưỡng'}>
+                                {socket.notes || 'Đang bảo dưỡng'}
+                              </div>
+                              <div className="text-[10px] text-rose-700">
+                                {cabName} • {socket.voltage}/{socket.amperage}
+                              </div>
+                            </div>
+                            <div className="text-[9px] text-rose-800 font-semibold text-center bg-rose-100 rounded py-0.5 border border-rose-200 flex items-center justify-center gap-1">
+                              <Wrench className="w-2.5 h-2.5 text-rose-600" />
+                              <span>Bấm để mở lại</span>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       return (
-                        <button
-                          key={st}
-                          type="button"
-                          onClick={() => setSocketFilterStatus(st)}
-                          className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
-                            isActive
-                              ? 'bg-[#326DD8] text-white shadow-xs'
-                              : 'bg-white border border-[#E5E9F0] text-[#344054] hover:bg-[#F8F9FB]'
-                          }`}
+                        <div
+                          key={socket.socket_code}
+                          onClick={() => setSelectedSocket(socket)}
+                          className="p-2.5 rounded-lg border border-slate-300 bg-white hover:bg-emerald-50/60 hover:border-emerald-400 transition-all space-y-1.5 flex flex-col justify-between cursor-pointer hover:shadow-md group"
+                          title="Ổ cắm đang trống — Bấm để cắm cont hoặc quản lý"
                         >
-                          {labels[st]}
-                        </button>
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono font-bold text-xs text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
+                              {socket.socket_code}
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-0.5">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Trống</span>
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-medium space-y-0.5">
+                            <div className="font-mono font-semibold text-slate-700">{cabName}</div>
+                            <div className="text-emerald-700 font-medium">380V • 32A 3 pha</div>
+                          </div>
+                          <div className="text-[9px] text-slate-500 font-semibold text-center bg-slate-50 rounded py-0.5 border border-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-900 group-hover:border-emerald-300 flex items-center justify-center gap-1">
+                            <Zap className="w-2.5 h-2.5 text-emerald-600 fill-current" />
+                            <span>Bấm để cắm cont</span>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
-                </div>
-
-                {/* LƯỚI TRỤ ĐIỆN TƯƠNG TÁC THỜI GIAN THỰC */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
-                  {displaySockets.map((socket) => {
-                    const isInUse = socket.status === 'IN_USE';
-                    const isMaint = socket.status === 'MAINTENANCE' || socket.status === 'FAULTY';
-                    const cont = socket.pluggedCont;
-
-                    if (isInUse) {
-                      return (
-                        <div
-                          key={socket.socket_code}
-                          onClick={() => setSelectedSocket(socket)}
-                          className="p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/90 shadow-2xs space-y-1.5 transition-all hover:shadow-md cursor-pointer hover:border-amber-500 relative group"
-                          title="Bấm để xem chi tiết / rút điện container"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-xs text-amber-950 bg-amber-200/80 px-1.5 py-0.5 rounded border border-amber-300">
-                              {socket.socket_code}
-                            </span>
-                            <span className="text-[10px] font-bold text-amber-800 flex items-center gap-0.5 animate-pulse">
-                              <Zap className="w-3 h-3 fill-current text-amber-600" />
-                              <span>Đang cắm</span>
-                            </span>
-                          </div>
-                          <div>
-                            <div className="font-mono font-bold text-xs text-blue-950 truncate" title={cont?.container_no_current || 'Đang cấp điện'}>
-                              {cont?.container_no_current || 'Cont đang cắm'}
-                            </div>
-                            {cont?.inbound_license_plate && (
-                              <div className="text-[10px] text-slate-600 font-semibold truncate">
-                                Xe: {cont.inbound_license_plate}
-                              </div>
-                            )}
-                            <div className="text-[10px] text-amber-900 font-medium mt-0.5 flex items-center justify-between">
-                              <span>{cont ? formatContainerSpec(cont.container_size, cont.container_type) : `${socket.voltage}/${socket.amperage}`}</span>
-                              <span className="font-bold">{cont?.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}</span>
-                            </div>
-                          </div>
-                          <div className="text-[9px] text-amber-800 font-semibold text-center bg-amber-100/70 rounded py-0.5 border border-amber-200 group-hover:bg-amber-200 flex items-center justify-center gap-1">
-                            <Zap className="w-2.5 h-2.5 text-amber-600 fill-current" />
-                            <span>Bấm để thao tác</span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (isMaint) {
-                      return (
-                        <div
-                          key={socket.socket_code}
-                          onClick={() => setSelectedSocket(socket)}
-                          className="p-2.5 rounded-lg border-2 border-rose-300 bg-rose-50/70 shadow-2xs space-y-1.5 transition-all hover:shadow-md cursor-pointer hover:border-rose-400 flex flex-col justify-between"
-                          title="Bấm để xem sự cố / hoàn tất bảo trì"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-xs text-rose-950 bg-rose-200 px-1.5 py-0.5 rounded border border-rose-300">
-                              {socket.socket_code}
-                            </span>
-                            <span className="text-[10px] font-bold text-rose-700 flex items-center gap-0.5">
-                              <Wrench className="w-3 h-3 text-rose-600" />
-                              <span>Bảo trì</span>
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-[11px] font-bold text-rose-900 truncate" title={socket.notes || 'Sự cố / Bảo dưỡng'}>
-                              {socket.notes || 'Đang bảo dưỡng'}
-                            </div>
-                            <div className="text-[10px] text-rose-700">
-                              {socket.voltage} / {socket.amperage}
-                            </div>
-                          </div>
-                          <div className="text-[9px] text-rose-800 font-semibold text-center bg-rose-100 rounded py-0.5 border border-rose-200 flex items-center justify-center gap-1">
-                            <Wrench className="w-2.5 h-2.5 text-rose-600" />
-                            <span>Bấm để mở lại</span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={socket.socket_code}
-                        onClick={() => setSelectedSocket(socket)}
-                        className="p-2.5 rounded-lg border border-slate-300 bg-white hover:bg-emerald-50/60 hover:border-emerald-400 transition-all space-y-1.5 flex flex-col justify-between cursor-pointer hover:shadow-md group"
-                        title="Trụ điện đang trống — Bấm để cắm cont hoặc quản lý"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-xs text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
-                            {socket.socket_code}
-                          </span>
-                          <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Trống</span>
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-500 font-medium space-y-0.5">
-                          <div className="font-mono font-semibold text-slate-700">{socket.voltage} • {socket.amperage}</div>
-                          <div className="text-emerald-700 font-medium">Sẵn sàng 3 pha</div>
-                        </div>
-                        <div className="text-[9px] text-slate-500 font-semibold text-center bg-slate-50 rounded py-0.5 border border-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-900 group-hover:border-emerald-300 flex items-center justify-center gap-1">
-                          <Zap className="w-2.5 h-2.5 text-emerald-600 fill-current" />
-                          <span>Bấm để cắm cont</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                )}
               </div>
             );
           })()}
@@ -4838,7 +5112,7 @@ export default function YardMonitorPage() {
         </div>
       )}
 
-      {/* MODAL 1: CHI TIẾT & THAO TÁC TRỤ ĐIỆN 380V (POWER SOCKET) */}
+      {/* MODAL 1: CHI TIẾT & THAO TÁC Ổ CẮM ĐIỆN 380V (POWER SOCKET) */}
       {selectedSocket && !isEditSocketModalOpen && (
         <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
@@ -4854,7 +5128,11 @@ export default function YardMonitorPage() {
                       {selectedSocket.socket_code}
                     </span>
                   </h3>
-                  <span className="text-[11px] text-[#667085]">Phân khu: Khu A — Bãi Container Lạnh</span>
+                  <div className="text-[11px] text-[#667085] flex items-center gap-1.5 mt-0.5">
+                    <span className="font-semibold text-[#175CD3]">{selectedSocket.cabinet_name || `Tủ ${selectedSocket.socket_code.split('-')[0]}`}</span>
+                    <span>•</span>
+                    <span>Khu A — Bãi Container Lạnh (Reefer)</span>
+                  </div>
                 </div>
               </div>
               <button
@@ -4907,7 +5185,7 @@ export default function YardMonitorPage() {
 
             {selectedSocket.notes && (
               <div className="text-xs text-[#344054] bg-[#EFF8FF] p-3 rounded-xl border border-[#B2DDFF]">
-                <span className="font-bold text-[#175CD3]">Ghi chú trụ: </span>
+                <span className="font-bold text-[#175CD3]">Ghi chú: </span>
                 <span>{selectedSocket.notes}</span>
               </div>
             )}
@@ -4979,7 +5257,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
-                    <span>Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Trụ {selectedSocket.socket_code})</span>
+                    <span>Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Ổ {selectedSocket.socket_code})</span>
                   </Link>
 
                   <button
@@ -5009,9 +5287,9 @@ export default function YardMonitorPage() {
                 <div className="p-3 bg-[#FEF3F2] rounded-xl border border-[#FECDCA] text-xs text-[#B42318] flex items-start gap-2.5">
                   <Wrench className="w-4 h-4 text-[#D92D20] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Trụ điện đang trong chế độ bảo trì / sửa chữa</span>
+                    <span className="font-bold">Ổ cắm điện đang trong chế độ bảo trì / sửa chữa</span>
                     <p className="text-[11px] text-[#912018] mt-0.5">
-                      Lý do: {selectedSocket.notes || 'Đang bảo dưỡng aptomat/dây dẫn'}. Trụ tạm khóa không thể tiếp nhận cắm điện.
+                      Lý do: {selectedSocket.notes || 'Đang bảo dưỡng aptomat/dây dẫn'}. Ổ tạm khóa không thể tiếp nhận cắm điện.
                     </p>
                   </div>
                 </div>
@@ -5023,7 +5301,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2"
                   >
                     <Check className="w-4 h-4" />
-                    <span>Hoàn tất bảo trì & Mở lại trụ</span>
+                    <span>Hoàn tất bảo trì & Mở lại ổ</span>
                   </button>
 
                   <button
@@ -5041,7 +5319,7 @@ export default function YardMonitorPage() {
                     className="py-2 px-2.5 rounded-lg font-semibold text-[#D92D20] bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5"
                   >
                     <Trash2 className="w-3.5 h-3.5 text-[#D92D20]" />
-                    <span>Xóa trụ</span>
+                    <span>Xóa ổ cắm</span>
                   </button>
                 </div>
               </div>
@@ -5060,7 +5338,7 @@ export default function YardMonitorPage() {
         </div>
       )}
 
-      {/* MODAL 2: THÊM TRỤ ĐIỆN MỚI */}
+      {/* MODAL 2: THÊM Ổ CẮM ĐIỆN 380V VÀO TỦ */}
       {isCreateSocketModalOpen && (
         <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
@@ -5070,8 +5348,8 @@ export default function YardMonitorPage() {
                   <Plus className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#17202E]">Thêm Trụ điện 380V mới</h3>
-                  <span className="text-[10px] text-[#667085]">Mở rộng hạ tầng điện container lạnh</span>
+                  <h3 className="text-sm font-bold text-[#17202E]">Thêm Ổ cắm 380V mới vào Tủ điện</h3>
+                  <span className="text-[10px] text-[#667085]">Quy hoạch hạ tầng điện 13 Tủ Sơn Cảng</span>
                 </div>
               </div>
               <button
@@ -5091,9 +5369,24 @@ export default function YardMonitorPage() {
             )}
 
             <form onSubmit={handleSaveCreateSocket} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Thuộc Tủ điện *</label>
+                <select
+                  value={socketFormCabinet}
+                  onChange={(e) => handleCabinetChangeInModal(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-bold text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                >
+                  {['T01','T02','T03','T04','T05','T06','T07','T08','T09','T10','T11','T12','T13'].map(t => (
+                    <option key={t} value={t}>
+                      {t} — Tủ {t.replace(/^T0?/, '')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã trụ (VD: R31) *</label>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã ổ cắm *</label>
                   <input
                     type="text"
                     required
@@ -5147,7 +5440,7 @@ export default function YardMonitorPage() {
                   rows={2}
                   value={socketFormNotes}
                   onChange={(e) => setSocketFormNotes(e.target.value)}
-                  placeholder="Vị trí cột điện, aptomat phụ trách, bảo vệ chống giật..."
+                  placeholder="Vị trí tủ điện, aptomat phụ trách, chống rò giật..."
                   className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] bg-white resize-none transition-all"
                 />
               </div>
@@ -5165,7 +5458,7 @@ export default function YardMonitorPage() {
                   disabled={isSubmittingSocket}
                   className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmittingSocket ? 'Đang tạo...' : 'Tạo Trụ điện'}
+                  {isSubmittingSocket ? 'Đang tạo...' : 'Tạo Ổ cắm'}
                 </button>
               </div>
             </form>
@@ -5173,7 +5466,7 @@ export default function YardMonitorPage() {
         </div>
       )}
 
-      {/* MODAL 3: SỬA TRỤ ĐIỆN */}
+      {/* MODAL 3: SỬA Ổ CẮM ĐIỆN */}
       {isEditSocketModalOpen && (
         <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
@@ -5183,7 +5476,7 @@ export default function YardMonitorPage() {
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#17202E]">Sửa Trụ điện: {socketFormCode}</h3>
+                  <h3 className="text-sm font-bold text-[#17202E]">Sửa Ổ cắm: {socketFormCode}</h3>
                   <span className="text-[10px] text-[#667085]">Cập nhật thông số kỹ thuật</span>
                 </div>
               </div>
@@ -5204,6 +5497,21 @@ export default function YardMonitorPage() {
             )}
 
             <form onSubmit={handleSaveEditSocket} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Thuộc Tủ điện</label>
+                <select
+                  value={socketFormCabinet}
+                  onChange={(e) => setSocketFormCabinet(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg bg-white font-bold text-[#17202E] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                >
+                  {['T01','T02','T03','T04','T05','T06','T07','T08','T09','T10','T11','T12','T13'].map(t => (
+                    <option key={t} value={t}>
+                      {t} — Tủ {t.replace(/^T0?/, '')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-[#344054] mb-1">Tên hiển thị *</label>
                 <input

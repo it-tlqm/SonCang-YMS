@@ -40,6 +40,7 @@ import {
   StaffUser,
   PowerSocket,
   PowerSocketStatus,
+  PowerCabinetInfo,
   AppRole,
   AppRolePermission,
   CashSettlement,
@@ -3134,6 +3135,25 @@ export class SupabaseRepository implements IYardRepository {
     }
   }
 
+  /** Lấy danh mục các tủ điện container lạnh 380V */
+  async getPowerCabinets(): Promise<PowerCabinetInfo[]> {
+    return [
+      { cabinet_code: 'T01', cabinet_name: 'Tủ 01', total_sockets: 3, description: 'Tủ điện T01 — 3 ổ cắm 380V (T01-01 -> T01-03)' },
+      { cabinet_code: 'T02', cabinet_name: 'Tủ 02', total_sockets: 4, description: 'Tủ điện T02 — 4 ổ cắm 380V (T02-01 -> T02-04)' },
+      { cabinet_code: 'T03', cabinet_name: 'Tủ 03', total_sockets: 4, description: 'Tủ điện T03 — 4 ổ cắm 380V (T03-01 -> T03-04)' },
+      { cabinet_code: 'T04', cabinet_name: 'Tủ 04', total_sockets: 3, description: 'Tủ điện T04 — 3 ổ cắm 380V (T04-01 -> T04-03)' },
+      { cabinet_code: 'T05', cabinet_name: 'Tủ 05', total_sockets: 8, description: 'Tủ điện T05 — 8 ổ cắm 380V công suất lớn (T05-01 -> T05-08)' },
+      { cabinet_code: 'T06', cabinet_name: 'Tủ 06', total_sockets: 3, description: 'Tủ điện T06 — 3 ổ cắm 380V (T06-01 -> T06-03)' },
+      { cabinet_code: 'T07', cabinet_name: 'Tủ 07', total_sockets: 3, description: 'Tủ điện T07 — 3 ổ cắm 380V (T07-01 -> T07-03)' },
+      { cabinet_code: 'T08', cabinet_name: 'Tủ 08', total_sockets: 2, description: 'Tủ điện T08 — 2 ổ cắm 380V (T08-01 -> T08-02)' },
+      { cabinet_code: 'T09', cabinet_name: 'Tủ 09', total_sockets: 5, description: 'Tủ điện T09 — 5 ổ cắm 380V (T09-01 -> T09-05)' },
+      { cabinet_code: 'T10', cabinet_name: 'Tủ 10', total_sockets: 3, description: 'Tủ điện T10 — 3 ổ cắm 380V (T10-01 -> T10-03)' },
+      { cabinet_code: 'T11', cabinet_name: 'Tủ 11', total_sockets: 4, description: 'Tủ điện T11 — 4 ổ cắm 380V (T11-01 -> T11-04)' },
+      { cabinet_code: 'T12', cabinet_name: 'Tủ 12', total_sockets: 4, description: 'Tủ điện T12 — 4 ổ cắm 380V (T12-01 -> T12-04)' },
+      { cabinet_code: 'T13', cabinet_name: 'Tủ 13', total_sockets: 4, description: 'Tủ điện T13 — 4 ổ cắm 380V (T13-01 -> T13-04)' },
+    ];
+  }
+
   /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
   async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {
     try {
@@ -3150,21 +3170,42 @@ export class SupabaseRepository implements IYardRepository {
       // Fallback
     }
 
-    // Fallback nếu bảng trống hoặc offline: trả về 30 trụ mặc định từ seed
-    const defaultSockets: PowerSocket[] = Array.from({ length: 30 }, (_, i) => {
-      const code = `R${String(i + 1).padStart(2, '0')}`;
-      return {
-        id: `socket-${code}`,
-        socket_code: code,
-        socket_name: `Trụ điện ${code}`,
-        zone_code: 'KHU_A_REEFER',
-        voltage: '380V',
-        amperage: '32A',
-        phase: '3_PHASE',
-        status: 'AVAILABLE',
-        notes: 'Trụ cấp điện container lạnh chuyên dụng 380V/32A chuẩn công nghiệp 3 pha',
-        is_active: true,
-      };
+    // Fallback nếu bảng trống hoặc offline: trả về 50 ổ cắm thuộc 13 Tủ điện Sơn Cảng
+    const cabinetSpecs = [
+      { code: 'T01', name: 'Tủ 01', count: 3 },
+      { code: 'T02', name: 'Tủ 02', count: 4 },
+      { code: 'T03', name: 'Tủ 03', count: 4 },
+      { code: 'T04', name: 'Tủ 04', count: 3 },
+      { code: 'T05', name: 'Tủ 05', count: 8 },
+      { code: 'T06', name: 'Tủ 06', count: 3 },
+      { code: 'T07', name: 'Tủ 07', count: 3 },
+      { code: 'T08', name: 'Tủ 08', count: 2 },
+      { code: 'T09', name: 'Tủ 09', count: 5 },
+      { code: 'T10', name: 'Tủ 10', count: 3 },
+      { code: 'T11', name: 'Tủ 11', count: 4 },
+      { code: 'T12', name: 'Tủ 12', count: 4 },
+      { code: 'T13', name: 'Tủ 13', count: 4 },
+    ];
+    const defaultSockets: PowerSocket[] = cabinetSpecs.flatMap((cab) => {
+      return Array.from({ length: cab.count }, (_, i) => {
+        const sIndex = i + 1;
+        const code = `${cab.code}-${String(sIndex).padStart(2, '0')}`;
+        return {
+          id: `socket-${code}`,
+          socket_code: code,
+          socket_name: `${cab.name} — Ổ ${sIndex}`,
+          zone_code: 'KHU_A_REEFER',
+          cabinet_code: cab.code,
+          cabinet_name: cab.name,
+          socket_index: sIndex,
+          voltage: '380V',
+          amperage: '32A',
+          phase: '3_PHASE',
+          status: 'AVAILABLE' as PowerSocketStatus,
+          notes: `${cab.name} ổ số ${sIndex} (Chuẩn 3 pha 380V/32A bến bãi Sơn Cảng)`,
+          is_active: true,
+        };
+      });
     });
     return defaultSockets;
   }

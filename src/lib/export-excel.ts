@@ -219,11 +219,11 @@ function createStyledReportSheet(
 
       // Highlight trực quan trạng thái
       const strVal = String(cell.value || '');
-      if (strVal.includes('Đã thu') || strVal.includes('Đã duyệt') || strVal.includes('✓ Sẵn sàng') || strVal.includes('✓ Bình thường')) {
+      if (strVal.includes('Đã thu') || strVal.includes('Đã duyệt') || strVal.includes('Sẵn sàng') || strVal.includes('Bình thường')) {
         cell.font = { name: THEME.fontFamily, size: 9.5, bold: true, color: { argb: 'FF15803D' } };
-      } else if (strVal.includes('Chưa thu') || strVal.includes('Chờ duyệt') || strVal.includes('🚨 TỒN QUÁ HẠN') || strVal.includes('⚠️ Chưa đủ')) {
+      } else if (strVal.includes('Chưa thu') || strVal.includes('Chờ duyệt') || strVal.includes('TỒN QUÁ HẠN') || strVal.includes('Chưa đủ')) {
         cell.font = { name: THEME.fontFamily, size: 9.5, bold: true, color: { argb: 'FFB91C1C' } };
-      } else if (strVal.includes('⚡ Đang cắm') || strVal.includes('⚠️ Theo dõi') || strVal.includes('Duyệt nợ')) {
+      } else if (strVal.includes('Đang cắm') || strVal.includes('Theo dõi') || strVal.includes('Duyệt nợ')) {
         cell.font = { name: THEME.fontFamily, size: 9.5, bold: true, color: { argb: 'FFB45309' } };
       }
     });
@@ -480,7 +480,7 @@ export async function exportYardVehiclesToExcel(vehicles: VehicleVisit[]): Promi
       ? `${Math.floor(diffHours)}h ${Math.floor((diffHours % 1) * 60)}p` 
       : `${Math.floor(diffHours / 24)} ngày ${Math.floor(diffHours % 24)}h`;
 
-    const dwellStatus = diffHours >= 48 ? '🚨 TỒN QUÁ HẠN (≥48h)' : diffHours >= 24 ? '⚠️ Theo dõi (≥24h)' : '✓ Bình thường (<24h)';
+    const dwellStatus = diffHours >= 48 ? 'TỒN QUÁ HẠN (≥48h)' : diffHours >= 24 ? 'Theo dõi (≥24h)' : 'Bình thường (<24h)';
     const ticketAmt = Number(v.ticket_amount) || 0;
     sumTicket += ticketAmt;
 
@@ -567,7 +567,7 @@ export async function exportYardContainersToExcel(containers: ContainerVisit[]):
       ? `${Math.floor(diffHours)}h ${Math.floor((diffHours % 1) * 60)}p` 
       : `${Math.floor(diffHours / 24)} ngày ${Math.floor(diffHours % 24)}h`;
 
-    const dwellStatus = diffHours >= 48 ? '🚨 TỒN QUÁ HẠN (≥48h)' : diffHours >= 24 ? '⚠️ Theo dõi (≥24h)' : '✓ Bình thường (<24h)';
+    const dwellStatus = diffHours >= 48 ? 'TỒN QUÁ HẠN (≥48h)' : diffHours >= 24 ? 'Theo dõi (≥24h)' : 'Bình thường (<24h)';
 
     return [
       idx + 1,
@@ -579,8 +579,8 @@ export async function exportYardContainersToExcel(containers: ContainerVisit[]):
       dwellText,
       dwellStatus,
       c.inbound_license_plate || 'Tồn kho hạ bãi',
-      c.is_plugged ? '⚡ Đang cắm điện' : 'Không cắm điện',
-      c.clearance_status === 'CLEARED' ? '✓ Đã duyệt' : c.clearance_status === 'CLEARED_WITH_DEBT' ? '⚠️ Duyệt nợ' : 'Chờ CCKB duyệt',
+      c.is_plugged ? 'Đang cắm điện' : 'Không cắm điện',
+      c.clearance_status === 'CLEARED' ? 'Đã duyệt' : c.clearance_status === 'CLEARED_WITH_DEBT' ? 'Duyệt nợ' : 'Chờ CCKB duyệt',
       c.yard_zone || '',
       c.slot_code || '',
       c.notes || '',
@@ -662,7 +662,7 @@ export async function exportReeferSessionsToExcel(sessions: ReeferPowerSession[]
     return [
       idx + 1,
       s.container_no,
-      isPlugged ? '⚡ Đang cắm điện' : 'Đã rút điện',
+      isPlugged ? 'Đang cắm điện' : 'Đã rút điện',
       new Date(s.plugged_in_at).toLocaleString('vi-VN'),
       s.plugged_in_by || '',
       s.unplugged_at ? new Date(s.unplugged_at).toLocaleString('vi-VN') : '—',
@@ -781,8 +781,8 @@ export async function exportYardInventoryReportToExcel(vehicles: VehicleVisit[],
     c.cargo_status === 'HANG' ? 'HÀNG' : c.cargo_status === 'RONG' ? 'RỖNG' : 'Chưa rõ',
     new Date(c.inbound_at).toLocaleString('vi-VN'),
     c.inbound_license_plate || '',
-    c.is_plugged ? '⚡ Đang cắm' : 'Không cắm',
-    c.clearance_status === 'CLEARED' ? '✓ Đã duyệt' : 'Chưa duyệt',
+    c.is_plugged ? 'Đang cắm' : 'Không cắm',
+    c.clearance_status === 'CLEARED' ? 'Đã duyệt' : 'Chưa duyệt',
     c.yard_zone || '',
     c.slot_code || '',
   ]);

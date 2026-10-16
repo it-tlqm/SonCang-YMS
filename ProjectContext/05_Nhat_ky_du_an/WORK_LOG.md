@@ -1,6 +1,65 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-16 17:15 — Chuẩn Hóa Phân Bổ 4 Phân Khu Bến Bãi Theo System Design, Nâng Cấp Nút Thao Tác Container Tab 3 Và Loại Bỏ 100% Emoji Sang SVG Lucide Icons
+## 2026-10-16 17:45 — Quy Hoạch Hệ Thống Cấp Điện Khu A Theo 13 Tủ Điện / 50 Giắc Cắm 380V Hiện Trường Thực Tế & Hoàn Tất Loại Bỏ 100% Emoji Sang SVG Lucide Icons
+
+- **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:
+  *"à hiện tại chỗ ổng cám đoiện chúng tôi đang bố trí như sau, theo tủ bạn ạ, tủ thì có giắc ấy: 13 tu 50 ổ:
+  hiện tại có 
+  1 - 3s
+  2 - 4s
+  3 -4
+  4-3
+  5-8
+  6-3
+  7-3
+  8-2
+  9-5
+  10-3
+  11-4
+  12-4
+  13-4"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Quy hoạch Hạ tầng Cấp điện 13 Tủ điện / 50 Giắc cắm 380V (Quyết định D-023 chốt):**
+     - Thay thế hoàn toàn mô hình 30 trụ điện phẳng cũ (`R01..R30`) bằng mô hình quản lý theo cấp bậc chuẩn hiện trường: **Tủ điện (Cabinet) ➔ Ổ cắm / Giắc cắm 380V (Socket)**.
+     - Kiểm toán cấu trúc phân bổ 13 Tủ điện với đúng 50 ổ cắm:
+       * Tủ 01 (T01): 3 ổ (`T01-01` .. `T01-03`)
+       * Tủ 02 (T02): 4 ổ (`T02-01` .. `T02-04`)
+       * Tủ 03 (T03): 4 ổ (`T03-01` .. `T03-04`)
+       * Tủ 04 (T04): 3 ổ (`T04-01` .. `T04-03`)
+       * Tủ 05 (T05): 8 ổ (`T05-01` .. `T05-08` — Tủ công suất lớn trung tâm)
+       * Tủ 06 (T06): 3 ổ (`T06-01` .. `T06-03`)
+       * Tủ 07 (T07): 3 ổ (`T07-01` .. `T07-03`)
+       * Tủ 08 (T08): 2 ổ (`T08-01` .. `T08-02`)
+       * Tủ 09 (T09): 5 ổ (`T09-01` .. `T09-05`)
+       * Tủ 10 (T10): 3 ổ (`T10-01` .. `T10-03`)
+       * Tủ 11 (T11): 4 ổ (`T11-01` .. `T11-04`)
+       * Tủ 12 (T12): 4 ổ (`T12-01` .. `T12-04`)
+       * Tủ 13 (T13): 4 ổ (`T13-01` .. `T13-04`)
+       *(Tổng: 3 + 4 + 4 + 3 + 8 + 3 + 3 + 2 + 5 + 3 + 4 + 4 + 4 = chính xác 50 ổ cắm)*.
+     - **Domain Types & Repository Layer:**
+       * `src/types/domain.types.ts`: Bổ sung interface `PowerCabinetInfo` (mã tủ, tên tủ, số ổ, số ổ đang cắm, số ổ trống, tỷ lệ tải, danh sách mã giắc); bổ sung các trường `cabinet_code`, `cabinet_name`, `socket_index` vào interface `PowerSocket`.
+       * `src/lib/services/repository-interface.ts`: Bổ sung method `getPowerCabinets?()` và mở rộng `createPowerSocket`, `updatePowerSocket` tiếp nhận thông tin tủ điện.
+       * `src/lib/services/demo-repository.ts`: Định nghĩa danh mục chuẩn 13 Tủ điện `YARD_POWER_CABINETS`, sinh 50 giắc cắm `INITIAL_DEMO_POWER_SOCKETS`; cập nhật mô tả Khu A Reefer: *"13 Tủ điện với 50 ổ cắm/giắc 3 pha công nghiệp 380V (T01 - T13)"*; nâng seed version lên `v5_appsheet_70v_65c_13cabinets_50sockets_v5` kèm cơ chế tự động di chuyển localStorage nếu data cũ không hợp lệ hoặc thiếu 50 ổ.
+       * `src/lib/services/supabase-repository.ts`: Triển khai phương thức `getPowerCabinets()`, đồng bộ 50 ổ cắm thuộc 13 Tủ điện trong fallback offline/anon.
+  2. **Nâng cấp UI Quản lý Bến bãi (`src/app/yard/page.tsx`):**
+     - Tiêu đề khối: **"Hệ thống Cấp điện Container Lạnh 380V — 13 Tủ điện / 50 Giắc cắm (Khu A)"**.
+     - Bổ sung thanh công cụ điều khiển linh hoạt:
+       * Nút chuyển chế độ xem: `Theo Tủ điện (13 Tủ)` (Card từng tủ với thanh đo % tải và các slot giắc trực quan) hoặc `Lưới ổ cắm (50 Giắc)` (lưới 50 giắc phẳng).
+       * Dropdown chọn lọc theo Tủ điện cụ thể (`selectedCabinetFilter` T01..T13) kết hợp lọc trạng thái (Tất cả, Đang cắm, Trống, Bảo trì).
+       * Nâng cấp Modal Chi tiết Ổ cắm: hiển thị thông tin Tủ điện phụ trách, vị trí giắc trong tủ, container đang cắm.
+       * Nâng cấp Modal Thêm/Sửa Ổ cắm: có dropdown chọn Tủ điện thuộc về (T01..T13), tự động gợi ý mã giắc kế tiếp (`T01-04`, `T02-05`...).
+  3. **Nâng cấp UI Giám sát Điện lạnh (`src/app/reefer/page.tsx`):**
+     - Bổ sung Tab 5 mới trong `WorkspaceTabs`: **"13 Tủ / 50 Giắc 380V"** (`activeTab === 'SOCKETS'`), hiển thị toàn bộ 13 Tủ điện kèm các giắc cắm trực quan, hỗ trợ bấm giắc trống để cắm cont nhanh hoặc bấm giắc bận để mở Inspector.
+     - Modal Cắm điện (`showPlugModal`): Dropdown chọn vị trí cắm điện gom nhóm theo `<optgroup>` của 13 Tủ điện (kèm chỉ số trống/bận của từng tủ).
+     - Quét sạch toàn bộ các emoji đồng hồ `⏱️` còn sót ở các modal lùi giờ/xác nhận giờ Zalo (thay bằng `Clock` SVG).
+  4. **Làm sạch Emoji trong Export Excel (`src/lib/export-excel.ts`):**
+     - Xóa sạch các emoji `🚨`, `⚠️`, `✓`, `⚡` trong text xuất báo cáo tồn bãi, chỉ giữ text chuẩn và format màu bằng ExcelJS.
+- **Kiểm thử xác thực:**
+  - Quét regex emoji toàn bộ codebase `src/`: **0 matches** (hoàn toàn sạch 100%).
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
+
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
   1. *"CHỗ này chưa đúng systemdesign: Chi tiết phân bổ xe & container theo phân khu. Phương tiện trong bãi (70) Khu: Chưa gán..."*

@@ -393,12 +393,22 @@ export interface StaffUser {
 
 export type PowerSocketStatus = 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'FAULTY';
 
+export interface PowerCabinetInfo {
+  cabinet_code: string; // T01 .. T13
+  cabinet_name: string; // Tủ 01 .. Tủ 13
+  total_sockets: number;
+  description?: string;
+}
+
 export interface PowerSocket {
   id: string;
   socket_code: string;
   socket_name: string;
   zone_code: string;
   yard_id?: string | null;
+  cabinet_code?: string;
+  cabinet_name?: string;
+  socket_index?: number;
   voltage: string;
   amperage: string;
   phase: string;
