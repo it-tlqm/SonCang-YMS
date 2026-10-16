@@ -25,7 +25,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-f0765011",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R01"
+    "slot_code": "T01-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-00002917e9cf",
@@ -48,7 +48,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-2917e9cf",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R02"
+    "slot_code": "T01-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001391d72a",
@@ -71,7 +71,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-1391d72a",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R03"
+    "slot_code": "T01-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000093a03711",
@@ -94,7 +94,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-93a03711",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R04"
+    "slot_code": "T02-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000d58bb169",
@@ -117,7 +117,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-d58bb169",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R05"
+    "slot_code": "T02-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c47f6f80",
@@ -140,7 +140,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-c47f6f80",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R06"
+    "slot_code": "T02-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000f237cf60",
@@ -163,7 +163,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-f237cf60",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R07"
+    "slot_code": "T02-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000e7c9f474",
@@ -186,7 +186,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-e7c9f474",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R08"
+    "slot_code": "T03-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-000036d65aa1",
@@ -209,7 +209,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-36d65aa1",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R09"
+    "slot_code": "T03-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-000034828534",
@@ -232,7 +232,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-34828534",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R10"
+    "slot_code": "T03-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-00007ee0cc8f",
@@ -255,7 +255,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-7ee0cc8f",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R11"
+    "slot_code": "T03-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-00007019d518",
@@ -278,7 +278,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-7019d518",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R12"
+    "slot_code": "T04-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000bd9cefd1",
@@ -301,7 +301,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-bd9cefd1",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R13"
+    "slot_code": "T04-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000fc1d8947",
@@ -324,7 +324,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-fc1d8947",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R14"
+    "slot_code": "T04-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000032b3fa99",
@@ -347,7 +347,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-32b3fa99",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R15"
+    "slot_code": "T05-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-000037debda9",
@@ -370,7 +370,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-37debda9",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R16"
+    "slot_code": "T05-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b18e6d61",
@@ -393,7 +393,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-b18e6d61",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R17"
+    "slot_code": "T05-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000040c0961f",
@@ -439,7 +439,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-bc209dcb",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R18"
+    "slot_code": "T05-04"
   },
   {
     "id": "c5a00000-0000-4000-a000-00005eb88903",
@@ -462,7 +462,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-5eb88903",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R19"
+    "slot_code": "T05-05"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000b54c4714",
@@ -485,7 +485,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-b54c4714",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R20"
+    "slot_code": "T05-06"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000d3ce7f72",
@@ -508,7 +508,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-d3ce7f72",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R21"
+    "slot_code": "T05-07"
   },
   {
     "id": "c5a00000-0000-4000-a000-00001ad25468",
@@ -531,7 +531,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-1ad25468",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R22"
+    "slot_code": "T05-08"
   },
   {
     "id": "c5a00000-0000-4000-a000-0000c1224ca6",
@@ -554,7 +554,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-c1224ca6",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R23"
+    "slot_code": "T06-01"
   },
   {
     "id": "c5a00000-0000-4000-a000-000012e8a4e4",
@@ -577,7 +577,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-12e8a4e4",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R24"
+    "slot_code": "T06-02"
   },
   {
     "id": "c5a00000-0000-4000-a000-000075a5e24c",
@@ -669,7 +669,7 @@ export const SEED_IN_YARD_VEHICLES: VehicleVisit[] = [
     "idempotency_key": "APPSHEET-V-1f3976dd",
     "plate_changes_count": 0,
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R25"
+    "slot_code": "T06-03"
   },
   {
     "id": "c5a00000-0000-4000-a000-000032f9fdcd",
@@ -1676,7 +1676,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-13T09:37:11.000Z",
     "updated_at": "2026-09-13T09:37:11.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R01"
+    "slot_code": "T01-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000008c57f83",
@@ -1705,7 +1705,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-19T15:16:28.000Z",
     "updated_at": "2026-09-19T15:16:28.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R02"
+    "slot_code": "T01-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c6c91591",
@@ -1734,7 +1734,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-23T12:59:49.000Z",
     "updated_at": "2026-09-23T12:59:49.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R03"
+    "slot_code": "T01-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-00003a07632c",
@@ -1763,7 +1763,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-23T23:04:40.000Z",
     "updated_at": "2026-09-23T23:04:40.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R04"
+    "slot_code": "T02-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005db0e629",
@@ -1792,7 +1792,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-24T14:16:34.000Z",
     "updated_at": "2026-09-24T14:16:34.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R05"
+    "slot_code": "T02-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-00008a2fc21a",
@@ -1821,7 +1821,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-26T08:37:46.000Z",
     "updated_at": "2026-09-26T08:37:46.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R06"
+    "slot_code": "T02-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-000070c1c8b9",
@@ -1850,7 +1850,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-26T13:55:25.000Z",
     "updated_at": "2026-09-26T13:55:25.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R07"
+    "slot_code": "T02-04"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000195a5f2a",
@@ -1879,7 +1879,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-26T14:54:36.000Z",
     "updated_at": "2026-09-26T14:54:36.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R08"
+    "slot_code": "T03-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000048eaf89b",
@@ -1908,7 +1908,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-26T15:01:34.000Z",
     "updated_at": "2026-09-26T15:01:34.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R09"
+    "slot_code": "T03-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000dd8ab50c",
@@ -1937,7 +1937,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-26T15:33:29.000Z",
     "updated_at": "2026-09-26T15:33:29.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R10"
+    "slot_code": "T03-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-000048fc4242",
@@ -1966,7 +1966,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-27T14:21:59.000Z",
     "updated_at": "2026-09-27T14:21:59.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R11"
+    "slot_code": "T03-04"
   },
   {
     "id": "c5b00000-0000-4000-a000-00009f0498ab",
@@ -1995,7 +1995,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-27T14:47:38.000Z",
     "updated_at": "2026-09-27T14:47:38.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R12"
+    "slot_code": "T04-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000046e5a154",
@@ -2024,7 +2024,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-29T09:15:44.000Z",
     "updated_at": "2026-09-29T09:15:44.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R13"
+    "slot_code": "T04-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c07a8821",
@@ -2053,7 +2053,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-29T12:03:35.000Z",
     "updated_at": "2026-09-29T12:03:35.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R14"
+    "slot_code": "T04-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000f75cfd00",
@@ -2082,7 +2082,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-29T15:34:55.000Z",
     "updated_at": "2026-09-29T15:34:55.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R15"
+    "slot_code": "T05-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000049b427e4",
@@ -2111,7 +2111,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-29T18:14:27.000Z",
     "updated_at": "2026-09-29T18:14:27.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R16"
+    "slot_code": "T05-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-00005004923e",
@@ -2140,7 +2140,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-29T18:25:24.000Z",
     "updated_at": "2026-09-29T18:25:24.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R17"
+    "slot_code": "T05-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c8ff9d4d",
@@ -2169,7 +2169,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T10:43:00.000Z",
     "updated_at": "2026-09-30T10:43:00.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R18"
+    "slot_code": "T05-04"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004c0f9810",
@@ -2198,7 +2198,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T11:18:22.000Z",
     "updated_at": "2026-09-30T11:18:22.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R19"
+    "slot_code": "T05-05"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000c2522536",
@@ -2227,7 +2227,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T17:11:46.000Z",
     "updated_at": "2026-09-30T17:11:46.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R20"
+    "slot_code": "T05-06"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000a1beab01",
@@ -2256,7 +2256,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T17:14:56.000Z",
     "updated_at": "2026-09-30T17:14:56.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R21"
+    "slot_code": "T05-07"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e52ea74f",
@@ -2285,7 +2285,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T17:18:00.000Z",
     "updated_at": "2026-09-30T17:18:00.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R22"
+    "slot_code": "T05-08"
   },
   {
     "id": "c5b00000-0000-4000-a000-00007b4af448",
@@ -2314,7 +2314,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T17:21:59.000Z",
     "updated_at": "2026-09-30T17:21:59.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R23"
+    "slot_code": "T06-01"
   },
   {
     "id": "c5b00000-0000-4000-a000-000009649e4c",
@@ -2343,7 +2343,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-09-30T17:24:04.000Z",
     "updated_at": "2026-09-30T17:24:04.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R24"
+    "slot_code": "T06-02"
   },
   {
     "id": "c5b00000-0000-4000-a000-0000e71e114d",
@@ -2372,7 +2372,7 @@ export const SEED_IN_YARD_CONTAINERS: ContainerVisit[] = [
     "created_at": "2026-10-01T07:39:07.000Z",
     "updated_at": "2026-10-01T07:39:07.000Z",
     "yard_zone": "KHU_A_REEFER",
-    "slot_code": "R25"
+    "slot_code": "T06-03"
   },
   {
     "id": "c5b00000-0000-4000-a000-00004313b143",

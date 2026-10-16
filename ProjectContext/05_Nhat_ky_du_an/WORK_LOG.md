@@ -1,5 +1,35 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 18:05 — Đồng Bộ Vị Trí Xe/Cont Vào 13 Tủ Điện 50 Giắc Cắm 380V (T01-01 -> T13-04) & Nâng Cấp Dropdown Modal Gán Vị Trí
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"ở 13 tủ 5 giắc màTủ 1 Tủ điện T01 3 ổ T01-01 .. T01-03 ... Tổng cộng 13 Tủ điện 50 ổ"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Đồng bộ Dữ liệu Vị trí Đỗ Khu A Sang 13 Tủ Điện (`src/data/seed-in-yard-data.ts`):**
+     - Chuyển đổi toàn bộ 50 bản ghi vị trí (`slot_code`) cũ dạng `R01..R25` (25 xe và 25 container lạnh trong Khu A) sang các ổ cắm thực tế của 13 Tủ điện:
+       * Tủ 01 (3 ổ): `T01-01`, `T01-02`, `T01-03` (3 xe/cont đỗ)
+       * Tủ 02 (4 ổ): `T02-01` .. `T02-04` (4 xe/cont đỗ)
+       * Tủ 03 (4 ổ): `T03-01` .. `T03-04` (4 xe/cont đỗ)
+       * Tủ 04 (3 ổ): `T04-01` .. `T04-03` (3 xe/cont đỗ)
+       * Tủ 05 (8 ổ - tủ trung tâm): `T05-01` .. `T05-08` (8 xe/cont đỗ)
+       * Tủ 06 (3 ổ): `T06-01` .. `T06-03` (3 xe/cont đỗ)
+       * Các tủ còn lại (Tủ 07 đến Tủ 13: 25 ổ cắm còn lại) ở trạng thái **SẴN SÀNG TRỐNG (AVAILABLE)** tiếp nhận xe/cont vào tiếp theo.
+  2. **Cập nhật Demo Repository (`src/lib/services/demo-repository.ts`):**
+     - Nâng cấp phiên bản dữ liệu `DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_13cabinets_50sockets_v7'`.
+     - Cập nhật sức chứa Khu A (`KHU_A_REEFER`) từ 30 lên đúng **50 chỗ** (khớp với 50 ổ cắm điện 380V).
+     - Bổ sung cơ chế tự động di chuyển (Auto Migration) trong constructor: Nếu trình duyệt người dùng còn lưu dữ liệu cũ có mã `R01..R25`, hệ thống tự động map sang mã `T01-01` .. `T06-03` cho cả phương tiện, container và phiên cắm điện mà không cần xóa cache thủ công.
+     - Hàm `autoAllocateYardZones()`: Tự động phân bổ vào danh sách 50 giắc cắm thuộc 13 Tủ điện thay vì mã R cũ.
+  3. **Nâng cấp Modal Gán Phân khu & Vị trí đỗ (`src/app/yard/page.tsx`):**
+     - Đưa `resolvedCabinets` lên dùng chung qua hook `useMemo` để tính toán trạng thái tủ điện toàn hệ thống.
+     - Khi chọn **Khu A (Reefer)**: Thay thế ô nhập tay text bằng **Dropdown chọn Giắc cắm 380V** gom nhóm thông minh theo 13 Tủ điện (`<optgroup>`).
+     - Tự động đánh dấu giắc nào `[Sẵn sàng]` và giắc nào `[Đang cắm/đỗ]` (vô hiệu hóa chọn trùng).
+     - Cập nhật dòng thuyết minh: *"Khu A gồm 13 Tủ điện với 50 giắc 3 pha công nghiệp 380V (T01-01 -> T13-04)"*.
+  4. **Làm sạch các nhãn cũ "30 Trụ điện" trên hệ thống:**
+     - Đổi hiển thị tại `src/app/reports/page.tsx` sang `"13 Tủ / 50 Giắc 380V"`.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công trong 3.3s).
+
 ## 2026-10-16 17:55 — Thiết Lập Mặc Định Thu Gọn (Collapsed By Default) Cho Toàn Bộ Secondary Panel Aside Trên Các Phân Hệ
 
 - **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:

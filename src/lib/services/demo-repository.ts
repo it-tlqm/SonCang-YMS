@@ -127,7 +127,7 @@ export const SEED_VEHICLE_TYPES_V5: VehicleType[] = [
   },
 ];
 
-export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_13cabinets_50sockets_v5';
+export const DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_13cabinets_50sockets_v7';
 
 const INITIAL_DEMO_VEHICLES: VehicleVisit[] = [...SEED_IN_YARD_VEHICLES];
 const INITIAL_DEMO_CONTAINERS: ContainerVisit[] = [...SEED_IN_YARD_CONTAINERS];
@@ -138,7 +138,7 @@ export const SEED_YARD_ZONES_SON_CANG: YardZoneInfo[] = [
     code: 'KHU_A_REEFER',
     name: 'Khu A — Bãi Container Lạnh (Reefer)',
     description: 'Bãi cắm điện chuyên dụng, trang bị 13 Tủ điện với 50 ổ cắm/giắc 3 pha công nghiệp 380V (T01 - T13)',
-    capacity: 30,
+    capacity: 50,
     has_power_outlets: true,
     color_badge: 'bg-amber-100 text-amber-800 border-amber-300',
   },
@@ -296,9 +296,11 @@ export class DemoRepository implements IYardRepository {
         this.vehicles = [...INITIAL_DEMO_VEHICLES];
         this.containers = [...INITIAL_DEMO_CONTAINERS];
         this.powerSockets = [...INITIAL_DEMO_POWER_SOCKETS];
+        this.yardZones = [...SEED_YARD_ZONES_SON_CANG];
         localStorage.setItem('soncang_v5_demo_vehicles', JSON.stringify(this.vehicles));
         localStorage.setItem('soncang_v5_demo_containers', JSON.stringify(this.containers));
         localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
+        localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
         localStorage.setItem('soncang_v5_seed_version', DEMO_DATA_SEED_VERSION);
       } else {
         if (savedV) {
@@ -307,6 +309,38 @@ export class DemoRepository implements IYardRepository {
         if (savedC) {
           try { this.containers = JSON.parse(savedC); } catch {}
         }
+      }
+
+      // Tự động chuyển đổi các mã trụ cũ R01..R25 sang mã 13 Tủ điện T01..T06
+      const R_TO_CABINET_MAP: Record<string, string> = {
+        R01: 'T01-01', R02: 'T01-02', R03: 'T01-03',
+        R04: 'T02-01', R05: 'T02-02', R06: 'T02-03', R07: 'T02-04',
+        R08: 'T03-01', R09: 'T03-02', R10: 'T03-03', R11: 'T03-04',
+        R12: 'T04-01', R13: 'T04-02', R14: 'T04-03',
+        R15: 'T05-01', R16: 'T05-02', R17: 'T05-03', R18: 'T05-04',
+        R19: 'T05-05', R20: 'T05-06', R21: 'T05-07', R22: 'T05-08',
+        R23: 'T06-01', R24: 'T06-02', R25: 'T06-03',
+      };
+      let hasMigrationChange = false;
+      this.vehicles.forEach(v => {
+        if (v.slot_code && R_TO_CABINET_MAP[v.slot_code]) {
+          v.slot_code = R_TO_CABINET_MAP[v.slot_code];
+          hasMigrationChange = true;
+        }
+      });
+      this.containers.forEach(c => {
+        if (c.slot_code && R_TO_CABINET_MAP[c.slot_code]) {
+          c.slot_code = R_TO_CABINET_MAP[c.slot_code];
+          hasMigrationChange = true;
+        }
+        if (c.plug_socket_code && R_TO_CABINET_MAP[c.plug_socket_code]) {
+          c.plug_socket_code = R_TO_CABINET_MAP[c.plug_socket_code];
+          hasMigrationChange = true;
+        }
+      });
+      if (hasMigrationChange) {
+        localStorage.setItem('soncang_v5_demo_vehicles', JSON.stringify(this.vehicles));
+        localStorage.setItem('soncang_v5_demo_containers', JSON.stringify(this.containers));
       }
       if (savedNC) {
         try { this.numberChanges = JSON.parse(savedNC); } catch {}
@@ -1757,7 +1791,8 @@ export class DemoRepository implements IYardRepository {
       if (c.inbound_vehicle_visit_id) vToC.set(c.inbound_vehicle_visit_id, c);
     });
 
-    let reeferIdx = 1;
+    const availableReeferSlots = INITIAL_DEMO_POWER_SOCKETS.map(s => s.socket_code);
+    let reeferSlotIdx = 0;
     let transferIdx = 1;
     let bufferIdx = 1;
     let dryIdx = 1;
@@ -1771,8 +1806,8 @@ export class DemoRepository implements IYardRepository {
         v.slot_code = `C-${String(transferIdx++).padStart(2, '0')}`;
         count++;
       } else if (cont && (cont.is_plugged || cont.container_type === 'RF' || v.vehicle_type === 'CONT_LANH')) {
-        if (reeferIdx <= 25) {
-          const slot = `R${String(reeferIdx++).padStart(2, '0')}`;
+        if (reeferSlotIdx < availableReeferSlots.length) {
+          const slot = availableReeferSlots[reeferSlotIdx++];
           v.yard_zone = 'KHU_A_REEFER';
           v.slot_code = slot;
           cont.yard_zone = 'KHU_A_REEFER';

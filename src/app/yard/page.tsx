@@ -310,6 +310,63 @@ export default function YardMonitorPage() {
   const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'HANG' | 'RONG' | 'PAIRED' | 'UNPAIRED'>('ALL');
   const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
+  // Gom nhóm & trạng thái 13 Tủ điện 50 Giắc cắm 380V (Dùng chung cho Tab Sơ đồ bãi và Modal Gán vị trí)
+  const resolvedCabinets = useMemo(() => {
+    const pluggedContMap = new Map<string, ContainerVisit>();
+    containers.forEach(c => {
+      if (c.is_plugged && (c.plug_socket_code || c.slot_code)) {
+        pluggedContMap.set(c.plug_socket_code || c.slot_code!, c);
+      }
+    });
+
+    const resolvedSockets = powerSockets.map(s => {
+      const cont = pluggedContMap.get(s.socket_code);
+      const isActuallyInUse = s.status === 'IN_USE' || Boolean(cont);
+      return {
+        ...s,
+        status: isActuallyInUse ? ('IN_USE' as PowerSocketStatus) : s.status,
+        pluggedCont: cont || null,
+      };
+    });
+
+    const cabinetMap = new Map<string, {
+      cabinetCode: string;
+      cabinetName: string;
+      sockets: typeof resolvedSockets;
+      total: number;
+      inUse: number;
+      avail: number;
+      maint: number;
+      loadPct: number;
+    }>();
+
+    resolvedSockets.forEach(s => {
+      const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+      const cabName = s.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
+      if (!cabinetMap.has(cabCode)) {
+        cabinetMap.set(cabCode, {
+          cabinetCode: cabCode,
+          cabinetName: cabName,
+          sockets: [],
+          total: 0,
+          inUse: 0,
+          avail: 0,
+          maint: 0,
+          loadPct: 0,
+        });
+      }
+      const cab = cabinetMap.get(cabCode)!;
+      cab.sockets.push(s);
+      cab.total++;
+      if (s.status === 'IN_USE') cab.inUse++;
+      else if (s.status === 'MAINTENANCE' || s.status === 'FAULTY') cab.maint++;
+      else cab.avail++;
+      cab.loadPct = cab.total > 0 ? Math.round((cab.inUse / cab.total) * 100) : 0;
+    });
+
+    return Array.from(cabinetMap.values()).sort((a, b) => a.cabinetCode.localeCompare(b.cabinetCode));
+  }, [powerSockets, containers]);
+
   // Tự động đóng Action Dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -2725,70 +2782,16 @@ export default function YardMonitorPage() {
           {/* BẢNG ĐIỀU KHIỂN & QUẢN TRỊ 13 TỦ ĐIỆN / 50 GIẮC CẮM 380V (KHU A REEFER)    */}
           {/* ========================================================================= */}
           {(() => {
-            // Lấy danh sách socket đang bận dựa trên DB hoặc container đang cắm
-            const pluggedContMap = new Map<string, ContainerVisit>();
-            containers.forEach(c => {
-              if (c.is_plugged && (c.plug_socket_code || c.slot_code)) {
-                pluggedContMap.set(c.plug_socket_code || c.slot_code!, c);
-              }
-            });
-
-            const resolvedSockets = powerSockets.map(s => {
-              const cont = pluggedContMap.get(s.socket_code);
-              const isActuallyInUse = s.status === 'IN_USE' || Boolean(cont);
-              return {
-                ...s,
-                status: isActuallyInUse ? ('IN_USE' as PowerSocketStatus) : s.status,
-                pluggedCont: cont || null,
-              };
-            });
-
-            const totalSockets = resolvedSockets.length;
-            const inUseCount = resolvedSockets.filter(s => s.status === 'IN_USE').length;
-            const maintCount = resolvedSockets.filter(s => s.status === 'MAINTENANCE' || s.status === 'FAULTY').length;
+            const cabinetList = resolvedCabinets;
+            const allSockets = cabinetList.flatMap(c => c.sockets);
+            const totalSockets = allSockets.length;
+            const inUseCount = allSockets.filter(s => s.status === 'IN_USE').length;
+            const maintCount = allSockets.filter(s => s.status === 'MAINTENANCE' || s.status === 'FAULTY').length;
             const availCount = Math.max(0, totalSockets - inUseCount - maintCount);
             const loadPercent = totalSockets > 0 ? Math.round((inUseCount / totalSockets) * 100) : 0;
 
-            // Gom nhóm theo 13 Tủ điện
-            const cabinetMap = new Map<string, {
-              cabinetCode: string;
-              cabinetName: string;
-              sockets: typeof resolvedSockets;
-              total: number;
-              inUse: number;
-              avail: number;
-              maint: number;
-              loadPct: number;
-            }>();
-
-            resolvedSockets.forEach(s => {
-              const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
-              const cabName = s.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
-              if (!cabinetMap.has(cabCode)) {
-                cabinetMap.set(cabCode, {
-                  cabinetCode: cabCode,
-                  cabinetName: cabName,
-                  sockets: [],
-                  total: 0,
-                  inUse: 0,
-                  avail: 0,
-                  maint: 0,
-                  loadPct: 0,
-                });
-              }
-              const cab = cabinetMap.get(cabCode)!;
-              cab.sockets.push(s);
-              cab.total++;
-              if (s.status === 'IN_USE') cab.inUse++;
-              else if (s.status === 'MAINTENANCE' || s.status === 'FAULTY') cab.maint++;
-              else cab.avail++;
-              cab.loadPct = cab.total > 0 ? Math.round((cab.inUse / cab.total) * 100) : 0;
-            });
-
-            const cabinetList = Array.from(cabinetMap.values()).sort((a, b) => a.cabinetCode.localeCompare(b.cabinetCode));
-
             // Lọc theo cabinetFilter và socketFilterStatus
-            const displaySockets = resolvedSockets.filter(s => {
+            const displaySockets = allSockets.filter(s => {
               const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
               if (selectedCabinetFilter !== 'ALL' && cabCode !== selectedCabinetFilter) return false;
               if (socketFilterStatus === 'ALL') return true;
@@ -4218,7 +4221,7 @@ export default function YardMonitorPage() {
                 >
                   {yardZones.map(z => (
                     <option key={z.code} value={z.code}>
-                      {z.name} ({z.capacity} chỗ {z.has_power_outlets ? '— 30 Trụ điện' : ''})
+                      {z.name} ({z.capacity} chỗ {z.has_power_outlets ? '— 13 Tủ / 50 Giắc điện 380V' : ''})
                     </option>
                   ))}
                 </select>
@@ -4226,18 +4229,40 @@ export default function YardMonitorPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-[#344054] mb-1">
-                  Mã ô đỗ / Số trụ điện (Tùy chọn):
+                  {selectedZoneCode === 'KHU_A_REEFER' ? 'Chọn Giắc cắm 380V (13 Tủ điện / 50 Ổ cắm):' : 'Mã ô đỗ (Tùy chọn):'}
                 </label>
-                <input
-                  type="text"
-                  value={inputSlotCode}
-                  onChange={(e) => setInputSlotCode(e.target.value.toUpperCase())}
-                  placeholder={selectedZoneCode === 'KHU_A_REEFER' ? 'VD: R01, R02... (Trụ 1-30)' : 'VD: B-01, C-12...'}
-                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
-                />
+                {selectedZoneCode === 'KHU_A_REEFER' ? (
+                  <select
+                    value={inputSlotCode}
+                    onChange={(e) => setInputSlotCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444]"
+                  >
+                    <option value="">-- Chưa gán giắc điện --</option>
+                    {resolvedCabinets.map(cab => (
+                      <optgroup key={cab.cabinetCode} label={`${cab.cabinetName} (${cab.total} ổ — ${cab.avail} trống)`}>
+                        {cab.sockets.map(s => {
+                          const isOccupied = s.status === 'IN_USE' && s.socket_code !== locationModalItem?.currentSlot;
+                          return (
+                            <option key={s.id} value={s.socket_code} disabled={isOccupied}>
+                              {s.socket_code} ({s.socket_name}) {isOccupied ? '— [Đang cắm/đỗ]' : '— [Sẵn sàng]'}
+                            </option>
+                          );
+                        })}
+                      </optgroup>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={inputSlotCode}
+                    onChange={(e) => setInputSlotCode(e.target.value.toUpperCase())}
+                    placeholder="VD: B-01, C-02, D-15..."
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#0A9444]/20 focus:border-[#0A9444] bg-white text-[#17202E]"
+                  />
+                )}
                 <p className="text-[11px] text-[#667085] mt-1">
                   {selectedZoneCode === 'KHU_A_REEFER' 
-                    ? 'Khu A có 30 trụ điện 380V đánh số từ R01 đến R30.'
+                    ? 'Khu A gồm 13 Tủ điện với 50 giắc 3 pha công nghiệp 380V (T01-01 -> T13-04).'
                     : 'Nhập vị trí hàng / ô đỗ theo quy hoạch bãi để tài xế và an ninh dễ tìm kiếm.'}
                 </p>
               </div>

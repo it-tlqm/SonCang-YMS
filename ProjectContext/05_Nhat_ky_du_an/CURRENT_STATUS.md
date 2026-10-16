@@ -40,8 +40,25 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 17:55 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **THIẾT LẬP MẶC ĐỊNH THU GỌN (COLLAPSED BY DEFAULT) CHO TOÀN BỘ SECONDARY PANEL ASIDE TRÊN CÁC PHÂN HỆ**:
+- **Cập nhật lúc:** 16/10/2026 18:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐỒNG BỘ VỊ TRÍ XE/CONT VÀO 13 TỦ ĐIỆN 50 GIẮC CẮM 380V (T01-01 -> T13-04) & NÂNG CẤP DROPDOWN GÁN VỊ TRÍ**:
+  * **1. Đồng bộ 100% Vị trí Đỗ Khu A Sang 13 Tủ Điện Thực Tế:**
+    - Cập nhật toàn bộ 50 bản ghi `slot_code` (25 xe và 25 container lạnh trong Khu A) trong `src/data/seed-in-yard-data.ts` sang các ổ cắm của 13 Tủ điện: T01 (3 ổ), T02 (4 ổ), T03 (4 ổ), T04 (3 ổ), T05 (8 ổ), T06 (3 ổ) = 25 giắc đang đỗ.
+    - 25 giắc cắm còn lại (T07 đến T13) ở trạng thái **SẴN SÀNG TRỐNG (AVAILABLE)** tiếp nhận xe/cont vào tiếp theo.
+  * **2. Nâng cấp Demo Repository & Sức chứa Chuẩn:**
+    - Nâng seed version `DEMO_DATA_SEED_VERSION = 'v5_appsheet_70v_65c_13cabinets_50sockets_v7'`.
+    - Sức chứa Khu A (`KHU_A_REEFER`): Tăng từ 30 lên đúng **50 chỗ** (khớp với 50 giắc cắm).
+    - Tích hợp Auto Migration tự động map toàn bộ `R01..R25` sang `T01-01..T06-03` cho client cũ.
+    - Thuật toán `autoAllocateYardZones()`: Cấp phát tự động từ danh sách 50 giắc cắm của 13 Tủ điện.
+  * **3. Nâng cấp Modal Gán Phân khu & Vị trí đỗ (`/yard`):**
+    - Sử dụng `resolvedCabinets` tính toán trạng thái 13 Tủ điện và giắc cắm theo thời gian thực.
+    - Khi chọn Khu A (Reefer): Hiển thị Dropdown gom nhóm theo 13 Tủ điện (`<optgroup>`), tự động hiển thị giắc nào `[Sẵn sàng]` và giắc nào `[Đang cắm/đỗ]`.
+  * **4. Làm sạch nhãn cũ "30 Trụ điện":** Thay thế bằng `"13 Tủ / 50 Giắc 380V"` tại `/reports`.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công trong 3.3s).
+
+- **Mốc trước đó (16/10/2026 17:55):** **THIẾT LẬP MẶC ĐỊNH THU GỌN (COLLAPSED BY DEFAULT) CHO TOÀN BỘ SECONDARY PANEL ASIDE TRÊN CÁC PHÂN HỆ**:
   * **1. Nâng cấp Component Lõi `SecondaryPanel`:**
     - Chuyển container khi thu gọn thành thẻ `<aside>` chuẩn ngữ nghĩa, breakpoint đồng bộ `hidden md:flex`.
     - Thêm hiệu ứng toàn dải nhấp mở rộng: toàn thanh dọc hẹp `w-12` là `cursor-pointer hover:bg-[#F1F4F8] transition-colors group select-none`, nhấp vào thanh hoặc nút `PanelLeftOpen` đều tự động mở rộng mượt mà.

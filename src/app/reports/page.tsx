@@ -1031,7 +1031,7 @@ export default function ReportsManagementPage() {
                     <div className="pt-2 border-t border-[#E5E9F0] flex items-center justify-between text-xs text-[#667085]">
                       <span>Xe đang đỗ: <strong className="font-mono text-[#17202E]">{zone.vehInZone} xe</strong></span>
                       <span>Container đỗ: <strong className="font-mono text-[#17202E]">{zone.contInZone} cont</strong></span>
-                      <span>{zone.has_power_outlets ? '30 Trụ điện' : '—'}</span>
+                      <span>{zone.has_power_outlets ? '13 Tủ / 50 Giắc 380V' : '—'}</span>
                     </div>
                   </div>
                 ))}
