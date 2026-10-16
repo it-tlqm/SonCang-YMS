@@ -40,8 +40,25 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 13:50 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ĐỒNG BỘ 100% TÀI KHOẢN SUPABASE AUTH & CHUYỂN THÔNG BÁO ADMIN SANG TOAST NOTIFICATION**:
+- **Cập nhật lúc:** 16/10/2026 14:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **BỎ LÀM TRÒN 15 PHÚT — TÍNH THEO PHÚT THỰC TẾ & LÀM TRÒN CƯỚC ĐIỆN ĐẾN 5.000Đ; ĐỔI THỨ TỰ TAB ĐIỆN LẠNH (/reefer)**:
+  * **Quy tắc tính cước điện container mới (Quyết định D-021 chốt):**
+    1. Bỏ hoàn toàn quy tắc làm tròn thời gian lên chu kỳ 15 phút.
+    2. Thời lượng cắm điện được tính theo số phút thực tế: `billable_minutes = Math.round(durationSeconds / 60)`.
+    3. Tiền cước tính từ thời lượng thực tế và làm tròn đến bội số 5.000đ: `amount = Math.max(5000, Math.round(rawAmount / 5000) * 5000)`. Đảm bảo 100% không phát sinh tiền lẻ 500đ, 1k, 2k hay lẻ tiền xu.
+    4. Cập nhật đồng bộ toàn bộ logic trong `src/app/reefer/page.tsx` (Live ticker, modal rút điện, modal hoàn tất Zalo, modal CCKB khớp giờ), `src/lib/services/demo-repository.ts` và tiện ích xuất Excel `src/lib/export-excel.ts`.
+    5. Soạn thảo Migration 029: `supabase/migrations/20261016000029_reefer_fee_exact_minutes_round_5k.sql` cập nhật hàm PostgreSQL `sc_calculate_reefer_fee`.
+  * **Cấu hình thứ tự Tab mới cho phân hệ Giám sát điện (`/reefer`):**
+    1. Tab 1: **Yêu cầu cắm điện CCKB** (icon `Layers`, hiển thị số lượng yêu cầu).
+    2. Tab 2: **Sẵn sàng cắm điện** (icon `Truck`, hiển thị số lượng container trong bãi sẵn sàng cắm).
+    3. Tab 3: **Phiên cắm điện thực tế** (icon `Zap`, hiển thị số phiên cắm).
+    4. Tab 4: **Nhật ký kiểm tra nhiệt độ** (icon `Thermometer`, nhật ký theo dõi nhiệt độ container lạnh).
+    5. Đặt tab mặc định khi truy cập trang là **Yêu cầu cắm điện CCKB**.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 13:50):** **ĐỒNG BỘ 100% TÀI KHOẢN SUPABASE AUTH & CHUYỂN THÔNG BÁO ADMIN SANG TOAST NOTIFICATION**:
   * **Xử lý triệt để lỗi đăng nhập 6 tài khoản nhân sự công vụ:**
     1. Phát hiện nguyên nhân gốc rễ: 4/6 tài khoản công vụ (`dieuphoi...`, `nguyentc...`, `tronglm...`, `thaild...`) trước đó chưa từng tồn tại trong bảng `auth.users` của Supabase Auth (chỉ có trong bảng `app_staff_users`), và bảng `app_user_role_assignments` thiếu liên kết `user_id` nên hàm `sc_my_permissions()` trả về rỗng.
     2. Đã tạo mới và đồng bộ 100% cả 6 tài khoản lên Supabase Auth Cloud, gán đúng các vai trò RBAC V5 tương ứng:

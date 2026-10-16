@@ -55,7 +55,7 @@ export default function ReeferMonitoringPage() {
   const canApproveAmendment = can('reefer.session.amendment.approve'); // TBP duyệt điều chỉnh
   const canRecordTemp = can('reefer.field_work.note'); // An ninh / Kỹ thuật đo nhiệt độ hiện trường
 
-  const [activeTab, setActiveTab] = useState<'SESSIONS' | 'UNPLUGGED' | 'REQUESTS' | 'TEMP_LOGS'>('SESSIONS');
+  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'UNPLUGGED' | 'SESSIONS' | 'TEMP_LOGS'>('REQUESTS');
 
   const [sessions, setSessions] = useState<ReeferPowerSession[]>([]);
   const [containers, setContainers] = useState<ContainerVisit[]>([]);
@@ -447,8 +447,9 @@ export default function ReeferMonitoringPage() {
     }
     setCompError('');
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
-    const mins = Math.ceil(sec / 900) * 15;
-    const amount = Math.round((mins / 60) * reeferHourlyRate);
+    const mins = Math.round(sec / 60);
+    const rawAmount = (mins / 60) * reeferHourlyRate;
+    const amount = sec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
     setCompPreview({ durationMin: mins, amount });
   };
 
@@ -547,10 +548,10 @@ export default function ReeferMonitoringPage() {
     }
     setVerifyError('');
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
-    const mins = Math.ceil(sec / 900) * 15;
+    const mins = Math.round(sec / 60);
     const rate = verifySession?.applied_hourly_rate || reeferHourlyRate;
     const rawAmount = (mins / 60) * rate;
-    const amount = Math.round(rawAmount / 5000) * 5000;
+    const amount = sec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
     setVerifyPreview({ durationMin: mins, amount });
   };
 
@@ -859,12 +860,12 @@ export default function ReeferMonitoringPage() {
     setUnplugTime(localIso);
     setUnplugNotes('');
 
-    // Tính toán trước chi phí (Làm tròn 15p và làm tròn đến 5.000đ, không tiền lẻ)
+    // Tính toán trước chi phí (Thời lượng thực tế và làm tròn đến 5.000đ, không tiền lẻ)
     const plugDate = new Date(session.plugged_in_at);
     const durationSec = Math.max(0, Math.floor((now.getTime() - plugDate.getTime()) / 1000));
-    const billableMins = Math.ceil(durationSec / 900) * 15;
+    const billableMins = Math.round(durationSec / 60);
     const rawAmount = (billableMins / 60) * session.applied_hourly_rate;
-    const amount = Math.round(rawAmount / 5000) * 5000;
+    const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
 
     setCalculatedPreview({ billableMinutes: billableMins, amount });
     setShowUnplugModal(true);
@@ -897,9 +898,9 @@ export default function ReeferMonitoringPage() {
     }
 
     const durationSec = Math.max(0, Math.floor((unplugDate.getTime() - plugDate.getTime()) / 1000));
-    const billableMins = Math.ceil(durationSec / 900) * 15;
+    const billableMins = Math.round(durationSec / 60);
     const rawAmount = (billableMins / 60) * selectedSession.applied_hourly_rate;
-    const amount = Math.round(rawAmount / 5000) * 5000;
+    const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
     setCalculatedPreview({ billableMinutes: billableMins, amount });
   };
 
@@ -1364,10 +1365,10 @@ export default function ReeferMonitoringPage() {
         <WorkspaceTabs
           tabs={[
             {
-              id: 'SESSIONS',
-              label: 'Phiên cắm điện thực tế',
-              count: sessions.length,
-              icon: Zap,
+              id: 'REQUESTS',
+              label: 'Yêu cầu cắm điện CCKB',
+              count: requests.length,
+              icon: Layers,
             },
             {
               id: 'UNPLUGGED',
@@ -1376,10 +1377,10 @@ export default function ReeferMonitoringPage() {
               icon: Truck,
             },
             {
-              id: 'REQUESTS',
-              label: 'Yêu cầu cắm điện CCKB',
-              count: requests.length,
-              icon: Layers,
+              id: 'SESSIONS',
+              label: 'Phiên cắm điện thực tế',
+              count: sessions.length,
+              icon: Zap,
             },
             {
               id: 'TEMP_LOGS',
@@ -1470,7 +1471,7 @@ export default function ReeferMonitoringPage() {
                     <th className="px-3.5 py-2.5">Chủ hàng</th>
                     <th className="px-3.5 py-2.5">Thời gian cắm</th>
                     <th className="px-3.5 py-2.5">Thời gian rút</th>
-                    <th className="px-3.5 py-2.5">Thời lượng (Làm tròn 15p)</th>
+                    <th className="px-3.5 py-2.5">Thời lượng (Tròn 5k)</th>
                     <th className="px-3.5 py-2.5">Đơn giá / Thành tiền</th>
                     <th className="px-3.5 py-2.5">Trạng thái</th>
                     <th className="px-3.5 py-2.5 text-right">Thao tác</th>
@@ -1571,9 +1572,9 @@ export default function ReeferMonitoringPage() {
                                 const nowMs = currentTimeMs || plugDate.getTime();
                                 const elapsedMs = Math.max(0, nowMs - plugDate.getTime());
                                 const elapsedMins = Math.floor(elapsedMs / 60000);
-                                const billableM = Math.ceil(elapsedMins / 15) * 15;
+                                const billableM = elapsedMins;
                                 const rawEst = (billableM / 60) * rate;
-                                const estAmount = Math.round(rawEst / 5000) * 5000;
+                                const estAmount = elapsedMins > 0 ? Math.max(5000, Math.round(rawEst / 5000) * 5000) : 0;
                                 return (
                                   <div className="font-bold text-amber-800 font-mono text-xs mt-0.5 flex items-center gap-1">
                                     <span>~ {estAmount.toLocaleString('vi-VN')} đ</span>
@@ -2541,8 +2542,9 @@ export default function ReeferMonitoringPage() {
                           const plugDate = new Date(selectedSession.plugged_in_at);
                           const unplugDate = new Date(targetTime);
                           const durationSec = Math.max(0, Math.floor((unplugDate.getTime() - plugDate.getTime()) / 1000));
-                          const billableMins = Math.ceil(durationSec / 900) * 15;
-                          const amount = Math.round((billableMins / 60) * selectedSession.applied_hourly_rate);
+                          const billableMins = Math.round(durationSec / 60);
+                          const rawAmount = (billableMins / 60) * selectedSession.applied_hourly_rate;
+                          const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
                           setCalculatedPreview({ billableMinutes: billableMins, amount });
                         }
                       }}
@@ -2558,7 +2560,7 @@ export default function ReeferMonitoringPage() {
                 <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48]">
                   <p className="font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
-                    Tính cước theo quy tắc (Làm tròn 15 phút — Tròn 5.000đ, không tiền lẻ):
+                    Tính cước theo quy tắc (Thời gian thực tế — Làm tròn cước đến 5.000đ):
                   </p>
                   <p>• Thời lượng tính tiền: <span className="font-mono font-bold text-[#17202E]">{calculatedPreview.billableMinutes} phút</span></p>
                   <p>• Đơn giá: <span className="font-mono font-bold text-[#17202E]">{selectedSession.applied_hourly_rate.toLocaleString('vi-VN')} đ/giờ</span></p>
@@ -2811,7 +2813,7 @@ export default function ReeferMonitoringPage() {
                 <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48]">
                   <p className="font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
-                    Cước phí tự động (Làm tròn 15 phút @ {reeferHourlyRate.toLocaleString('vi-VN')} đ/h):
+                    Cước phí tự động (Thời gian thực tế — Tròn đến 5.000đ @ {reeferHourlyRate.toLocaleString('vi-VN')} đ/h):
                   </p>
                   <div className="flex justify-between items-center pt-1">
                     <span>Thời lượng tính tiền: <strong className="font-mono text-[#17202E]">{compPreview.durationMin} phút ({Math.round(compPreview.durationMin / 60 * 100) / 100}h)</strong></span>
@@ -3057,7 +3059,7 @@ export default function ReeferMonitoringPage() {
                 <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl space-y-1 text-xs text-[#027A48] animate-in fade-in">
                   <p className="font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4 text-[#027A48]" />
-                    Cước điện tính lại tự động (Làm tròn 15p — Tròn 5.000đ):
+                    Cước điện tính lại tự động (Thời gian thực tế — Tròn đến 5.000đ):
                   </p>
                   <div className="flex justify-between items-center pt-1">
                     <span>
@@ -3086,7 +3088,7 @@ export default function ReeferMonitoringPage() {
               </div>
 
               <div className="p-3 bg-[#EFF8FF] rounded-xl border border-[#B2DDFF] text-[11px] text-[#175CD3] leading-relaxed">
-                ℹ️ <strong>CCKB lưu ý:</strong> Khi lưu cập nhật, hệ thống tự động đồng bộ lại thời lượng làm tròn 15 phút và khoản thu tương ứng trong Sổ cái.
+                ℹ️ <strong>CCKB lưu ý:</strong> Khi lưu cập nhật, hệ thống tự động đồng bộ lại thời lượng thực tế, cước làm tròn đến 5.000đ và khoản thu tương ứng trong Sổ cái.
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">

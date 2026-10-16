@@ -830,9 +830,10 @@ export class DemoRepository implements IYardRepository {
       return { session };
     }
 
-    // Làm tròn 15 phút
-    const billableMinutes = Math.ceil(durationSeconds / 900) * 15;
-    const totalAmount = Math.round((billableMinutes / 60) * session.applied_hourly_rate);
+    // Tính theo thời lượng phút thực tế, làm tròn cước đến bội số 5.000đ
+    const billableMinutes = Math.round(durationSeconds / 60);
+    const rawAmount = (billableMinutes / 60) * session.applied_hourly_rate;
+    const totalAmount = durationSeconds > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
 
     session.power_status = 'UNPLUGGED';
     session.unplugged_at = unplugTime.toISOString();
@@ -884,9 +885,10 @@ export class DemoRepository implements IYardRepository {
     }
 
     const durationSeconds = Math.max(0, Math.floor((unplugTime.getTime() - plugTime.getTime()) / 1000));
-    const billableMinutes = durationSeconds <= 0 ? 0 : Math.ceil(durationSeconds / 900) * 15;
+    const billableMinutes = durationSeconds <= 0 ? 0 : Math.round(durationSeconds / 60);
     const rate = this.tariffs.find(t => t.code === 'DIEN_CONT_GIO')?.amount || 100000;
-    const totalAmount = Math.round((billableMinutes / 60) * rate);
+    const rawAmount = (billableMinutes / 60) * rate;
+    const totalAmount = durationSeconds > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
     const status: ReeferPowerStatus = durationSeconds <= 0 ? 'PENDING_REVIEW' : 'UNPLUGGED';
 
     const session: ReeferPowerSession = {
@@ -948,8 +950,9 @@ export class DemoRepository implements IYardRepository {
       const plugTime = new Date(session.plugged_in_at).getTime();
       const unplugTime = new Date(session.unplugged_at).getTime();
       const durSec = Math.max(0, Math.floor((unplugTime - plugTime) / 1000));
-      const billMin = Math.ceil(durSec / 900) * 15;
-      const amount = Math.round((billMin / 60) * session.applied_hourly_rate);
+      const billMin = Math.round(durSec / 60);
+      const rawAmount = (billMin / 60) * session.applied_hourly_rate;
+      const amount = durSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
       session.raw_duration_seconds = durSec;
       session.billable_minutes = billMin;
       session.total_power_amount = amount;
@@ -973,7 +976,7 @@ export class DemoRepository implements IYardRepository {
     { id: 'tf-5', code: 'VE_XE_BO_8_TAN', name: 'Vé xe bo 8 tấn (2 chân)', unit: 'Lượt xe', amount: 100000, is_active: true },
     { id: 'tf-6', code: 'VE_XE_BO_3_BANH', name: 'Vé xe bo 3 bánh nội bộ', unit: 'Lượt xe', amount: 40000, is_active: true },
     { id: 'tf-7', code: 'VE_XE_SANG_TAI', name: 'Vé xe sang tải nội bộ', unit: 'Lượt xe', amount: 0, is_active: true },
-    { id: 'tf-8', code: 'DIEN_CONT_GIO', name: 'Tiền điện container theo giờ (Làm tròn 15p)', unit: 'Giờ', amount: 100000, is_active: true },
+    { id: 'tf-8', code: 'DIEN_CONT_GIO', name: 'Tiền điện container theo giờ (Tròn đến 5.000đ)', unit: 'Giờ', amount: 100000, is_active: true },
     { id: 'tf-9', code: 'LUU_CONT_DEM', name: 'Phí lưu container qua đêm (22h-06h, miễn đêm đầu)', unit: 'Đêm', amount: 100000, is_active: true },
   ];
 

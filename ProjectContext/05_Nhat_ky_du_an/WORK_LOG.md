@@ -1,5 +1,37 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 14:05 — Cập Nhật Quy Tắc Tính Tiền Điện Container (Thời Gian Thực Tế & Tròn Đến 5.000đ) & Tái Cấu Trúc Thứ Tự Tab Giám Sát Điện (/reefer)
+
+- **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:
+  *"K CÒN LÀM TRÒN 15P B CHỈ LÀM CHỌN SAU CHO ĐẾN 5K THÔI (Làm tròn 15 phút)"*
+  *"TÔI NGHĨ CHỖ NÀY SẼ ĐỔI THỨ TỰ NHƯ SAU:
+  Yêu cầu cắm điện CCKB (2)
+  Sẵn sàng cắm điện (64)
+  Phiên cắm điện thực tế (1)
+  Nhật ký kiểm tra nhiệt độ (0)"*
+  Kèm câu hỏi tư vấn kiến trúc mở rộng dịch vụ: *"HIỆN TẠI MUỐN MỞ RỘNG DỊCH VỤ NỮA THÌ NHƯ NÀO GIỜ BẠN NHỈ? VÍ DỤ CÓ 1 LAOIJ XE KHÁC CHỈ THU VÉ VÀO CHƯA CÓ THAO TÁC GÌ NỮA?"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Quy tắc làm tròn cước điện container mới (Quyết định D-021 chốt):**
+     - **Bỏ hoàn toàn quy tắc làm tròn 15 phút:** Trước đây hệ thống làm tròn thời gian cắm điện lên chu kỳ 15 phút (`Math.ceil(sec / 900) * 15`). Theo quyết định mới, thời lượng cắm điện được tính theo số phút thực tế cắm điện ngoài bãi (`billable_minutes = Math.round(durationSeconds / 60)`).
+     - **Làm tròn tiền cước đến bội số 5.000đ:** Cước tính = `(billable_minutes / 60) * applied_hourly_rate`. Số tiền sau đó được làm tròn đến bội số 5.000đ (`Math.round(rawAmount / 5000) * 5000`), bảo đảm phiên có cắm điện thực tế (> 0s) luôn đạt mức tối thiểu 5.000đ và tuyệt đối không phát sinh tiền lẻ 500đ, 1k, 2k.
+     - **Cập nhật đồng bộ toàn bộ codebase:**
+       * `src/app/reefer/page.tsx`: Cập nhật Live ticker tính cước theo thời gian thực tế, modal Rút điện, modal Nhập phiên hoàn tất Zalo, modal CCKB Khớp giờ giắc và toàn bộ nhãn hiển thị preview từ "Làm tròn 15p" sang "Thời gian thực tế — Làm tròn cước đến 5.000đ".
+       * `src/lib/services/demo-repository.ts`: Cập nhật hàm `unplugReefer`, `recordCompletedReeferSession`, `verifyReeferSessionZalo` và danh mục tariffs.
+       * `src/lib/export-excel.ts`: Cập nhật tiêu đề cột xuất báo cáo Excel thành "Thời gian tính cước (Phút thực tế)" và "Thành tiền (Tròn đến 5k)".
+       * `supabase/migrations/20261016000029_reefer_fee_exact_minutes_round_5k.sql`: Soạn thảo migration cập nhật hàm PostgreSQL `sc_calculate_reefer_fee`.
+  2. **Tái cấu trúc thứ tự Tab tại Phân hệ Giám sát điện (`/reefer`):**
+     - Sắp xếp lại thứ tự hiển thị tab theo đúng quy trình nghiệp vụ CCKB:
+       1. **Yêu cầu cắm điện CCKB** (icon `Layers`, số lượng yêu cầu).
+       2. **Sẵn sàng cắm điện** (icon `Truck`, số lượng container lạnh trong bãi đang chờ cắm).
+       3. **Phiên cắm điện thực tế** (icon `Zap`, số lượng phiên cắm đang chạy hoặc đã hoàn tất).
+       4. **Nhật ký kiểm tra nhiệt độ** (icon `Thermometer`, lịch sử ghi nhận nhiệt độ cont lạnh).
+     - Thiết lập Tab mặc định khi mở trang là **Yêu cầu cắm điện CCKB** (`activeTab = 'REQUESTS'`).
+  3. **Tư vấn kiến trúc mở rộng loại xe & dịch vụ mới:**
+     - Phân tích chi tiết quy trình thêm loại xe chỉ thu vé vào không cõng cont qua danh mục `app_vehicle_types` (`allows_container = false`, `default_ticket_amount = X`), luồng An ninh Cổng vào (`/gate`) tự ẩn cont, và Cổng ra (`/exit`) cho phép xuất bãi 1-chạm không cần CCKB duyệt cont.
+- **Kiểm thử xác nhận:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
 ## 2026-10-16 13:50 — Đồng Bộ Toàn Diện 6 Tài Khoản Supabase Auth & Chuyển Đổi Thông Báo Quản Trị Nhân Sự Sang Toast Notification
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:

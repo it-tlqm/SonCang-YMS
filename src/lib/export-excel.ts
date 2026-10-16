@@ -635,9 +635,9 @@ export async function exportReeferSessionsToExcel(sessions: ReeferPowerSession[]
     { label: 'Thời điểm rút điện', align: 'center', minWidth: 17 },
     { label: 'Người rút', align: 'left', minWidth: 16 },
     { label: 'Thời lượng thực (phút)', align: 'right', isNumber: true, minWidth: 16 },
-    { label: 'Thời gian tính cước (Làm tròn 15p)', align: 'center', minWidth: 22 },
+    { label: 'Thời gian tính cước (Phút thực tế)', align: 'center', minWidth: 22 },
     { label: 'Đơn giá giờ (VNĐ/h)', align: 'right', isCurrency: true, minWidth: 16 },
-    { label: 'Thành tiền (VNĐ)', align: 'right', isCurrency: true, minWidth: 16 },
+    { label: 'Thành tiền (Tròn đến 5k)', align: 'right', isCurrency: true, minWidth: 16 },
     { label: 'Thanh toán', align: 'center', minWidth: 15 },
     { label: 'Ghi chú', align: 'left', minWidth: 18 },
   ];
