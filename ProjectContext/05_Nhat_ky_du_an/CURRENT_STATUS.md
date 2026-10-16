@@ -40,11 +40,11 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI SCROLL VÀ HIỂN THỊ HÌNH ẢNH TRÊN TRANG /GUIDE, SẴN SÀNG ĐẨY PRODUCTION**:
-  * **Lỗi cuộn trang (Scroll):** Khắc phục triệt để bằng việc thiết lập `overflow-y-auto` và `h-full` tại thẻ cha của `src/app/guide/page.tsx` khắc phục xung đột với `overflow-hidden` của App Shell layout. Trang cẩm nang cuộn mượt mà trơn tru trên cả Desktop lẫn Mobile.
-  * **Lỗi hiển thị ảnh & tài liệu:** Đưa toàn bộ 33 ảnh minh họa vào thư mục chuẩn `public/user_inserted_images/` cùng các tệp Word/PDF vào `public/`. Cập nhật đường dẫn chuẩn xác. Đã kiểm tra `HTTP 200 OK` cho toàn bộ tài nguyên tĩnh.
-  * Đang thực hiện commit và push lên `origin main` để Vercel deploy cập nhật production ngay lập tức.
+- **Cập nhật lúc:** 16/10/2026 22:22 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐIỀU CHỈNH BIỂU MẪU TIẾP NHẬN CỔNG VÀO SANG WIDTH LINH ĐỘNG (W-FULL RESPONSIVE)**:
+  * Đã loại bỏ class `max-w-4xl` cứng nhắc trên thẻ `<form>` tại `src/app/entry/page.tsx`, thay bằng `p-4 sm:p-5 lg:p-6 w-full space-y-6`.
+  * Form tiếp nhận xe cổng vào tự động co giãn linh động 100% không gian làm việc khi mở rộng màn hình hoặc khi đóng/mở panel trợ giúp, đảm bảo bố cục trực quan, thẩm mỹ và công thái học.
+  * Đã kiểm thử `npx tsc --noEmit` đạt 0 lỗi và test HTTP response status 200 OK.
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

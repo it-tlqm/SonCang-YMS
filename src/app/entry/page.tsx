@@ -590,7 +590,7 @@ export default function EntryGatePage() {
 
         {/* THÔNG BÁO HOÀN TẤT THÀNH CÔNG */}
         {successResult && (
-          <div className="m-5 p-4 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] animate-in fade-in slide-in-from-top-2">
+          <div className="m-4 sm:m-5 lg:m-6 p-4 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] animate-in fade-in slide-in-from-top-2">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-[#0A9444] text-white flex items-center justify-center shrink-0 mt-0.5">
@@ -639,7 +639,7 @@ export default function EntryGatePage() {
 
         {/* THÔNG BÁO LỖI NẾU CÓ */}
         {errorMessage && (
-          <div className="mx-5 mt-4 p-3.5 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-xs text-[#D92D20] flex items-center gap-2.5">
+          <div className="mx-4 sm:mx-5 lg:mx-6 mt-4 p-3.5 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-xs text-[#D92D20] flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span className="flex-1 font-medium">{errorMessage}</span>
             <button
@@ -652,8 +652,8 @@ export default function EntryGatePage() {
           </div>
         )}
 
-        {/* FORM TIẾP NHẬN CHÍNH (THEO CHIỀU DỌC CÔNG THÁI HỌC) */}
-        <form onSubmit={handleSubmit} className="p-5 max-w-4xl space-y-6">
+        {/* FORM TIẾP NHẬN CHÍNH (WIDTH LINH ĐỘNG THEO TOÀN BỘ KHÔNG GIAN WORKSPACE) */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 lg:p-6 w-full space-y-6">
           {/* SECTION 1: THÔNG TIN PHƯƠNG TIỆN */}
           <div className="border border-[#E5E9F0] rounded-xl p-4 sm:p-5 bg-white shadow-2xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F6]">

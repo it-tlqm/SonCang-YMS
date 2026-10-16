@@ -1,5 +1,21 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 22:22 — Điều Chỉnh Chiều Rộng Linh Động (Fluid Width) Cho Biểu Mẫu Tiếp Nhận Cổng Vào (/entry)
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
+  *"form này chưa width linh động này bạn: <form class=\"p-5 max-w-4xl space-y-6\">..."*
+- **Nguyên nhân kỹ thuật & Phân tích:**
+  - Trước đó, thẻ `<form>` trong `src/app/entry/page.tsx` sử dụng class `max-w-4xl` (~896px), làm giới hạn cứng chiều rộng của form.
+  - Khi người dùng làm việc trên màn hình lớn (1440px+), hoặc khi thu gọn panel bên trái / đóng thanh panel trợ giúp bên phải (`isRightPanelOpen = false`), vùng làm việc chính mở rộng nhưng form bị bó cứng trong 896px và lệch trái, để lại khoảng trống thừa rất lớn bên phải.
+- **Biện pháp xử lý & Triển khai thực tế:**
+  - Thay đổi class của `<form>` từ `p-5 max-w-4xl space-y-6` thành `p-4 sm:p-5 lg:p-6 w-full space-y-6`.
+  - Đồng bộ khoảng cách lề của các thông báo thành công (`successResult`) và thông báo lỗi (`errorMessage`) thành `m-4 sm:m-5 lg:m-6` và `mx-4 sm:mx-5 lg:mx-6 mt-4`.
+  - Kết quả: Biểu mẫu tiếp nhận xe cổng vào tự động co giãn linh động (fluid responsive) 100% theo toàn bộ diện tích khả dụng của workspace trên mọi độ phân giải (Mobile, Tablet, Desktop) và tự điều chỉnh hoàn hảo khi bật/tắt các panel phụ.
+- **Tệp sửa đổi:** `src/app/entry/page.tsx`
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit` -> PASS (0 lỗi).
+  - Dev server HTTP test: `http://localhost:3000/entry` -> HTTP 200 OK.
+
 ## 2026-10-16 22:15 — Khắc Phục Triệt Để Lỗi Cuộn Trang & Đồng Bộ Toàn Bộ Ảnh Tĩnh / Tài Liệu Lên Production Cho Trang /guide
 
 - **Yêu cầu / nguồn:** Phản ánh trực tiếp từ Chủ dự án:
