@@ -502,6 +502,34 @@ export interface IYardRepository {
   /** Lấy danh mục các tủ điện container lạnh 380V */
   getPowerCabinets?(): Promise<PowerCabinetInfo[]>;
 
+  /** Tạo mới Tủ điện 380V */
+  createPowerCabinet?(params: {
+    cabinetCode: string;
+    cabinetName: string;
+    totalSockets?: number;
+    description?: string;
+  }): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }>;
+
+  /** Cập nhật thông tin Tủ điện 380V */
+  updatePowerCabinet?(
+    cabinetCode: string,
+    params: Partial<{
+      cabinetName: string;
+      description: string;
+      totalSockets: number;
+    }>
+  ): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }>;
+
+  /** Xóa Tủ điện 380V */
+  deletePowerCabinet?(cabinetCode: string): Promise<{ success: boolean; error?: string }>;
+
+  /** Bật/Tắt bảo trì toàn bộ tủ điện (cắt/đóng điện toàn bộ giắc trong tủ) */
+  setCabinetMaintenance?(
+    cabinetCode: string,
+    isMaintenance: boolean,
+    notes?: string
+  ): Promise<{ success: boolean; count?: number; error?: string }>;
+
   /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
   getPowerSockets(zoneCode?: string): Promise<PowerSocket[]>;
 

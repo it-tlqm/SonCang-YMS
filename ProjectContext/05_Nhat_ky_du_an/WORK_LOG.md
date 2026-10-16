@@ -1,6 +1,37 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-16 18:05 — Đồng Bộ Vị Trí Xe/Cont Vào 13 Tủ Điện 50 Giắc Cắm 380V (T01-01 -> T13-04) & Nâng Cấp Dropdown Modal Gán Vị Trí
+## 2026-10-16 18:25 — Nâng Cấp Toàn Diện Bộ Công Cụ Quản Lý Tủ Điện & 50 Giắc Cắm 380V, Cắm Cont Nhanh Tại Bãi & Xóa Sạch Dấu Vết 30 Trụ Cũ Trên Supabase Cloud DEV
+
+- **Yêu cầu / nguồn:** Phản ánh từ Chủ dự án:
+  *"ở phần này tôi k quản lý được à??? chịu ấy nang cấp đi: Hệ thống Cấp điện Container Lạnh 380V — 13 Tủ điện / 30 Giắc cắm (Khu A)..."*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Khắc phục triệt để lỗi phân mảnh 30 Trụ R01..R30 trên Supabase Cloud DEV:**
+     - Đã dọn dẹp sạch toàn bộ các bản ghi socket cũ `R01..R30` trong DB Supabase (`app_power_sockets`).
+     - Đã nạp thành công 50 ổ cắm chuẩn của 13 Tủ điện: `T01-01` .. `T13-04` vào cơ sở dữ liệu Supabase Cloud (`Total sockets count: 50`, `R sockets remaining: []`).
+     - Cập nhật logic `getPowerSockets()` trong `supabase-repository.ts`: Lọc sạch mọi tiền tố `R%` còn sót lại và tự động suy luận chuẩn hóa `cabinet_code`, `cabinet_name`, `socket_index` từ `socket_code` để không bao giờ bị vỡ giao diện.
+  2. **Mở rộng Repository Interface & Dịch vụ CRUD Tủ điện (`IYmsRepository`):**
+     - Bổ sung các phương thức: `createPowerCabinet`, `updatePowerCabinet`, `deletePowerCabinet`, `setCabinetMaintenance` vào `repository-interface.ts`.
+     - Triển khai đầy đủ trên `DemoRepository` (lưu trữ `soncang_v5_power_cabinets` trong LocalStorage, tự động sinh các socket con khi tạo tủ mới, kiểm tra an toàn container đang cắm khi xóa tủ).
+     - Triển khai đầy đủ trên `SupabaseRepository` với bảng `app_power_sockets` trên Supabase PostgreSQL.
+  3. **Nâng cấp Toàn diện Giao diện Quản lý Tủ điện & Giắc cắm trên Phân hệ Bến bãi (`src/app/yard/page.tsx`):**
+     - **Thanh Công cụ Header:** Bổ sung nút **`+ Thêm Tủ điện`** (màu xanh navy Sơn Cảng `#223873`), nút **`+ Thêm Ổ cắm`** (màu xanh lá `#0A9444`), nút **`Mở Quản lý CCKB`** và Switch chuyển đổi chế độ xem theo Tủ điện hoặc Lưới tất cả giắc.
+     - **Bộ Lọc & Tìm kiếm Nhanh:** Tích hợp ô Tìm kiếm trực tiếp (lọc theo mã giắc `T01..T13`, tên tủ hoặc số container đang cắm `CMAU...`).
+     - **Thao tác Nhanh Trực tiếp trên Mỗi Card Tủ điện:**
+       * Nút **`+ Ổ`**: Bấm là mở form Thêm ổ cắm với mã tủ được điền sẵn, tự động gợi ý mã tiếp theo (ví dụ T01 đã có 3 ổ -> gợi ý ngay `T01-04`).
+       * Nút **`Bảo trì tủ / Mở điện`**: 1-Click chuyển toàn bộ ổ cắm trong tủ sang chế độ bảo trì (hoặc mở lại sẵn sàng).
+       * Nút **`Sửa`**: Mở modal sửa thông tin tên tủ, mô tả.
+       * Nút **`Xóa`**: Xóa tủ nếu trống (bảo vệ ngăn xóa nếu có container đang cắm điện).
+     - **Nâng cấp Drawer / Modal Chi tiết Giắc cắm:**
+       * Khi ổ cắm trống: Bổ sung nút **`Cắm Container nhanh tại bãi`** (chọn cont đang ở bãi để cắm ngay lập tức và tự động tạo phiên cắm điện), nút **`Xóa ổ cắm khỏi danh mục`**, nút **`Đặt bảo trì`**, nút **`Sửa thông tin`**.
+       * Khi ổ cắm đang cắm điện: Hiển thị đầy đủ số cont, xe chở vào, giờ cắm, nút **`Rút điện ngay (CCKB)`**, nút **`Báo sự cố`**.
+     - **Bổ sung 2 Modal Tương tác Mới:**
+       * Modal Thêm / Sửa Tủ điện (`isCabinetModalOpen`).
+       * Modal Cắm Container Nhanh tại Bãi (`isQuickPlugModalOpen`).
+  4. **Đồng bộ Giao diện Phân hệ CCKB (`src/app/reefer/page.tsx`):**
+     - Đồng bộ số lượng Tủ điện và Giắc cắm động `{cabList.length} Tủ / {total} Giắc 380V`.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công trong 3.3s).
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
   *"ở 13 tủ 5 giắc màTủ 1 Tủ điện T01 3 ổ T01-01 .. T01-03 ... Tổng cộng 13 Tủ điện 50 ổ"*

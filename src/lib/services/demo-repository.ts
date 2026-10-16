@@ -251,6 +251,7 @@ export class DemoRepository implements IYardRepository {
   private customers: Customer[] = [...INITIAL_DEMO_CUSTOMERS];
   private staffUsers: StaffUser[] = [...INITIAL_DEMO_STAFF_USERS];
   private yardZones: YardZoneInfo[] = [...SEED_YARD_ZONES_SON_CANG];
+  private powerCabinets: PowerCabinetInfo[] = [...YARD_POWER_CABINETS];
   private powerSockets: PowerSocket[] = [...INITIAL_DEMO_POWER_SOCKETS];
   private cashSettlements: CashSettlement[] = [];
   private settlementItems: CashSettlementItem[] = [];
@@ -381,6 +382,10 @@ export class DemoRepository implements IYardRepository {
       if (savedYZ) {
         try { this.yardZones = JSON.parse(savedYZ); } catch {}
       }
+      const savedCabinets = localStorage.getItem('soncang_v5_power_cabinets');
+      if (savedCabinets) {
+        try { this.powerCabinets = JSON.parse(savedCabinets); } catch {}
+      }
       const savedSockets = localStorage.getItem('soncang_v5_power_sockets');
       if (savedSockets) {
         try {
@@ -507,6 +512,7 @@ export class DemoRepository implements IYardRepository {
       localStorage.setItem('soncang_v5_staff_users', JSON.stringify(this.staffUsers));
       localStorage.setItem('soncang_v5_demo_tariffs', JSON.stringify(this.tariffs));
       localStorage.setItem('soncang_v5_yard_zones', JSON.stringify(this.yardZones));
+      localStorage.setItem('soncang_v5_power_cabinets', JSON.stringify(this.powerCabinets));
       localStorage.setItem('soncang_v5_power_sockets', JSON.stringify(this.powerSockets));
       localStorage.setItem('soncang_v5_cash_settlements', JSON.stringify(this.cashSettlements));
       localStorage.setItem('soncang_v5_settlement_items', JSON.stringify(this.settlementItems));
@@ -2272,7 +2278,159 @@ export class DemoRepository implements IYardRepository {
   }
 
   async getPowerCabinets(): Promise<PowerCabinetInfo[]> {
-    return [...YARD_POWER_CABINETS];
+    // Tự động tính số lượng ổ cắm thực tế đang gắn vào từng tủ
+    const socketCountMap = new Map<string, number>();
+    this.powerSockets.forEach(s => {
+      const code = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+      socketCountMap.set(code, (socketCountMap.get(code) || 0) + 1);
+    });
+
+    return this.powerCabinets.map(c => ({
+      ...c,
+      total_sockets: socketCountMap.get(c.cabinet_code) ?? c.total_sockets,
+    })).sort((a, b) => a.cabinet_code.localeCompare(b.cabinet_code));
+  }
+
+  async createPowerCabinet(params: {
+    cabinetCode: string;
+    cabinetName: string;
+    totalSockets?: number;
+    description?: string;
+  }): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }> {
+    const cleanCode = params.cabinetCode.trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, error: 'Mã tủ điện không được để trống' };
+    }
+    if (this.powerCabinets.some(c => c.cabinet_code === cleanCode)) {
+      return { success: false, error: `Tủ điện mã ${cleanCode} đã tồn tại` };
+    }
+
+    const initialSockets = Math.max(0, params.totalSockets || 0);
+    const newCab: PowerCabinetInfo = {
+      cabinet_code: cleanCode,
+      cabinet_name: params.cabinetName.trim() || `Tủ ${cleanCode}`,
+      total_sockets: initialSockets,
+      description: params.description?.trim() || `Tủ điện ${cleanCode} (${initialSockets} ổ cắm 380V)`,
+    };
+    this.powerCabinets.push(newCab);
+    this.powerCabinets.sort((a, b) => a.cabinet_code.localeCompare(b.cabinet_code));
+
+    // Tự động tạo các ổ cắm tương ứng nếu được chỉ định số lượng
+    if (initialSockets > 0) {
+      for (let i = 1; i <= initialSockets; i++) {
+        const sIndex = i;
+        const sCode = `${cleanCode}-${String(sIndex).padStart(2, '0')}`;
+        if (!this.powerSockets.some(s => s.socket_code === sCode)) {
+          this.powerSockets.push({
+            id: `socket-${Date.now()}-${sCode}`,
+            socket_code: sCode,
+            socket_name: `${newCab.cabinet_name} — Ổ ${sIndex}`,
+            zone_code: 'KHU_A_REEFER',
+            cabinet_code: cleanCode,
+            cabinet_name: newCab.cabinet_name,
+            socket_index: sIndex,
+            voltage: '380V',
+            amperage: '32A',
+            phase: '3_PHASE',
+            status: 'AVAILABLE',
+            notes: `${newCab.cabinet_name} ổ số ${sIndex} (Chuẩn 3 pha 380V bến bãi Sơn Cảng)`,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        }
+      }
+      this.powerSockets.sort((a, b) => a.socket_code.localeCompare(b.socket_code));
+    }
+
+    this.persist();
+    return { success: true, cabinet: newCab };
+  }
+
+  async updatePowerCabinet(
+    cabinetCode: string,
+    params: Partial<{
+      cabinetName: string;
+      description: string;
+      totalSockets: number;
+    }>
+  ): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }> {
+    const idx = this.powerCabinets.findIndex(c => c.cabinet_code === cabinetCode);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy tủ điện mã ${cabinetCode}` };
+    }
+
+    const cur = this.powerCabinets[idx];
+    const updated: PowerCabinetInfo = {
+      ...cur,
+      cabinet_name: params.cabinetName !== undefined ? params.cabinetName.trim() : cur.cabinet_name,
+      description: params.description !== undefined ? params.description.trim() : cur.description,
+      total_sockets: params.totalSockets !== undefined ? params.totalSockets : cur.total_sockets,
+    };
+    this.powerCabinets[idx] = updated;
+
+    // Cập nhật tên tủ trong các socket con nếu có đổi tên
+    if (params.cabinetName) {
+      this.powerSockets.forEach(s => {
+        if (s.cabinet_code === cabinetCode || s.socket_code.startsWith(`${cabinetCode}-`)) {
+          s.cabinet_name = updated.cabinet_name;
+        }
+      });
+    }
+
+    this.persist();
+    return { success: true, cabinet: updated };
+  }
+
+  async deletePowerCabinet(cabinetCode: string): Promise<{ success: boolean; error?: string }> {
+    const idx = this.powerCabinets.findIndex(c => c.cabinet_code === cabinetCode);
+    if (idx === -1) {
+      return { success: false, error: `Không tìm thấy tủ điện mã ${cabinetCode}` };
+    }
+
+    // Kiểm tra các ổ cắm thuộc tủ xem có ổ nào đang cắm điện không
+    const busySockets = this.powerSockets.filter(
+      s => (s.cabinet_code === cabinetCode || s.socket_code.startsWith(`${cabinetCode}-`)) && s.status === 'IN_USE'
+    );
+    if (busySockets.length > 0) {
+      return {
+        success: false,
+        error: `Không thể xóa tủ ${cabinetCode} vì có ${busySockets.length} ổ cắm đang cấp điện cho container! Vui lòng rút điện trước khi xóa.`,
+      };
+    }
+
+    // Xóa tất cả các ổ cắm thuộc tủ này
+    this.powerSockets = this.powerSockets.filter(
+      s => s.cabinet_code !== cabinetCode && !s.socket_code.startsWith(`${cabinetCode}-`)
+    );
+    this.powerCabinets.splice(idx, 1);
+    this.persist();
+    return { success: true };
+  }
+
+  async setCabinetMaintenance(
+    cabinetCode: string,
+    isMaintenance: boolean,
+    notes?: string
+  ): Promise<{ success: boolean; count?: number; error?: string }> {
+    let count = 0;
+    const nextStatus: PowerSocketStatus = isMaintenance ? 'MAINTENANCE' : 'AVAILABLE';
+    const reason = notes || (isMaintenance ? `Bảo trì toàn bộ tủ ${cabinetCode}` : 'Hoàn tất bảo trì, mở điện toàn bộ tủ');
+
+    this.powerSockets.forEach(s => {
+      if (s.cabinet_code === cabinetCode || s.socket_code.startsWith(`${cabinetCode}-`)) {
+        // Không ngắt điện socket đang cắm cont trừ khi rút cont trước
+        if (s.status !== 'IN_USE') {
+          s.status = nextStatus;
+          s.notes = reason;
+          s.updated_at = new Date().toISOString();
+          count++;
+        }
+      }
+    });
+
+    this.persist();
+    return { success: true, count };
   }
 
   async getPowerSockets(zoneCode?: string): Promise<PowerSocket[]> {

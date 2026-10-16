@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
-import { VehicleVisit, ContainerVisit, CargoStatus, CargoStatusUpdate, ContainerNumberChange, VehiclePlateChange, YardZoneInfo, TicketPaymentStatus, VehicleVisitStatus, PowerSocket, PowerSocketStatus, ReeferPowerSession } from '@/types/domain.types';
+import { VehicleVisit, ContainerVisit, CargoStatus, CargoStatusUpdate, ContainerNumberChange, VehiclePlateChange, YardZoneInfo, TicketPaymentStatus, VehicleVisitStatus, PowerSocket, PowerSocketStatus, ReeferPowerSession, PowerCabinetInfo } from '@/types/domain.types';
 import { 
   Truck, 
   Container as ContainerIcon, 
@@ -284,7 +284,8 @@ export default function YardMonitorPage() {
   const [zoneError, setZoneError] = useState<string>('');
   const [isSubmittingZone, setIsSubmittingZone] = useState<boolean>(false);
 
-  // --- QUẢN TRỊ TRỤ ĐIỆN & GIẮC CẮM 380V (Power Sockets) ---
+  // --- QUẢN TRỊ HỆ THỐNG CẤP ĐIỆN: 13 TỦ ĐIỆN & 50 GIẮC CẮM 380V (Power Cabinets & Sockets) ---
+  const [powerCabinets, setPowerCabinets] = useState<PowerCabinetInfo[]>([]);
   const [powerSockets, setPowerSockets] = useState<PowerSocket[]>([]);
   const [reeferSessions, setReeferSessions] = useState<ReeferPowerSession[]>([]);
   const [selectedSocket, setSelectedSocket] = useState<PowerSocket | null>(null);
@@ -302,6 +303,25 @@ export default function YardMonitorPage() {
   const [socketViewMode, setSocketViewMode] = useState<'BY_CABINET' | 'GRID'>('BY_CABINET');
   const [selectedCabinetFilter, setSelectedCabinetFilter] = useState<string>('ALL');
   const [socketFormCabinet, setSocketFormCabinet] = useState<string>('T01');
+  const [socketSearchQuery, setSocketSearchQuery] = useState<string>('');
+
+  // Quản lý Modal Thêm / Sửa Tủ điện
+  const [isCabinetModalOpen, setIsCabinetModalOpen] = useState<boolean>(false);
+  const [cabinetModalMode, setCabinetModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
+  const [cabinetFormCode, setCabinetFormCode] = useState<string>('');
+  const [cabinetFormName, setCabinetFormName] = useState<string>('');
+  const [cabinetFormSockets, setCabinetFormSockets] = useState<number>(4);
+  const [cabinetFormDesc, setCabinetFormDesc] = useState<string>('');
+  const [cabinetActionError, setCabinetActionError] = useState<string>('');
+  const [isSubmittingCabinet, setIsSubmittingCabinet] = useState<boolean>(false);
+
+  // Quản lý Modal Cắm Container Nhanh tại Bãi
+  const [isQuickPlugModalOpen, setIsQuickPlugModalOpen] = useState<boolean>(false);
+  const [quickPlugSocket, setQuickPlugSocket] = useState<PowerSocket | null>(null);
+  const [quickPlugContId, setQuickPlugContId] = useState<string>('');
+  const [quickPlugHours, setQuickPlugHours] = useState<number>(24);
+  const [quickPlugError, setQuickPlugError] = useState<string>('');
+  const [isSubmittingQuickPlug, setIsSubmittingQuickPlug] = useState<boolean>(false);
 
   // DS-02 Multi-pane Workspace States: Secondary Panel & Inspector
   const [selectedInspectorPair, setSelectedInspectorPair] = useState<YardPairItem | null>(null);
@@ -340,6 +360,20 @@ export default function YardMonitorPage() {
       loadPct: number;
     }>();
 
+    // Khởi tạo các tủ từ danh mục powerCabinets trước (nếu có)
+    powerCabinets.forEach(cab => {
+      cabinetMap.set(cab.cabinet_code, {
+        cabinetCode: cab.cabinet_code,
+        cabinetName: cab.cabinet_name,
+        sockets: [],
+        total: 0,
+        inUse: 0,
+        avail: 0,
+        maint: 0,
+        loadPct: 0,
+      });
+    });
+
     resolvedSockets.forEach(s => {
       const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
       const cabName = s.cabinet_name || `Tủ ${cabCode.replace(/^T0?/, '')}`;
@@ -365,7 +399,7 @@ export default function YardMonitorPage() {
     });
 
     return Array.from(cabinetMap.values()).sort((a, b) => a.cabinetCode.localeCompare(b.cabinetCode));
-  }, [powerSockets, containers]);
+  }, [powerSockets, powerCabinets, containers]);
 
   // Tự động đóng Action Dropdown khi click ra ngoài
   useEffect(() => {
@@ -389,8 +423,9 @@ export default function YardMonitorPage() {
       repository.getYardZones(),
       repository.getPowerSockets(),
       repository.getReeferSessions(yardId),
+      repository.getPowerCabinets ? repository.getPowerCabinets() : Promise.resolve([]),
     ])
-      .then(([vList, cList, zList, sList, sessList]) => {
+      .then(([vList, cList, zList, sList, sessList, cabList]) => {
         if (isMounted) {
           setAllVehicles(vList);
           setVehicles(vList.filter(v => v.status === 'IN_YARD'));
@@ -398,6 +433,7 @@ export default function YardMonitorPage() {
           setYardZones(zList);
           setPowerSockets(sList);
           setReeferSessions(sessList);
+          if (cabList && cabList.length > 0) setPowerCabinets(cabList);
         }
       })
       .catch((err) => {
@@ -415,14 +451,16 @@ export default function YardMonitorPage() {
       repository.getYardZones(),
       repository.getPowerSockets(),
       repository.getReeferSessions(yardId),
+      repository.getPowerCabinets ? repository.getPowerCabinets() : Promise.resolve([]),
     ])
-      .then(([vList, cList, zList, sList, sessList]) => {
+      .then(([vList, cList, zList, sList, sessList, cabList]) => {
         setAllVehicles(vList);
         setVehicles(vList.filter(v => v.status === 'IN_YARD'));
         setContainers(cList.filter(c => c.status === 'IN_YARD'));
         setYardZones(zList);
         setPowerSockets(sList);
         setReeferSessions(sessList);
+        if (cabList && cabList.length > 0) setPowerCabinets(cabList);
       })
       .catch((err) => {
         console.error('Lỗi tải dữ liệu bãi:', err);
@@ -661,9 +699,9 @@ export default function YardMonitorPage() {
   };
 
   // --- TÁC VỤ QUẢN LÝ TỦ ĐIỆN & GIẮC CẮM 380V ---
-  const handleOpenCreateSocketModal = () => {
+  const handleOpenCreateSocketModal = (targetCabCode?: string) => {
     // Tự động gợi ý mã ổ cắm tiếp theo theo tủ được chọn
-    const defaultCab = socketFormCabinet || 'T01';
+    const defaultCab = targetCabCode || socketFormCabinet || 'T01';
     const cabSockets = powerSockets.filter(s => (s.cabinet_code || s.socket_code.split('-')[0]) === defaultCab);
     const nextNum = cabSockets.length + 1;
     const suggestedCode = `${defaultCab}-${String(nextNum).padStart(2, '0')}`;
@@ -676,6 +714,174 @@ export default function YardMonitorPage() {
     setSocketFormNotes(`Ổ cắm số ${nextNum} thuộc Tủ điện ${defaultCab} (Chuẩn công nghiệp 3 pha 380V/32A)`);
     setSocketActionError('');
     setIsCreateSocketModalOpen(true);
+  };
+
+  const handleOpenCreateCabinetModal = () => {
+    // Tự động tính mã tủ tiếp theo
+    const existingCodes = new Set(resolvedCabinets.map(c => c.cabinetCode));
+    let nextNum = resolvedCabinets.length + 1;
+    let nextCode = `T${String(nextNum).padStart(2, '0')}`;
+    while (existingCodes.has(nextCode)) {
+      nextNum++;
+      nextCode = `T${String(nextNum).padStart(2, '0')}`;
+    }
+    setCabinetModalMode('CREATE');
+    setCabinetFormCode(nextCode);
+    setCabinetFormName(`Tủ điện ${nextCode}`);
+    setCabinetFormSockets(4);
+    setCabinetFormDesc(`Tủ điện phân phối 3 pha 380V chuẩn bến bãi Sơn Cảng`);
+    setCabinetActionError('');
+    setIsCabinetModalOpen(true);
+  };
+
+  const handleOpenEditCabinetModal = (cab: { cabinetCode: string; cabinetName: string; total: number }) => {
+    setCabinetModalMode('EDIT');
+    setCabinetFormCode(cab.cabinetCode);
+    setCabinetFormName(cab.cabinetName);
+    setCabinetFormSockets(cab.total);
+    setCabinetFormDesc(`Tủ điện ${cab.cabinetCode} (${cab.total} giắc cắm 380V)`);
+    setCabinetActionError('');
+    setIsCabinetModalOpen(true);
+  };
+
+  const handleSaveCabinet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanCode = cabinetFormCode.trim().toUpperCase();
+    if (!cleanCode) {
+      setCabinetActionError('Vui lòng nhập mã tủ điện (VD: T14).');
+      return;
+    }
+    setIsSubmittingCabinet(true);
+    setCabinetActionError('');
+    try {
+      if (cabinetModalMode === 'CREATE') {
+        if (!repository.createPowerCabinet) {
+          throw new Error('Chức năng tạo tủ điện chưa được cấu hình.');
+        }
+        const res = await repository.createPowerCabinet({
+          cabinetCode: cleanCode,
+          cabinetName: cabinetFormName.trim() || `Tủ ${cleanCode}`,
+          totalSockets: cabinetFormSockets,
+          description: cabinetFormDesc.trim() || undefined,
+        });
+        if (!res.success) {
+          setCabinetActionError(res.error || 'Lỗi khi tạo tủ điện.');
+          setIsSubmittingCabinet(false);
+          return;
+        }
+      } else {
+        if (!repository.updatePowerCabinet) {
+          throw new Error('Chức năng sửa tủ điện chưa được cấu hình.');
+        }
+        const res = await repository.updatePowerCabinet(cleanCode, {
+          cabinetName: cabinetFormName.trim(),
+          description: cabinetFormDesc.trim(),
+          totalSockets: cabinetFormSockets,
+        });
+        if (!res.success) {
+          setCabinetActionError(res.error || 'Lỗi khi cập nhật tủ điện.');
+          setIsSubmittingCabinet(false);
+          return;
+        }
+      }
+      setIsCabinetModalOpen(false);
+      handleReload();
+    } catch (err: any) {
+      setCabinetActionError(err?.message || 'Lỗi ngoại lệ khi lưu tủ điện.');
+    } finally {
+      setIsSubmittingCabinet(false);
+    }
+  };
+
+  const handleDeleteCabinet = async (cabCode: string, total: number) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa Tủ điện ${cabCode} cùng ${total} ổ cắm thuộc tủ? Thao tác này sẽ xóa vĩnh viễn danh mục hạ tầng của tủ.`)) return;
+    try {
+      if (!repository.deletePowerCabinet) {
+        alert('Chức năng xóa tủ điện chưa được hỗ trợ');
+        return;
+      }
+      const res = await repository.deletePowerCabinet(cabCode);
+      if (!res.success) {
+        alert(res.error || 'Lỗi khi xóa tủ điện.');
+        return;
+      }
+      handleReload();
+    } catch (err: any) {
+      alert(err?.message || 'Lỗi ngoại lệ khi xóa tủ điện.');
+    }
+  };
+
+  const handleToggleCabinetMaintenance = async (cabCode: string, allInMaint: boolean) => {
+    const isMaintenance = !allInMaint;
+    const msg = isMaintenance 
+      ? `Xác nhận chuyển toàn bộ ổ cắm trong Tủ ${cabCode} sang chế độ BẢO TRÌ (ngắt điện bảo dưỡng aptomat tổng)?`
+      : `Xác nhận MỞ ĐIỆN lại toàn bộ ổ cắm trong Tủ ${cabCode} sang chế độ SẴN SÀNG?`;
+    if (!confirm(msg)) return;
+
+    try {
+      if (repository.setCabinetMaintenance) {
+        const res = await repository.setCabinetMaintenance(cabCode, isMaintenance);
+        if (!res.success) {
+          alert(res.error || 'Lỗi khi cập nhật bảo trì tủ điện.');
+          return;
+        }
+      }
+      handleReload();
+    } catch (err: any) {
+      alert(err?.message || 'Lỗi khi cập nhật trạng thái bảo trì tủ.');
+    }
+  };
+
+  const handleOpenQuickPlugModal = (socket: PowerSocket) => {
+    setQuickPlugSocket(socket);
+    // Lấy danh sách cont tồn bãi ở Khu A hoặc cont có hàng chưa cắm điện
+    const unpluggable = containers.filter(c => !c.is_plugged);
+    if (unpluggable.length > 0) {
+      setQuickPlugContId(unpluggable[0].id);
+    } else {
+      setQuickPlugContId('');
+    }
+    setQuickPlugHours(24);
+    setQuickPlugError('');
+    setIsQuickPlugModalOpen(true);
+  };
+
+  const handleSaveQuickPlug = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickPlugSocket || !quickPlugContId) {
+      setQuickPlugError('Vui lòng chọn container cần cắm điện.');
+      return;
+    }
+    const targetCont = containers.find(c => c.id === quickPlugContId);
+    if (!targetCont) {
+      setQuickPlugError('Không tìm thấy container đã chọn.');
+      return;
+    }
+    setIsSubmittingQuickPlug(true);
+    setQuickPlugError('');
+    try {
+      // 1. Cắm điện container
+      await repository.plugInReefer({
+        yardId: yardId || targetCont.yard_id || 'fe83bb2b-833e-412c-aed4-b9a781a6decd',
+        containerVisitId: targetCont.id,
+        containerNo: targetCont.container_no_current,
+        pluggedInAt: new Date().toISOString(),
+        plugSocketCode: quickPlugSocket.socket_code,
+        operatorId: user?.id || 'lead-cckb',
+        notes: `Cắm điện tại bến bãi giắc ${quickPlugSocket.socket_code}`,
+      });
+
+      // 2. Chuyển socket sang IN_USE
+      await repository.setPowerSocketStatus(quickPlugSocket.socket_code, 'IN_USE', `Cấp điện cho cont ${targetCont.container_no_current}`);
+
+      setIsQuickPlugModalOpen(false);
+      setSelectedSocket(null);
+      handleReload();
+    } catch (err: any) {
+      setQuickPlugError(err?.message || 'Lỗi khi cắm điện container.');
+    } finally {
+      setIsSubmittingQuickPlug(false);
+    }
   };
 
   const handleCabinetChangeInModal = (cabCode: string) => {
@@ -2790,27 +2996,33 @@ export default function YardMonitorPage() {
             const availCount = Math.max(0, totalSockets - inUseCount - maintCount);
             const loadPercent = totalSockets > 0 ? Math.round((inUseCount / totalSockets) * 100) : 0;
 
-            // Lọc theo cabinetFilter và socketFilterStatus
+            // Lọc theo cabinetFilter, socketFilterStatus và socketSearchQuery
             const displaySockets = allSockets.filter(s => {
               const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
               if (selectedCabinetFilter !== 'ALL' && cabCode !== selectedCabinetFilter) return false;
-              if (socketFilterStatus === 'ALL') return true;
-              if (socketFilterStatus === 'IN_USE') return s.status === 'IN_USE';
-              if (socketFilterStatus === 'AVAILABLE') return s.status === 'AVAILABLE';
-              if (socketFilterStatus === 'MAINTENANCE') return s.status === 'MAINTENANCE' || s.status === 'FAULTY';
+              if (socketFilterStatus === 'IN_USE' && s.status !== 'IN_USE') return false;
+              if (socketFilterStatus === 'AVAILABLE' && s.status !== 'AVAILABLE') return false;
+              if (socketFilterStatus === 'MAINTENANCE' && s.status !== 'MAINTENANCE' && s.status !== 'FAULTY') return false;
+              if (socketSearchQuery.trim()) {
+                const q = socketSearchQuery.trim().toLowerCase();
+                const matchCode = s.socket_code.toLowerCase().includes(q);
+                const matchCab = (s.cabinet_code || '').toLowerCase().includes(q);
+                const matchCont = (s.pluggedCont?.container_no_current || '').toLowerCase().includes(q);
+                if (!matchCode && !matchCab && !matchCont) return false;
+              }
               return true;
             });
 
             return (
               <div className="bg-white rounded-xl border border-[#E5E9F0] p-4 shadow-xs space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E5E9F0]">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E5E9F0]">
                   <div>
                     <h3 className="text-sm font-semibold text-[#17202E] flex items-center gap-2">
                       <Zap className="w-4 h-4 text-amber-500 fill-current" />
-                      <span>Hệ thống Cấp điện Container Lạnh 380V — 13 Tủ điện / {totalSockets} Giắc cắm (Khu A)</span>
+                      <span>Hệ thống Cấp điện Container Lạnh 380V — {cabinetList.length} Tủ điện / {totalSockets} Giắc cắm (Khu A)</span>
                     </h3>
                     <p className="text-xs text-[#667085] mt-0.5">
-                      Cấu trúc hiện trường bến bãi Sơn Cảng phân bổ theo 13 Tủ điện. Bấm vào từng giắc cắm để xem chi tiết, cắm/rút cont hoặc bật chế độ bảo trì.
+                      Cấu trúc hiện trường bến bãi Sơn Cảng phân bổ theo {cabinetList.length} Tủ điện. Quản lý tủ, thêm giắc, cắm/rút cont hoặc bật chế độ bảo trì.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -2819,19 +3031,19 @@ export default function YardMonitorPage() {
                       <button
                         type="button"
                         onClick={() => setSocketViewMode('BY_CABINET')}
-                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                           socketViewMode === 'BY_CABINET'
                             ? 'bg-white text-[#223873] shadow-xs'
                             : 'text-[#667085] hover:text-[#17202E]'
                         }`}
                       >
                         <Cpu className="w-3.5 h-3.5" />
-                        <span>13 Tủ điện</span>
+                        <span>Theo {cabinetList.length} Tủ điện</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setSocketViewMode('GRID')}
-                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                        className={`px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                           socketViewMode === 'GRID'
                             ? 'bg-white text-[#223873] shadow-xs'
                             : 'text-[#667085] hover:text-[#17202E]'
@@ -2842,18 +3054,31 @@ export default function YardMonitorPage() {
                       </button>
                     </div>
 
+                    {/* Nút Thêm Tủ điện */}
                     <button
                       type="button"
-                      onClick={handleOpenCreateSocketModal}
+                      onClick={handleOpenCreateCabinetModal}
+                      className="px-2.5 py-1.5 rounded-lg bg-[#223873] hover:bg-[#1a2c5a] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+                      title="Thêm Tủ điện phân phối 380V mới vào bãi"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Thêm Tủ điện</span>
+                    </button>
+
+                    {/* Nút Thêm Ổ cắm */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCreateSocketModal()}
                       className="px-2.5 py-1.5 rounded-lg bg-[#0A9444] hover:bg-[#087C3C] text-white font-semibold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
                       title="Thêm ổ cắm/giắc điện mới vào tủ"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Thêm ổ cắm</span>
+                      <span>Thêm Ổ cắm</span>
                     </button>
+
                     <Link
                       href="/reefer"
-                      className="px-2.5 py-1.5 rounded-lg bg-[#223873] hover:bg-[#1a2c5a] text-white font-semibold text-xs transition-colors flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#F8F9FB] hover:bg-[#F2F4F7] text-[#344054] border border-[#D0D5DD] font-semibold text-xs transition-colors flex items-center gap-1"
                     >
                       <span>Mở Quản lý CCKB</span>
                       <ExternalLink className="w-3 h-3" />
@@ -2862,11 +3087,11 @@ export default function YardMonitorPage() {
                 </div>
 
                 {/* THỐNG KÊ THỜI GIAN THỰC & BỘ LỌC TRẠNG THÁI */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 bg-[#F8F9FB] p-2.5 rounded-xl border border-[#E5E9F0]">
                   <div className="flex items-center gap-2 flex-wrap text-xs">
                     <span className="font-semibold text-[#344054] flex items-center gap-1">
                       <Cpu className="w-3.5 h-3.5 text-[#326DD8]" />
-                      <strong>13 Tủ điện</strong> ({totalSockets} giắc 380V)
+                      <strong>{cabinetList.length} Tủ điện</strong> ({totalSockets} giắc 380V)
                     </span>
                     <span className="text-[#D0D5DD]">•</span>
                     <span className="px-2 py-0.5 rounded-md bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] font-semibold flex items-center gap-1">
@@ -2889,8 +3114,20 @@ export default function YardMonitorPage() {
                     </span>
                   </div>
 
-                  {/* Lọc nhanh Tủ và Trạng thái */}
-                  <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                  {/* Lọc nhanh Tủ, Trạng thái & Ô Tìm kiếm */}
+                  <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                    {/* Ô Tìm kiếm Giắc cắm / Tủ / Số Container */}
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#667085]" />
+                      <input
+                        type="text"
+                        placeholder="Tìm giắc, tủ, số cont..."
+                        value={socketSearchQuery}
+                        onChange={(e) => setSocketSearchQuery(e.target.value)}
+                        className="pl-8 pr-2.5 py-1 rounded-lg border border-[#D0D5DD] bg-white text-xs font-medium text-[#17202E] placeholder-[#98A2B3] focus:outline-none focus:ring-1 focus:ring-[#326DD8] w-44"
+                      />
+                    </div>
+
                     {/* Dropdown Lọc Tủ */}
                     <div className="flex items-center gap-1">
                       <span className="text-[#667085] font-medium">Tủ:</span>
@@ -2899,7 +3136,7 @@ export default function YardMonitorPage() {
                         onChange={(e) => setSelectedCabinetFilter(e.target.value)}
                         className="px-2 py-1 rounded-lg border border-[#D0D5DD] bg-white text-xs font-semibold text-[#17202E] focus:outline-none focus:ring-1 focus:ring-[#326DD8]"
                       >
-                        <option value="ALL">Tất cả 13 Tủ</option>
+                        <option value="ALL">Tất cả {cabinetList.length} Tủ</option>
                         {cabinetList.map((cab) => (
                           <option key={cab.cabinetCode} value={cab.cabinetCode}>
                             {cab.cabinetName} ({cab.inUse}/{cab.total} cắm)
@@ -2938,7 +3175,7 @@ export default function YardMonitorPage() {
                 </div>
 
                 {/* ============================================================== */}
-                {/* CHẾ ĐỘ 1: XEM THEO 13 TỦ ĐIỆN HIỆN TRƯỜNG (BY_CABINET)         */}
+                {/* CHẾ ĐỘ 1: XEM THEO CÁC TỦ ĐIỆN HIỆN TRƯỜNG (BY_CABINET)         */}
                 {/* ============================================================== */}
                 {socketViewMode === 'BY_CABINET' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
@@ -2946,19 +3183,27 @@ export default function YardMonitorPage() {
                       .filter(cab => selectedCabinetFilter === 'ALL' || cab.cabinetCode === selectedCabinetFilter)
                       .map((cab) => {
                         const filteredCabSockets = cab.sockets.filter(s => {
-                          if (socketFilterStatus === 'ALL') return true;
-                          if (socketFilterStatus === 'IN_USE') return s.status === 'IN_USE';
-                          if (socketFilterStatus === 'AVAILABLE') return s.status === 'AVAILABLE';
-                          if (socketFilterStatus === 'MAINTENANCE') return s.status === 'MAINTENANCE' || s.status === 'FAULTY';
+                          if (socketFilterStatus === 'IN_USE' && s.status !== 'IN_USE') return false;
+                          if (socketFilterStatus === 'AVAILABLE' && s.status !== 'AVAILABLE') return false;
+                          if (socketFilterStatus === 'MAINTENANCE' && s.status !== 'MAINTENANCE' && s.status !== 'FAULTY') return false;
+                          if (socketSearchQuery.trim()) {
+                            const q = socketSearchQuery.trim().toLowerCase();
+                            const matchCode = s.socket_code.toLowerCase().includes(q);
+                            const matchCab = (s.cabinet_code || '').toLowerCase().includes(q);
+                            const matchCont = (s.pluggedCont?.container_no_current || '').toLowerCase().includes(q);
+                            if (!matchCode && !matchCab && !matchCont) return false;
+                          }
                           return true;
                         });
+
+                        const allMaint = cab.total > 0 && cab.maint === cab.total;
 
                         return (
                           <div
                             key={cab.cabinetCode}
                             className="bg-[#FCFCFD] rounded-xl border border-[#E5E9F0] p-3 shadow-2xs hover:shadow-xs transition-shadow space-y-2.5 flex flex-col justify-between"
                           >
-                            {/* Card Header Tủ điện */}
+                            {/* Card Header Tủ điện với bộ nút quản lý cấp tủ */}
                             <div>
                               <div className="flex items-center justify-between pb-2 border-b border-[#F2F4F7]">
                                 <div className="flex items-center gap-2">
@@ -2966,7 +3211,7 @@ export default function YardMonitorPage() {
                                     {cab.cabinetCode}
                                   </div>
                                   <div>
-                                    <div className="text-xs font-bold text-[#17202E] flex items-center gap-1.5">
+                                    <div className="text-xs font-bold text-[#17202E] flex items-center gap-1.5 flex-wrap">
                                       <span>{cab.cabinetName}</span>
                                       <span className="text-[10px] font-semibold text-[#667085] bg-[#F2F4F7] px-1.5 py-0.2 rounded">
                                         {cab.total} giắc 380V
@@ -2984,12 +3229,57 @@ export default function YardMonitorPage() {
                                   </div>
                                 </div>
 
-                                <div className="text-right">
+                                <div className="flex items-center gap-1.5">
                                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                                     cab.loadPct >= 80 ? 'bg-[#FEF3F2] text-[#B42318]' : cab.loadPct > 0 ? 'bg-[#FFFAEB] text-[#B54708]' : 'bg-[#ECFDF3] text-[#027A48]'
                                   }`}>
                                     {cab.loadPct}% tải
                                   </span>
+
+                                  {/* Action Buttons Cấp Tủ */}
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenCreateSocketModal(cab.cabinetCode)}
+                                      className="p-1 rounded-md text-[#0A9444] hover:bg-[#ECFDF3] border border-transparent hover:border-[#A6F4C5] transition-colors cursor-pointer"
+                                      title={`Thêm ổ cắm mới vào Tủ ${cab.cabinetCode}`}
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleCabinetMaintenance(cab.cabinetCode, allMaint)}
+                                      className={`p-1 rounded-md transition-colors cursor-pointer ${
+                                        allMaint
+                                          ? 'text-[#0A9444] hover:bg-[#ECFDF3] border border-[#A6F4C5]'
+                                          : 'text-[#667085] hover:text-[#B42318] hover:bg-[#FEF3F2]'
+                                      }`}
+                                      title={allMaint ? `Mở điện lại toàn bộ Tủ ${cab.cabinetCode}` : `Bảo trì toàn bộ Tủ ${cab.cabinetCode}`}
+                                    >
+                                      <Wrench className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenEditCabinetModal(cab)}
+                                      className="p-1 rounded-md text-[#326DD8] hover:bg-[#EFF8FF] border border-transparent hover:border-[#B2DDFF] transition-colors cursor-pointer"
+                                      title={`Sửa thông tin Tủ ${cab.cabinetCode}`}
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={cab.inUse > 0}
+                                      onClick={() => handleDeleteCabinet(cab.cabinetCode, cab.total)}
+                                      className={`p-1 rounded-md transition-colors ${
+                                        cab.inUse > 0
+                                          ? 'text-[#D0D5DD] cursor-not-allowed'
+                                          : 'text-[#D92D20] hover:bg-[#FEF3F2] cursor-pointer'
+                                      }`}
+                                      title={cab.inUse > 0 ? 'Tủ đang có container cắm điện, không thể xóa' : `Xóa Tủ ${cab.cabinetCode}`}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
 
@@ -5280,12 +5570,21 @@ export default function YardMonitorPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href={`/reefer?socket=${encodeURIComponent(selectedSocket.socket_code)}`}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenQuickPlugModal(selectedSocket)}
                     className="py-2 px-3 rounded-lg font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 shadow-xs col-span-2 text-center"
                   >
                     <Zap className="w-4 h-4 fill-current" />
-                    <span>Mở Nghiệp vụ Cổng cảng Kho bãi lập phiếu cắm điện (Ổ {selectedSocket.socket_code})</span>
+                    <span>Cắm Container nhanh tại bãi (Ổ {selectedSocket.socket_code})</span>
+                  </button>
+
+                  <Link
+                    href={`/reefer?socket=${encodeURIComponent(selectedSocket.socket_code)}`}
+                    className="py-2 px-3 rounded-lg font-semibold text-[#175CD3] bg-[#EFF8FF] hover:bg-[#D1E9FF] border border-[#B2DDFF] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 col-span-2 text-center"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Mở Nghiệp vụ CCKB lập phiếu cắm điện</span>
                   </Link>
 
                   <button
@@ -5304,6 +5603,15 @@ export default function YardMonitorPage() {
                   >
                     <Edit3 className="w-3.5 h-3.5 text-[#326DD8]" />
                     <span>Sửa thông tin</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSocket(selectedSocket.socket_code)}
+                    className="py-2 px-2.5 rounded-lg font-semibold text-[#D92D20] bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] transition-colors cursor-pointer text-xs flex items-center justify-center gap-1.5 col-span-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-[#D92D20]" />
+                    <span>Xóa ổ cắm khỏi danh mục</span>
                   </button>
                 </div>
               </div>
@@ -5609,6 +5917,232 @@ export default function YardMonitorPage() {
         </div>
       )}
 
+      {/* MODAL 3: THÊM / SỬA TỦ ĐIỆN 380V */}
+      {isCabinetModalOpen && (
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#17202E]">
+                    {cabinetModalMode === 'CREATE' ? 'Thêm Tủ điện phân phối 380V mới' : `Sửa thông tin Tủ điện ${cabinetFormCode}`}
+                  </h3>
+                  <span className="text-[10px] text-[#667085]">Quy hoạch hạ tầng tủ điện bến bãi Sơn Cảng</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCabinetModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {cabinetActionError && (
+              <div className="p-3 rounded-xl bg-[#FEF3F2] text-[#B42318] text-xs font-medium flex items-center gap-2 border border-[#FECDCA]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D92D20]" />
+                <span>{cabinetActionError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveCabinet} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Mã Tủ điện *</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={cabinetModalMode === 'EDIT'}
+                    placeholder="VD: T14"
+                    value={cabinetFormCode}
+                    onChange={(e) => setCabinetFormCode(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-[#17202E] bg-white disabled:bg-[#F8F9FB] focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">Tên Tủ hiển thị *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="VD: Tủ 14"
+                    value={cabinetFormName}
+                    onChange={(e) => setCabinetFormName(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                  />
+                </div>
+              </div>
+
+              {cabinetModalMode === 'CREATE' && (
+                <div>
+                  <label className="block text-xs font-semibold text-[#344054] mb-1">
+                    Số lượng ổ cắm 380V tạo sẵn ban đầu
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={16}
+                    value={cabinetFormSockets}
+                    onChange={(e) => setCabinetFormSockets(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                    className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                  />
+                  <p className="text-[10px] text-[#667085] mt-1">
+                    Hệ thống sẽ tự động tạo {cabinetFormSockets} ổ cắm có mã từ <strong>{cabinetFormCode || 'TXX'}-01</strong> đến <strong>{cabinetFormCode || 'TXX'}-{String(cabinetFormSockets).padStart(2, '0')}</strong>.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">Mô tả / Vị trí bãi / Ghi chú</label>
+                <textarea
+                  rows={2}
+                  placeholder="VD: Tủ phân phối nhánh phía Tây Khu A bến bãi..."
+                  value={cabinetFormDesc}
+                  onChange={(e) => setCabinetFormDesc(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg text-xs font-medium text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] resize-none transition-all"
+                />
+              </div>
+
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
+                <button
+                  type="button"
+                  onClick={() => setIsCabinetModalOpen(false)}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCabinet}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#223873] hover:bg-[#1a2c5a] shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingCabinet ? 'Đang lưu...' : cabinetModalMode === 'CREATE' ? 'Tạo Tủ điện' : 'Lưu Tủ điện'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: CẮM CONTAINER NHANH TẠI BÃI */}
+      {isQuickPlugModalOpen && quickPlugSocket && (
+        <div className="fixed inset-0 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 border border-[#E5E9F0] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 -mx-5 px-5 -mt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+                  <Zap className="w-4 h-4 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#17202E]">
+                    Cắm điện nhanh vào Ổ {quickPlugSocket.socket_code}
+                  </h3>
+                  <span className="text-[10px] text-[#667085]">{quickPlugSocket.cabinet_name || 'Hệ thống cấp điện 380V Sơn Cảng'}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsQuickPlugModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {quickPlugError && (
+              <div className="p-3 rounded-xl bg-[#FEF3F2] text-[#B42318] text-xs font-medium flex items-center gap-2 border border-[#FECDCA]">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D92D20]" />
+                <span>{quickPlugError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveQuickPlug} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Chọn Container tồn bãi cần cắm điện *
+                </label>
+                {(() => {
+                  const unpluggable = containers.filter(c => !c.is_plugged);
+                  if (unpluggable.length === 0) {
+                    return (
+                      <div className="p-3 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] text-xs text-[#B54708]">
+                        Hiện tại không có container nào chưa cắm điện trong bãi.
+                      </div>
+                    );
+                  }
+                  return (
+                    <select
+                      value={quickPlugContId}
+                      onChange={(e) => setQuickPlugContId(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-mono font-bold text-[#17202E] bg-white focus:outline-none focus:ring-2 focus:ring-[#326DD8]/20 focus:border-[#326DD8] transition-all"
+                    >
+                      {unpluggable.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.container_no_current} — Xe {c.inbound_license_plate || '—'} ({c.cargo_status === 'HANG' ? 'HÀNG' : 'RỖNG'}) [{c.yard_zone}]
+                        </option>
+                      ))}
+                    </select>
+                  );
+                })()}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#344054] mb-1">
+                  Thời gian cắm dự kiến (giờ)
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[12, 24, 48, 72].map(hrs => (
+                    <button
+                      key={hrs}
+                      type="button"
+                      onClick={() => setQuickPlugHours(hrs)}
+                      className={`py-1.5 rounded-lg font-semibold text-xs transition-colors cursor-pointer ${
+                        quickPlugHours === hrs
+                          ? 'bg-[#326DD8] text-white shadow-xs'
+                          : 'bg-[#F8F9FB] border border-[#D0D5DD] text-[#344054] hover:bg-[#F2F4F7]'
+                      }`}
+                    >
+                      {hrs} giờ
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#EFF8FF] rounded-xl border border-[#B2DDFF] text-[11px] text-[#175CD3] space-y-1">
+                <div className="font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#175CD3]" />
+                  <span>Quy chuẩn tính cước cắm điện bến bãi:</span>
+                </div>
+                <p className="text-[10px] text-[#1e40af] leading-relaxed">
+                  Hệ thống tự động kích hoạt phiên cắm điện 380V tại phân hệ CCKB, ghi nhận giờ bắt đầu thực tế và tính phí lưu cắm điện chính xác theo biểu phí niêm yết.
+                </p>
+              </div>
+
+              <div className="pt-2 flex space-x-2 border-t border-[#E5E9F0] -mx-5 px-5 -mb-1">
+                <button
+                  type="button"
+                  onClick={() => setIsQuickPlugModalOpen(false)}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] border border-[#D0D5DD] transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingQuickPlug || !quickPlugContId}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>{isSubmittingQuickPlug ? 'Đang kích hoạt...' : 'Kích hoạt Cắm điện'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* MODAL XÁC NHẬN KHỞI TẠO BÃI TRỐNG 100% */}
       {showResetYardModal && (
         <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
@@ -5634,7 +6168,7 @@ export default function YardMonitorPage() {
               </div>
               <ul className="list-disc pl-4 space-y-0.5 text-[#667085]">
                 <li>Biểu phí niêm yết 7 loại xe và dịch vụ cảng</li>
-                <li>4 Phân khu chức năng bãi và 30 trụ điện 380V</li>
+                <li>4 Phân khu chức năng bãi và 13 Tủ điện (50 giắc cắm 380V)</li>
                 <li>Danh bạ khách hàng và tài khoản nhân sự</li>
               </ul>
             </div>

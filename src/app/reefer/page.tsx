@@ -2124,7 +2124,7 @@ export default function ReeferMonitoringPage() {
                   <div className="flex items-center gap-2 flex-wrap text-xs">
                     <span className="font-bold text-[#17202E] flex items-center gap-1.5">
                       <Cpu className="w-4 h-4 text-[#326DD8]" />
-                      <span>Hệ thống 13 Tủ điện</span>
+                      <span>Hệ thống {cabList.length} Tủ điện</span>
                     </span>
                     <span className="text-[#D0D5DD]">•</span>
                     <span className="text-[#667085]">Quy mô: <strong>{total} giắc 3 pha 380V</strong></span>

@@ -3137,21 +3137,213 @@ export class SupabaseRepository implements IYardRepository {
 
   /** Lấy danh mục các tủ điện container lạnh 380V */
   async getPowerCabinets(): Promise<PowerCabinetInfo[]> {
-    return [
-      { cabinet_code: 'T01', cabinet_name: 'Tủ 01', total_sockets: 3, description: 'Tủ điện T01 — 3 ổ cắm 380V (T01-01 -> T01-03)' },
-      { cabinet_code: 'T02', cabinet_name: 'Tủ 02', total_sockets: 4, description: 'Tủ điện T02 — 4 ổ cắm 380V (T02-01 -> T02-04)' },
-      { cabinet_code: 'T03', cabinet_name: 'Tủ 03', total_sockets: 4, description: 'Tủ điện T03 — 4 ổ cắm 380V (T03-01 -> T03-04)' },
-      { cabinet_code: 'T04', cabinet_name: 'Tủ 04', total_sockets: 3, description: 'Tủ điện T04 — 3 ổ cắm 380V (T04-01 -> T04-03)' },
-      { cabinet_code: 'T05', cabinet_name: 'Tủ 05', total_sockets: 8, description: 'Tủ điện T05 — 8 ổ cắm 380V công suất lớn (T05-01 -> T05-08)' },
-      { cabinet_code: 'T06', cabinet_name: 'Tủ 06', total_sockets: 3, description: 'Tủ điện T06 — 3 ổ cắm 380V (T06-01 -> T06-03)' },
-      { cabinet_code: 'T07', cabinet_name: 'Tủ 07', total_sockets: 3, description: 'Tủ điện T07 — 3 ổ cắm 380V (T07-01 -> T07-03)' },
-      { cabinet_code: 'T08', cabinet_name: 'Tủ 08', total_sockets: 2, description: 'Tủ điện T08 — 2 ổ cắm 380V (T08-01 -> T08-02)' },
-      { cabinet_code: 'T09', cabinet_name: 'Tủ 09', total_sockets: 5, description: 'Tủ điện T09 — 5 ổ cắm 380V (T09-01 -> T09-05)' },
-      { cabinet_code: 'T10', cabinet_name: 'Tủ 10', total_sockets: 3, description: 'Tủ điện T10 — 3 ổ cắm 380V (T10-01 -> T10-03)' },
-      { cabinet_code: 'T11', cabinet_name: 'Tủ 11', total_sockets: 4, description: 'Tủ điện T11 — 4 ổ cắm 380V (T11-01 -> T11-04)' },
-      { cabinet_code: 'T12', cabinet_name: 'Tủ 12', total_sockets: 4, description: 'Tủ điện T12 — 4 ổ cắm 380V (T12-01 -> T12-04)' },
-      { cabinet_code: 'T13', cabinet_name: 'Tủ 13', total_sockets: 4, description: 'Tủ điện T13 — 4 ổ cắm 380V (T13-01 -> T13-04)' },
-    ];
+    try {
+      const allSockets = await this.getPowerSockets();
+      const cabMap = new Map<string, { code: string; name: string; count: number; desc?: string }>();
+
+      // Danh mục 13 tủ tiêu chuẩn của Sơn Cảng làm base
+      const defaultCabinets: PowerCabinetInfo[] = [
+        { cabinet_code: 'T01', cabinet_name: 'Tủ 01', total_sockets: 3, description: 'Tủ điện T01 — 3 ổ cắm 380V (T01-01 -> T01-03)' },
+        { cabinet_code: 'T02', cabinet_name: 'Tủ 02', total_sockets: 4, description: 'Tủ điện T02 — 4 ổ cắm 380V (T02-01 -> T02-04)' },
+        { cabinet_code: 'T03', cabinet_name: 'Tủ 03', total_sockets: 4, description: 'Tủ điện T03 — 4 ổ cắm 380V (T03-01 -> T03-04)' },
+        { cabinet_code: 'T04', cabinet_name: 'Tủ 04', total_sockets: 3, description: 'Tủ điện T04 — 3 ổ cắm 380V (T04-01 -> T04-03)' },
+        { cabinet_code: 'T05', cabinet_name: 'Tủ 05', total_sockets: 8, description: 'Tủ điện T05 — 8 ổ cắm 380V công suất lớn (T05-01 -> T05-08)' },
+        { cabinet_code: 'T06', cabinet_name: 'Tủ 06', total_sockets: 3, description: 'Tủ điện T06 — 3 ổ cắm 380V (T06-01 -> T06-03)' },
+        { cabinet_code: 'T07', cabinet_name: 'Tủ 07', total_sockets: 3, description: 'Tủ điện T07 — 3 ổ cắm 380V (T07-01 -> T07-03)' },
+        { cabinet_code: 'T08', cabinet_name: 'Tủ 08', total_sockets: 2, description: 'Tủ điện T08 — 2 ổ cắm 380V (T08-01 -> T08-02)' },
+        { cabinet_code: 'T09', cabinet_name: 'Tủ 09', total_sockets: 5, description: 'Tủ điện T09 — 5 ổ cắm 380V (T09-01 -> T09-05)' },
+        { cabinet_code: 'T10', cabinet_name: 'Tủ 10', total_sockets: 3, description: 'Tủ điện T10 — 3 ổ cắm 380V (T10-01 -> T10-03)' },
+        { cabinet_code: 'T11', cabinet_name: 'Tủ 11', total_sockets: 4, description: 'Tủ điện T11 — 4 ổ cắm 380V (T11-01 -> T11-04)' },
+        { cabinet_code: 'T12', cabinet_name: 'Tủ 12', total_sockets: 4, description: 'Tủ điện T12 — 4 ổ cắm 380V (T12-01 -> T12-04)' },
+        { cabinet_code: 'T13', cabinet_name: 'Tủ 13', total_sockets: 4, description: 'Tủ điện T13 — 4 ổ cắm 380V (T13-01 -> T13-04)' },
+      ];
+      defaultCabinets.forEach(c => {
+        cabMap.set(c.cabinet_code, { code: c.cabinet_code, name: c.cabinet_name, count: 0, desc: c.description });
+      });
+
+      // Đếm số ổ cắm thực tế và thêm các tủ mới do người dùng tạo
+      allSockets.forEach(s => {
+        const code = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+        const num = code.replace(/^T0?/, '');
+        const name = s.cabinet_name || `Tủ ${num}`;
+        if (!cabMap.has(code)) {
+          cabMap.set(code, { code, name, count: 0, desc: `Tủ điện ${code}` });
+        }
+        const item = cabMap.get(code)!;
+        item.count++;
+      });
+
+      return Array.from(cabMap.values()).map(c => ({
+        cabinet_code: c.code,
+        cabinet_name: c.name,
+        total_sockets: c.count,
+        description: c.desc,
+      })).sort((a, b) => a.cabinet_code.localeCompare(b.cabinet_code));
+    } catch {
+      return [
+        { cabinet_code: 'T01', cabinet_name: 'Tủ 01', total_sockets: 3, description: 'Tủ điện T01 — 3 ổ cắm 380V (T01-01 -> T01-03)' },
+        { cabinet_code: 'T02', cabinet_name: 'Tủ 02', total_sockets: 4, description: 'Tủ điện T02 — 4 ổ cắm 380V (T02-01 -> T02-04)' },
+        { cabinet_code: 'T03', cabinet_name: 'Tủ 03', total_sockets: 4, description: 'Tủ điện T03 — 4 ổ cắm 380V (T03-01 -> T03-04)' },
+        { cabinet_code: 'T04', cabinet_name: 'Tủ 04', total_sockets: 3, description: 'Tủ điện T04 — 3 ổ cắm 380V (T04-01 -> T04-03)' },
+        { cabinet_code: 'T05', cabinet_name: 'Tủ 05', total_sockets: 8, description: 'Tủ điện T05 — 8 ổ cắm 380V công suất lớn (T05-01 -> T05-08)' },
+        { cabinet_code: 'T06', cabinet_name: 'Tủ 06', total_sockets: 3, description: 'Tủ điện T06 — 3 ổ cắm 380V (T06-01 -> T06-03)' },
+        { cabinet_code: 'T07', cabinet_name: 'Tủ 07', total_sockets: 3, description: 'Tủ điện T07 — 3 ổ cắm 380V (T07-01 -> T07-03)' },
+        { cabinet_code: 'T08', cabinet_name: 'Tủ 08', total_sockets: 2, description: 'Tủ điện T08 — 2 ổ cắm 380V (T08-01 -> T08-02)' },
+        { cabinet_code: 'T09', cabinet_name: 'Tủ 09', total_sockets: 5, description: 'Tủ điện T09 — 5 ổ cắm 380V (T09-01 -> T09-05)' },
+        { cabinet_code: 'T10', cabinet_name: 'Tủ 10', total_sockets: 3, description: 'Tủ điện T10 — 3 ổ cắm 380V (T10-01 -> T10-03)' },
+        { cabinet_code: 'T11', cabinet_name: 'Tủ 11', total_sockets: 4, description: 'Tủ điện T11 — 4 ổ cắm 380V (T11-01 -> T11-04)' },
+        { cabinet_code: 'T12', cabinet_name: 'Tủ 12', total_sockets: 4, description: 'Tủ điện T12 — 4 ổ cắm 380V (T12-01 -> T12-04)' },
+        { cabinet_code: 'T13', cabinet_name: 'Tủ 13', total_sockets: 4, description: 'Tủ điện T13 — 4 ổ cắm 380V (T13-01 -> T13-04)' },
+      ];
+    }
+  }
+
+  /** Tạo mới Tủ điện 380V trên Supabase Cloud */
+  async createPowerCabinet(params: {
+    cabinetCode: string;
+    cabinetName: string;
+    totalSockets?: number;
+    description?: string;
+  }): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }> {
+    const cleanCode = params.cabinetCode.trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, error: 'Mã tủ điện không được để trống' };
+    }
+    const initialSockets = Math.max(0, params.totalSockets || 0);
+    const cabName = params.cabinetName.trim() || `Tủ ${cleanCode}`;
+
+    try {
+      const supabase = createClient();
+      // Nếu có số lượng ổ cắm, chèn luôn các ổ cắm tương ứng
+      if (initialSockets > 0) {
+        const rowsToInsert = [];
+        for (let i = 1; i <= initialSockets; i++) {
+          const sIndex = i;
+          const sCode = `${cleanCode}-${String(sIndex).padStart(2, '0')}`;
+          rowsToInsert.push({
+            socket_code: sCode,
+            socket_name: `${cabName} — Ổ ${sIndex}`,
+            zone_code: 'KHU_A_REEFER',
+            voltage: '380V',
+            amperage: '32A',
+            phase: '3_PHASE',
+            status: 'AVAILABLE',
+            notes: `${cabName} ổ số ${sIndex} (Chuẩn 3 pha 380V)`,
+          });
+        }
+        const { error: insErr } = await (supabase.from as any)('app_power_sockets').upsert(rowsToInsert, { onConflict: 'socket_code' });
+        if (insErr) {
+          return { success: false, error: insErr.message };
+        }
+      }
+
+      return {
+        success: true,
+        cabinet: {
+          cabinet_code: cleanCode,
+          cabinet_name: cabName,
+          total_sockets: initialSockets,
+          description: params.description?.trim(),
+        },
+      };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi khi tạo tủ điện' };
+    }
+  }
+
+  /** Cập nhật thông tin Tủ điện 380V */
+  async updatePowerCabinet(
+    cabinetCode: string,
+    params: Partial<{
+      cabinetName: string;
+      description: string;
+      totalSockets: number;
+    }>
+  ): Promise<{ success: boolean; cabinet?: PowerCabinetInfo; error?: string }> {
+    try {
+      const supabase = createClient();
+      if (params.cabinetName) {
+        // Cập nhật socket_name cho các socket thuộc tủ
+        const { data: sockets } = await (supabase.from as any)('app_power_sockets')
+          .select('socket_code, socket_name')
+          .like('socket_code', `${cabinetCode}-%`);
+        if (sockets && sockets.length > 0) {
+          for (const s of sockets) {
+            const idx = s.socket_code.split('-')[1] || '01';
+            await (supabase.from as any)('app_power_sockets')
+              .update({ socket_name: `${params.cabinetName.trim()} — Ổ ${parseInt(idx, 10)}` })
+              .eq('socket_code', s.socket_code);
+          }
+        }
+      }
+      return {
+        success: true,
+        cabinet: {
+          cabinet_code: cabinetCode,
+          cabinet_name: params.cabinetName || `Tủ ${cabinetCode}`,
+          total_sockets: params.totalSockets || 0,
+          description: params.description,
+        },
+      };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi khi cập nhật tủ điện' };
+    }
+  }
+
+  /** Xóa Tủ điện 380V */
+  async deletePowerCabinet(cabinetCode: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient();
+      // Kiểm tra có ổ cắm nào đang cắm điện không
+      const { data: sockets } = await (supabase.from as any)('app_power_sockets')
+        .select('socket_code, status')
+        .like('socket_code', `${cabinetCode}-%`);
+      
+      const inUse = sockets?.filter((s: any) => s.status === 'IN_USE');
+      if (inUse && inUse.length > 0) {
+        return {
+          success: false,
+          error: `Không thể xóa tủ ${cabinetCode} vì có ${inUse.length} ổ cắm đang cấp điện! Vui lòng rút điện trước.`,
+        };
+      }
+
+      const { error } = await (supabase.from as any)('app_power_sockets')
+        .delete()
+        .like('socket_code', `${cabinetCode}-%`);
+
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi khi xóa tủ điện' };
+    }
+  }
+
+  /** Bật/Tắt bảo trì toàn bộ tủ điện */
+  async setCabinetMaintenance(
+    cabinetCode: string,
+    isMaintenance: boolean,
+    notes?: string
+  ): Promise<{ success: boolean; count?: number; error?: string }> {
+    try {
+      const supabase = createClient();
+      const nextStatus: PowerSocketStatus = isMaintenance ? 'MAINTENANCE' : 'AVAILABLE';
+      const reason = notes || (isMaintenance ? `Bảo trì toàn bộ tủ ${cabinetCode}` : 'Mở lại điện toàn bộ tủ');
+
+      const { data, error } = await (supabase.from as any)('app_power_sockets')
+        .update({
+          status: nextStatus,
+          notes: reason,
+          updated_at: new Date().toISOString(),
+        })
+        .like('socket_code', `${cabinetCode}-%`)
+        .neq('status', 'IN_USE')
+        .select();
+
+      if (error) return { success: false, error: error.message };
+      return { success: true, count: data?.length || 0 };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Lỗi khi bảo trì tủ điện' };
+    }
   }
 
   /** Lấy danh mục các trụ / giắc cắm điện container lạnh 380V */
@@ -3164,7 +3356,21 @@ export class SupabaseRepository implements IYardRepository {
       }
       const { data, error } = await query;
       if (!error && data && data.length > 0) {
-        return data as unknown as PowerSocket[];
+        // Lọc bỏ mã R cũ nếu còn sót và suy luận chuẩn cabinet_code, cabinet_name, socket_index
+        return (data as any[])
+          .filter(s => !s.socket_code.startsWith('R'))
+          .map(s => {
+            const cabCode = s.cabinet_code || s.socket_code.split('-')[0] || 'T01';
+            const cabNum = cabCode.replace(/^T0?/, '');
+            const cabName = s.cabinet_name || `Tủ ${cabNum}`;
+            const idx = s.socket_index || parseInt(s.socket_code.split('-')[1], 10) || 1;
+            return {
+              ...s,
+              cabinet_code: cabCode,
+              cabinet_name: cabName,
+              socket_index: idx,
+            } as PowerSocket;
+          });
       }
     } catch {
       // Fallback
