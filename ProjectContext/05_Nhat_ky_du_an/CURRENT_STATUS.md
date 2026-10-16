@@ -40,10 +40,11 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:05 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ĐẨY PRODUCTION THÀNH CÔNG LÊN GITHUB REMOTE (ORIGIN MAIN) & TỰ ĐỘNG TRIỂN KHAI VERCEL**:
-  * Đã push thành công commit `3f8cee5` lên `origin main` (`git@github.com-company:it-tlqm/SonCang-YMS.git`).
-  * Toàn bộ mã nguồn mới bao gồm 33 ảnh thực tế, trang `/guide` tương tác và bộ tài liệu Word/PDF 8.7MB đã được đưa lên production.
+- **Cập nhật lúc:** 16/10/2026 22:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KHẮC PHỤC TRIỆT ĐỂ LỖI SCROLL VÀ HIỂN THỊ HÌNH ẢNH TRÊN TRANG /GUIDE, SẴN SÀNG ĐẨY PRODUCTION**:
+  * **Lỗi cuộn trang (Scroll):** Khắc phục triệt để bằng việc thiết lập `overflow-y-auto` và `h-full` tại thẻ cha của `src/app/guide/page.tsx` khắc phục xung đột với `overflow-hidden` của App Shell layout. Trang cẩm nang cuộn mượt mà trơn tru trên cả Desktop lẫn Mobile.
+  * **Lỗi hiển thị ảnh & tài liệu:** Đưa toàn bộ 33 ảnh minh họa vào thư mục chuẩn `public/user_inserted_images/` cùng các tệp Word/PDF vào `public/`. Cập nhật đường dẫn chuẩn xác. Đã kiểm tra `HTTP 200 OK` cho toàn bộ tài nguyên tĩnh.
+  * Đang thực hiện commit và push lên `origin main` để Vercel deploy cập nhật production ngay lập tức.
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

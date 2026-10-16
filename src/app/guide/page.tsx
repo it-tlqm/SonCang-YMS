@@ -62,10 +62,10 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Biển số xe và số container là căn cứ pháp lý — nếu sơn mờ phải lập biên bản kiểm tra thực tế.',
       images: [
-        { src: '/docs/user_inserted_images/image3.png', title: 'Toàn cảnh Form Tiếp nhận Cổng vào (/entry)' },
-        { src: '/docs/user_inserted_images/image4.png', title: 'Nhập tay số CCCD 12 số của tài xế' },
-        { src: '/docs/user_inserted_images/image5.png', title: 'Hộp thoại Quét QR CCCD gắn chip bóc tách tự động' },
-        { src: '/docs/user_inserted_images/image6.png', title: 'Tiếp nhận song song 2 Cont 20ft & Khớp phiếu điện' }
+        { src: '/user_inserted_images/image3.png', title: 'Toàn cảnh Form Tiếp nhận Cổng vào (/entry)' },
+        { src: '/user_inserted_images/image4.png', title: 'Nhập tay số CCCD 12 số của tài xế' },
+        { src: '/user_inserted_images/image5.png', title: 'Hộp thoại Quét QR CCCD gắn chip bóc tách tự động' },
+        { src: '/user_inserted_images/image6.png', title: 'Tiếp nhận song song 2 Cont 20ft & Khớp phiếu điện' }
       ]
     },
     {
@@ -88,11 +88,11 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Cước lưu bãi container chỉ mang tính chất tích lũy dự tính, CHỈ được chốt và thu thực tế tại Cổng ra khi container rời bãi.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-YARD-01-dashboard.png', title: 'Bảng điều khiển bến bãi, cước lưu bãi tích lũy (~X đ (Y đêm))' },
-        { src: '/docs/user_inserted_images/IMG-YARD-02-zones-grid.png', title: 'Sơ đồ 4 Phân khu & Lưới 13 Tủ điện 50 Giắc cắm 380V' },
-        { src: '/docs/user_inserted_images/IMG-YARD-03-modal-add-cabinet.png', title: 'Hộp thoại Thêm Mới Tủ Điện 380V (Mã tủ T14, 4 giắc 380V)' },
-        { src: '/docs/user_inserted_images/IMG-YARD-04-modal-quick-plug.png', title: 'Hộp thoại Cắm Container Nhanh Tại Bãi (Quick Plug)' },
-        { src: '/docs/user_inserted_images/IMG-YARD-05-modal-edit-plate.png', title: 'Hộp thoại Hiệu chỉnh Biển số xe & Lưu vết Audit' }
+        { src: '/user_inserted_images/IMG-YARD-01-dashboard.png', title: 'Bảng điều khiển bến bãi, cước lưu bãi tích lũy (~X đ (Y đêm))' },
+        { src: '/user_inserted_images/IMG-YARD-02-zones-grid.png', title: 'Sơ đồ 4 Phân khu & Lưới 13 Tủ điện 50 Giắc cắm 380V' },
+        { src: '/user_inserted_images/IMG-YARD-03-modal-add-cabinet.png', title: 'Hộp thoại Thêm Mới Tủ Điện 380V (Mã tủ T14, 4 giắc 380V)' },
+        { src: '/user_inserted_images/IMG-YARD-04-modal-quick-plug.png', title: 'Hộp thoại Cắm Container Nhanh Tại Bãi (Quick Plug)' },
+        { src: '/user_inserted_images/IMG-YARD-05-modal-edit-plate.png', title: 'Hộp thoại Hiệu chỉnh Biển số xe & Lưu vết Audit' }
       ]
     },
     {
@@ -115,11 +115,11 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Cước điện container lạnh tính theo thời gian cắm thực tế, làm tròn đến 5.000đ. Không khóa cước trước khi rút điện.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-REEFER-01-active-sessions.png', title: 'Tab Đang cắm điện — Live ticker thời gian thực tế' },
-        { src: '/docs/user_inserted_images/IMG-REEFER-02-ready-queue.png', title: 'Tab Sẵn sàng cắm — Danh sách container chờ cấp điện' },
-        { src: '/docs/user_inserted_images/IMG-REEFER-03-modal-create-request.png', title: 'Hộp thoại Lập Yêu cầu Cắm điện Dự kiến CCKB' },
-        { src: '/docs/user_inserted_images/IMG-REEFER-04-modal-plug.png', title: 'Hộp thoại Cắm điện Container & Chọn Tủ/Giắc 380V' },
-        { src: '/docs/user_inserted_images/IMG-REEFER-05-modal-unplug.png', title: 'Hộp thoại Rút điện Chốt cước tự động (Làm tròn 5.000đ)' }
+        { src: '/user_inserted_images/IMG-REEFER-01-active-sessions.png', title: 'Tab Đang cắm điện — Live ticker thời gian thực tế' },
+        { src: '/user_inserted_images/IMG-REEFER-02-ready-queue.png', title: 'Tab Sẵn sàng cắm — Danh sách container chờ cấp điện' },
+        { src: '/user_inserted_images/IMG-REEFER-03-modal-create-request.png', title: 'Hộp thoại Lập Yêu cầu Cắm điện Dự kiến CCKB' },
+        { src: '/user_inserted_images/IMG-REEFER-04-modal-plug.png', title: 'Hộp thoại Cắm điện Container & Chọn Tủ/Giắc 380V' },
+        { src: '/user_inserted_images/IMG-REEFER-05-modal-unplug.png', title: 'Hộp thoại Rút điện Chốt cước tự động (Làm tròn 5.000đ)' }
       ]
     },
     {
@@ -141,10 +141,10 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Không xóa hoặc ghi đè khoản thu đã xác nhận. Mọi chênh lệch phải xử lý qua phiếu điều chỉnh được phê duyệt.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-BILLING-01-ledger-table.png', title: 'Sổ cái Thu phí Toàn bãi & Bộ lọc đa tiêu chí' },
-        { src: '/docs/user_inserted_images/IMG-BILLING-02-modal-collect.png', title: 'Hộp thoại Thu tiền Đơn lẻ (Tiền mặt / Chuyển khoản VietQR)' },
-        { src: '/docs/user_inserted_images/IMG-BILLING-03-modal-batch.png', title: 'Hộp thoại Thu gộp nhiều khoản cước (Batch Collection)' },
-        { src: '/docs/user_inserted_images/IMG-BILLING-04-modal-receipt.png', title: 'Hộp thoại In Phiếu Thu Tiền Bến Bãi Chuẩn Mực' }
+        { src: '/user_inserted_images/IMG-BILLING-01-ledger-table.png', title: 'Sổ cái Thu phí Toàn bãi & Bộ lọc đa tiêu chí' },
+        { src: '/user_inserted_images/IMG-BILLING-02-modal-collect.png', title: 'Hộp thoại Thu tiền Đơn lẻ (Tiền mặt / Chuyển khoản VietQR)' },
+        { src: '/user_inserted_images/IMG-BILLING-03-modal-batch.png', title: 'Hộp thoại Thu gộp nhiều khoản cước (Batch Collection)' },
+        { src: '/user_inserted_images/IMG-BILLING-04-modal-receipt.png', title: 'Hộp thoại In Phiếu Thu Tiền Bến Bãi Chuẩn Mực' }
       ]
     },
     {
@@ -166,11 +166,11 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'An ninh cổng ra KHÔNG ĐƯỢC MỞ BARRIER khi chưa đủ 3 điều kiện tích xanh hợp lệ.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-EXIT-01-gate-checklist.png', title: 'Màn hình Kiểm soát Cổng ra & Checklist 3 Điều kiện' },
-        { src: '/docs/user_inserted_images/IMG-EXIT-02-modal-unified-exit.png', title: 'Hộp thoại An ninh Cổng ra Hợp nhất Kiểm soát theo xe' },
-        { src: '/docs/user_inserted_images/IMG-EXIT-03-clearance-queue.png', title: 'Tab Nghiệp vụ CCKB Duyệt xuất bãi (Clearance)' },
-        { src: '/docs/user_inserted_images/IMG-EXIT-04-modal-debt-guarantee.png', title: 'Hộp thoại CCKB Duyệt Xuất bãi Kèm Bảo Lãnh Công Nợ' },
-        { src: '/docs/user_inserted_images/IMG-EXIT-05-modal-receipt.png', title: 'Hộp thoại In Biên lai Thu phí Lưu bãi Cổng ra' }
+        { src: '/user_inserted_images/IMG-EXIT-01-gate-checklist.png', title: 'Màn hình Kiểm soát Cổng ra & Checklist 3 Điều kiện' },
+        { src: '/user_inserted_images/IMG-EXIT-02-modal-unified-exit.png', title: 'Hộp thoại An ninh Cổng ra Hợp nhất Kiểm soát theo xe' },
+        { src: '/user_inserted_images/IMG-EXIT-03-clearance-queue.png', title: 'Tab Nghiệp vụ CCKB Duyệt xuất bãi (Clearance)' },
+        { src: '/user_inserted_images/IMG-EXIT-04-modal-debt-guarantee.png', title: 'Hộp thoại CCKB Duyệt Xuất bãi Kèm Bảo Lãnh Công Nợ' },
+        { src: '/user_inserted_images/IMG-EXIT-05-modal-receipt.png', title: 'Hộp thoại In Biên lai Thu phí Lưu bãi Cổng ra' }
       ]
     },
     {
@@ -193,12 +193,12 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Mọi khoản tiền mặt thu từ các ca trực phải được bàn giao và khóa sổ ngay cuối ca trực theo biên bản 4 mắt.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-01-cash-settlement.png', title: 'Màn hình Bàn giao & Chốt tiền mặt ca trực nguyên tắc 4 mắt' },
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-02-modal-settlement.png', title: 'Hộp thoại Lập Biên bản Bàn giao & Khóa sổ Quỹ Ca trực' },
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-03-modal-print-settlement.png', title: 'Hộp thoại In Biên bản Bàn giao Quỹ Tiền mặt Ca trực' },
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-04-invoices-ledger.png', title: 'Sổ Quản lý Hóa đơn điện tử MST / CCCD' },
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-05-modal-invoice.png', title: 'Hộp thoại Lập & Phát hành Hóa đơn GTGT Bến bãi' },
-        { src: '/docs/user_inserted_images/IMG-ACCOUNTING-06-debts-management.png', title: 'Màn hình Quản lý & Thu hồi Công nợ Bảo lãnh' }
+        { src: '/user_inserted_images/IMG-ACCOUNTING-01-cash-settlement.png', title: 'Màn hình Bàn giao & Chốt tiền mặt ca trực nguyên tắc 4 mắt' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-02-modal-settlement.png', title: 'Hộp thoại Lập Biên bản Bàn giao & Khóa sổ Quỹ Ca trực' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-03-modal-print-settlement.png', title: 'Hộp thoại In Biên bản Bàn giao Quỹ Tiền mặt Ca trực' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-04-invoices-ledger.png', title: 'Sổ Quản lý Hóa đơn điện tử MST / CCCD' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-05-modal-invoice.png', title: 'Hộp thoại Lập & Phát hành Hóa đơn GTGT Bến bãi' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-06-debts-management.png', title: 'Màn hình Quản lý & Thu hồi Công nợ Bảo lãnh' }
       ]
     },
     {
@@ -220,12 +220,12 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Nhật ký kiểm toán (Audit Logs) là bản ghi bất biến, không thể xóa hoặc sửa dưới bất kỳ hình thức nào.',
       images: [
-        { src: '/docs/user_inserted_images/IMG-REPORTS-01-operations.png', title: 'Báo cáo Vận hành Bến bãi (Sản lượng xe, Tải bãi, Tải điện)' },
-        { src: '/docs/user_inserted_images/IMG-REPORTS-02-financial.png', title: 'Báo cáo Dòng tiền & Doanh thu Bến bãi theo ngày/tháng' },
-        { src: '/docs/user_inserted_images/IMG-ADMIN-01-users-list.png', title: 'Quản trị Nhân sự & Danh sách Người dùng (7 vai trò RBAC V5)' },
-        { src: '/docs/user_inserted_images/IMG-ADMIN-02-modal-add-user.png', title: 'Hộp thoại Thêm mới / Cập nhật Tài khoản Nhân sự' },
-        { src: '/docs/user_inserted_images/IMG-ADMIN-03-rbac-matrix.png', title: 'Ma trận Phân quyền 67 Hành vi Nghiệp vụ & 206 Quyền hạn V5' },
-        { src: '/docs/user_inserted_images/IMG-ADMIN-04-audit-logs.png', title: 'Sổ Nhật ký Kiểm toán Toàn bãi (Audit Logs) Truy vết Lịch sử' }
+        { src: '/user_inserted_images/IMG-REPORTS-01-operations.png', title: 'Báo cáo Vận hành Bến bãi (Sản lượng xe, Tải bãi, Tải điện)' },
+        { src: '/user_inserted_images/IMG-REPORTS-02-financial.png', title: 'Báo cáo Dòng tiền & Doanh thu Bến bãi theo ngày/tháng' },
+        { src: '/user_inserted_images/IMG-ADMIN-01-users-list.png', title: 'Quản trị Nhân sự & Danh sách Người dùng (7 vai trò RBAC V5)' },
+        { src: '/user_inserted_images/IMG-ADMIN-02-modal-add-user.png', title: 'Hộp thoại Thêm mới / Cập nhật Tài khoản Nhân sự' },
+        { src: '/user_inserted_images/IMG-ADMIN-03-rbac-matrix.png', title: 'Ma trận Phân quyền 67 Hành vi Nghiệp vụ & 206 Quyền hạn V5' },
+        { src: '/user_inserted_images/IMG-ADMIN-04-audit-logs.png', title: 'Sổ Nhật ký Kiểm toán Toàn bãi (Audit Logs) Truy vết Lịch sử' }
       ]
     }
   ];
@@ -296,7 +296,7 @@ export default function GuideOverviewPage() {
   const currentStepData = workflowSteps.find(s => s.step === selectedWorkflowStep) || workflowSteps[0];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-16">
+    <div className="flex-1 h-full overflow-y-auto bg-[#F8FAFC] pb-16">
       {/* 1. HERO HEADER */}
       <div className="bg-gradient-to-r from-[#172554] via-[#1E3A8A] to-[#0F172A] text-white pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-blue-900 shadow-md">
         <div className="max-w-7xl mx-auto">

@@ -1,5 +1,28 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 22:15 — Khắc Phục Triệt Để Lỗi Cuộn Trang & Đồng Bộ Toàn Bộ Ảnh Tĩnh / Tài Liệu Lên Production Cho Trang /guide
+
+- **Yêu cầu / nguồn:** Phản ánh trực tiếp từ Chủ dự án:
+  *"k scroll dc /guide luôn các ảnh cũng bị k hiể thị được\"*
+- **Nguyên nhân gốc rễ (Root Cause Analysis):**
+  1. *Lỗi không cuộn (scroll) được:* Thẻ `<main>` trong layout `AppShell` (`src/components/layout/app-shell.tsx`) có thuộc tính `overflow-hidden`. Trong khi đó, component trang `/guide` trước đó dùng `min-h-screen`, khiến nội dung vượt quá chiều cao màn hình bị cắt bớt và không thể cuộn độc lập.
+  2. *Lỗi ảnh và file đính kèm không hiển thị được:* Các tệp ảnh thực tế trước đó nằm ở thư mục root `docs/user_inserted_images/` và được tham chiếu đường dẫn `/docs/...`. Trong Next.js App Router, thư mục ngoài `public/` không được web server cấp quyền truy cập tĩnh ra ngoài trình duyệt client.
+- **Biện pháp xử lý & Triển khai thực tế:**
+  1. *Sửa bố cục cuộn:* Cập nhật thẻ bọc ngoài của `src/app/guide/page.tsx` thành `<div className="flex-1 h-full overflow-y-auto bg-[#F8FAFC] pb-16">`. Đảm bảo trang `/guide` cuộn mượt mà độc lập trong vùng làm việc của AppShell trên cả Desktop và thiết bị di động.
+  2. *Đồng bộ tài nguyên tĩnh vào `public/`:*
+     - Sao chép toàn bộ 33 ảnh thực tế vào `public/user_inserted_images/`.
+     - Sao chép tài liệu Word `public/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx` và file PDF in ấn `public/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf`.
+     - Chuẩn hóa toàn bộ đường dẫn ảnh và liên kết tải trong `src/app/guide/page.tsx` từ `/docs/...` sang `/user_inserted_images/...` và `/{tên_file}`.
+- **Tệp sửa đổi & bổ sung:**
+  - `src/app/guide/page.tsx` (sửa layout cuộn và đường dẫn asset tĩnh)
+  - `public/user_inserted_images/` (33 ảnh độ phân giải cao)
+  - `public/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx`
+  - `public/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf`
+- **Kiểm thử xác thực:**
+  - TypeScript compilation: `npx tsc --noEmit` -> 0 errors.
+  - HTTP Static test: Request tới `http://localhost:3000/user_inserted_images/image1.png` và `http://localhost:3000/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf` trả về HTTP 200 OK.
+  - Sẵn sàng push lên branch `main` kích hoạt Vercel Production deployment.
+
 ## 2026-10-16 22:05 — Đẩy Thành Công Mã Nguồn Lên GitHub Remote (origin main) & Kích Hoạt Vercel Production Auto-Deploy
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
