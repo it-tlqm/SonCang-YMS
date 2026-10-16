@@ -40,8 +40,24 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 14:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TÍCH HỢP HIỂN THỊ PHÍ LƯU BÃI CONTAINER TÍCH LŨY TẠM TÍNH (~73.7TR) LÊN DASHBOARD VÀ BÃI XE (/yard) (QUYẾT ĐỊNH D-022)**:
+- **Cập nhật lúc:** 16/10/2026 15:35 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TÁI TẠO TOÀN DIỆN BỘ TÀI LIỆU DỰ ÁN (.DOCX & .PDF) CẬP NHẬT ĐẦY ĐỦ CÁC QUYẾT ĐỊNH NÂNG CẤP MỚI NHẤT**:
+  * **Cập nhật nội dung toàn diện 4 ấn phẩm tài liệu:**
+    1. **Quy tắc cước điện mới (D-021):** Bỏ làm tròn 15 phút, tính theo phút thực tế ngoài bãi, làm tròn thành tiền đến 5.000đ, không tiền lẻ.
+    2. **Cấu trúc 4 Tab `/reefer`:** (1) Yêu cầu cắm điện CCKB, (2) Sẵn sàng cắm điện, (3) Phiên cắm điện thực tế, (4) Nhật ký nhiệt độ.
+    3. **Phí lưu bãi container tạm tính (D-022):** Hiển thị ~73.7tr (52 cont) trên Dashboard KPI Card 5 và trên từng huy hiệu xe/cont tại `/yard`.
+    4. **Tối ưu phân trang:** Giới thiệu bộ phân trang 16 bảng dữ liệu 10/20/50/100 dòng.
+    5. **Danh sách tài khoản công vụ:** Bổ sung bảng 6 tài khoản kích hoạt sẵn kèm mật khẩu cho An ninh, CCKB, Điều phối, IT Admin.
+  * **Xuất bản thành công cả 2 định dạng Word & PDF:**
+    - `Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx` & `.pdf` (4.58 MB)
+    - `Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx` & `.pdf` (4.45 MB)
+  * **Kiểm thử xác nhận:**
+    - `python scripts/generate_user_guide_doc.py`: 100% PASS.
+    - `python scripts/generate_system_doc.py`: 100% PASS.
+    - `scripts/convert_docx_to_pdf.ps1`: 100% PASS (Word COM).
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+
+- **Mốc trước đó (16/10/2026 14:15):** **TÍCH HỢP HIỂN THỊ PHÍ LƯU BÃI CONTAINER TÍCH LŨY TẠM TÍNH (~73.7TR) LÊN DASHBOARD VÀ BÃI XE (/yard) (QUYẾT ĐỊNH D-022)**:
   * **Giải quyết thắc mắc về công nợ và thu tiền từ dữ liệu 70 xe AppSheet:**
     1. **Vé vào cổng (16.600.000đ):** File AppSheet gốc ghi nhận 100% 70 xe vào bãi là `TRANG_THAI_THU_VE = 'Đã thu'`. Hệ thống giữ nguyên trạng thái `PAID` theo đúng file gốc.
     2. **Phí lưu bãi container (73.700.000đ):** 52/65 container đã lưu qua 24 giờ. Theo bất biến nghiệp vụ V5, khoản phí này chỉ chốt và thu tại Cổng ra (`/exit`) khi xe/cont ra bãi. Tuy nhiên để phản ánh số liệu tài chính chân thực trên bảng điều khiển, hệ thống đã tích hợp hiển thị Phí lưu bãi tích lũy tạm tính.

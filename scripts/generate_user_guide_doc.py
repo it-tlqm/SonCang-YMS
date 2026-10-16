@@ -321,6 +321,38 @@ def generate_user_guide_doc(output_path):
         "Mỗi nhân sự trực ca được cấp 01 tài khoản định danh cá nhân gắn liền với vai trò nghiệp vụ (RBAC V5). Tuyệt đối không dùng chung mật khẩu."
     )
     
+    # Bảng tài khoản công vụ khởi tạo sẵn cho kiểm thử và vận hành
+    acc_table = doc.add_table(rows=7, cols=5)
+    acc_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(acc_table, "CBD5E1")
+    acc_headers = ["Vị trí trực ca", "Họ tên nhân sự", "Email công vụ", "Mật khẩu", "Vai trò RBAC V5"]
+    for i, h in enumerate(acc_headers):
+        acc_table.rows[0].cells[i].text = h
+    format_row(acc_table.rows[0], is_header=True, bg_color="223873", text_color="FFFFFF", font_size=9, bold=True)
+    
+    accounts_data = [
+        ("An ninh Cổng trực ca", "An Ninh Sơn Cảng", "anninh.talunglogistics@gmail.com", "Anninh@2026", "SEC_STAFF (26 quyền)"),
+        ("Trưởng bộ phận An ninh", "Lương Duy Thái", "thaild@talunglogistics.com", "Thaild@2026", "SEC_LEAD (31 quyền)"),
+        ("Nhân viên Thương vụ CCKB", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026", "PORT_STAFF (31 quyền)"),
+        ("Trưởng bộ phận CCKB", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026", "PORT_LEAD (38 quyền)"),
+        ("Nhân viên Điều phối bãi", "Điều phối", "dieuphoi.talunglogistics@gmail.com", "Dieuphoi@2026", "DIS_STAFF (9 quyền)"),
+        ("Quản trị viên Hệ thống", "Ban Quản trị IT", "it@talunglogistics.com", "Admin@2026", "SYS_ADMIN (63 quyền)"),
+    ]
+    col_w_acc = [Inches(1.5), Inches(1.3), Inches(2.2), Inches(1.0), Inches(1.2)]
+    for idx, (pos, name, em, pwd, rl) in enumerate(accounts_data, start=1):
+        row = acc_table.rows[idx]
+        for c_idx, val in enumerate([pos, name, em, pwd, rl]):
+            row.cells[c_idx].width = col_w_acc[c_idx]
+            row.cells[c_idx].text = val
+        bg = "F8F9FB" if idx % 2 == 1 else "FFFFFF"
+        format_row(row, bg_color=bg, text_color="17202E", font_size=8.5)
+        row.cells[0].paragraphs[0].runs[0].font.bold = True
+        row.cells[3].paragraphs[0].runs[0].font.name = "Consolas"
+        row.cells[3].paragraphs[0].runs[0].font.bold = True
+        row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor.from_string("0A9444")
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
     add_callout(doc, 
         "Hệ thống quy định 7 vai trò chuẩn V5: Nhân viên An ninh (SEC_STAFF), Trưởng bộ phận An ninh (SEC_LEAD), "
         "Nhân viên CCKB (PORT_STAFF), Trưởng bộ phận CCKB (PORT_LEAD), Điều phối viên (DIS_STAFF), Trưởng BP Điều phối (DIS_LEAD), "
@@ -412,18 +444,21 @@ def generate_user_guide_doc(output_path):
         "Màn hình áp dụng chuẩn Full-Width và Full-Height Table chống co cụt, đảm bảo không bao giờ bị che khuất các nút thao tác."
     )
     
-    add_h2("3.1. Theo dõi 3 danh sách bến bãi chính")
+    add_h2("3.1. Theo dõi 3 danh sách bến bãi chính & Các tiện ích vận hành nâng cao")
     doc.add_paragraph(
         "• Tab 'Tổng hợp Cặp Xe — Container': Hiển thị liên kết trực quan giữa xe đầu kéo và container đang mang theo, trạng thái điện lạnh và thời gian lưu bãi.\n"
         "• Tab 'Phương tiện trong bãi': Thống kê chi tiết biển số xe, loại xe, giờ vào, tài xế và trạng thái thanh toán vé cổng.\n"
-        "• Tab 'Container tồn bãi': Danh sách toàn bộ container đang lưu tại bãi, phân loại rõ cont HÀNG / RỖNG, trạng thái cắm điện và vị trí phân khu."
+        "• Tab 'Container tồn bãi': Danh sách toàn bộ container đang lưu tại bãi, phân loại rõ cont HÀNG / RỖNG, trạng thái cắm điện và vị trí phân khu.\n"
+        "• Hiển thị Phí lưu bãi Container tích lũy tạm tính (Quyết định D-022): Trên cả 2 bảng Cặp xe - Cont và Container tồn bãi, ngay dưới huy hiệu giờ lưu (≥24h, ≥48h), hệ thống hiển thị dòng chữ màu hổ phách 'Lưu bãi: ~X đ (Y đêm)' tính toán động theo khung giờ 22h-06h (miễn đêm đầu, đơn giá 100.000đ/đêm) giúp Điều phối và An ninh nắm bắt ngay cước phát sinh trước khi xe ra.\n"
+        "• Tối ưu tải dữ liệu & Phân trang (Pagination): Toàn bộ bảng bến bãi trang bị bộ phân trang thông minh (tùy chọn 10, 20, 50, 100 dòng/trang, mặc định 20 dòng), tự động chuyển trang mượt mà trên cả máy tính lẫn điện thoại di động.\n"
+        "• Tiện ích 'Làm sạch bãi (0 xe)' / 'Khởi tạo bãi trống 100%': Nút thao tác trên thanh công cụ và Menu người dùng cho phép Quản trị viên đưa bãi về trạng thái sạch sau các đợt kiểm thử mà không làm ảnh hưởng đến danh mục biểu phí, phân khu hay tài khoản nhân sự."
     )
 
     add_image_placeholder(doc,
         code="IMG-YARD-01",
-        title="Màn hình Bảng điều khiển Quản lý Bến bãi & Tồn bãi (/yard)",
-        description="Giao diện Full-Width hiển thị thanh chỉ số KPI 4 ô, thanh tìm kiếm thông minh và bảng dữ liệu xe - container tồn bãi.",
-        focus_note="Thanh KPI phương tiện tồn bãi, nút chuyển 4 tab và menu thao tác dòng dữ liệu mở thông minh."
+        title="Màn hình Bảng điều khiển Quản lý Bến bãi, Phí lưu bãi tích lũy & Phân trang (/yard)",
+        description="Giao diện Full-Width hiển thị thanh KPI 4 ô, huy hiệu giờ lưu kèm tiền lưu bãi tạm tính, bộ lọc và thanh phân trang 20 dòng/trang.",
+        focus_note="Thanh KPI phương tiện tồn bãi, dòng 'Lưu bãi: ~X đ (Y đêm)' màu hổ phách, thanh phân trang và menu thao tác mở thông minh."
     )
 
     add_h2("3.2. Sơ đồ 4 Phân khu bãi (Khu A, B, C, D) & 30 Trụ điện 380V")
@@ -462,46 +497,57 @@ def generate_user_guide_doc(output_path):
     
     doc.add_paragraph(
         "Phân hệ Container Điện lạnh (`/reefer`) là nghiệp vụ cốt lõi, đảm bảo việc bảo quản nông sản xuất nhập khẩu lạnh "
-        "và tính cước dịch vụ điện chính xác tuyệt đối theo nguyên tắc V5."
+        "và tính cước dịch vụ điện chính xác tuyệt đối theo quyết định mới nhất của Ban Giám đốc."
     )
     
     add_callout(doc,
-        "QUY TẮC TÍNH TIỀN ĐIỆN V5 BẮT BUỘC:\n"
+        "QUY TẮC TÍNH TIỀN ĐIỆN MỚI (QUYẾT ĐỊNH D-021 CHỐT):\n"
         "1. Đơn giá: 100.000 VNĐ/giờ (áp dụng cho cả Cắm theo giờ và Cắm liên tục).\n"
-        "2. Làm tròn: Tự động làm tròn lên từng nấc 15 phút (01-15 phút tính 15p; 16-30 phút tính 30p; 31-45 phút tính 45p; 46-60 phút tính 1 giờ).\n"
-        "3. Công thức: Tiền điện = (Số phút làm tròn / 60) * 100.000 VNĐ. Tiền điện chốt dứt điểm khi RÚT ĐIỆN thực tế.",
-        "QUY TẮC CỐT LÕI TÍNH CƯỚC ĐIỆN LẠNH"
+        "2. Bỏ hoàn toàn quy tắc làm tròn 15 phút: Thời gian tính cước là SỐ PHÚT THỰC TẾ cắm điện ngoài bãi (billable_minutes = ROUND(giây / 60)).\n"
+        "3. Làm tròn tiền cước đến bội số 5.000 VNĐ: Thành tiền = (Số phút thực tế / 60) * 100.000 VNĐ và được làm tròn đến mốc 5.000đ gần nhất (ROUND(cước / 5000) * 5000). Mọi phiên cắm thực tế (> 0s) đều đạt tối thiểu 5.000đ và tuyệt đối không phát sinh tiền lẻ 500đ, 1k, 2k.\n"
+        "4. Chốt cước: Tiền điện chốt dứt điểm khi RÚT ĐIỆN thực tế và tự động ghi vào Sổ cái thu phí (charges).",
+        "QUY TẮC CỐT LÕI TÍNH CƯỚC ĐIỆN LẠNH THỜI GIAN THỰC TẾ"
+    )
+
+    doc.add_paragraph(
+        "Cấu trúc Phân hệ Giám sát điện gồm 4 Tab nghiệp vụ trực quan theo đúng quy trình phối hợp hiện trường:\n"
+        "• Tab 1 — Yêu cầu cắm điện CCKB (Mặc định): Tiếp nhận và quản lý các phiếu đăng ký cắm điện do chủ hàng/CCKB lập trước.\n"
+        "• Tab 2 — Sẵn sàng cắm điện: Danh sách toàn bộ container lạnh đang đỗ trong bãi sẵn sàng cấp điện kèm nút 'Cắm điện ngay'.\n"
+        "• Tab 3 — Phiên cắm điện thực tế: Giám sát đồng hồ đếm thời gian thực các container đang cắm, nhiệt độ, trụ điện 380V và nút 'Rút điện chốt cước'.\n"
+        "• Tab 4 — Nhật ký kiểm tra nhiệt độ: Lịch sử theo dõi và ghi nhận nhiệt độ (°C) định kỳ theo từng ca trực."
     )
 
     add_h2("4.1. Quy trình Cắm điện ngoài hiện trường")
     doc.add_paragraph(
-        "1. Khi container vào bãi, An ninh hoặc CCKB chuyển sang tab 'Container sẵn sàng cắm điện' (có banner thông báo màu xanh).\n"
-        "2. Chọn container cần cắm → Nhấp 'Cắm điện ngay' → Chọn Trụ điện 380V (từ Trụ 01 đến Trụ 30).\n"
+        "1. Khi container vào bãi, An ninh hoặc CCKB chuyển sang tab 'Sẵn sàng cắm điện' (hiển thị số lượng container chờ cắm).\n"
+        "2. Chọn container cần cắm → Nhấp 'Cắm điện ngay' → Chọn Trụ điện 380V (từ Trụ 01 đến Trụ 30, hiển thị rõ trụ trống/bận).\n"
         "3. Chọn Chế độ cắm (Theo giờ hoặc Cắm liên tục), nhập Nhiệt độ cài đặt (°C) và ghi nhận Giờ cắm thực tế (Hỗ trợ lùi giờ theo giờ nhắn Zalo hiện trường).\n"
-        "4. Nhấn 'Xác nhận cắm điện' → Container chuyển ngay sang trạng thái 'ĐANG CẮM ĐIỆN'."
+        "4. Nhấn 'Xác nhận cắm điện' → Container chuyển ngay sang trạng thái 'ĐANG CẮM ĐIỆN' và xuất hiện tại Tab 'Phiên cắm điện thực tế'."
     )
 
     add_image_placeholder(doc,
         code="IMG-REEFER-01",
-        title="Màn hình Theo dõi Cắm rút điện & Danh sách Sẵn sàng cắm (/reefer)",
-        description="Giao diện theo dõi các phiên điện đang chạy với đồng hồ đếm thời gian thực, trụ điện và nhiệt độ bảo quản.",
-        focus_note="Thẻ banner 'Container sẵn sàng cắm', huy hiệu trạng thái 'Đang cắm điện' và nút 'Rút điện'."
+        title="Màn hình Theo dõi Cắm rút điện 4 Tab & Danh sách Sẵn sàng cắm (/reefer)",
+        description="Giao diện theo dõi 4 Tab nghiệp vụ, hiển thị đồng hồ đếm cước thời gian thực tế và danh sách container sẵn sàng cắm.",
+        focus_note="4 Tab (Yêu cầu CCKB, Sẵn sàng cắm, Phiên cắm thực tế, Nhật ký nhiệt độ), huy hiệu 'Đang cắm điện' và nút 'Rút điện'."
     )
 
     add_h2("4.2. Quy trình Rút điện chốt cước & Ghi nhận Nhật ký nhiệt độ")
     doc.add_paragraph(
         "• Thao tác Rút điện: Khi xe chuẩn bị xuất bãi hoặc khách yêu cầu ngắt điện, nhân viên bấm 'Rút điện chốt cước'. "
-        "Hệ thống tự động hiển thị Giờ rút hiện tại, tính toán Số phút thực tế, Số phút làm tròn 15 phút và Số tiền điện phải thu tương ứng. "
+        "Hệ thống tự động hiển thị Giờ rút hiện tại, tính toán Số phút thực tế cắm điện và Thành tiền cước làm tròn đến 5.000đ. "
         "Khoản tiền điện này lập tức được ghi vào Sổ cái thu phí (`charges`).\n"
-        "• Ghi nhật ký nhiệt độ: Định kỳ 2-4 tiếng/lần, kỹ thuật viên CCKB đi kiểm tra các cont đang cắm, nhập nhiệt độ hiển thị trên đồng hồ cont "
-        "vào tab 'Nhật ký nhiệt độ' để theo dõi biểu đồ bảo quản nông sản và làm căn cứ pháp lý với chủ hàng."
+        "• Nghiệp vụ Khớp giờ Zalo: Trường hợp nhân viên cắm/rút thực tế ngoài bãi báo qua Zalo nhưng chưa kịp thao tác trên phần mềm, "
+        "CCKB sử dụng tính năng 'Khớp giờ Zalo' để nhập mốc giờ cắm/rút thực tế có bằng chứng ảnh/tin nhắn Zalo, đảm bảo tính công bằng và minh bạch cước.\n"
+        "• Ghi nhật ký nhiệt độ: Định kỳ 2-4 tiếng/lần, kỹ thuật viên CCKB kiểm tra các cont đang cắm, nhập nhiệt độ hiển thị vào tab 'Nhật ký kiểm tra nhiệt độ' "
+        "để theo dõi biểu đồ bảo quản nông sản và làm căn cứ pháp lý với chủ hàng."
     )
 
     add_image_placeholder(doc,
         code="IMG-REEFER-02",
-        title="Hộp thoại Rút điện Chốt cước tự động (Làm tròn 15 phút) (/reefer)",
-        description="Modal xác nhận rút điện hiển thị bảng tính chi tiết: Giờ cắm, Giờ rút, Thời lượng thực, Thời lượng tính phí và Tổng tiền điện.",
-        focus_note="Dòng 'Thời lượng làm tròn 15 phút', ô 'Thành tiền cước điện' và nút 'Xác nhận rút điện'."
+        title="Hộp thoại Rút điện Chốt cước tự động (Thời gian thực tế — Làm tròn 5.000đ) (/reefer)",
+        description="Modal xác nhận rút điện hiển thị bảng tính chi tiết: Giờ cắm, Giờ rút, Số phút thực tế và Thành tiền cước làm tròn bội số 5k.",
+        focus_note="Dòng 'Thời gian tính cước (Phút thực tế)', ô 'Thành tiền (Tròn đến 5k)' và nút 'Xác nhận rút điện'."
     )
 
     add_image_placeholder(doc,
@@ -685,8 +731,8 @@ def generate_user_guide_doc(output_path):
         ("IMG-YARD-01", "Bảng điều khiển Quản lý Bến bãi & Tồn bãi", "/yard", "An ninh & Điều phối"),
         ("IMG-YARD-02", "Sơ đồ 4 Phân khu & 30 Trụ điện 380V", "/yard", "Điều phối & CCKB"),
         ("IMG-YARD-03", "Hộp thoại Hiệu chỉnh Biển số / Số cont", "/yard", "An ninh & CCKB"),
-        ("IMG-REEFER-01", "Màn hình Theo dõi Cắm rút điện lạnh", "/reefer", "CCKB & An ninh"),
-        ("IMG-REEFER-02", "Hộp thoại Rút điện Chốt cước (15 phút)", "/reefer", "CCKB Điện lạnh"),
+        ("IMG-REEFER-01", "Màn hình Theo dõi Cắm rút điện 4 Tab", "/reefer", "CCKB & An ninh"),
+        ("IMG-REEFER-02", "Hộp thoại Rút điện Chốt cước (Tròn đến 5k)", "/reefer", "CCKB Điện lạnh"),
         ("IMG-REEFER-03", "Phiếu điện dự kiến & Nhật ký nhiệt độ", "/reefer", "CCKB Điện lạnh"),
         ("IMG-EXIT-01", "Kiểm soát Xuất bãi & Checklist điều kiện", "/exit", "An ninh Cổng ra"),
         ("IMG-EXIT-02", "Thương vụ CCKB Duyệt xuất bảo lãnh nợ", "/exit", "CCKB & An ninh"),

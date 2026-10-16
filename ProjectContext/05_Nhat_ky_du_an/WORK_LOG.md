@@ -1,5 +1,39 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 15:35 — Tái Tạo Toàn Diện Bộ Tài Liệu Dự Án (.DOCX & .PDF) Cập Nhật Đầy Đủ Các Quyết Định Nâng Cấp Mới Nhất
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"Chungsta có thực hiện nâng cấp 1 số cái đó bạn vì vậy bạn giúp tôi gen lại tài lieuj nhé"*
+- **Phân tích kỹ thuật & Hạng mục cập nhật vào tài liệu:**
+  1. **Quy tắc cước điện container mới (Quyết định D-021 chốt):**
+     - Bỏ hoàn toàn quy tắc làm tròn 15 phút.
+     - Tính cước theo số phút thực tế cắm ngoài bãi (`billable_minutes = ROUND(durationSeconds / 60)`).
+     - Làm tròn thành tiền cước đến bội số 5.000 VNĐ (`ROUND(rawAmount / 5000) * 5000`), bảo đảm phiên cắm thực tế (> 0s) luôn đạt tối thiểu 5.000đ và tuyệt đối không phát sinh tiền lẻ 500đ, 1k, 2k.
+  2. **Thứ tự 4 Tab nghiệp vụ mới tại Phân hệ Giám sát điện (`/reefer`):**
+     - Tab 1: Yêu cầu cắm điện CCKB (mặc định mở).
+     - Tab 2: Sẵn sàng cắm điện (danh sách cont lạnh trong bãi chờ cắm).
+     - Tab 3: Phiên cắm điện thực tế (theo dõi cắm/rút trực tiếp kèm đồng hồ đếm thời gian thực).
+     - Tab 4: Nhật ký kiểm tra nhiệt độ.
+  3. **Hiển thị Phí lưu bãi Container tích lũy tạm tính (Quyết định D-022 chốt):**
+     - Dashboard (`/dashboard`): Thẻ KPI Card 5 hiển thị rõ `Chưa thanh toán (Tạm tính): 73.700.000 đ` kèm phụ đề `Lưu bãi: ~73.7tr (52 cont)`.
+     - Quản lý bến bãi (`/yard`): Huy hiệu lưu bãi hiển thị dòng thông tin màu hổ phách `Lưu bãi: ~X đ (Y đêm)` cho từng container có phát sinh phí lưu đêm.
+  4. **Tối ưu tải dữ liệu & Phân trang (Pagination) toàn diện 16 bảng:**
+     - Giới thiệu bộ điều hướng phân trang chuẩn 20 dòng/trang (tùy chọn 10, 20, 50, 100), chống giật lag DOM trên thiết bị di động.
+  5. **Bảng Danh mục 6 Tài khoản Công vụ Kích hoạt sẵn:**
+     - Bổ sung bảng định danh tài khoản, email, mật khẩu khởi tạo và vai trò RBAC V5 cho 6 vị trí trực ca thực tế (`anninh.talunglogistics@gmail.com` / `Anninh@2026`, `it@talunglogistics.com` / `Admin@2026`...).
+  6. **Cập nhật dữ liệu bãi thực tế & Bổ sung thông tin tài xế từ sổ kế toán:**
+     - Nạp sẵn 70 xe và 65 container tồn bãi; cập nhật thông tin tên tài xế và CCCD từ sổ theo dõi kế toán của Ánh Bé vào `src/data/seed-in-yard-data.ts`.
+- **Tái tạo và Xuất bản 4 ấn phẩm tài liệu chuẩn (.docx & .pdf):**
+  1. [`docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx) (bản sao thư mục gốc).
+  2. [`docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf) (bản sao thư mục gốc: 4.58 MB, xuất bản qua Word COM).
+  3. [`docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.docx) (bản sao thư mục gốc).
+  4. [`docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.pdf`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Tai_Lieu_Mo_Ta_He_Thong_Quan_Ly_Ben_Bai_Son_Cang.pdf) (bản sao thư mục gốc: 4.45 MB, xuất bản qua Word COM).
+- **Kiểm thử xác thực:**
+  - `python scripts/generate_user_guide_doc.py`: PASS 100%.
+  - `python scripts/generate_system_doc.py`: PASS 100%.
+  - `scripts/convert_docx_to_pdf.ps1`: PASS 100% (Word COM).
+  - `npx tsc --noEmit`: PASS 100% (0 errors).
+
 ## 2026-10-16 14:15 — Tích Hợp Hiển Thị Phí Lưu Bãi Container Tích Lũy Tạm Tính (~73.7Tr) Lên Dashboard & Quản Lý Bến Bãi (Quyết Định D-022)
 
 - **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:

@@ -351,10 +351,11 @@ def create_system_doc(output_path):
     )
     
     reefer_features = [
-        ("Theo dõi phiên cắm/rút thời gian thực: ", "Ghi nhận chính xác thời điểm cắm giắc điện, thời điểm rút giắc, vị trí trụ cắm và cán bộ thực hiện."),
-        ("Thuật toán làm tròn cước điện: ", "Thời lượng cắm điện được tính lũy kế theo giờ và tự động làm tròn lên theo block 15 phút (0.25h) theo đúng quy chế biểu phí bến bãi."),
-        ("Giám sát nhật ký nhiệt độ định kỳ: ", "Hỗ trợ ghi nhận thông số nhiệt độ (°C) và tình trạng máy lạnh theo từng ca trực, lưu vết chứng cứ cho chủ hàng."),
-        ("Cơ chế cảnh báo cont chưa cắm điện: ", "Hiển thị thanh thông báo trang nhã ngay trên tab điều hành khi phát hiện container lạnh vào bãi nhưng chưa được cấp nguồn điện.")
+        ("Cấu trúc 4 Tab quy trình nghiệp vụ: ", "Sắp xếp theo thứ tự phối hợp chuẩn: (1) Yêu cầu cắm điện CCKB [mặc định mở], (2) Container sẵn sàng cắm điện, (3) Phiên cắm điện thực tế, (4) Nhật ký kiểm tra nhiệt độ."),
+        ("Theo dõi phiên cắm/rút thời gian thực: ", "Ghi nhận chính xác thời điểm cắm giắc điện, thời điểm rút giắc, vị trí trụ cắm và cán bộ thực hiện kèm đồng hồ đếm thời gian thực."),
+        ("Thuật toán tính cước điện thời gian thực tế (Quyết định D-021): ", "Bỏ hoàn toàn quy tắc làm tròn 15 phút. Thời lượng cắm điện được tính theo SỐ PHÚT THỰC TẾ cắm ngoài bãi; thành tiền cước làm tròn đến bội số 5.000 VNĐ, triệt tiêu hoàn toàn tiền lẻ."),
+        ("Nghiệp vụ Khớp giờ Zalo & Hồi tố: ", "Hỗ trợ CCKB đối soát và khớp giờ giắc điện theo bằng chứng ảnh/tin nhắn Zalo hiện trường, chống tranh chấp cước."),
+        ("Giám sát nhật ký nhiệt độ định kỳ: ", "Hỗ trợ ghi nhận thông số nhiệt độ (°C) và tình trạng máy lạnh theo từng ca trực, lưu vết chứng cứ cho chủ hàng.")
     ]
     for b_prefix, txt in reefer_features:
         p = doc.add_paragraph(style='List Bullet')
@@ -370,10 +371,12 @@ def create_system_doc(output_path):
     )
     
     yard_features = [
+        ("Đồng bộ dữ liệu bến bãi thực tế: ", "Đã nạp sẵn 70 xe và 65 container tồn bãi thực tế từ dữ liệu vận hành AppSheet phục vụ kiểm thử và vận hành tức thì."),
         ("Quản lý cặp ghép Xe — Container: ", "Theo dõi trực quan xe nào đang chở container nào, xe nào đã hạ bãi cont và chuyển thành xe đơn."),
+        ("Cảnh báo lưu bãi & Phí lưu bãi tích lũy tạm tính (Quyết định D-022): ", "Tự động phân loại cảnh báo ≥ 24h và ≥ 48h, đồng thời hiển thị trực quan cước lưu bãi tạm tính 'Lưu bãi: ~X đ (Y đêm)' của từng container theo khung 22h-06h (miễn đêm đầu)."),
+        ("Tối ưu tải dữ liệu & Phân trang (Pagination): ", "Trang bị bộ phân trang thông minh 10/20/50/100 dòng/trang, giúp hiển thị mượt mà danh sách tồn bãi lớn mà không gây giật lag DOM."),
         ("Chuyển trạng thái HÀNG / RỖNG: ", "Quy trình cập nhật trạng thái container chặt chẽ, ghi nhận nhân viên điều phối thao tác."),
-        ("Cảnh báo thời gian lưu bãi (Dwell Time): ", "Tự động phân loại và làm nổi bật các phương tiện/container lưu bãi ≥ 24 giờ và quá hạn ≥ 48 giờ để kịp thời đôn đốc giải tỏa bãi."),
-        ("Quy trình Sửa số Container có kiểm toán: ", "Nghiêm cấm tự tiện sửa số container; bắt buộc người dùng nhập lý do (tối thiểu 3 ký tự) và lưu lại lịch sử thay đổi để phục vụ hậu kiểm.")
+        ("Quy trình Sửa số Container / Biển số có kiểm toán: ", "Bắt buộc nhập lý do điều chỉnh và lưu vết bất biến (Append-only) vào Nhật ký kiểm toán phục vụ hậu kiểm.")
     ]
     for b_prefix, txt in yard_features:
         p = doc.add_paragraph(style='List Bullet')
@@ -389,10 +392,11 @@ def create_system_doc(output_path):
     )
     
     billing_features = [
-        ("Tổng hợp 4 nguồn doanh thu bến bãi V5: ", "Vé xe vào cổng, Cước tiền điện container, Phí lưu bãi qua đêm, và Dịch vụ nâng hạ/sang tải."),
-        ("Bảng Sổ cái full-width chuyên nghiệp: ", "Hiển thị đầy đủ thông tin: Mã chứng từ, Loại phí, Đối tượng (Xe/Cont), Số tiền, Hình thức thanh toán (Tiền mặt / Chuyển khoản Napas 247), Trạng thái thu."),
+        ("Dashboard phản ánh tài chính trung thực: ", "Thẻ chỉ số tổng quan tích hợp cả các khoản nợ đã chốt trong sổ cái và Phí lưu bãi container tích lũy tạm tính (~73.7tr) của các cont đang đỗ trong bãi."),
+        ("Tổng hợp các nguồn doanh thu bến bãi: ", "Vé xe vào cổng, Cước tiền điện container, Phí lưu bãi qua đêm, và Dịch vụ nâng hạ/sang tải."),
+        ("Bảng Sổ cái full-width chuyên nghiệp: ", "Hiển thị đầy đủ thông tin: Mã chứng từ, Loại phí, Đối tượng (Xe/Cont), Số tiền, Hình thức thanh toán (Tiền mặt / Chuyển khoản VietQR), Trạng thái thu."),
         ("Thanh toán gộp đa chứng từ: ", "Cho phép thu ngân chọn thanh toán đồng thời nhiều khoản phí cho cùng một chủ hàng/doanh nghiệp vận tải."),
-        ("Báo cáo ca trực & Bàn giao quỹ: ", "Thống kê chính xác số tiền thực thu trong ca của từng nhân viên thu ngân/an ninh, xuất phiếu bàn giao ca minh bạch.")
+        ("Báo cáo ca trực & Bàn giao quỹ 4 mắt: ", "Thống kê chính xác số tiền thực thu trong ca của từng nhân viên thu ngân/an ninh, chốt nộp quỹ hiện trường minh bạch.")
     ]
     for b_prefix, txt in billing_features:
         p = doc.add_paragraph(style='List Bullet')
@@ -445,7 +449,7 @@ def create_system_doc(output_path):
         ("5", "Vé xe bo 8 tấn (2 chân)", "Lượt xe", "100.000 đ"),
         ("6", "Vé xe bo 3 bánh nội bộ", "Lượt xe", "40.000 đ"),
         ("7", "Vé xe sang tải nội bộ", "Lượt xe", "0 đ (Miễn phí)"),
-        ("8", "Tiền điện container lạnh theo giờ", "Giờ (block 15p)", "100.000 đ / giờ"),
+        ("8", "Tiền điện container lạnh theo giờ", "Giờ (Phút thực tế, tròn 5k)", "100.000 đ / giờ"),
         ("9", "Phí lưu container qua đêm (22:00–06:00)", "Đêm (miễn đêm đầu)", "100.000 đ / đêm"),
     ]
     
@@ -466,12 +470,14 @@ def create_system_doc(output_path):
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
     
-    add_heading_2("Quy tắc phân công thu tiền nghiệp vụ:")
+    add_heading_2("Quy tắc tính toán & phân công thu tiền nghiệp vụ:")
     p_rules = doc.add_paragraph()
-    p_rules.add_run("• Nhân viên An ninh: ").bold = True
-    p_rules.add_run("Chịu trách nhiệm thu tiền Vé xe vào cổng tại Bốt Cổng vào và Phí lưu bãi qua đêm phát sinh khi xe rời bãi tại Bốt Cổng ra.\n")
-    p_rules.add_run("• Nhân viên CCKB: ").bold = True
-    p_rules.add_run("Quản lý thu Tiền điện container lạnh và xét duyệt ngoại lệ cho phép ghi nợ bảo lãnh. ").font.color.rgb = RGBColor(30, 40, 55)
+    p_rules.add_run("• Quy tắc tính cước điện container (Quyết định D-021): ").bold = True
+    p_rules.add_run("Bỏ làm tròn 15 phút. Thời lượng tính theo số phút thực tế cắm ngoài bãi; thành tiền làm tròn đến bội số 5.000 VNĐ (tối thiểu 5.000đ cho phiên cắm > 0s), triệt tiêu hoàn toàn tiền lẻ 500đ, 1k, 2k.\n")
+    p_rules.add_run("• Quy tắc tính phí lưu bãi container (Quyết định D-022): ").bold = True
+    p_rules.add_run("Tính theo đêm lưu qua khung giờ 22:00 – 06:00 (miễn đêm đầu tiên, 100.000 đ/đêm); chỉ chốt và thu tiền tại Cổng ra khi container thực tế rời cảng.\n")
+    p_rules.add_run("• Phân công thu tiền nghiệp vụ: ").bold = True
+    p_rules.add_run("An ninh thu Vé xe vào cổng và Phí lưu bãi container tại Cổng ra; CCKB thu Tiền điện container lạnh và duyệt bảo lãnh nợ AP07. ").font.color.rgb = RGBColor(30, 40, 55)
     r_warn = p_rules.add_run("Tuyệt đối An ninh Bốt Cổng không tự ý thu tiền điện.")
     r_warn.bold = True
     r_warn.font.color.rgb = RGBColor.from_string("B54708")
@@ -591,6 +597,38 @@ def create_system_doc(output_path):
         if "https://" in val:
             row.cells[1].paragraphs[0].runs[0].font.color.rgb = RGBColor.from_string("326DD8")
             row.cells[1].paragraphs[0].runs[0].font.bold = True
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+    add_heading_2("Danh sách Tài khoản Công vụ Kích hoạt sẵn phục vụ Vận hành & Kiểm thử:")
+    
+    uat_acc_table = doc.add_table(rows=7, cols=4)
+    uat_acc_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(uat_acc_table, "CBD5E1")
+    uat_headers = ["Vị trí công tác", "Nhân sự", "Email đăng nhập", "Mật khẩu khởi tạo"]
+    for i, h in enumerate(uat_headers):
+        uat_acc_table.rows[0].cells[i].text = h
+    format_row(uat_acc_table.rows[0], is_header=True, bg_color="223873", text_color="FFFFFF", font_size=9.5, bold=True)
+    
+    uat_data = [
+        ("An ninh Cổng trực ca (SEC_STAFF)", "An Ninh Sơn Cảng", "anninh.talunglogistics@gmail.com", "Anninh@2026"),
+        ("Trưởng BP An ninh (SEC_LEAD)", "Lương Duy Thái", "thaild@talunglogistics.com", "Thaild@2026"),
+        ("Thương vụ CCKB (PORT_STAFF)", "Linh Minh Trọng", "tronglm@talunglogistics.com", "Tronglm@2026"),
+        ("Trưởng BP CCKB (PORT_LEAD)", "Trịnh Công Nguyên", "nguyentc@talunglogistics.com", "Nguyentc@2026"),
+        ("Điều phối viên Bãi (DIS_STAFF)", "Điều phối", "dieuphoi.talunglogistics@gmail.com", "Dieuphoi@2026"),
+        ("Quản trị viên Hệ thống (SYS_ADMIN)", "Ban Quản trị IT", "it@talunglogistics.com", "Admin@2026"),
+    ]
+    col_w_uat = [Inches(2.5), Inches(1.5), Inches(2.2), Inches(1.0)]
+    for idx, (pos, name, em, pwd) in enumerate(uat_data, start=1):
+        row = uat_acc_table.rows[idx]
+        for c_idx, val in enumerate([pos, name, em, pwd]):
+            row.cells[c_idx].width = col_w_uat[c_idx]
+            row.cells[c_idx].text = val
+        bg = "F8F9FB" if idx % 2 == 1 else "FFFFFF"
+        format_row(row, bg_color=bg, text_color="17202E", font_size=9)
+        row.cells[0].paragraphs[0].runs[0].font.bold = True
+        row.cells[3].paragraphs[0].runs[0].font.name = "Consolas"
+        row.cells[3].paragraphs[0].runs[0].font.bold = True
+        row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor.from_string("0A9444")
 
     # Signature Block
     doc.add_paragraph().paragraph_format.space_after = Pt(20)
