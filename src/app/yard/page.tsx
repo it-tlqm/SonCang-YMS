@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/contexts/toast-context';
 import { VehicleVisit, ContainerVisit, CargoStatus, CargoStatusUpdate, ContainerNumberChange, VehiclePlateChange, YardZoneInfo, TicketPaymentStatus, VehicleVisitStatus, PowerSocket, PowerSocketStatus, ReeferPowerSession, PowerCabinetInfo } from '@/types/domain.types';
 import { 
   Truck, 
@@ -120,6 +121,7 @@ function describeVietnameseDateTime(d: Date | string | null | undefined): string
 
 export default function YardMonitorPage() {
   const { role, yardId, can, repository, user, authMode } = useAuth();
+  const { warning: toastWarning, error: toastError, success: toastSuccess } = useToast();
 
   // Quyền xem lượt xe / lượt container theo RBAC V5
   const canReadYard = can('vehicle.visit.read') || can('container.visit.read');
@@ -1081,7 +1083,7 @@ export default function YardMonitorPage() {
     const cont = containers.find(c => c.is_plugged && (c.plug_socket_code === socketCode || c.slot_code === socketCode));
     
     if (!activeSession && !cont) {
-      alert(`Không tìm thấy phiên cắm điện đang chạy tại trụ ${socketCode}`);
+      toastWarning(`Không tìm thấy phiên cắm điện đang chạy tại trụ ${socketCode}`, 'Chưa cắm điện');
       return;
     }
 
@@ -1105,10 +1107,11 @@ export default function YardMonitorPage() {
       }
 
       await repository.setPowerSocketStatus(socketCode, 'AVAILABLE', 'Đã rút điện, sẵn sàng phục vụ');
+      toastSuccess(`Đã rút điện và giải phóng trụ ${socketCode} thành công!`, 'Thành công');
       setSelectedSocket(null);
       handleReload();
     } catch (err: any) {
-      alert(err?.message || 'Lỗi khi rút điện container.');
+      toastError(err?.message || 'Lỗi khi rút điện container.', 'Lỗi rút điện');
     }
   };
 

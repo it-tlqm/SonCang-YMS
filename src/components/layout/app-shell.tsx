@@ -36,6 +36,8 @@ import {
   BookOpen
 } from 'lucide-react';
 import { ChangePasswordModal } from '@/components/modals/change-password-modal';
+import { useToast } from '@/contexts/toast-context';
+import { GlobalSearchModal } from '@/components/workspace/global-search-modal';
 
 interface NavItem {
   name: string;
@@ -47,7 +49,8 @@ interface NavItem {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, role, isDemoMode, switchDemoRole, logout, can, isLoading, repository } = useAuth();
+  const { user, role, isDemoMode, switchDemoRole, logout, can, isLoading, repository, yardId } = useAuth();
+  const { success: toastSuccess, error: toastError } = useToast();
   const pathname = usePathname();
   const router = useRouter();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
@@ -57,6 +60,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [showResetYardModal, setShowResetYardModal] = useState(false);
   const [isResettingYard, setIsResettingYard] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState<boolean>(false);
+  const [liveCounts, setLiveCounts] = useState<{
+    yardContCount: number;
+    reeferActiveCount: number;
+    exitWaitCount: number;
+  }>({ yardContCount: 0, reeferActiveCount: 0, exitWaitCount: 0 });
+
   const isRealWriteEnabled = process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true';
 
   const handleResetYardClean = async () => {
@@ -65,16 +75,109 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const res = await repository.resetYardToClean();
       if (res.success) {
         setShowResetYardModal(false);
-        window.location.reload();
+        toastSuccess('Đã dọn dẹp sạch toàn bộ dữ liệu bãi trống 100%!', 'Khởi tạo thành công');
+        setTimeout(() => window.location.reload(), 1000);
       } else {
-        alert(res.error || 'Lỗi khi làm sạch dữ liệu bãi.');
+        toastError(res.error || 'Lỗi khi làm sạch dữ liệu bãi.', 'Lỗi thao tác');
       }
     } catch (err: any) {
-      alert('Lỗi hệ thống: ' + (err?.message || String(err)));
+      toastError('Lỗi hệ thống: ' + (err?.message || String(err)), 'Lỗi ngoại lệ');
     } finally {
       setIsResettingYard(false);
     }
   };
+
+  // Nạp dữ liệu số lượng thực tế cho Live Badges (tự làm mới mỗi 15 giây)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCounts = async () => {
+      try {
+        const [cList, rList, vList] = await Promise.all([
+          repository.getContainers(yardId),
+          repository.getReeferSessions(yardId),
+          repository.getVehicles(yardId),
+        ]);
+        if (isMounted) {
+          const inYardConts = cList.filter((c) => c.status === 'IN_YARD').length;
+          const activeSessions = rList.filter((r) => r.power_status === 'PLUGGED').length;
+          const waitExit = vList.filter((v) => v.status === 'IN_YARD' && v.ticket_payment_status !== 'PAID').length;
+          setLiveCounts({
+            yardContCount: inYardConts,
+            reeferActiveCount: activeSessions,
+            exitWaitCount: waitExit,
+          });
+        }
+      } catch (err) {
+        // im lặng nếu phiên chưa sẵn sàng
+      }
+    };
+
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [yardId, repository]);
+
+  // Phím tắt bàn phím toàn cục (Global Keyboard Shortcuts)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 1. Ctrl + K hoặc Cmd + K: Mở / Đóng Hộp tra cứu nhanh toàn bãi
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen((prev) => !prev);
+        return;
+      }
+
+      // 2. Esc: Đóng các menu và popup
+      if (e.key === 'Escape') {
+        setIsGlobalSearchOpen(false);
+        setShowRoleMenu(false);
+        setIsMobileOpen(false);
+        return;
+      }
+
+      // 3. Alt + Phím số: Chuyển nhanh giữa các phân hệ cốt lõi
+      if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+        switch (e.key) {
+          case '1':
+            e.preventDefault();
+            router.push('/entry');
+            break;
+          case '2':
+            e.preventDefault();
+            router.push('/yard');
+            break;
+          case '3':
+            e.preventDefault();
+            router.push('/reefer');
+            break;
+          case '4':
+            e.preventDefault();
+            router.push('/exit');
+            break;
+          case '5':
+            e.preventDefault();
+            router.push('/billing');
+            break;
+          case '6':
+            e.preventDefault();
+            router.push('/accounting');
+            break;
+          case '0':
+          case 'g':
+          case 'G':
+            e.preventDefault();
+            router.push('/guide');
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
 
   // Điều hướng người dùng chưa đăng nhập về trang /login
   useEffect(() => {
@@ -181,7 +284,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       href: '/yard',
       icon: Layers,
       permissionsAny: ['container.visit.read', 'vehicle.visit.read'],
-      badge: 'Bãi',
+      badge: liveCounts.yardContCount > 0 ? `${liveCounts.yardContCount} cont` : 'Bãi',
       section: 'OPERATIONS',
     },
     {
@@ -189,7 +292,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       href: '/reefer',
       icon: Zap,
       permissionsAny: ['reefer.session.actual_start.record', 'reefer.request.create', 'reefer.field_work.note'],
-      badge: 'Reefer',
+      badge: liveCounts.reeferActiveCount > 0 ? `${liveCounts.reeferActiveCount} cắm điện` : 'Reefer',
       section: 'OPERATIONS',
     },
     {
@@ -197,7 +300,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       href: '/exit',
       icon: LogOut,
       permissionsAny: ['exit.clearance.issue', 'exit.actual.confirm'],
-      badge: 'Cổng ra',
+      badge: liveCounts.exitWaitCount > 0 ? `${liveCounts.exitWaitCount} chờ ra` : 'Cổng ra',
       section: 'OPERATIONS',
     },
 
@@ -431,6 +534,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="truncate">{currentItem?.name || 'Vận hành'}</span>
             </span>
           </div>
+        </div>
+
+        {/* Center: Global Quick Search Trigger */}
+        <div className="flex items-center gap-2">
+          {/* Quick Search Button (Desktop/Tablet) */}
+          <button
+            type="button"
+            onClick={() => setIsGlobalSearchOpen(true)}
+            className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-[#F8F9FB] hover:bg-[#EFF8FF] border border-[#E5E9F0] hover:border-[#B2DDFF] text-xs text-[#667085] hover:text-[#326DD8] transition-all cursor-pointer shadow-2xs"
+            title="Tra cứu nhanh toàn bãi (Ctrl + K)"
+          >
+            <Search className="w-3.5 h-3.5 text-[#326DD8]" />
+            <span className="hidden md:inline font-medium">Tra cứu xe, cont, mã vé...</span>
+            <span className="md:hidden font-medium">Tra cứu...</span>
+            <kbd className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono text-[#667085] bg-white border border-[#E5E9F0] shadow-2xs">
+              Ctrl K
+            </kbd>
+          </button>
+
+          {/* Quick Search Button (Mobile icon) */}
+          <button
+            type="button"
+            onClick={() => setIsGlobalSearchOpen(true)}
+            className="sm:hidden p-1.5 rounded-lg text-[#667085] hover:bg-[#F1F4F8] hover:text-[#326DD8] transition-colors"
+            title="Tra cứu nhanh toàn bãi"
+          >
+            <Search className="w-5 h-5 text-[#326DD8]" />
+          </button>
         </div>
 
         {/* Right: Environment, Clock, Yard, User Profile */}
@@ -725,10 +856,84 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         {/* MAIN WORKSPACE CANVAS (FLEXIBLE CENTRAL AREA) */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white pb-14 md:pb-0">
           {children}
         </main>
       </div>
+
+      {/* MOBILE PWA BOTTOM NAVIGATION BAR (Thumb-friendly) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-md border-t border-[#E5E9F0] flex items-center justify-around px-1 z-40 select-none pb-safe">
+        <Link
+          href="/entry"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+            pathname === '/entry' ? 'text-[#0A9444] font-bold' : 'text-[#667085] hover:text-[#17202E]'
+          }`}
+        >
+          <Truck className="w-4.5 h-4.5" />
+          <span className="text-[10px] mt-0.5 font-medium">Cổng vào</span>
+        </Link>
+
+        <Link
+          href="/yard"
+          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+            pathname === '/yard' ? 'text-[#0A9444] font-bold' : 'text-[#667085] hover:text-[#17202E]'
+          }`}
+        >
+          <Layers className="w-4.5 h-4.5" />
+          <span className="text-[10px] mt-0.5 font-medium">Bến bãi</span>
+          {liveCounts.yardContCount > 0 && (
+            <span className="absolute top-1 right-3 px-1 py-0.2 rounded-full bg-[#0A9444] text-white text-[9px] font-bold leading-none">
+              {liveCounts.yardContCount}
+            </span>
+          )}
+        </Link>
+
+        <Link
+          href="/reefer"
+          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+            pathname === '/reefer' ? 'text-[#326DD8] font-bold' : 'text-[#667085] hover:text-[#17202E]'
+          }`}
+        >
+          <Zap className="w-4.5 h-4.5" />
+          <span className="text-[10px] mt-0.5 font-medium">Cắm điện</span>
+          {liveCounts.reeferActiveCount > 0 && (
+            <span className="absolute top-1 right-3 px-1 py-0.2 rounded-full bg-[#B54708] text-white text-[9px] font-bold leading-none">
+              {liveCounts.reeferActiveCount}
+            </span>
+          )}
+        </Link>
+
+        <Link
+          href="/exit"
+          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+            pathname === '/exit' ? 'text-[#326DD8] font-bold' : 'text-[#667085] hover:text-[#17202E]'
+          }`}
+        >
+          <LogOut className="w-4.5 h-4.5" />
+          <span className="text-[10px] mt-0.5 font-medium">Cổng ra</span>
+          {liveCounts.exitWaitCount > 0 && (
+            <span className="absolute top-1 right-3 px-1 py-0.2 rounded-full bg-[#D92D20] text-white text-[9px] font-bold leading-none">
+              {liveCounts.exitWaitCount}
+            </span>
+          )}
+        </Link>
+
+        <Link
+          href="/guide"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
+            pathname === '/guide' ? 'text-[#0A9444] font-bold' : 'text-[#667085] hover:text-[#17202E]'
+          }`}
+        >
+          <BookOpen className="w-4.5 h-4.5" />
+          <span className="text-[10px] mt-0.5 font-medium">Cẩm nang</span>
+        </Link>
+      </nav>
+
+      {/* MODAL TRA CỨU NHANH TOÀN BÃI (Ctrl + K) */}
+      <GlobalSearchModal
+        isOpen={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+      />
 
       {/* MODAL ĐỔI MẬT KHẨU CÁ NHÂN */}
       <ChangePasswordModal

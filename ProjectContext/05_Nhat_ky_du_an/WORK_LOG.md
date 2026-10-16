@@ -1,5 +1,41 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 22:38 — Triển Khai Toàn Diện Gói Nâng Cấp UI/UX, Công Thái Học & Công Cụ Vận Hành Bến Bãi
+
+- **Yêu cầu / nguồn:** Phê duyệt & chỉ đạo triển khai trực tiếp từ Chủ dự án:
+  *"OK triển khai theo kế hoạch bạn đã đề rà, yêu cầu bạn nang cấp hết tất cả"*
+- **Nội dung kỹ thuật & Triển khai thực tế:**
+  1. **Thanh điều hướng dưới đáy màn hình trên Mobile (PWA Mobile Bottom Bar):**
+     - Bổ sung `<nav>` cố định dưới đáy màn hình cho mobile (`md:hidden fixed bottom-0`), thiết kế thumb-friendly hỗ trợ nhân viên An ninh và Điều phối/CCKB thao tác 1 tay ngoài bãi.
+     - 5 nút chạm nhanh: Cổng vào (`/entry`), Bến bãi (`/yard`), Cắm điện (`/reefer`), Cổng ra (`/exit`), Cẩm nang (`/guide`).
+     - Tự động highlight trạng thái trang hiện tại, tích hợp padding an toàn `pb-safe`, và cập nhật `<main>` có `pb-14 md:pb-0` chống che khuất nút thao tác.
+  2. **Bộ đếm thời gian thực trên Menu (Dynamic Live Badges):**
+     - Kết nối repository nạp tự động số lượng tồn bãi: Bãi & Cont hiển thị số cont thực tế (VD: `38 cont`), Cắm điện hiển thị số phiên đang cắm (VD: `12 cắm điện`), Cổng ra hiển thị số xe chờ xuất bãi (VD: `4 chờ ra`).
+     - Tự động làm mới chu kỳ 15 giây, hiển thị badge trực quan trên cả Desktop Sidebar và Mobile Bottom Bar.
+  3. **Hộp tra cứu nhanh toàn bãi (Global Command Palette `Ctrl + K`):**
+     - Tạo mới `src/components/workspace/global-search-modal.tsx`: Mở bằng phím tắt `Ctrl + K` (hoặc `Cmd + K`) hoặc nút kính lúp trên Global Top Bar.
+     - Tra cứu thông minh đa trường: Biển số xe (chuẩn hóa không dấu), số container (đủ 11 ký tự hoặc 7 số cuối), số CCCD, mã vé bến bãi.
+     - Hiển thị tức thì thẻ kết quả chi tiết: Trạng thái xe (trong bãi / đã ra), phiên cắm điện đang chạy (mã ổ cắm 380V), nút bấm nhảy trực tiếp tới đúng phân hệ xử lý.
+  4. **Phím tắt bàn phím toàn cục (Global Keyboard Shortcuts):**
+     - `Esc`: Đóng ngay lập tức mọi menu, modal và hộp tìm kiếm.
+     - `Alt + 1` đến `Alt + 6`: Chuyển tức thì giữa các phân hệ: Cổng vào (1), Bến bãi (2), Cắm điện (3), Cổng ra (4), Sổ cái (5), Kế toán (6).
+     - `Alt + 0` hoặc `Alt + G`: Mở Cẩm nang hướng dẫn.
+  5. **Chuẩn hóa Hệ thống Thông báo Nổi (Toast Notification System):**
+     - Tạo mới `src/contexts/toast-context.tsx` và bọc `ToastProvider` vào `RootLayout` (`src/app/layout.tsx`).
+     - Hỗ trợ các phương thức `toast.success()`, `toast.error()`, `toast.warning()`, `toast.info()`.
+     - Thay thế triệt để các lệnh `alert()` trình duyệt tại `app-shell.tsx`, `billing/page.tsx`, `reefer/page.tsx`, `yard/page.tsx`.
+- **Tệp sửa đổi & tạo mới:**
+  - `src/contexts/toast-context.tsx` (Tạo mới)
+  - `src/components/workspace/global-search-modal.tsx` (Tạo mới)
+  - `src/components/layout/app-shell.tsx` (Sửa đổi)
+  - `src/app/layout.tsx` (Sửa đổi)
+  - `src/app/billing/page.tsx` (Sửa đổi)
+  - `src/app/reefer/page.tsx` (Sửa đổi)
+  - `src/app/yard/page.tsx` (Sửa đổi)
+- **Kiểm thử xác thực:**
+  - TypeScript compilation: `npx tsc --noEmit` -> PASS 100% (0 lỗi).
+  - Dev server HTTP check: `http://localhost:3000/dashboard`, `/yard`, `/entry` -> HTTP 200 OK.
+
 ## 2026-10-16 22:22 — Điều Chỉnh Chiều Rộng Linh Động (Fluid Width) Cho Biểu Mẫu Tiếp Nhận Cổng Vào (/entry)
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:

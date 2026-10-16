@@ -40,11 +40,14 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:22 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ĐIỀU CHỈNH BIỂU MẪU TIẾP NHẬN CỔNG VÀO SANG WIDTH LINH ĐỘNG (W-FULL RESPONSIVE)**:
-  * Đã loại bỏ class `max-w-4xl` cứng nhắc trên thẻ `<form>` tại `src/app/entry/page.tsx`, thay bằng `p-4 sm:p-5 lg:p-6 w-full space-y-6`.
-  * Form tiếp nhận xe cổng vào tự động co giãn linh động 100% không gian làm việc khi mở rộng màn hình hoặc khi đóng/mở panel trợ giúp, đảm bảo bố cục trực quan, thẩm mỹ và công thái học.
-  * Đã kiểm thử `npx tsc --noEmit` đạt 0 lỗi và test HTTP response status 200 OK.
+- **Cập nhật lúc:** 16/10/2026 22:38 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN TẤT TRIỂN KHAI GÓI NÂNG CẤP UI/UX TOÀN DIỆN CHO PWA & WEBSITE BẾN BÃI SƠN CẢNG**:
+  * **1. Mobile Bottom Navigation Bar (PWA):** Bổ sung thanh điều hướng ngón tay cái cố định ở cạnh dưới cho điện thoại di động (Cổng vào, Bến bãi, Cắm điện, Cổng ra, Cẩm nang). Tự động bù trừ padding `pb-safe` và `pb-14 md:pb-0`.
+  * **2. Bộ đếm thời gian thực (Live Badges):** Tự động đồng bộ số lượng cont bãi, phiên cắm điện, xe chờ ra cổng trên Sidebar và Bottom Bar chu kỳ 15 giây.
+  * **3. Tra cứu nhanh toàn bãi (`Ctrl + K` Command Palette):** Tìm kiếm thông minh xe, container, mã vé, số CCCD và chuyển ngay tới phân hệ quản lý.
+  * **4. Phím tắt toàn cục:** `Esc` đóng modal, `Alt + 1..6` chuyển nhanh 6 phân hệ, `Alt + 0` xem Cẩm nang.
+  * **5. Chuẩn hóa Toast Notification:** Tạo mới `ToastProvider` thay thế triệt để các hộp thoại `alert()` trình duyệt.
+  * Đã kiểm thử `npx tsc --noEmit` đạt 0 lỗi và sẵn sàng đẩy lên branch main kích hoạt auto-deploy Vercel Production.
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

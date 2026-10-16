@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/contexts/toast-context';
 import { DEMO_ACCOUNTS } from '@/types/auth.types';
 import { ContainerVisit, ReeferPowerSession, ReeferRequest, ReeferRequestStatus, ReeferPowerStatus, TariffItem, ReeferTemperatureLog, PowerSocket } from '@/types/domain.types';
 import { validateContainerNumber } from '@/lib/container-validator';
@@ -45,6 +46,7 @@ import { TablePagination } from '@/components/workspace/table-pagination';
 
 export default function ReeferMonitoringPage() {
   const { yardId, can, repository, user, role } = useAuth();
+  const { warning: toastWarning } = useToast();
 
   // Phân quyền RBAC V5 chuẩn mực qua can() — Tuyệt đối không hardcode mở quyền theo role
   const canReadReefer = can('reefer.session.read');
@@ -463,7 +465,7 @@ export default function ReeferMonitoringPage() {
     );
 
     if (!matchedCont) {
-      alert(`Container ${req.container_no} chưa vào bãi (IN_YARD). Vui lòng tiếp nhận xe tại Cổng vào trước khi nhập cắm/rút hoàn tất!`);
+      toastWarning(`Container ${req.container_no} chưa vào bãi (IN_YARD). Vui lòng tiếp nhận xe tại Cổng vào trước khi nhập cắm/rút hoàn tất!`, 'Chưa vào bãi');
       return;
     }
 

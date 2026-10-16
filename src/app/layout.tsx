@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
+import { ToastProvider } from "@/contexts/toast-context";
 import { AppShell } from "@/components/layout/app-shell";
 import { PwaRegister } from "@/components/pwa-register";
 
@@ -49,10 +50,12 @@ export default function RootLayout({
     <html lang="vi" className={`${inter.variable} ${beVietnamPro.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-[#FFFFFF] text-[#17202E]">
         <AuthProvider>
-          <AppShell>
-            {children}
-          </AppShell>
-          <PwaRegister />
+          <ToastProvider>
+            <AppShell>
+              {children}
+            </AppShell>
+            <PwaRegister />
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/contexts/toast-context';
 import { 
   ChargeItem, 
   TariffItem, 
@@ -55,6 +56,7 @@ import { TablePagination } from '@/components/workspace/table-pagination';
 
 export default function CashierBillingPage() {
   const { user, role, yardId, can, repository } = useAuth();
+  const { warning: toastWarning } = useToast();
 
   // Phân quyền tách bạch triệt để theo RBAC V5:
   // - CCKB (PORT_STAFF, PORT_LEAD): CHỈ thu và CHỈ thấy cước điện (REEFER)
@@ -395,7 +397,7 @@ export default function CashierBillingPage() {
   // ==========================================
   const handleOpenCollect = (charge: ChargeItem) => {
     if (charge.charge_type === 'REEFER' && isSecurityRole) {
-      alert('Chưa được phân quyền: Thao tác thu tiền điện container thuộc thẩm quyền của bộ phận CCKB.');
+      toastWarning('Chưa được phân quyền: Thao tác thu tiền điện container thuộc thẩm quyền của bộ phận CCKB.', 'Phân quyền thu phí');
       return;
     }
 
@@ -520,7 +522,7 @@ export default function CashierBillingPage() {
     // Kiểm tra nếu có khoản điện mà là an ninh
     const hasReefer = selectedChargesList.some(c => c.charge_type === 'REEFER');
     if (hasReefer && isSecurityRole) {
-      alert('Cảnh báo phân quyền: Danh sách chọn có khoản tiền điện Container Lạnh thuộc thẩm quyền thu của Nghiệp vụ Cổng cảng Kho bãi! Vui lòng bỏ chọn khoản điện để tiếp tục thu vé/lưu bãi.');
+      toastWarning('Danh sách chọn có khoản tiền điện Container Lạnh thuộc thẩm quyền thu của Nghiệp vụ Cổng cảng Kho bãi! Vui lòng bỏ chọn khoản điện để tiếp tục thu vé/lưu bãi.', 'Cảnh báo phân quyền');
       return;
     }
 
