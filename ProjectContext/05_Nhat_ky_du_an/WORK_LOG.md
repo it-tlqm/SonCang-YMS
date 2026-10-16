@@ -1,5 +1,43 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 13:50 — Đồng Bộ Toàn Diện 6 Tài Khoản Supabase Auth & Chuyển Đổi Thông Báo Quản Trị Nhân Sự Sang Toast Notification
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"ủa sao các tk này reset mk ròi mà vẫn k đăng nhạp dược?: với chỗ này có cái thông báo cập nhật xong nen đẩy thành toast b ạ"*
+  Kèm danh sách 6 tài khoản nhân sự công vụ tại `/admin/users`:
+  1. An Ninh Sơn Cảng (`anninh.talunglogistics@gmail.com`)
+  2. Ban Quản trị Hệ thống (`it@talunglogistics.com`)
+  3. Điều phối (`dieuphoi.talunglogistics@gmail.com`)
+  4. Trịnh Công Nguyên (`nguyentc@talunglogistics.com`)
+  5. Linh Minh Trọng (`tronglm@talunglogistics.com`)
+  6. Lương Duy Thái (`thaild@talunglogistics.com`)
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Điều tra nguyên nhân gốc rễ (Root Cause Analysis):**
+     - Khi kiểm tra Supabase Auth Cloud (`auth.users`), chỉ có 2 tài khoản hệ thống cũ tồn tại. 4 tài khoản nhân viên công vụ (`dieuphoi...`, `nguyentc...`, `tronglm...`, `thaild...`) **chưa từng được tạo trong bảng `auth.users`** (trước đây chỉ mới được chèn vào bảng nhân viên nghiệp vụ `app_staff_users`).
+     - API reset mật khẩu cũ `/api/admin/users/reset-password` phụ thuộc vào `SUPABASE_SERVICE_ROLE_KEY`. Nếu biến này thiếu trên Vercel hoặc API chỉ cập nhật `app_staff_users`, tài khoản `auth.users` không đổi hoặc không tồn tại.
+     - Đồng thời, bảng phân quyền `app_user_role_assignments` thiếu các bản ghi liên kết `user_id` với vai trò cho các user mới, khiến hàm bảo mật PostgreSQL `sc_my_permissions()` trả về rỗng (0 quyền), dẫn đến không thể truy cập dữ liệu bến bãi theo RLS.
+  2. **Đồng bộ hóa 100% 6 tài khoản công vụ lên Supabase Auth & Role Assignments:**
+     - Đã tạo mới và đồng bộ cả 6 tài khoản lên Supabase Auth Cloud với mật khẩu chuẩn:
+       * `it@talunglogistics.com` (`SYS_ADMIN` - Quản trị viên Hệ thống): Mật khẩu `Admin@2026` — 63 quyền.
+       * `anninh.talunglogistics@gmail.com` (`SEC_STAFF` - Nhân viên An ninh Cổng): Mật khẩu `Anninh@2026` — 26 quyền.
+       * `thaild@talunglogistics.com` (`SEC_LEAD` - Trưởng bộ phận An ninh): Mật khẩu `Thaild@2026` — 31 quyền.
+       * `tronglm@talunglogistics.com` (`PORT_STAFF` - Nhân viên Thương vụ CCKB): Mật khẩu `Tronglm@2026` — 31 quyền.
+       * `nguyentc@talunglogistics.com` (`PORT_LEAD` - Trưởng bộ phận CCKB): Mật khẩu `Nguyentc@2026` — 38 quyền.
+       * `dieuphoi.talunglogistics@gmail.com` (`DIS_STAFF` - Nhân viên Điều phối Bãi): Mật khẩu `Dieuphoi@2026` — 9 quyền.
+     - Đã test xác thực trực tiếp qua `supabase.auth.signInWithPassword` bằng anon key: Cả 6/6 tài khoản đều đăng nhập THÀNH CÔNG 100%, nạp đúng ma trận quyền hạn RBAC V5.
+  3. **Nâng cấp API Route `/api/admin/users/reset-password/route.ts` & Repository:**
+     - Tự động kiểm tra và tạo mới user trong `auth.users` nếu nhân sự chưa có tài khoản.
+     - Cập nhật mật khẩu chuẩn xác qua Admin Auth API.
+     - Tự động kích hoạt/bổ sung bản ghi tương ứng trong `app_user_role_assignments` để RLS và phân quyền có hiệu lực ngay lập tức.
+     - Cập nhật `DemoRepository.adminResetStaffPassword` gọi API đồng bộ lên Cloud mỗi khi người dùng reset trên UI.
+  4. **Chuyển thông báo thành Toast Notification tại `/admin/users`:**
+     - File: [`src/app/admin/users/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/admin/users/page.tsx).
+     - Thay thế toàn bộ khung banner inline cũ (từng làm trôi/thụt lùi bảng danh sách) bằng **Floating Toast Notification** hiện ở góc dưới bên phải màn hình (`fixed bottom-6 right-6 z-50`).
+     - Giao diện thiết kế hiện đại: Đổ bóng `shadow-2xl`, bo góc mềm mại, icon `CheckCircle2`, badge trạng thái rõ ràng, nút `X` đóng nhanh và tự động biến mất mượt mà sau 4.5 giây mà không làm xô lệch bất kỳ phần tử nào trên bảng.
+- **Kiểm thử xác nhận:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
 ## 2026-10-16 13:40 — Tối Ưu Tải Dữ Liệu & Tích Hợp Phân Trang (Pagination) Toàn Diện Trên Toàn Bộ Hệ Thống
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:

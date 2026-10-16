@@ -762,22 +762,30 @@ export default function UsersAndRbacAdminPage() {
       />
 
       <div className="p-4 sm:p-5 space-y-4 w-full flex-1 flex flex-col min-h-[calc(100vh-210px)]">
-        {/* THÔNG BÁO THÀNH CÔNG */}
-        {successMsg && (
-          <div className="p-3 bg-[#ECFDF3] border border-[#A6F4C5] rounded-lg text-[#0A9444] text-xs font-medium flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-[#0A9444] shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSuccessMsg('')}
-              className="text-[#0A9444] hover:underline cursor-pointer font-semibold text-xs"
-            >
-              Đóng
-            </button>
+      {/* FLOATING TOAST NOTIFICATION */}
+      {successMsg && (
+        <div 
+          className="fixed bottom-6 right-6 z-50 max-w-md bg-white border border-[#A6F4C5] rounded-xl shadow-2xl p-4 flex items-start gap-3 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] flex items-center justify-center text-[#0A9444] shrink-0 mt-0.5 shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-[#0A9444]" />
           </div>
-        )}
+          <div className="flex-1 pr-1">
+            <p className="text-xs font-bold text-[#17202E]">Thông báo hệ thống</p>
+            <p className="text-xs text-[#0A9444] font-medium mt-0.5 leading-relaxed break-words">{successMsg}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg('')}
+            className="p-1 rounded-md text-[#98A2B3] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer shrink-0"
+            title="Đóng thông báo"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
         {/* TAB 1: DANH SÁCH NHÂN SỰ & VAI TRÒ */}
         {activeTab === 'USERS' && (

@@ -2121,6 +2121,20 @@ export class DemoRepository implements IYardRepository {
     user.must_change_password = params.mustChangePassword !== false;
     user.temp_password_hint = params.newPassword;
     this.persist();
+
+    // Đồng bộ lên Supabase Auth server để tài khoản đăng nhập được qua trang /login
+    if (typeof window !== 'undefined') {
+      try {
+        await fetch('/api/admin/users/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+        });
+      } catch (e) {
+        console.warn('Không thể đồng bộ Auth qua API (offline):', e);
+      }
+    }
+
     return { success: true, message: `Đã đặt lại mật khẩu cho ${user.full_name} thành công` };
   }
 

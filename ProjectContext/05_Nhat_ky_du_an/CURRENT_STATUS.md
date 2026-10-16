@@ -40,8 +40,27 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 13:40 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TỐI ƯU TẢI DỮ LIỆU & TÍCH HỢP PHÂN TRANG (PAGINATION) TOÀN DIỆN TRÊN TOÀN HỆ THỐNG**:
+- **Cập nhật lúc:** 16/10/2026 13:50 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐỒNG BỘ 100% TÀI KHOẢN SUPABASE AUTH & CHUYỂN THÔNG BÁO ADMIN SANG TOAST NOTIFICATION**:
+  * **Xử lý triệt để lỗi đăng nhập 6 tài khoản nhân sự công vụ:**
+    1. Phát hiện nguyên nhân gốc rễ: 4/6 tài khoản công vụ (`dieuphoi...`, `nguyentc...`, `tronglm...`, `thaild...`) trước đó chưa từng tồn tại trong bảng `auth.users` của Supabase Auth (chỉ có trong bảng `app_staff_users`), và bảng `app_user_role_assignments` thiếu liên kết `user_id` nên hàm `sc_my_permissions()` trả về rỗng.
+    2. Đã tạo mới và đồng bộ 100% cả 6 tài khoản lên Supabase Auth Cloud, gán đúng các vai trò RBAC V5 tương ứng:
+       - `it@talunglogistics.com` (`SYS_ADMIN` - Mật khẩu: `Admin@2026`) — 63 quyền.
+       - `anninh.talunglogistics@gmail.com` (`SEC_STAFF` - Mật khẩu: `Anninh@2026`) — 26 quyền.
+       - `thaild@talunglogistics.com` (`SEC_LEAD` - Mật khẩu: `Thaild@2026`) — 31 quyền.
+       - `tronglm@talunglogistics.com` (`PORT_STAFF` - Mật khẩu: `Tronglm@2026`) — 31 quyền.
+       - `nguyentc@talunglogistics.com` (`PORT_LEAD` - Mật khẩu: `Nguyentc@2026`) — 38 quyền.
+       - `dieuphoi.talunglogistics@gmail.com` (`DIS_STAFF` - Mật khẩu: `Dieuphoi@2026`) — 9 quyền.
+    3. Kiểm thử xác thực trực tiếp qua `supabase.auth.signInWithPassword`: 6/6 tài khoản đăng nhập thành công 100%.
+    4. Nâng cấp API `/api/admin/users/reset-password`: Hỗ trợ tự động tạo user trong `auth.users` nếu chưa có, cập nhật mật khẩu và kích hoạt `app_user_role_assignments` tức thì.
+  * **Chuyển đổi thông báo Quản trị Nhân sự (`/admin/users`) sang Toast:**
+    1. Thay thế khung banner inline cũ (làm thụt lùi bảng và vỡ layout) bằng **Floating Toast Notification** nổi ở góc dưới bên phải (`fixed bottom-6 right-6 z-50`).
+    2. Có icon `CheckCircle2`, badge trạng thái, nút tắt nhanh `X` và tự đóng sau 4.5s.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 13:40):** **TỐI ƯU TẢI DỮ LIỆU & TÍCH HỢP PHÂN TRANG (PAGINATION) TOÀN DIỆN TRÊN TOÀN HỆ THỐNG**:
   * **Component chuẩn Modern Enterprise Workspace:**
     1. Tạo mới component tái sử dụng `src/components/workspace/table-pagination.tsx`.
     2. Hỗ trợ tùy chọn kích thước trang linh hoạt (10, 20, 50, 100 dòng/trang, mặc định 20), hiển thị thông tin số lượng dòng rõ ràng (`Hiển thị X - Y trên tổng số Z [nhãn]`).
