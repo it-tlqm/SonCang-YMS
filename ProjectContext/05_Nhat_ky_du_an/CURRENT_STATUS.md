@@ -40,8 +40,27 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 13:15 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **ĐỒNG BỘ HOÀN TẤT 70 XE & 65 CONTAINER THỰC TẾ LÊN HỆ THỐNG CLOUD & DEMO (PHƯƠNG ÁN A CHỐT)**:
+- **Cập nhật lúc:** 16/10/2026 13:40 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TỐI ƯU TẢI DỮ LIỆU & TÍCH HỢP PHÂN TRANG (PAGINATION) TOÀN DIỆN TRÊN TOÀN HỆ THỐNG**:
+  * **Component chuẩn Modern Enterprise Workspace:**
+    1. Tạo mới component tái sử dụng `src/components/workspace/table-pagination.tsx`.
+    2. Hỗ trợ tùy chọn kích thước trang linh hoạt (10, 20, 50, 100 dòng/trang, mặc định 20), hiển thị thông tin số lượng dòng rõ ràng (`Hiển thị X - Y trên tổng số Z [nhãn]`).
+    3. Bộ nút điều hướng phân trang thông minh (`<<`, `<`, các số trang kèm dấu chấm lửng `...`, `>`, `>>`).
+    4. Tự động reset về trang 1 khi người dùng tìm kiếm (`searchQuery`) hoặc thay đổi bộ lọc trạng thái.
+    5. Thiết kế responsive tối ưu cho cả màn hình di động (PWA) và màn hình máy tính để bàn (Desktop).
+  * **Tích hợp phân trang toàn bộ các phân hệ chính (16 bảng dữ liệu):**
+    1. **Quản lý Bến bãi (`/yard`):** Tab Cặp Xe — Cont (70 cặp), Tab Cont trong bãi (65 cont), Tab Phương tiện trong bãi (70 xe).
+    2. **Kiểm soát Cổng ra (`/exit`):** Tab Xe trong bãi (70 xe), Tab CCKB duyệt xuất (65 cont), Tab Lịch sử xe xuất bãi.
+    3. **Container Điện lạnh (`/reefer`):** Tab Phiên cắm điện, Tab Container sẵn sàng cắm (65 cont), Tab Yêu cầu cắm điện CCKB, Tab Nhật ký kiểm tra nhiệt độ.
+    4. **Sổ cái Thu phí & Ca trực (`/billing`):** Tab Sổ cái các khoản thu, Tab Bảng kê chứng từ thu tiền trong ca.
+    5. **Kế toán & Sổ quỹ (`/accounting`):** Tab Chốt nộp tiền mặt hiện trường, Tab Danh sách hóa đơn GTGT, Tab Công nợ bến bãi AP07.
+    6. **Quản trị Nhật ký kiểm toán (`/admin/audit-logs`):** Toàn bộ lịch sử kiểm toán vận hành bến bãi.
+  * **Hiệu năng & Tối ưu:** Sử dụng `useMemo` cắt mảng hiển thị DOM, loại bỏ hoàn toàn giật lag khi render bảng lớn, cuộn trang mượt mà.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 13:15):** **ĐỒNG BỘ HOÀN TẤT 70 XE & 65 CONTAINER THỰC TẾ LÊN HỆ THỐNG CLOUD & DEMO (PHƯƠNG ÁN A CHỐT)**:
   * **Chốt Phương án A từ Chủ dự án:**
     1. Đưa chính xác 70 lượt xe đang đỗ trong bãi (`IN_YARD`) và 65 container đang lưu bãi (`IN_YARD`) từ AppSheet cũ (`docs/Xe-ra-vao_SC.xlsx`) lên hệ thống phục vụ vận hành và kiểm thử thực tế.
     2. Giữ nguyên thông tin lái xe để trống (NULL) theo đúng chỉ đạo.

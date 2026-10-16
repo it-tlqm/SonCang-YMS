@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { 
@@ -16,6 +16,7 @@ import { WorkspaceHeader } from '@/components/workspace/workspace-header';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 import { AuditLogEntry } from '@/lib/services/repository-interface';
 
@@ -86,6 +87,19 @@ export default function AuditLogsAdminPage() {
     const matchesCategory = categoryFilter === 'ALL' || item.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
+
+  // Quản lý Phân trang (Pagination)
+  const [pageLogs, setPageLogs] = useState<number>(1);
+  const [pageSizeLogs, setPageSizeLogs] = useState<number>(20);
+
+  useEffect(() => {
+    setPageLogs(1);
+  }, [searchQuery, categoryFilter]);
+
+  const pagedLogs = useMemo(() => {
+    const start = (pageLogs - 1) * pageSizeLogs;
+    return filteredLogs.slice(start, start + pageSizeLogs);
+  }, [filteredLogs, pageLogs, pageSizeLogs]);
 
   const getCategoryBadge = (cat: AuditLogEntry['category']) => {
     switch (cat) {
@@ -195,7 +209,7 @@ export default function AuditLogsAdminPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => (
+                  pagedLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-[#F8F9FB] transition-colors">
                       <td className="px-3.5 py-2.5 text-[#667085] whitespace-nowrap font-mono text-xs">
                         <div>{new Date(log.occurred_at).toLocaleTimeString('vi-VN')}</div>
@@ -235,6 +249,15 @@ export default function AuditLogsAdminPage() {
               </tbody>
             </table>
           </div>
+
+          <TablePagination
+            currentPage={pageLogs}
+            totalItems={filteredLogs.length}
+            pageSize={pageSizeLogs}
+            onPageChange={setPageLogs}
+            onPageSizeChange={setPageSizeLogs}
+            itemLabel="nhật ký"
+          />
         </div>
       </div>
     </div>

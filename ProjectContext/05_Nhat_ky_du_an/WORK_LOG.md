@@ -1,5 +1,46 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 13:40 — Tối Ưu Tải Dữ Liệu & Tích Hợp Phân Trang (Pagination) Toàn Diện Trên Toàn Bộ Hệ Thống
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"vì dữ lieuj nhiều tôi nghĩ chúng ta sẽ tối ưu tải dữ liệu bạn ạ, giúp tôi đi chả có phân trang hhay gì cả bạn ạ"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Thách thức:** Sau khi nạp 70 xe và 65 container thực tế từ AppSheet vào bãi, giao diện các trang `/yard`, `/exit`, `/reefer`, `/billing`, `/accounting`, `/admin/audit-logs` render toàn bộ các mảng dữ liệu lớn cùng một lúc. Điều này khiến DOM nặng, cuộn trang kéo dài, khó kiểm soát và làm chậm thao tác trên thiết bị di động (PWA).
+  2. **Xây dựng Component chuẩn Enterprise Workspace (`TablePagination`):**
+     - File: [`src/components/workspace/table-pagination.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/components/workspace/table-pagination.tsx).
+     - Hỗ trợ các thuộc tính: `currentPage`, `totalItems`, `pageSize`, `onPageChange`, `onPageSizeChange`, `pageSizeOptions` (10, 20, 50, 100 dòng/trang, mặc định 20), `itemLabel` linh hoạt ("xe", "container", "phiên điện", "khoản thu", "hóa đơn"...).
+     - Thiết kế giao diện hiện đại, nút phân trang thông minh với dấu chấm lửng (`...`), hiển thị rõ ràng chỉ số `Hiển thị X - Y trên tổng số Z [nhãn]`.
+     - Tối ưu Responsive: Tự động chuyển đổi layout trên mobile để các nút bấm dễ chạm và không vỡ layout.
+  3. **Tích hợp toàn diện trên 6 phân hệ cốt lõi (16 bảng dữ liệu):**
+     - **Quản lý Bến bãi (`/yard` - `src/app/yard/page.tsx`):**
+       * Tab 1: Cặp Xe — Container (`pagedPairs` - 70 cặp).
+       * Tab 2: Container trong bãi (`pagedContainers` - 65 cont).
+       * Tab 3: Phương tiện trong bãi (`pagedVehicles` - 70 xe).
+     - **Kiểm soát Cổng ra (`/exit` - `src/app/exit/page.tsx`):**
+       * Tab 1: Xe trong bãi sẵn sàng xuất (`pagedVehicles` - 70 xe).
+       * Tab 2: CCKB duyệt xuất container (`pagedContainers` - 65 cont).
+       * Tab 3: Lịch sử xe xuất bãi (`pagedHistory`).
+     - **Container Điện lạnh (`/reefer` - `src/app/reefer/page.tsx`):**
+       * Tab 1: Phiên cắm điện container (`pagedSessions`).
+       * Tab 2: Container sẵn sàng cắm điện (`pagedUnplugged` - 65 cont).
+       * Tab 3: Yêu cầu cắm điện CCKB (`pagedRequests`).
+       * Tab 4: Nhật ký kiểm tra nhiệt độ định kỳ (`pagedTempLogs`).
+     - **Sổ cái Thu phí & Ca trực (`/billing` - `src/app/billing/page.tsx`):**
+       * Tab 1: Sổ cái các khoản thu bến bãi (`pagedCharges`).
+       * Tab 2: Bảng kê chứng từ thu tiền trong ca trực (`pagedShiftPayments`).
+     - **Kế toán & Sổ quỹ (`/accounting` - `src/app/accounting/page.tsx`):**
+       * Tab 1: Lịch sử chốt nộp tiền mặt hiện trường kiểm soát 4 mắt (`pagedSettlements`).
+       * Tab 2: Danh sách hóa đơn GTGT MST & CCCD (`pagedInvoices`).
+       * Tab 3: Danh sách công nợ bến bãi AP07 (`pagedDebts`).
+     - **Quản trị Nhật ký kiểm toán (`/admin/audit-logs` - `src/app/admin/audit-logs/page.tsx`):**
+       * Bảng nhật ký kiểm toán bất biến toàn bãi (`pagedLogs`).
+  4. **Tối ưu trải nghiệm & Hiệu năng (State & Effect management):**
+     - Sử dụng `useMemo` tính toán mảng slice `.slice((page - 1) * pageSize, page * pageSize)`, DOM chỉ phải vẽ tối đa 20 dòng thay vì hàng trăm dòng cùng lúc.
+     - Tự động gắn hook `useEffect` reset trang về 1 mỗi khi người dùng thay đổi từ khóa tìm kiếm (`searchQuery`) hoặc thay đổi bộ lọc trạng thái (HÀNG/RỖNG, đã thu/chưa thu, loại xe...), ngăn ngừa hoàn toàn tình trạng trang rỗng khi đang ở trang cao.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
 ## 2026-10-16 13:15 — Đồng Bộ Hoàn Tất 70 Lượt Xe & 65 Container Tồn Bãi Thực Tế Lên Hệ Thống Cloud & Demo (Phương Án A Chốt)
 
 - **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:

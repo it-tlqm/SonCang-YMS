@@ -48,6 +48,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 export default function CashierBillingPage() {
   const { user, role, yardId, can, repository } = useAuth();
@@ -600,6 +601,31 @@ export default function CashierBillingPage() {
       });
   }, [roleScopedCharges, searchQuery, typeFilter, statusFilter, contFilter, customerFilter]);
 
+  // Quản lý Phân trang (Pagination)
+  const [pageCharges, setPageCharges] = useState<number>(1);
+  const [pageSizeCharges, setPageSizeCharges] = useState<number>(20);
+
+  const [pageShiftPayments, setPageShiftPayments] = useState<number>(1);
+  const [pageSizeShiftPayments, setPageSizeShiftPayments] = useState<number>(20);
+
+  useEffect(() => {
+    setPageCharges(1);
+  }, [searchQuery, typeFilter, statusFilter, contFilter, customerFilter]);
+
+  useEffect(() => {
+    setPageShiftPayments(1);
+  }, [selectedShiftType, reportDate, deptFilter, payMethodFilter]);
+
+  const pagedCharges = useMemo(() => {
+    const start = (pageCharges - 1) * pageSizeCharges;
+    return filteredCharges.slice(start, start + pageSizeCharges);
+  }, [filteredCharges, pageCharges, pageSizeCharges]);
+
+  const pagedShiftPayments = useMemo(() => {
+    const start = (pageShiftPayments - 1) * pageSizeShiftPayments;
+    return shiftPayments.slice(start, start + pageSizeShiftPayments);
+  }, [shiftPayments, pageShiftPayments, pageSizeShiftPayments]);
+
   const totalUnpaid = useMemo(() => {
     // Chỉ tính các khoản nợ thực tế cần thu tại giao diện này (loại trừ STORAGE vì STORAGE thu tại /exit)
     return roleScopedCharges
@@ -1118,7 +1144,7 @@ export default function CashierBillingPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredCharges.map((c) => {
+                    pagedCharges.map((c) => {
                       const isPaid = c.status === 'PAID';
                       const isReefer = c.charge_type === 'REEFER';
                       const isStorage = c.charge_type === 'STORAGE';
@@ -1288,6 +1314,14 @@ export default function CashierBillingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageCharges}
+              totalItems={filteredCharges.length}
+              pageSize={pageSizeCharges}
+              onPageChange={setPageCharges}
+              onPageSizeChange={setPageSizeCharges}
+              itemLabel="khoản thu"
+            />
           </div>
 
           {/* Khối tham khảo: Biểu phí & Quy tắc phân công thu tiền */}
@@ -1628,10 +1662,10 @@ export default function CashierBillingPage() {
                       </td>
                     </tr>
                   ) : (
-                    shiftPayments.map((p, idx) => (
+                    pagedShiftPayments.map((p, idx) => (
                       <tr key={p.id} className="hover:bg-slate-50/80 text-xs transition-colors">
                         <td className="px-3 py-2.5 text-center font-mono text-slate-400">
-                          {idx + 1}
+                          {(pageShiftPayments - 1) * pageSizeShiftPayments + idx + 1}
                         </td>
                         <td className="px-3 py-2.5 font-mono text-slate-700">
                           {new Date(p.collected_at).toLocaleTimeString('vi-VN')}
@@ -1673,6 +1707,14 @@ export default function CashierBillingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageShiftPayments}
+              totalItems={shiftPayments.length}
+              pageSize={pageSizeShiftPayments}
+              onPageChange={setPageShiftPayments}
+              onPageSizeChange={setPageSizeShiftPayments}
+              itemLabel="chứng từ"
+            />
           </div>
         </div>
       )}

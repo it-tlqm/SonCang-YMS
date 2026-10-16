@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { DEMO_ACCOUNTS } from '@/types/auth.types';
@@ -39,6 +39,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 export default function ReeferMonitoringPage() {
   const { yardId, can, repository, user, role } = useAuth();
@@ -1121,6 +1122,46 @@ export default function ReeferMonitoringPage() {
     return matchesSearch && matchesStatus;
   });
 
+  // Quản lý Phân trang (Pagination)
+  const [pageSessions, setPageSessions] = useState<number>(1);
+  const [pageSizeSessions, setPageSizeSessions] = useState<number>(20);
+
+  const [pageUnplugged, setPageUnplugged] = useState<number>(1);
+  const [pageSizeUnplugged, setPageSizeUnplugged] = useState<number>(20);
+
+  const [pageRequests, setPageRequests] = useState<number>(1);
+  const [pageSizeRequests, setPageSizeRequests] = useState<number>(20);
+
+  const [pageTempLogs, setPageTempLogs] = useState<number>(1);
+  const [pageSizeTempLogs, setPageSizeTempLogs] = useState<number>(20);
+
+  useEffect(() => {
+    setPageSessions(1);
+    setPageUnplugged(1);
+    setPageRequests(1);
+    setPageTempLogs(1);
+  }, [searchQuery, statusFilter, requestFilter, activeTab]);
+
+  const pagedSessions = useMemo(() => {
+    const start = (pageSessions - 1) * pageSizeSessions;
+    return filteredSessions.slice(start, start + pageSizeSessions);
+  }, [filteredSessions, pageSessions, pageSizeSessions]);
+
+  const pagedUnplugged = useMemo(() => {
+    const start = (pageUnplugged - 1) * pageSizeUnplugged;
+    return unpluggedContainersInYard.slice(start, start + pageSizeUnplugged);
+  }, [unpluggedContainersInYard, pageUnplugged, pageSizeUnplugged]);
+
+  const pagedRequests = useMemo(() => {
+    const start = (pageRequests - 1) * pageSizeRequests;
+    return filteredRequests.slice(start, start + pageSizeRequests);
+  }, [filteredRequests, pageRequests, pageSizeRequests]);
+
+  const pagedTempLogs = useMemo(() => {
+    const start = (pageTempLogs - 1) * pageSizeTempLogs;
+    return temperatureLogs.slice(start, start + pageSizeTempLogs);
+  }, [temperatureLogs, pageTempLogs, pageSizeTempLogs]);
+
   // Thống kê KPI
   const activeCount = sessions.filter((s) => s.power_status === 'PLUGGED').length;
   const unpaidCount = sessions.filter((s) => s.power_status === 'UNPLUGGED' && s.payment_status === 'UNPAID').length;
@@ -1443,7 +1484,7 @@ export default function ReeferMonitoringPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredSessions.map((s) => {
+                    pagedSessions.map((s) => {
                       const isPlugged = s.power_status === 'PLUGGED';
                       const plugDate = new Date(s.plugged_in_at);
                       const unplugDate = s.unplugged_at ? new Date(s.unplugged_at) : null;
@@ -1624,6 +1665,14 @@ export default function ReeferMonitoringPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageSessions}
+              totalItems={filteredSessions.length}
+              pageSize={pageSizeSessions}
+              onPageChange={setPageSessions}
+              onPageSizeChange={setPageSizeSessions}
+              itemLabel="phiên điện"
+            />
           </div>
         </div>
       )}
@@ -1668,7 +1717,8 @@ export default function ReeferMonitoringPage() {
               <span>Hiện tại không có container nào trong bãi đang chờ cắm điện.</span>
             </div>
           ) : (
-            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
+            <>
+              <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[11px] text-[#667085] uppercase font-semibold tracking-wider">
                   <tr>
@@ -1680,7 +1730,7 @@ export default function ReeferMonitoringPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E9F0]">
-                  {unpluggedContainersInYard.map((c) => {
+                  {pagedUnplugged.map((c) => {
                     const matchedReq = requests.find(
                       (r) =>
                         (r.container_no === c.container_no_current || r.container_visit_id === c.id) &&
@@ -1765,7 +1815,16 @@ export default function ReeferMonitoringPage() {
                 </tbody>
               </table>
             </div>
-          )}
+            <TablePagination
+              currentPage={pageUnplugged}
+              totalItems={unpluggedContainersInYard.length}
+              pageSize={pageSizeUnplugged}
+              onPageChange={setPageUnplugged}
+              onPageSizeChange={setPageSizeUnplugged}
+              itemLabel="container"
+            />
+          </>
+        )}
         </div>
       )}
 
@@ -1821,7 +1880,7 @@ export default function ReeferMonitoringPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredRequests.map((r) => (
+                    pagedRequests.map((r) => (
                       <tr key={r.id} className="hover:bg-[#F8F9FB] transition-colors">
                         <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E]">
                           {r.container_no}
@@ -1874,6 +1933,14 @@ export default function ReeferMonitoringPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageRequests}
+              totalItems={filteredRequests.length}
+              pageSize={pageSizeRequests}
+              onPageChange={setPageRequests}
+              onPageSizeChange={setPageSizeRequests}
+              itemLabel="yêu cầu"
+            />
           </div>
         </div>
       )}
@@ -1923,7 +1990,7 @@ export default function ReeferMonitoringPage() {
                       </td>
                     </tr>
                   ) : (
-                    temperatureLogs.map((log) => (
+                    pagedTempLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-[#F8F9FB] transition-colors">
                         <td className="px-3.5 py-2.5 font-mono text-xs text-[#667085]">
                           {new Date(log.logged_at).toLocaleString('vi-VN')}
@@ -1962,6 +2029,14 @@ export default function ReeferMonitoringPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageTempLogs}
+              totalItems={temperatureLogs.length}
+              pageSize={pageSizeTempLogs}
+              onPageChange={setPageTempLogs}
+              onPageSizeChange={setPageSizeTempLogs}
+              itemLabel="bản ghi"
+            />
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { VehicleVisit, ContainerVisit, CargoStatus, CargoStatusUpdate, ContainerNumberChange, VehiclePlateChange, YardZoneInfo, TicketPaymentStatus, VehicleVisitStatus, PowerSocket, PowerSocketStatus, ReeferPowerSession } from '@/types/domain.types';
@@ -49,6 +49,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 export interface YardPairItem {
   id: string;
@@ -134,6 +135,16 @@ export default function YardMonitorPage() {
   const [filterDwell, setFilterDwell] = useState<'ALL' | 'OVER_24H' | 'OVER_48H'>('ALL');
   const [nowMs, setNowMs] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Quản lý Phân trang (Pagination) cho từng Tab
+  const [pagePairs, setPagePairs] = useState<number>(1);
+  const [pageSizePairs, setPageSizePairs] = useState<number>(20);
+
+  const [pageContainers, setPageContainers] = useState<number>(1);
+  const [pageSizeContainers, setPageSizeContainers] = useState<number>(20);
+
+  const [pageVehicles, setPageVehicles] = useState<number>(1);
+  const [pageSizeVehicles, setPageSizeVehicles] = useState<number>(20);
 
   // Modal gán phân khu & vị trí đỗ bãi
   const [locationModalItem, setLocationModalItem] = useState<{
@@ -1087,6 +1098,29 @@ export default function YardMonitorPage() {
     return matchQuery && matchCargo && matchDwell;
   });
 
+  // Tự động reset về trang 1 khi thay đổi điều kiện tìm kiếm hoặc bộ lọc
+  useEffect(() => {
+    setPagePairs(1);
+    setPageContainers(1);
+    setPageVehicles(1);
+  }, [searchQuery, filterCargo, filterPairType, filterDwell]);
+
+  // Cắt trang (Pagination Slice) tối ưu tốc độ render
+  const pagedPairs = useMemo(() => {
+    const start = (pagePairs - 1) * pageSizePairs;
+    return filteredPairs.slice(start, start + pageSizePairs);
+  }, [filteredPairs, pagePairs, pageSizePairs]);
+
+  const pagedContainers = useMemo(() => {
+    const start = (pageContainers - 1) * pageSizeContainers;
+    return filteredContainers.slice(start, start + pageSizeContainers);
+  }, [filteredContainers, pageContainers, pageSizeContainers]);
+
+  const pagedVehicles = useMemo(() => {
+    const start = (pageVehicles - 1) * pageSizeVehicles;
+    return filteredVehicles.slice(start, start + pageSizeVehicles);
+  }, [filteredVehicles, pageVehicles, pageSizeVehicles]);
+
   const handleOpenCargoModal = (cont: ContainerVisit) => {
     setSelectedCont(cont);
     // Chỉ nhận HANG hoặc RONG
@@ -1652,7 +1686,8 @@ export default function YardMonitorPage() {
               Không tìm thấy cặp xe — container nào phù hợp điều kiện tìm kiếm.
             </div>
           ) : (
-            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
+            <>
+              <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
@@ -1665,8 +1700,8 @@ export default function YardMonitorPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E9F0]">
-                  {filteredPairs.map((item, idx) => {
-                    const isNearBottom = idx >= Math.max(1, filteredPairs.length - 2) && filteredPairs.length > 2;
+                  {pagedPairs.map((item, idx) => {
+                    const isNearBottom = idx >= Math.max(1, pagedPairs.length - 2) && pagedPairs.length > 2;
                     const v = item.vehicle;
                     const c = item.container;
                     const entryTime = v?.entry_at || c?.inbound_at || '';
@@ -2059,6 +2094,15 @@ export default function YardMonitorPage() {
                 </tbody>
               </table>
             </div>
+              <TablePagination
+                currentPage={pagePairs}
+                totalItems={filteredPairs.length}
+                pageSize={pageSizePairs}
+                onPageChange={setPagePairs}
+                onPageSizeChange={setPageSizePairs}
+                itemLabel="cặp xe — cont"
+              />
+            </>
           )}
         </div>
       )}
@@ -2071,7 +2115,8 @@ export default function YardMonitorPage() {
               Không tìm thấy container nào trong bãi phù hợp điều kiện lọc.
             </div>
           ) : (
-            <div className="overflow-x-auto flex-1 min-h-[500px] pb-32">
+            <>
+              <div className="overflow-x-auto flex-1 min-h-[500px] pb-32">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
@@ -2084,7 +2129,7 @@ export default function YardMonitorPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E9F0]">
-                  {filteredContainers.map((c) => (
+                  {pagedContainers.map((c) => (
                     <tr key={c.id} className="hover:bg-[#F8F9FB] transition-colors">
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center space-x-2">
@@ -2168,6 +2213,15 @@ export default function YardMonitorPage() {
                 </tbody>
               </table>
             </div>
+              <TablePagination
+                currentPage={pageContainers}
+                totalItems={filteredContainers.length}
+                pageSize={pageSizeContainers}
+                onPageChange={setPageContainers}
+                onPageSizeChange={setPageSizeContainers}
+                itemLabel="container"
+              />
+            </>
           )}
         </div>
       )}
@@ -2180,7 +2234,8 @@ export default function YardMonitorPage() {
               Không tìm thấy phương tiện nào đang trong bãi.
             </div>
           ) : (
-            <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
+            <>
+              <div className="overflow-x-auto flex-1 min-h-[500px] pb-40">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold uppercase text-[11px] tracking-wider">
                   <tr>
@@ -2195,8 +2250,8 @@ export default function YardMonitorPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E9F0]">
-                  {filteredVehicles.map((v, vIdx) => {
-                    const isNearBottomVeh = vIdx >= Math.max(1, filteredVehicles.length - 2) && filteredVehicles.length > 2;
+                  {pagedVehicles.map((v, vIdx) => {
+                    const isNearBottomVeh = vIdx >= Math.max(1, pagedVehicles.length - 2) && pagedVehicles.length > 2;
                     return (
                     <tr key={v.id} className="hover:bg-[#F8F9FB] transition-colors">
                       <td className="px-3.5 py-2.5 font-mono font-bold text-[#17202E] text-sm">
@@ -2373,6 +2428,15 @@ export default function YardMonitorPage() {
                 </tbody>
               </table>
             </div>
+              <TablePagination
+                currentPage={pageVehicles}
+                totalItems={filteredVehicles.length}
+                pageSize={pageSizeVehicles}
+                onPageChange={setPageVehicles}
+                onPageSizeChange={setPageSizeVehicles}
+                itemLabel="phương tiện"
+              />
+            </>
           )}
         </div>
       )}

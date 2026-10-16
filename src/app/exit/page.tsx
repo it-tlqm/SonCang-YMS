@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { ContainerVisit, VehicleVisit, ReeferPowerSession, ChargeItem, ReeferRequest } from '@/types/domain.types';
 import { 
@@ -33,6 +33,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 export default function ExitClearancePage() {
   const { user, role, yardId, can, repository } = useAuth();
@@ -646,6 +647,37 @@ export default function ExitClearancePage() {
   const noReeferCount = inYardContainers.length - reeferContainers.length;
   const clearedCount = inYardContainers.filter(c => c.clearance_status === 'CLEARED' || c.clearance_status === 'CLEARED_WITH_DEBT').length;
 
+  // Quản lý Phân trang (Pagination)
+  const [pageVehicles, setPageVehicles] = useState<number>(1);
+  const [pageSizeVehicles, setPageSizeVehicles] = useState<number>(20);
+
+  const [pageContainers, setPageContainers] = useState<number>(1);
+  const [pageSizeContainers, setPageSizeContainers] = useState<number>(20);
+
+  const [pageHistory, setPageHistory] = useState<number>(1);
+  const [pageSizeHistory, setPageSizeHistory] = useState<number>(20);
+
+  useEffect(() => {
+    setPageVehicles(1);
+    setPageContainers(1);
+    setPageHistory(1);
+  }, [searchQuery, activeTab]);
+
+  const pagedVehicles = useMemo(() => {
+    const start = (pageVehicles - 1) * pageSizeVehicles;
+    return filteredVehicles.slice(start, start + pageSizeVehicles);
+  }, [filteredVehicles, pageVehicles, pageSizeVehicles]);
+
+  const pagedContainers = useMemo(() => {
+    const start = (pageContainers - 1) * pageSizeContainers;
+    return filteredContainers.slice(start, start + pageSizeContainers);
+  }, [filteredContainers, pageContainers, pageSizeContainers]);
+
+  const pagedHistory = useMemo(() => {
+    const start = (pageHistory - 1) * pageSizeHistory;
+    return exitedVehicles.slice(start, start + pageSizeHistory);
+  }, [exitedVehicles, pageHistory, pageSizeHistory]);
+
   return (
     <div className="flex-1 flex overflow-hidden w-full h-full bg-[#FFFFFF]">
       {/* ============================================================== */}
@@ -946,7 +978,7 @@ export default function ExitClearancePage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredVehicles.map((v) => {
+                  pagedVehicles.map((v) => {
                     const inDate = new Date(v.entry_at);
                     const attachedCont = inYardContainers.find(c => c.inbound_vehicle_visit_id === v.id);
 
@@ -1116,6 +1148,14 @@ export default function ExitClearancePage() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={pageVehicles}
+            totalItems={filteredVehicles.length}
+            pageSize={pageSizeVehicles}
+            onPageChange={setPageVehicles}
+            onPageSizeChange={setPageSizeVehicles}
+            itemLabel="phương tiện"
+          />
         </div>
       )}
 
@@ -1154,7 +1194,7 @@ export default function ExitClearancePage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredContainers.map((c) => {
+                  pagedContainers.map((c) => {
                     const inDate = new Date(c.inbound_at);
                     const now = new Date();
                     const daysDiff = Math.max(0, Math.floor((now.getTime() - inDate.getTime()) / (1000 * 3600 * 24)));
@@ -1257,6 +1297,14 @@ export default function ExitClearancePage() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={pageContainers}
+            totalItems={filteredContainers.length}
+            pageSize={pageSizeContainers}
+            onPageChange={setPageContainers}
+            onPageSizeChange={setPageSizeContainers}
+            itemLabel="container"
+          />
         </div>
       )}
 
@@ -1313,7 +1361,7 @@ export default function ExitClearancePage() {
                     </td>
                   </tr>
                 ) : (
-                  exitedVehicles.map((v, idx) => {
+                  pagedHistory.map((v, idx) => {
                     const inDate = new Date(v.entry_at);
                     const outDate = v.exit_at ? new Date(v.exit_at) : null;
                     const durationMins = outDate 
@@ -1388,6 +1436,14 @@ export default function ExitClearancePage() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={pageHistory}
+            totalItems={exitedVehicles.length}
+            pageSize={pageSizeHistory}
+            onPageChange={setPageHistory}
+            onPageSizeChange={setPageSizeHistory}
+            itemLabel="lượt xe xuất"
+          />
         </div>
       )}
 

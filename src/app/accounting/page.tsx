@@ -49,6 +49,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { TablePagination } from '@/components/workspace/table-pagination';
 
 type ActiveTab = 'CASH_SETTLEMENT' | 'INVOICES' | 'DEBTS' | 'REPORTS';
 
@@ -215,6 +216,43 @@ export default function AccountingPage() {
     if (settlementDeptFilter === 'ALL') return settlements;
     return settlements.filter(s => s.handover_dept === settlementDeptFilter);
   }, [settlements, settlementDeptFilter]);
+
+  // Quản lý Phân trang (Pagination)
+  const [pageSettlements, setPageSettlements] = useState<number>(1);
+  const [pageSizeSettlements, setPageSizeSettlements] = useState<number>(20);
+
+  const [pageInvoices, setPageInvoices] = useState<number>(1);
+  const [pageSizeInvoices, setPageSizeInvoices] = useState<number>(20);
+
+  const [pageDebts, setPageDebts] = useState<number>(1);
+  const [pageSizeDebts, setPageSizeDebts] = useState<number>(20);
+
+  useEffect(() => {
+    setPageSettlements(1);
+  }, [settlementDeptFilter]);
+
+  useEffect(() => {
+    setPageInvoices(1);
+  }, [invoiceStatusFilter]);
+
+  useEffect(() => {
+    setPageDebts(1);
+  }, [debtSearchKeyword]);
+
+  const pagedSettlements = useMemo(() => {
+    const start = (pageSettlements - 1) * pageSizeSettlements;
+    return filteredSettlements.slice(start, start + pageSizeSettlements);
+  }, [filteredSettlements, pageSettlements, pageSizeSettlements]);
+
+  const pagedInvoices = useMemo(() => {
+    const start = (pageInvoices - 1) * pageSizeInvoices;
+    return filteredInvoices.slice(start, start + pageSizeInvoices);
+  }, [filteredInvoices, pageInvoices, pageSizeInvoices]);
+
+  const pagedDebts = useMemo(() => {
+    const start = (pageDebts - 1) * pageSizeDebts;
+    return filteredDebts.slice(start, start + pageSizeDebts);
+  }, [filteredDebts, pageDebts, pageSizeDebts]);
 
   // Xuất file Excel 4 Sheet
   const handleExportExcel = async () => {
@@ -646,9 +684,11 @@ export default function AccountingPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredSettlements.map((s, idx) => (
+                    pagedSettlements.map((s, idx) => (
                       <tr key={s.id} className="hover:bg-slate-50 transition">
-                        <td className="px-4 py-3 text-center font-mono text-slate-500">{idx + 1}</td>
+                        <td className="px-4 py-3 text-center font-mono text-slate-500">
+                          {(pageSettlements - 1) * pageSizeSettlements + idx + 1}
+                        </td>
                         <td className="px-4 py-3 font-mono font-bold text-blue-900">{s.settlement_code}</td>
                         <td className="px-4 py-3 text-slate-600">{formatDateTime(s.created_at)}</td>
                         <td className="px-4 py-3">
@@ -684,6 +724,14 @@ export default function AccountingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageSettlements}
+              totalItems={filteredSettlements.length}
+              pageSize={pageSizeSettlements}
+              onPageChange={setPageSettlements}
+              onPageSizeChange={setPageSizeSettlements}
+              itemLabel="đợt chốt"
+            />
           </div>
         </div>
       )}
@@ -789,9 +837,11 @@ export default function AccountingPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredInvoices.map((inv, idx) => (
+                    pagedInvoices.map((inv, idx) => (
                       <tr key={inv.id} className="hover:bg-slate-50 transition">
-                        <td className="px-4 py-3 text-center font-mono text-slate-500">{idx + 1}</td>
+                        <td className="px-4 py-3 text-center font-mono text-slate-500">
+                          {(pageInvoices - 1) * pageSizeInvoices + idx + 1}
+                        </td>
                         <td className="px-4 py-3 font-mono font-bold text-slate-800">{inv.invoice_code}</td>
                         <td className="px-4 py-3 font-mono font-black text-emerald-800">
                           {inv.e_invoice_no || <span className="text-slate-400 font-normal">Chờ số</span>}
@@ -847,6 +897,14 @@ export default function AccountingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageInvoices}
+              totalItems={filteredInvoices.length}
+              pageSize={pageSizeInvoices}
+              onPageChange={setPageInvoices}
+              onPageSizeChange={setPageSizeInvoices}
+              itemLabel="hóa đơn"
+            />
           </div>
         </div>
       )}
@@ -931,9 +989,11 @@ export default function AccountingPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredDebts.map((d, idx) => (
+                    pagedDebts.map((d, idx) => (
                       <tr key={d.id} className="hover:bg-slate-50 transition">
-                        <td className="px-4 py-3 text-center font-mono text-slate-500">{idx + 1}</td>
+                        <td className="px-4 py-3 text-center font-mono text-slate-500">
+                          {(pageDebts - 1) * pageSizeDebts + idx + 1}
+                        </td>
                         <td className="px-4 py-3 font-bold text-slate-900">{d.customer_name}</td>
                         <td className="px-4 py-3 font-mono text-slate-600">{d.customer_phone || '---'}</td>
                         <td className="px-4 py-3 font-mono font-bold text-blue-900">
@@ -965,6 +1025,14 @@ export default function AccountingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={pageDebts}
+              totalItems={filteredDebts.length}
+              pageSize={pageSizeDebts}
+              onPageChange={setPageDebts}
+              onPageSizeChange={setPageSizeDebts}
+              itemLabel="khoản nợ"
+            />
           </div>
         </div>
       )}
