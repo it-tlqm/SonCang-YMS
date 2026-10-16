@@ -40,8 +40,10 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:00 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TRIỂN KHAI HOÀN CHỈNH TRANG GIỚI THIỆU & HƯỚNG DẪN VẬN HÀNH TƯƠNG TÁC NGAY TRONG ỨNG DỤNG WEB/PWA (/guide)**:
+- **Cập nhật lúc:** 16/10/2026 22:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **ĐẨY PRODUCTION THÀNH CÔNG LÊN GITHUB REMOTE (ORIGIN MAIN) & TỰ ĐỘNG TRIỂN KHAI VERCEL**:
+  * Đã push thành công commit `3f8cee5` lên `origin main` (`git@github.com-company:it-tlqm/SonCang-YMS.git`).
+  * Toàn bộ mã nguồn mới bao gồm 33 ảnh thực tế, trang `/guide` tương tác và bộ tài liệu Word/PDF 8.7MB đã được đưa lên production.
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

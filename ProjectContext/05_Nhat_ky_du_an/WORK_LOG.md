@@ -1,5 +1,14 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 22:05 — Đẩy Thành Công Mã Nguồn Lên GitHub Remote (origin main) & Kích Hoạt Vercel Production Auto-Deploy
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
+  *"đẩy production đi\"*
+- **Triển khai thực tế:**
+  1. Kiểm tra toàn bộ mã nguồn sạch sẽ: `npx tsc --noEmit` pass 100% (0 lỗi).
+  2. Thực hiện `git push origin main` đẩy commit `3f8cee5` lên `git@github.com-company:it-tlqm/SonCang-YMS.git`.
+  3. Kết quả: Đẩy thành công `fed0571..3f8cee5 main -> main`. Vercel tự động build và triển khai bản mới nhất tại: `https://son-cang-yms.vercel.app/guide`.
+
 ## 2026-10-16 22:00 — Xây Dựng Trang Giới Thiệu & Hướng Dẫn Vận Hành Tương Tác Trực Tiếp Trong Ứng Dụng Web/PWA (/guide)
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
