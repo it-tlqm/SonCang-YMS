@@ -315,6 +315,36 @@ export default function UsersAndRbacAdminPage() {
     }
   }, [isAllowed, repository]);
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'USERS' || tabParam === 'MATRIX') {
+      setActiveTab(tabParam as any);
+    }
+    const modalParam = p.get('modal');
+    if (modalParam === 'add_user' && !showModal) {
+      setModalMode('CREATE');
+      setSelectedStaff(null);
+      setFormFullName('Nguyễn Văn Tuấn');
+      setFormEmail('tuan.nv@soncang.vn');
+      setFormPhone('0912345678');
+      setFormRoleCode('SEC_STAFF');
+      setFormDepartmentCode('AN_NINH');
+      setFormYardName('Bãi Sơn Cảng');
+      setFormIsActive(true);
+      setFormNotes('Nhân viên an ninh cổng kiểm soát ca 1');
+      setShowModal(true);
+    } else if (modalParam === 'create_role' && !showCreateRoleModal) {
+      setNewRoleCode('DIS_SPECIALIST');
+      setNewRoleName('Chuyên viên Điều phối Hiện trường');
+      setNewRoleDeptCode('DIEU_PHOI');
+      setNewRoleDescription('Chuyên trách giám sát sắp xếp container và điều phối xe cẩu');
+      setShowCreateRoleModal(true);
+    }
+  }, [showModal, showCreateRoleModal]);
+
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     await Promise.all([loadStaffUsers(), loadRolesAndPermissions()]);

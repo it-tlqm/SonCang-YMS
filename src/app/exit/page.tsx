@@ -159,6 +159,47 @@ export default function ExitClearancePage() {
     return () => { isMounted = false; };
   }, [repository, yardId]);
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'GATE_EXIT' || tabParam === 'CLEARANCE' || tabParam === 'EXITED_HISTORY') {
+      setActiveTab(tabParam as any);
+    }
+    const modalParam = p.get('modal');
+    if (modalParam === 'clearance' && containers.length > 0 && !showClearanceModal) {
+      setSelectedCont(containers[0]);
+      setAllowDebt(false);
+      setShowClearanceModal(true);
+    } else if (modalParam === 'debt_guarantee' && containers.length > 0 && !showClearanceModal) {
+      setSelectedCont(containers[0]);
+      setAllowDebt(true);
+      setClearanceNotes('Doanh nghiệp XNK Tà Lùng bảo lãnh thanh toán cước điện trong 07 ngày làm việc theo công văn số 18/CV-TL');
+      setShowClearanceModal(true);
+    } else if (modalParam === 'unified_exit' && vehicles.length > 0 && !showUnifiedExitModal) {
+      const vehWithCont = vehicles.find(v => (v.containers && v.containers.length > 0) || v.vehicle_type === 'CONT_LANH') || vehicles[0];
+      setSelectedVehForExit(vehWithCont);
+      setShowUnifiedExitModal(true);
+      setPaidAtGate(true);
+      setPaymentMethod('CASH');
+      setExitNotes('Kiểm tra 3 điều kiện hợp lệ: Vé cổng OK, Cước điện OK, Duyệt CCKB OK. Cho xe xuất bãi.');
+    } else if (modalParam === 'receipt' && !exitReceipt) {
+      setExitReceipt({
+        receiptCode: 'BL-EXIT-20261016-0089',
+        containerNo: 'TEMU9876543',
+        licensePlate: '98C-123.45',
+        fee: 350000,
+        entryTicketFee: 250000,
+        chargedNights: 2,
+        totalNights: 2,
+        payMethod: 'CASH',
+        payDate: '16/10/2026 21:00:00',
+        notes: 'Thu tiền lưu bãi 2 đêm + Vé xe vào cổng trực tiếp tại Cổng ra',
+      });
+    }
+  }, [containers, vehicles, showClearanceModal, showUnifiedExitModal, exitReceipt]);
+
   const handleManualRefresh = () => {
     setIsLoading(true);
     Promise.all([

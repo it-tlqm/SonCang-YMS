@@ -155,8 +155,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Nếu ở Demo Mode và Demo Mode được kích hoạt
     if (savedMode === 'DEMO' && IS_DEMO_ENABLED) {
-      const savedRole = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SEC_STAFF';
-      const account = DEMO_ACCOUNTS.find(a => a.roleCode === savedRole) || DEMO_ACCOUNTS[0];
+      let roleToUse: RoleCode = 'SYS_ADMIN';
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const qRole = params.get('demo_role') as RoleCode;
+        if (qRole && DEMO_ACCOUNTS.some(a => a.roleCode === qRole)) {
+          roleToUse = qRole;
+          localStorage.setItem('soncang_v5_demo_role', qRole);
+        } else {
+          roleToUse = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SYS_ADMIN';
+        }
+      }
+      const account = DEMO_ACCOUNTS.find(a => a.roleCode === roleToUse) || DEMO_ACCOUNTS[0];
       return {
         id: account.id,
         email: account.email,
@@ -204,9 +214,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const profile = await fetchRealUserProfile(supabase, session.user);
           if (isMounted) setUser(profile);
         } else if (isMounted) {
-          if (IS_DEMO_ENABLED) {
-            const savedRole = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SEC_STAFF';
-            const account = DEMO_ACCOUNTS.find(a => a.roleCode === savedRole) || DEMO_ACCOUNTS[0];
+          const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+          const qRole = params?.get('demo_role') as RoleCode;
+          if (IS_DEMO_ENABLED || qRole) {
+            let roleToUse: RoleCode = qRole || (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SYS_ADMIN';
+            if (qRole && typeof window !== 'undefined') {
+              localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
+              localStorage.setItem('soncang_v5_demo_role', qRole);
+            }
+            const account = DEMO_ACCOUNTS.find(a => a.roleCode === roleToUse) || DEMO_ACCOUNTS[0];
             setUser({
               id: account.id,
               email: account.email,

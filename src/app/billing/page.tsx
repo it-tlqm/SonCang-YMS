@@ -186,6 +186,42 @@ export default function CashierBillingPage() {
     loadAllData();
   }, [repository, yardId]);
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'LEDGER' || tabParam === 'SHIFT_REPORT') {
+      setActiveTab(tabParam as any);
+    }
+    const modalParam = p.get('modal');
+    if (modalParam === 'collect' && charges.length > 0 && !showCollectModal) {
+      const unpaidCharge = charges.find(c => c.status === 'UNPAID') || charges[0];
+      setSelectedCharge(unpaidCharge);
+      setPayMethod('CASH');
+      setReceiptCode('PT-SC-20261016-012');
+      setPayNotes('Thu tiền cước điện container tại bến bãi theo phiếu dịch vụ');
+      setShowCollectModal(true);
+    } else if (modalParam === 'batch' && charges.length > 1 && !showBatchModal) {
+      const unpaidList = charges.filter(c => c.status === 'UNPAID');
+      const targetIds = unpaidList.length >= 2 ? [unpaidList[0].id, unpaidList[1].id] : [charges[0].id, charges[1].id];
+      setSelectedChargeIds(targetIds);
+      setBatchPayMethod('CASH');
+      setBatchReceiptCode('PT-BATCH-20261016-004');
+      setBatchNotes('Thu gộp cước lưu bãi + tiền điện cho xe 98C-123.45');
+      setShowBatchModal(true);
+    } else if (modalParam === 'receipt' && !receiptMeta) {
+      setReceiptMeta({
+        receiptCode: 'PT-SC-20261016-012',
+        payMethod: 'CASH',
+        payDate: '16/10/2026 21:00:00',
+        operatorName: 'Nguyễn Văn An (Kế toán Sơn Cảng)',
+        notes: 'Thu tiền cước cấp điện container lạnh 24 giờ',
+      });
+      if (charges.length > 0) setReceiptCharge(charges[0]);
+    }
+  }, [charges, showCollectModal, showBatchModal, receiptMeta]);
+
   const handleManualRefresh = () => {
     setIsLoading(true);
     loadAllData();

@@ -148,6 +148,47 @@ export default function AccountingPage() {
     setTodayDateStr(new Date().toISOString().substring(0, 10));
   }, []);
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'CASH_SETTLEMENT' || tabParam === 'INVOICES' || tabParam === 'DEBTS' || tabParam === 'REPORTS') {
+      setActiveTab(tabParam as any);
+    }
+    const modalParam = p.get('modal');
+    if (modalParam === 'settlement' && !isSettlementModalOpen) {
+      setIsSettlementModalOpen(true);
+    } else if (modalParam === 'invoice' && !isInvoiceModalOpen) {
+      setIsInvoiceModalOpen(true);
+    } else if (modalParam === 'print_settlement' && !selectedSettlementToPrint) {
+      if (settlements.length > 0) {
+        setSelectedSettlementToPrint({ settlement: settlements[0] });
+      } else {
+        setSelectedSettlementToPrint({
+          settlement: {
+            id: 'cs-mock-01',
+            settlement_code: 'BB-BG-20261016-001',
+            collector_name: 'Hoàng Văn An (Đội trưởng An ninh)',
+            handover_dept: 'AN_NINH',
+            period_from: '2026-10-16T06:00:00',
+            period_to: '2026-10-16T14:00:00',
+            total_cash_expected: 15400000,
+            total_cash_counted: 15400000,
+            difference_amount: 0,
+            total_transfer_amount: 8500000,
+            handover_person_name: 'Hoàng Văn An',
+            status: 'COMPLETED',
+            notes: 'Khớp 100% doanh thu vé xe ca 1 ngày 16/10/2026',
+            created_at: new Date().toISOString(),
+          }
+        });
+      }
+    } else if (modalParam === 'collect_debt' && debts.length > 0 && !selectedDebtToCollect) {
+      setSelectedDebtToCollect(debts[0]);
+    }
+  }, [settlements, debts, isSettlementModalOpen, isInvoiceModalOpen, selectedSettlementToPrint, selectedDebtToCollect]);
+
   // KPI Tab 1: Tiền mặt chờ thu
   const pendingCashAnNinh = useMemo(() => {
     return unsettledCash

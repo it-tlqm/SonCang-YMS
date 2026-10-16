@@ -106,6 +106,14 @@ export default function ReportsManagementPage() {
     setCustomEndDate(now.toISOString().slice(0, 10));
     setCurrentDate(now);
     setMounted(true);
+
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const tabParam = p.get('tab');
+      if (tabParam === 'REVENUE' || tabParam === 'VEHICLES' || tabParam === 'REEFER_CONTAINER' || tabParam === 'YARD_ZONES') {
+        setActiveTab(tabParam as ReportTabType);
+      }
+    }
   }, []);
 
   // Tải dữ liệu từ repository

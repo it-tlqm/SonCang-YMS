@@ -222,6 +222,51 @@ export default function ReeferMonitoringPage() {
     return () => { isMounted = false; };
   }, [repository, yardId]);
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'UNPLUGGED' || tabParam === 'SESSIONS' || tabParam === 'TEMP_LOGS' || tabParam === 'REQUESTS' || tabParam === 'SOCKETS') {
+      setActiveTab(tabParam as any);
+    }
+    const modalParam = p.get('modal');
+    if (modalParam === 'unplug' && sessions.length > 0 && !showUnplugModal) {
+      setSelectedSession(sessions[0]);
+      setShowUnplugModal(true);
+    } else if (modalParam === 'plug' && containers.length > 0 && !showPlugModal) {
+      setSelectedContId(containers[0].id);
+      setPlugSocketCode('T01-01');
+      setPlugPowerMode('HOURLY');
+      setPlugExpectedHours(24);
+      setPlugNotes('Cắm điện bảo quản thanh long xuất khẩu theo yêu cầu chủ hàng');
+      setShowPlugModal(true);
+    } else if (modalParam === 'create_request' && !showCreateReqModal) {
+      setShowCreateReqModal(true);
+      setReqSourceType('YARD');
+      if (containers.length > 0) setReqSelectedYardContId(containers[0].id);
+      setReqContainerNo(containers[0]?.container_no_current || 'TGHU1234567');
+      setReqPlate('98C-456.78');
+      setReqCustomer('Công ty XNK Nông sản Tà Lùng');
+      setReqCargo('Thanh long ruột đỏ');
+      setReqTemp('-18°C');
+      setReqMode('HOURLY');
+      setReqExpectedHours(24);
+      setReqNotes('Phiếu yêu cầu cấp điện bảo quản hàng chờ làm thủ tục hải quan');
+    } else if (modalParam === 'temp_log' && !showTempModal) {
+      setShowTempModal(true);
+      if (containers.length > 0) setTempContId(containers[0].id);
+      setTempValue('-18.5');
+      setTempStatus('RUNNING_NORMAL');
+      setTempNotes('Nhiệt độ dàn lạnh ổn định -18.5°C, máy chạy êm, giắc cắm chắc chắn');
+    } else if (modalParam === 'verify' && sessions.length > 0 && !showVerifyModal) {
+      setVerifySession(sessions[0]);
+      setVerifyPlugTime(sessions[0].plugged_in_at ? new Date(sessions[0].plugged_in_at).toISOString().slice(0, 16) : '');
+      setVerifyNotes('Đối chiếu hình ảnh giắc cắm và video nhóm Zalo CCKB trực ban lúc 08:15');
+      setShowVerifyModal(true);
+    }
+  }, [sessions, containers, showUnplugModal, showPlugModal, showCreateReqModal, showTempModal, showVerifyModal]);
+
   const handleManualRefresh = () => {
     setIsLoading(true);
     Promise.all([

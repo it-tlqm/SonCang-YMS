@@ -352,7 +352,7 @@ def create_system_doc(output_path):
     
     reefer_features = [
         ("Cấu trúc 4 Tab quy trình nghiệp vụ: ", "Sắp xếp theo thứ tự phối hợp chuẩn: (1) Yêu cầu cắm điện CCKB [mặc định mở], (2) Container sẵn sàng cắm điện, (3) Phiên cắm điện thực tế, (4) Nhật ký kiểm tra nhiệt độ."),
-        ("Theo dõi phiên cắm/rút thời gian thực: ", "Ghi nhận chính xác thời điểm cắm giắc điện, thời điểm rút giắc, vị trí trụ cắm và cán bộ thực hiện kèm đồng hồ đếm thời gian thực."),
+        ("Theo dõi phiên cắm/rút thời gian thực: ", "Ghi nhận chính xác thời điểm cắm giắc điện, thời điểm rút giắc, Tủ điện & mã giắc cắm (thuộc hệ thống 13 Tủ / 50 Giắc 380V Khu A) và cán bộ thực hiện kèm đồng hồ đếm thời gian thực."),
         ("Thuật toán tính cước điện thời gian thực tế (Quyết định D-021): ", "Bỏ hoàn toàn quy tắc làm tròn 15 phút. Thời lượng cắm điện được tính theo SỐ PHÚT THỰC TẾ cắm ngoài bãi; thành tiền cước làm tròn đến bội số 5.000 VNĐ, triệt tiêu hoàn toàn tiền lẻ."),
         ("Nghiệp vụ Khớp giờ Zalo & Hồi tố: ", "Hỗ trợ CCKB đối soát và khớp giờ giắc điện theo bằng chứng ảnh/tin nhắn Zalo hiện trường, chống tranh chấp cước."),
         ("Giám sát nhật ký nhiệt độ định kỳ: ", "Hỗ trợ ghi nhận thông số nhiệt độ (°C) và tình trạng máy lạnh theo từng ca trực, lưu vết chứng cứ cho chủ hàng.")
@@ -374,6 +374,8 @@ def create_system_doc(output_path):
         ("Đồng bộ dữ liệu bến bãi thực tế: ", "Đã nạp sẵn 70 xe và 65 container tồn bãi thực tế từ dữ liệu vận hành AppSheet phục vụ kiểm thử và vận hành tức thì."),
         ("Quản lý cặp ghép Xe — Container: ", "Theo dõi trực quan xe nào đang chở container nào, xe nào đã hạ bãi cont và chuyển thành xe đơn."),
         ("Cảnh báo lưu bãi & Phí lưu bãi tích lũy tạm tính (Quyết định D-022): ", "Tự động phân loại cảnh báo ≥ 24h và ≥ 48h, đồng thời hiển thị trực quan cước lưu bãi tạm tính 'Lưu bãi: ~X đ (Y đêm)' của từng container theo khung 22h-06h (miễn đêm đầu)."),
+        ("Quy hoạch Hệ thống Cấp điện 13 Tủ điện — 50 Giắc cắm 380V (Khu A): ", "Chuẩn hóa lưới điện lạnh thành 13 Tủ công nghiệp (T01..T13) với 50 ổ cắm chuyên dụng (T01: 3, T02: 4, T03: 4, T04: 3, T05: 8, T06: 3, T07: 3, T08: 2, T09: 5, T10: 3, T11: 4, T12: 4, T13: 4). Trang bị bộ công cụ CRUD quản lý tủ điện (+ Thêm tủ, + Ổ, Bật/Tắt bảo trì toàn tủ 1-chạm, Cắm nhanh container tại bãi)."),
+        ("Thiết kế công thái học (Thu gọn Aside): ", "Bảng phụ Hàng đợi bến bãi và phân khu mặc định thu gọn (Aside w-12), mở rộng linh hoạt w-80 giúp giải phóng tối đa không gian hiển thị bảng dữ liệu chính."),
         ("Tối ưu tải dữ liệu & Phân trang (Pagination): ", "Trang bị bộ phân trang thông minh 10/20/50/100 dòng/trang, giúp hiển thị mượt mà danh sách tồn bãi lớn mà không gây giật lag DOM."),
         ("Chuyển trạng thái HÀNG / RỖNG: ", "Quy trình cập nhật trạng thái container chặt chẽ, ghi nhận nhân viên điều phối thao tác."),
         ("Quy trình Sửa số Container / Biển số có kiểm toán: ", "Bắt buộc nhập lý do điều chỉnh và lưu vết bất biến (Append-only) vào Nhật ký kiểm toán phục vụ hậu kiểm.")

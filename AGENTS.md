@@ -26,3 +26,13 @@
 - Cập nhật `ProjectContext/05_Nhat_ky_du_an/CURRENT_STATUS.md` và bổ sung `WORK_LOG.md` với file đã sửa, test đã chạy, lỗi còn mở, bước tiếp.
 - Mọi quyết định mới được người dùng chốt phải ghi `DECISION_LOG.md` (ngày, nội dung, nguồn/đối chiếu, tác động); mục chưa chốt thêm vào `OPEN_DECISIONS_UAT.md`.
 - Báo cáo bằng tiếng Việt, theo mức độ thực hiện thật/đề xuất/chưa xác minh. Tên nghiệp vụ là **Phần mềm quản lý bến bãi/cảng cạn**, không dùng từ “BOS”.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

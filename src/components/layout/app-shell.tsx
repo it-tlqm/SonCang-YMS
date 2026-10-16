@@ -32,7 +32,8 @@ import {
   Landmark,
   ShieldCheck,
   Search,
-  RotateCcw
+  RotateCcw,
+  BookOpen
 } from 'lucide-react';
 import { ChangePasswordModal } from '@/components/modals/change-password-modal';
 
@@ -78,6 +79,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Điều hướng người dùng chưa đăng nhập về trang /login
   useEffect(() => {
     if (!isLoading && !user && pathname !== '/login') {
+      const p = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      if (p?.get('demo_role')) return;
       router.replace('/login');
     }
   }, [isLoading, user, pathname, router]);
@@ -143,6 +146,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Danh mục phân hệ điều hướng chuẩn hóa theo RBAC V5
   const navItems: NavItem[] = [
     // Nhóm 1: VẬN HÀNH BẾN BÃI
+    {
+      name: 'Giới thiệu & Hướng dẫn',
+      href: '/guide',
+      icon: BookOpen,
+      permissionsAny: [
+        'vehicle.visit.read',
+        'container.visit.read',
+        'ticket.payment.collect',
+        'reefer.session.read',
+        'admin.roles.manage',
+      ],
+      badge: 'Cẩm nang',
+      section: 'OPERATIONS',
+    },
     {
       name: 'Tổng quan Vận hành',
       href: '/dashboard',

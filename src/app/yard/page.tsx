@@ -470,6 +470,66 @@ export default function YardMonitorPage() {
       });
   };
 
+  // Deep-linking URL params cho chụp ảnh tài liệu & chia sẻ link
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const tabParam = p.get('tab');
+    if (tabParam === 'zones') setActiveTab('zones');
+    else if (tabParam === 'containers') setActiveTab('containers');
+    else if (tabParam === 'vehicles') setActiveTab('vehicles');
+    else if (tabParam === 'pairs') setActiveTab('pairs');
+
+    const modalParam = p.get('modal');
+    if (modalParam === 'edit_plate' && vehicles.length > 0 && !selectedVehForCorrection) {
+      setSelectedVehForCorrection(vehicles[0]);
+      setNewLicensePlate(vehicles[0].license_plate || '');
+      setPlateCorrectionReason('Đối chiếu cavet xe và kiểm tra thực tế hiện trường');
+    } else if (modalParam === 'add_cabinet' && !isCabinetModalOpen) {
+      setIsCabinetModalOpen(true);
+      setCabinetModalMode('CREATE');
+      setCabinetFormCode('T14');
+      setCabinetFormName('Tủ điện T14');
+      setCabinetFormSockets(4);
+      setCabinetFormDesc('Tủ điện 3P 380V mở rộng khu A');
+    } else if (modalParam === 'add_socket' && !isCreateSocketModalOpen) {
+      setIsCreateSocketModalOpen(true);
+      setSocketFormCabinet('T01');
+      setSocketFormCode('T01-04');
+      setSocketFormName('Ổ cắm 04 (T01)');
+      setSocketFormVoltage('380V');
+      setSocketFormAmperage('32A');
+      setSocketFormNotes('Ổ cắm công nghiệp 3P 380V bổ sung');
+    } else if (modalParam === 'quick_plug' && !isQuickPlugModalOpen && powerSockets.length > 0) {
+      const availSocket = powerSockets.find(s => s.status === 'AVAILABLE') || powerSockets[0];
+      setQuickPlugSocket(availSocket);
+      setIsQuickPlugModalOpen(true);
+      if (containers.length > 0) setQuickPlugContId(containers[0].id);
+      setQuickPlugHours(24);
+    } else if (modalParam === 'edit_cont' && containers.length > 0 && !selectedContForCorrection) {
+      setSelectedContForCorrection(containers[0]);
+      setNewContainerNo(containers[0].container_no_current || '');
+      setCorrectionReason('Biên bản điều chỉnh mã số cont do mờ sơn bề mặt');
+    } else if (modalParam === 'assign_zone' && containers.length > 0 && !locationModalItem) {
+      setLocationModalItem({
+        type: 'CONTAINER',
+        id: containers[0].id,
+        title: `Container ${containers[0].container_no_current || 'TEMU1234567'}`,
+        subtitle: `Loại: ${containers[0].container_type || 'RF 40ft'} • Hàng: ${containers[0].cargo_status || 'HÀNG'}`,
+        currentZone: 'KHU_A_REEFER',
+        currentSlot: 'A-01',
+      });
+      setSelectedZoneCode('KHU_A_REEFER');
+      setInputSlotCode('A-02');
+    } else if (modalParam === 'adjust_vehicle' && vehicles.length > 0 && !adjustingVehicle) {
+      setAdjustingVehicle(vehicles[0]);
+      setAdjEntryAtText(vehicles[0].entry_at ? new Date(vehicles[0].entry_at).toISOString().slice(0, 16) : '');
+      setAdjVehicleType(vehicles[0].vehicle_type || 'CONT_LANH');
+      setAdjTicketAmount(250000);
+      setAdjReason('Hiệu chỉnh sai sót ca trực trước theo biên bản kiểm toán');
+    }
+  }, [vehicles, containers, powerSockets, selectedVehForCorrection, isCabinetModalOpen, isCreateSocketModalOpen, isQuickPlugModalOpen, selectedContForCorrection, locationModalItem, adjustingVehicle]);
+
   const handleOpenLocationModal = (
     type: 'VEHICLE' | 'CONTAINER',
     item: { id: string; title: string; subtitle: string; yard_zone?: string | null; slot_code?: string | null }

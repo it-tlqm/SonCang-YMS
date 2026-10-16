@@ -40,8 +40,64 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 18:25 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **NÂNG CẤP TOÀN DIỆN BỘ CÔNG CỤ QUẢN LÝ TỦ ĐIỆN & 50 GIẮC CẮM 380V, CẮM CONT NHANH TẠI BÃI & DỌN SẠCH 30 TRỤ CŨ TRÊN SUPABASE CLOUD**:
+- **Cập nhật lúc:** 16/10/2026 22:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TRIỂN KHAI HOÀN CHỈNH TRANG GIỚI THIỆU & HƯỚNG DẪN VẬN HÀNH TƯƠNG TÁC NGAY TRONG ỨNG DỤNG WEB/PWA (/guide)**:
+  * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
+    - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
+    - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.
+    - Sơ đồ Tiến trình Nghiệp vụ 7 Bước tương tác: Bấm vào từng bước để xem chi tiết vai trò, tính năng cốt lõi, lưu ý bắt buộc, nút mở trực tiếp phân hệ và thư viện ảnh thực tế tương ứng.
+    - Bảng phân bổ chi tiết 13 Tủ điện & 50 Giắc cắm 380V (Khu A) kèm thẻ thống kê công suất.
+    - 6 Quy tắc Vàng Vận hành Bắt buộc được đóng khung trực quan.
+    - Thư viện 33 Ảnh Thực tế kèm tính năng Lightbox Modal phóng to ảnh trực tiếp trên trình duyệt.
+  * **2. Bộ Sưu Tập 33 Ảnh Thực Tế Độ Phân Giải Cao (Màn hình ngoài & Từng Modal):**
+    - **Phân hệ 1 & 2 (Xác thực & Tiếp nhận cổng vào):** Bảo tồn nguyên vẹn 6 ảnh chất lượng cao người dùng đã dán (`image1.png` .. `image6.png`).
+    - **Phân hệ 3 (Quản lý Bến bãi & Tủ điện 380V):** 6 ảnh chi tiết:
+      * Màn hình ngoài Dashboard bến bãi, cước lưu bãi tích lũy (~X đ (Y đêm)), phân trang 20 dòng.
+      * Sơ đồ 4 Phân khu & 13 Tủ điện / 50 Giắc cắm 380V (Khu A).
+      * Modal Thêm Tủ điện mới 380V (Mã tủ T14, 4 giắc, công suất bến bãi).
+      * Modal Cắm Container Nhanh Tại Bãi (Quick Plug 1-chạm vào giắc 380V).
+      * Modal Hiệu chỉnh Biển số xe / Số Cont kèm lý do lưu vết Kiểm toán (Audit Log).
+      * Modal Gán Phân khu & Vị trí đỗ bãi (Zone & Slot Code).
+    - **Phân hệ 4 (Điện lạnh CCKB):** 6 ảnh chi tiết:
+      * Màn hình ngoài Tab "Đang cắm điện" (Live ticker thời gian thực tế, công tơ, nhiệt độ).
+      * Màn hình ngoài Tab "Sẵn sàng cắm" (Hàng đợi cấp điện container lạnh hạ bãi).
+      * Modal Lập Phiếu Yêu cầu Cắm điện Dự kiến CCKB (loại hàng, -18°C, chủ hàng).
+      * Modal Cắm điện Container (chọn tủ điện T01..T13, giắc 380V, giờ cắm).
+      * Modal Rút điện Chốt cước tự động (làm tròn 5.000đ theo thời gian thực tế).
+      * Modal Ghi nhận Nhật ký nhiệt độ container lạnh định kỳ.
+    - **Phân hệ 5 (Cổng ra & Xuất bãi):** 5 ảnh chi tiết:
+      * Màn hình ngoài Kiểm soát Cổng ra An ninh & Checklist 3 Điều kiện Xuất bãi.
+      * Modal An ninh Cổng ra Hợp nhất Kiểm soát theo xe & Tính phí lưu bãi tự động.
+      * Màn hình ngoài Tab CCKB Duyệt xuất bãi (Clearance) & Danh sách chờ duyệt.
+      * Modal CCKB Duyệt Xuất bãi Kèm Bảo Lãnh Công Nợ Doanh Nghiệp.
+      * Modal In Biên lai Thu phí Lưu bãi & Vé xe Cổng ra trực tiếp tại bốt bảo vệ.
+    - **Phân hệ 6 (Sổ cái Thu phí & Phiếu thu):** 4 ảnh chi tiết:
+      * Màn hình ngoài Sổ cái Thu phí Toàn bãi & Bộ lọc đa tiêu chí.
+      * Modal Thu tiền Đơn lẻ (Tiền mặt / Chuyển khoản VietQR).
+      * Modal Thu gộp nhiều khoản cước (Batch Collection).
+      * Modal In Phiếu Thu Tiền Bến Bãi Chuẩn Mực.
+    - **Phân hệ 7 (Kế toán Bến bãi):** 6 ảnh chi tiết:
+      * Màn hình ngoài Bàn giao & Chốt tiền mặt ca trực nguyên tắc 4 mắt.
+      * Modal Lập Biên bản Bàn giao & Khóa sổ Quỹ Ca trực.
+      * Modal In Biên bản Bàn giao Quỹ Tiền mặt Ca trực.
+      * Màn hình ngoài Sổ Quản lý Hóa đơn điện tử MST/CCCD.
+      * Modal Lập & Phát hành Hóa đơn GTGT Bến bãi.
+      * Màn hình ngoài Quản lý & Thu hồi Công nợ Bảo lãnh Bến bãi.
+    - **Phân hệ 8 (Báo cáo Điều hành):** 2 ảnh chi tiết:
+      * Báo cáo Vận hành Bến bãi (Sản lượng xe vào/ra, Tải bãi, Công suất tải điện).
+      * Báo cáo Dòng tiền & Doanh thu Bến bãi (Theo ngày/tháng, cơ cấu doanh thu).
+    - **Phân hệ 9 (Quản trị Hệ thống):** 4 ảnh chi tiết:
+      * Màn hình ngoài Quản trị Nhân sự & Danh sách Người dùng (7 vai trò RBAC V5).
+      * Modal Thêm mới / Cập nhật Tài khoản Nhân sự Trực ca.
+      * Màn hình ngoài Ma trận Phân quyền 67 Hành vi Nghiệp vụ & 206 Quyền hạn V5.
+      * Màn hình ngoài Sổ Nhật ký Kiểm toán Toàn bãi (Audit Logs) Truy vết Lịch sử.
+  * **3. Tối ưu Công nghệ OOXML & Xuất bản Word/PDF Hoàn Thiện:**
+    - Mỗi ảnh thực tế kèm tiêu đề và sub-caption chi tiết được đóng trong một bảng box độc lập viền xanh `#0A9444`/`#CBD5E1`, giúp Word tự động ngắt trang hoàn hảo, không bị tràn hay lỗi bố cục.
+    - `Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx` (Dung lượng: **8.12 MB**).
+    - `Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf` (Dung lượng: **8.76 MB**, xuất bản qua Word COM).
+    - Đồng bộ ở cả thư mục gốc dự án và thư mục `docs/`.
+
+- **Mốc trước đó (16/10/2026 18:25):** **NÂNG CẤP TOÀN DIỆN BỘ CÔNG CỤ QUẢN LÝ TỦ ĐIỆN & 50 GIẮC CẮM 380V, CẮM CONT NHANH TẠI BÃI & DỌN SẠCH 30 TRỤ CŨ TRÊN SUPABASE CLOUD**:
   * **1. Xóa Bỏ Hoàn Toàn 30 Trụ Cũ & Chuẩn Hóa Supabase Cloud DEV:**
     - Dọn dẹp sạch toàn bộ các bản ghi socket cũ `R01..R30` trong DB Supabase (`app_power_sockets`).
     - Nạp thành công 50 ổ cắm chuẩn của 13 Tủ điện: `T01-01` .. `T13-04` vào DB Supabase Cloud (`Total count: 50`, `R sockets: []`).
