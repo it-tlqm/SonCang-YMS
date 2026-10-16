@@ -1,5 +1,27 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 17:55 — Thiết Lập Mặc Định Thu Gọn (Collapsed By Default) Cho Toàn Bộ Secondary Panel Aside Trên Các Phân Hệ
+
+- **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:
+  *"giúp tôi để mặc dịnh thu gọn nhwngz cái nây với ví dụ Hàng đợi Bến bãi 70 aside"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Nâng cấp Component Lõi `SecondaryPanel` (`src/components/workspace/secondary-panel.tsx`):**
+     - Đổi thẻ khi thu gọn sang `<aside>` đúng ngữ nghĩa HTML5, đồng bộ breakpoint hiển thị `hidden md:flex`.
+     - Thêm hiệu ứng tương tác: toàn bộ thanh dọc hẹp `w-12` là `cursor-pointer hover:bg-[#F1F4F8] transition-colors group select-none`, nhấp vào bất cứ đâu trên thanh thu gọn hoặc bấm icon `PanelLeftOpen` đều tự động mở rộng mượt mà.
+     - Tích hợp huy hiệu số lượng (`count`) bo tròn nổi bật (`bg-[#E5E9F0]` -> `group-hover:bg-[#326DD8] group-hover:text-white`), nhãn tiêu đề dọc xoay 180 độ trang nhã và tooltip trực quan "Mở rộng {title} (Nhấp để xem)".
+  2. **Đồng bộ Thiết lập Mặc định Thu gọn (`isSecondaryCollapsed = true`) Trên Toàn Bộ 8 Phân Hệ:**
+     - **Dashboard (`src/app/dashboard/page.tsx`):** Thu gọn mặc định aside "Hàng đợi Bến bãi" (70 xe), tối đa hóa diện tích cho 5 KPI Cards, biểu đồ phân bổ và bảng phương tiện bến bãi.
+     - **Quản lý Bến bãi (`src/app/yard/page.tsx`):** Bổ sung state `isSecondaryCollapsed = useState(true)` và gắn `onToggleCollapse`, thu gọn mặc định aside "Danh mục Tồn bãi", ưu tiên không gian cho 4 Tabs Cặp xe-cont, Cont tồn bãi, Phương tiện và Sơ đồ 4 phân khu / 13 tủ điện 50 giắc cắm.
+     - **Container Điện lạnh (`src/app/reefer/page.tsx`):** Chuyển `isSecondaryCollapsed = true`, thu gọn mặc định danh sách cont bên trái, mở rộng tối đa vùng làm việc cho 5 Tabs (Yêu cầu CCKB, Sẵn sàng cắm điện, Phiên cắm điện thực tế, Nhật ký nhiệt độ, 13 Tủ / 50 Giắc 380V).
+     - **Kiểm soát Cổng ra (`src/app/exit/page.tsx`):** Chuyển `isSecondaryCollapsed = true`, thu gọn mặc định aside "Xe sẵn sàng xuất" (70 xe), bảng kiểm soát cổng ra và duyệt xuất container hiển thị rộng rãi full-width.
+     - **Tiếp nhận Cổng vào (`src/app/entry/page.tsx`):** Chuyển `isSecondaryCollapsed = true`, thu gọn mặc định aside "Xe vừa tiếp nhận", giải phóng không gian cho form tiếp nhận xe, thông tin tài xế/CCCD 12 số và các nút thao tác nhanh.
+     - **Sổ cái Thu phí & Ca trực (`src/app/billing/page.tsx`):** Bổ sung state `isSecondaryCollapsed = useState(true)` và `onToggleCollapse`, thu gọn mặc định aside "Khoản chờ thu", bảng Sổ cái thu phí mở rộng toàn màn hình.
+     - **Kế toán & Sổ quỹ (`src/app/accounting/page.tsx`):** Bổ sung state `isSecondaryCollapsed = useState(true)` và `onToggleCollapse`, thu gọn mặc định aside "Phiếu chốt ca / Hóa đơn / Hồ sơ nợ", các bảng chốt tiền mặt 4 mắt và HĐGTGT hiển thị thoáng đãng.
+     - **Báo cáo Vận hành (`src/app/reports/page.tsx`):** Bổ sung state `isSecondaryCollapsed = useState(true)` và `onToggleCollapse`, cho phép thu gọn aside bộ lọc kỳ báo cáo để tập trung vào số liệu phân tích và biểu đồ dòng tiền.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công trong 3.4s).
+
 ## 2026-10-16 17:45 — Quy Hoạch Hệ Thống Cấp Điện Khu A Theo 13 Tủ Điện / 50 Giắc Cắm 380V Hiện Trường Thực Tế & Hoàn Tất Loại Bỏ 100% Emoji Sang SVG Lucide Icons
 
 - **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:

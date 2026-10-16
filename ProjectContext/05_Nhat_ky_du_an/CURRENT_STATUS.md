@@ -40,8 +40,26 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 17:45 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **QUY HOẠCH HỆ THỐNG CẤP ĐIỆN KHU A THEO 13 TỦ ĐIỆN / 50 GIẮC CẮM 380V HIỆN TRƯỜNG THỰC TẾ & HOÀN TẤT LOẠI BỎ 100% EMOJI (QUYẾT ĐỊNH D-023)**:
+- **Cập nhật lúc:** 16/10/2026 17:55 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **THIẾT LẬP MẶC ĐỊNH THU GỌN (COLLAPSED BY DEFAULT) CHO TOÀN BỘ SECONDARY PANEL ASIDE TRÊN CÁC PHÂN HỆ**:
+  * **1. Nâng cấp Component Lõi `SecondaryPanel`:**
+    - Chuyển container khi thu gọn thành thẻ `<aside>` chuẩn ngữ nghĩa, breakpoint đồng bộ `hidden md:flex`.
+    - Thêm hiệu ứng toàn dải nhấp mở rộng: toàn thanh dọc hẹp `w-12` là `cursor-pointer hover:bg-[#F1F4F8] transition-colors group select-none`, nhấp vào thanh hoặc nút `PanelLeftOpen` đều tự động mở rộng mượt mà.
+    - Hiển thị badge số lượng `count` nổi bật, nhãn xoay dọc 180 độ trang nhã và tooltip trực quan.
+  * **2. Thiết lập Mặc định Thu gọn (`isSecondaryCollapsed = true`) Trên Toàn Bộ 8 Phân Hệ:**
+    - `Dashboard`: Thu gọn mặc định aside "Hàng đợi Bến bãi" (70 xe), nhường chỗ trọn vẹn cho 5 KPI Cards, biểu đồ và bảng dữ liệu.
+    - `Quản lý Bến bãi (/yard)`: Bổ sung state `isSecondaryCollapsed = useState(true)` và `onToggleCollapse`, thu gọn mặc định aside "Danh mục Tồn bãi", mở rộng tối đa không gian cho 4 Tabs Cặp xe-cont, Cont bãi, Xe bãi và Sơ đồ 4 phân khu / 13 tủ điện 50 giắc cắm.
+    - `Container Điện lạnh (/reefer)`: Thu gọn mặc định aside cont bên trái (`isSecondaryCollapsed = true`), hiển thị thông thoáng 5 Tabs nghiệp vụ.
+    - `Kiểm soát Cổng ra (/exit)`: Thu gọn mặc định aside "Xe sẵn sàng xuất" (`isSecondaryCollapsed = true`), mở rộng bảng duyệt xuất full-width.
+    - `Tiếp nhận Cổng vào (/entry)`: Thu gọn mặc định aside "Xe vừa tiếp nhận" (`isSecondaryCollapsed = true`), giải phóng tối đa diện tích cho form tiếp nhận xe và CCCD.
+    - `Sổ cái Thu phí (/billing)`: Bổ sung state và gắn toggle thu gọn mặc định aside "Khoản chờ thu".
+    - `Kế toán Bến bãi (/accounting)`: Bổ sung state và gắn toggle thu gọn mặc định aside "Phiếu chốt ca / HĐ / Nợ".
+    - `Báo cáo Vận hành (/reports)`: Bổ sung state và gắn toggle cho phép thu gọn aside bộ lọc kỳ báo cáo.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công trong 3.4s).
+
+- **Mốc trước đó (16/10/2026 17:45):** **QUY HOẠCH HỆ THỐNG CẤP ĐIỆN KHU A THEO 13 TỦ ĐIỆN / 50 GIẮC CẮM 380V HIỆN TRƯỜNG THỰC TẾ & HOÀN TẤT LOẠI BỎ 100% EMOJI (QUYẾT ĐỊNH D-023)**:
   * **1. Cấu trúc lại Hạ tầng Cấp điện Khu A thành 13 Tủ điện / 50 Giắc cắm 380V:**
     - Thay thế mô hình 30 trụ điện phẳng cũ (`R01..R30`) bằng phân cấp chuẩn thực tế: **13 Tủ điện (Cabinet T01 - T13)** chứa đúng **50 ổ cắm / giắc 380V công nghiệp**.
     - Phân bổ thực tế: T01 (3 ổ), T02 (4 ổ), T03 (4 ổ), T04 (3 ổ), T05 (8 ổ - Tủ công suất lớn), T06 (3 ổ), T07 (3 ổ), T08 (2 ổ), T09 (5 ổ), T10 (3 ổ), T11 (4 ổ), T12 (4 ổ), T13 (4 ổ). Tổng cộng: 50 ổ cắm.

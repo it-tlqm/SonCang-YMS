@@ -308,6 +308,7 @@ export default function YardMonitorPage() {
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
   const [secondarySearch, setSecondarySearch] = useState<string>('');
   const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'HANG' | 'RONG' | 'PAIRED' | 'UNPAIRED'>('ALL');
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Tự động đóng Action Dropdown khi click ra ngoài
   useEffect(() => {
@@ -1366,6 +1367,8 @@ export default function YardMonitorPage() {
       <SecondaryPanel
         title="Danh mục Tồn bãi"
         count={pairItems.length}
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
         headerActions={
           <button
             type="button"

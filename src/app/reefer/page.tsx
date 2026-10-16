@@ -71,7 +71,7 @@ export default function ReeferMonitoringPage() {
   // DS-02 Multi-pane states
   const [selectedSessionForInspector, setSelectedSessionForInspector] = useState<ReeferPowerSession | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
-  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Modal Ghi nhận nhiệt độ container lạnh
   const [showTempModal, setShowTempModal] = useState<boolean>(false);

@@ -63,7 +63,7 @@ export default function DashboardPage() {
   // Secondary Panel State
   const [secondarySearch, setSecondarySearch] = useState<string>('');
   const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'IN_YARD' | 'WARNING'>('IN_YARD');
-  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Right Context Panel Inspector State
   const [selectedVehicle, setSelectedVehicle] = useState<VehicleVisit | null>(null);

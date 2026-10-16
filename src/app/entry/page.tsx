@@ -119,7 +119,7 @@ export default function EntryGatePage() {
 
   // Secondary Panel State
   const [recentSearch, setRecentSearch] = useState<string>('');
-  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
   const [selectedRecentVehicle, setSelectedRecentVehicle] = useState<VehicleVisit | null>(null);
 
   // Right Context Panel State (Mặc định mở trên Desktop >= 1280px, đóng trên Tablet/Mobile để không che form)

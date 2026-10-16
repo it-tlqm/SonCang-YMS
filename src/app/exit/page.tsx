@@ -127,7 +127,7 @@ export default function ExitClearancePage() {
   const [selectedVehicleForInspector, setSelectedVehicleForInspector] = useState<VehicleVisit | null>(null);
   const [selectedContForInspector, setSelectedContForInspector] = useState<ContainerVisit | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
-  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Tải dữ liệu ban đầu
   useEffect(() => {

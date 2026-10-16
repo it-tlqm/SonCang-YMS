@@ -74,6 +74,7 @@ export default function ReportsManagementPage() {
 
   // DS-02 Inspector Panel
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(true);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Modal in báo cáo
   const [showPrintModal, setShowPrintModal] = useState<boolean>(false);
@@ -425,6 +426,8 @@ export default function ReportsManagementPage() {
       <SecondaryPanel
         title="Kỳ báo cáo & Bộ lọc"
         count={periodDisplayTitle ? 1 : 0}
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
         headerActions={
           <button
             type="button"

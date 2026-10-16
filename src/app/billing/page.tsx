@@ -100,6 +100,7 @@ export default function CashierBillingPage() {
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
   const [secondarySearch, setSecondarySearch] = useState<string>('');
   const [secondaryFilter, setSecondaryFilter] = useState<'ALL' | 'UNPAID' | 'REEFER' | 'TICKET'>('ALL');
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Chọn nhiều khoản (Batch Collection)
   const [selectedChargeIds, setSelectedChargeIds] = useState<string[]>([]);
@@ -673,6 +674,8 @@ export default function CashierBillingPage() {
       <SecondaryPanel
         title="Khoản chờ thu"
         count={roleScopedCharges.filter(c => c.status === 'UNPAID').length}
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
         headerActions={
           <button
             type="button"

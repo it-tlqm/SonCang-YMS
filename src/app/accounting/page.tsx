@@ -102,6 +102,7 @@ export default function AccountingPage() {
   } | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
   const [secondarySearch, setSecondarySearch] = useState<string>('');
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
 
   // Tải dữ liệu từ Repository
   const loadData = async () => {
@@ -301,6 +302,8 @@ export default function AccountingPage() {
             ? 'Hồ sơ nợ'
             : 'Giao dịch gần đây'
         }
+        isCollapsed={isSecondaryCollapsed}
+        onToggleCollapse={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
         count={
           activeTab === 'CASH_SETTLEMENT'
             ? settlements.length
