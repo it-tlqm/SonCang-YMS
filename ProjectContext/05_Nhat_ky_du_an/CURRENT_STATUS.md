@@ -40,8 +40,40 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 15/10/2026 14:50 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **LÀM SẠCH TRIỆT ĐỂ KHOẢN PHÍ / CÔNG NỢ (`charges`), PHIÊN ĐIỆN LẠNH (`reeferSessions`) & BỔ SUNG TÙY CHỌN "KHỞI TẠO BÃI TRỐNG 100%" (CLEAN YARD)**:
+- **Cập nhật lúc:** 16/10/2026 12:42 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **SAO LƯU & CHUẨN HÓA TOÀN DIỆN DỮ LIỆU LỊCH SỬ GOOGLE APPSHEET (`docs/Xe-ra-vao_SC.xlsx`)**:
+  * **Trích xuất & Chuẩn hóa 100% dữ liệu:**
+    1. Phạm vi thời gian: 27/08/2026 đến 16/10/2026 (gần 2 tháng).
+    2. Phương tiện (`VEHICLE`): 360 lượt xe (290 đã ra, 70 đang trong bãi - khớp 100% tồn bãi AppSheet). Doanh thu vé: 81.420.000 đ.
+    3. Container (`CONTAINER`): 304 lượt cont (239 đã xuất, 65 đang lưu - khớp 100% tồn bãi, 100% HÀNG). Doanh thu lưu: 60.500.000 đ.
+    4. Thông tin lái xe: Để trống (NULL) theo chỉ đạo của Chủ dự án (*"thông tin như lái xe thì để sau"*).
+  * **Bộ hồ sơ tệp sao lưu chuẩn:**
+    - `data/legacy_appsheet/legacy_vehicles.json` (360 bản ghi xe).
+    - `data/legacy_appsheet/legacy_containers.json` (304 bản ghi container).
+    - `data/legacy_appsheet/legacy_summary.json` (Bản tóm tắt chỉ số KPI).
+    - `data/legacy_appsheet/legacy_appsheet_backup.sql` (392 KB DDL & DML, 2 bảng PostgreSQL).
+    - `data/legacy_appsheet/README_LEGACY_BACKUP.md` (Báo cáo thuyết minh đối soát).
+    - Bản sao lưu trữ bền vững tại `ProjectContext/06_Kien_truc_va_kiem_thu/legacy_appsheet/`.
+  * **Tiện ích tra cứu:** `src/lib/services/legacy-backup-service.ts` hỗ trợ tra cứu lịch sử nhanh.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 10:55):** **XUẤT BẢN SỔ TAY HƯỚNG DẪN SỬ DỤNG (.DOCX) KÈM 16 KHUNG PLACEHOLDER ẢNH & BỔ SUNG Ô NHẬP THỦ CÔNG CCCD TÀI XẾ (/entry)**:
+  * **Tài liệu Word Hướng dẫn Vận hành kèm 16 Placeholder ảnh:**
+    1. Tệp tài liệu: `docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx` (bản sao thư mục gốc: `Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx`).
+    2. Cấu trúc 7 phần toàn diện: (1) Đăng nhập Web/PWA & RBAC V5; (2) An ninh Cổng vào 5 bước; (3) Quản lý Bến bãi, Phân khu & Trụ điện; (4) Container Điện lạnh, cắm rút cước 15 phút & nhiệt độ; (5) Cổng ra & Duyệt xuất bảo lãnh AP07; (6) Kế toán, chốt tiền mặt 4 mắt & Sổ hóa đơn MST/CCCD; (7) Báo cáo & Quản trị kiểm toán.
+    3. Tích hợp 16 khung placeholder ảnh thiết kế viền nét đứt chuyên nghiệp, sẵn sàng cho nhân viên dán ảnh chụp thực tế vào gửi nhóm.
+  * **Bổ sung ô nhập thủ công CCCD 12 số tài xế tại Cổng vào (`/entry`):**
+    1. Bổ sung trường input độc lập `Số CCCD tài xế` (12 số, font mono, có nút xóa nhanh ✕).
+    2. Nhóm thông tin tài xế thành cụm 3 cột: Họ tên, Số CCCD, Số điện thoại liên hệ.
+    3. Hỗ trợ song song cả 2 hình thức: Gõ tay trực tiếp 12 chữ số và Quét mã QR CCCD chip / mã vạch tự động điền.
+    4. Hiển thị badge xác nhận `✓ Đủ 12 số CCCD hợp lệ` và lưu vết vào `combinedNote` khi tiếp nhận xe.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (15/10/2026 14:50):** **LÀM SẠCH TRIỆT ĐỂ KHOẢN PHÍ / CÔNG NỢ (`charges`), PHIÊN ĐIỆN LẠNH (`reeferSessions`) & BỔ SUNG TÙY CHỌN "KHỞI TẠO BÃI TRỐNG 100%" (CLEAN YARD)**:
   * **Làm sạch `charges` và `reeferSessions` (Xóa bỏ 100% mock data giả định):**
     1. Làm rỗng các hằng số seed khởi tạo giả định (`INITIAL_DEMO_VEHICLES = []`, `INITIAL_DEMO_CONTAINERS = []`, `INITIAL_DEMO_PAYMENTS = []`, `INITIAL_DEMO_TEMP_LOGS = []`), bảo toàn danh mục hạ tầng chuẩn (`SEED_YARD_ZONES_SON_CANG`, `INITIAL_DEMO_CUSTOMERS`, `INITIAL_DEMO_STAFF_USERS`, `INITIAL_DEMO_POWER_SOCKETS`).
     2. Loại bỏ hoàn toàn 2 mảng tĩnh cứng cũ trong `DemoRepository`: `charges` (chứa `14C-123.45`, `TEMU9182341`, `OOLU6543210`, `CMAU5432198`) và `reeferSessions`.

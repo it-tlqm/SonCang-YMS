@@ -278,7 +278,7 @@ export default function EntryGatePage() {
     return () => clearTimeout(timer);
   }, [countdown, isPaused]);
 
-  // Trích xuất CCCD gắn chip
+  // Trích xuất CCCD gắn chip hoặc quét mã vạch
   const parseAndApplyCccdData = (rawText: string) => {
     const text = rawText.trim();
     if (text.includes('|')) {
@@ -293,6 +293,14 @@ export default function EntryGatePage() {
         setScannerRawInput('');
         return true;
       }
+    }
+    // Hỗ trợ mã vạch thuần túy hoặc số căn cước 9-12 chữ số
+    if (/^\d{9,12}$/.test(text)) {
+      setDriverIdCard(text);
+      setScanSuccessMsg(`Đã nhận diện số CCCD/CMND: ${text}`);
+      setShowIdCardScanner(false);
+      setScannerRawInput('');
+      return true;
     }
     setDriverIdCard(text);
     return false;
@@ -734,33 +742,76 @@ export default function EntryGatePage() {
                   ))}
                 </select>
               </div>
+            </div>
 
-              {/* Tên tài xế */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#17202E]">
-                  Họ tên tài xế
-                </label>
-                <input
-                  type="text"
-                  value={driverName}
-                  onChange={(e) => setDriverName(e.target.value)}
-                  placeholder="VD: Nguyễn Văn A"
-                  className="w-full h-9 px-3 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
-                />
+            {/* THÔNG TIN TÀI XẾ & ĐỊNH DANH CCCD */}
+            <div className="pt-3 border-t border-[#F0F2F6]">
+              <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                <span>Thông tin Tài xế & Định danh CCCD</span>
+                {driverIdCard && (
+                  <span className="text-[11px] font-semibold text-[#0A9444] bg-[#ECFDF3] px-2 py-0.5 rounded-md border border-[#A6F4C5]">
+                    {driverIdCard.length === 12 ? '✓ Đủ 12 số CCCD hợp lệ' : `Định danh: ${driverIdCard}`}
+                  </span>
+                )}
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Tên tài xế */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#17202E]">
+                    Họ tên tài xế
+                  </label>
+                  <input
+                    type="text"
+                    value={driverName}
+                    onChange={(e) => setDriverName(e.target.value)}
+                    placeholder="VD: Nguyễn Văn A"
+                    className="w-full h-9 px-3 text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                  />
+                </div>
 
-              {/* Số điện thoại */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#17202E]">
-                  Số điện thoại liên hệ
-                </label>
-                <input
-                  type="tel"
-                  value={driverPhone}
-                  onChange={(e) => setDriverPhone(e.target.value)}
-                  placeholder="VD: 0912345678"
-                  className="w-full h-9 px-3 text-xs font-mono bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
-                />
+                {/* Số CCCD tài xế (Nhập tay hoặc quét QR) */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#17202E] flex items-center justify-between">
+                    <span>Số CCCD tài xế</span>
+                    <span className="text-[10px] text-[#667085]">Nhập tay hoặc quét QR</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      maxLength={15}
+                      value={driverIdCard}
+                      onChange={(e) => {
+                        setDriverIdCard(e.target.value.replace(/\s+/g, ''));
+                      }}
+                      placeholder="VD: 001095012345"
+                      className="w-full h-9 px-3 text-xs font-mono font-semibold bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] focus:ring-1 focus:ring-[#326DD8]"
+                    />
+                    {driverIdCard && (
+                      <button
+                        type="button"
+                        onClick={() => setDriverIdCard('')}
+                        title="Xóa nhanh số CCCD"
+                        className="absolute right-2.5 top-2 text-[#98A2B3] hover:text-[#D92D20] text-xs font-bold cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Số điện thoại */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#17202E]">
+                    Số điện thoại liên hệ
+                  </label>
+                  <input
+                    type="tel"
+                    value={driverPhone}
+                    onChange={(e) => setDriverPhone(e.target.value)}
+                    placeholder="VD: 0912345678"
+                    className="w-full h-9 px-3 text-xs font-mono bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
+                  />
+                </div>
               </div>
             </div>
           </div>

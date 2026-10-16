@@ -1,5 +1,63 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 12:42 — Sao Lưu & Chuẩn Hóa Toàn Diện Dữ Liệu Lịch Sử Google AppSheet (`docs/Xe-ra-vao_SC.xlsx`)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"D:\thanhnx\OpenCode\YMS-project\docs\Xe-ra-vao_SCxlsx file này là dữ liệu cũ trên app sheet bạn có thẻ giúp tôi backup lại nó trên hệ thống này k? các thông tin như lái xe thì để sau bạn ạ"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Trích xuất & Chuẩn hóa 100% dữ liệu lịch sử:**
+     - Tệp nguồn: [`docs/Xe-ra-vao_SC.xlsx`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Xe-ra-vao_SC.xlsx) (Trích xuất 16/10/2026 10:44).
+     - Thời gian ghi nhận: Gần 2 tháng từ **27/08/2026 16:37** đến **16/10/2026 17:39**.
+     - Số lượng lượt xe (`VEHICLE`): **360 lượt xe** (290 xe đã xuất bãi `EXITED`, 70 xe đang tồn bãi `IN_YARD` - khớp 100% báo cáo tồn bãi `BC_SC_TON_BAI`).
+     - Cơ cấu loại xe: 304 `CONT_LANH` (84.4%), 53 `XE_BO_8_TAN_2_CHAN` (14.7%), 3 `XE_BO_3_BANH` (0.8%).
+     - Doanh thu vé cổng: **81.420.000 VNĐ** (247 Tiền mặt: 57.870.000 đ; 108 Chuyển khoản VietQR: 23.550.000 đ).
+     - Số lượng container (`CONTAINER`): **304 lượt container** (239 cont đã xuất `EXITED`, 65 cont đang lưu `IN_YARD` - khớp 100% tồn bãi, 100% tình trạng `HÀNG`).
+     - Doanh thu phí lưu bãi: **60.500.000 VNĐ**.
+     - Xử lý thông tin lái xe: Để trống (NULL) theo đúng chỉ đạo của Chủ dự án (*"thông tin như lái xe thì để sau"*).
+  2. **Bộ tệp tin sao lưu vĩnh viễn (Persistent Backup Files):**
+     - [`data/legacy_appsheet/legacy_vehicles.json`](file:///d:/thanhnx/OpenCode/YMS-project/data/legacy_appsheet/legacy_vehicles.json): 360 bản ghi xe chuẩn hóa thời gian ISO và múi giờ Việt Nam.
+     - [`data/legacy_appsheet/legacy_containers.json`](file:///d:/thanhnx/OpenCode/YMS-project/data/legacy_appsheet/legacy_containers.json): 304 bản ghi container chuẩn hóa.
+     - [`data/legacy_appsheet/legacy_summary.json`](file:///d:/thanhnx/OpenCode/YMS-project/data/legacy_appsheet/legacy_summary.json): Bản tóm tắt chỉ số đối soát tự động.
+     - [`data/legacy_appsheet/legacy_appsheet_backup.sql`](file:///d:/thanhnx/OpenCode/YMS-project/data/legacy_appsheet/legacy_appsheet_backup.sql): Script DDL & DML hoàn chỉnh (~392 KB), định nghĩa 2 bảng `legacy_appsheet_vehicles` và `legacy_appsheet_containers` với câu lệnh `INSERT ... ON CONFLICT DO NOTHING`.
+     - Đồng bộ lưu trữ sang: [`ProjectContext/06_Kien_truc_va_kiem_thu/legacy_appsheet/`](file:///d:/thanhnx/OpenCode/YMS-project/ProjectContext/06_Kien_truc_va_kiem_thu/legacy_appsheet/).
+  3. **Tài liệu thuyết minh & Service hỗ trợ:**
+     - [`data/legacy_appsheet/README_LEGACY_BACKUP.md`](file:///d:/thanhnx/OpenCode/YMS-project/data/legacy_appsheet/README_LEGACY_BACKUP.md) (bản sao tại [`docs/Bao_Cao_Sao_Luu_Du_Lieu_AppSheet.md`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Bao_Cao_Sao_Luu_Du_Lieu_AppSheet.md)).
+     - [`src/lib/services/legacy-backup-service.ts`](file:///d:/thanhnx/OpenCode/YMS-project/src/lib/services/legacy-backup-service.ts): Service TypeScript cung cấp phương thức `getSummary()`, `searchVehicles()`, `searchContainers()` phục vụ tra cứu lịch sử mà không làm nhiễm bẩn dữ liệu runtime hiện hành.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+## 2026-10-16 10:55 — Xuất Bản Tài Liệu Hướng Dẫn Sử Dụng (.DOCX) Kèm 16 Khung Placeholder Ảnh & Bổ Sung Ô Nhập Thủ Công Số CCCD Tài Xế (/entry)
+
+- **Yêu cầu / nguồn:** Yêu cầu từ Chủ dự án:
+  *"cần 1 tài liệu docx có place holder ảnh đẻ gửi vào nhóm cho mng dùng bạn ạ à note lại chúng ta sẽ thử chức năng cccd bạn ạ, chõ này liệu có thẻ cho ng dùng nhạp thù công trước số cccd bạn ạ"*
+- **Phân tích kỹ thuật & Triển khai thực tế:**
+  1. **Xuất bản Tài liệu Word (.docx) Hướng dẫn Vận hành có 16 Khung Placeholder ảnh chuyên nghiệp:**
+     - Tạo script tự động hóa: [`scripts/generate_user_guide_doc.py`](file:///d:/thanhnx/OpenCode/YMS-project/scripts/generate_user_guide_doc.py).
+     - Xuất bản 2 bản sao:
+       * [`docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx`](file:///d:/thanhnx/OpenCode/YMS-project/docs/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx)
+       * [`Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx`](file:///d:/thanhnx/OpenCode/YMS-project/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx)
+     - Thiết kế chuẩn mực doanh nghiệp Tà Lùng Quang Minh: Khổ A4, bảng màu nhận diện `#223873` (Navy) và `#0A9444` (Xanh lá Sơn Cảng), Header/Footer phân trang tự động.
+     - Tích hợp **16 Khung Placeholder ảnh** thiết kế dạng ô viền nét đứt (dashed `#326DD8`), nền xám `#F8FAFC`, icon camera, mã ảnh, tên màn hình, hướng dẫn thao tác (Ctrl+V hoặc Change Picture), kích thước đề xuất (1920x1080px) và điểm cần khoanh vùng/chú thích.
+     - Cấu trúc 7 phần hướng dẫn chi tiết theo từng bước:
+       * Phần 1: Truy cập Web/PWA & Đăng nhập phân quyền 7 vai trò RBAC V5.
+       * Phần 2: An ninh Cổng vào (`/entry`): 5 bước tiếp nhận xe, chọn loại xe, nhập tay/quét QR CCCD, cont đôi 2x20ft, thu vé cổng.
+       * Phần 3: Quản lý Bến bãi (`/yard`): Bảng cặp xe-cont, sơ đồ 4 phân khu, 30 trụ điện 380V, sửa số biển/cont lưu vết Audit.
+       * Phần 4: Container Điện lạnh (`/reefer`): Cắm điện, rút điện chốt cước làm tròn 15 phút, nhật ký nhiệt độ.
+       * Phần 5: Kiểm soát Cổng ra (`/exit`): Checklist 3 điều kiện xuất bãi, CCKB duyệt xuất bảo lãnh nợ AP07, tính phí lưu bãi qua đêm.
+       * Phần 6: Kế toán & Thu ngân (`/billing`, `/accounting`): Thu gộp nhiều khoản, chốt tiền mặt hiện trường 4 mắt, hóa đơn GTGT MST/CCCD, thu nợ AP07.
+       * Phần 7: Điều phối, Báo cáo & Quản trị (`/reports`, `/admin/*`): Hàng/Rỗng, phân tích dòng tiền, quản trị người dùng, audit log append-only.
+  2. **Bổ sung Ô nhập thủ công số CCCD tài xế (12 chữ số) trên trang Cổng vào (`/entry`):**
+     - [`src/app/entry/page.tsx`](file:///d:/thanhnx/OpenCode/YMS-project/src/app/entry/page.tsx):
+       * Bổ sung ô input *Số CCCD tài xế* độc lập (định dạng mono, tối đa 15 ký tự, hỗ trợ xóa nhanh ✕).
+       * Gom nhóm cụm *Thông tin Tài xế & Định danh CCCD* thành lưới 3 cột cân đối: Họ tên tài xế, Số CCCD tài xế (12 số), Số điện thoại liên hệ.
+       * Bổ sung huy hiệu xác thực: Hiển thị badge xanh lá `✓ Đủ 12 số CCCD hợp lệ` khi nhập đủ 12 chữ số.
+       * Cải tiến hàm `parseAndApplyCccdData`: Tự động nhận diện cả chuỗi mã QR CCCD gắn chip (phân tách bởi dấu `|`) lẫn mã vạch số thuần túy (9-12 chữ số).
+       * Dữ liệu CCCD được tự động gom vào ghi chú lượt xe `combinedNote` (`CCCD: 00109... | ...`), sẵn sàng đồng bộ sang kế toán hóa đơn.
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
 ## 2026-10-15 14:50 — Làm Sạch Triệt Để Khoản Phí / Công Nợ (`charges`), Phiên Cắm Điện (`reeferSessions`) & Bổ Sung Tùy Chọn "Khởi Tạo Bãi Trống 100%"
 
 - **Yêu cầu / nguồn:** Phản hồi và yêu cầu từ Chủ dự án:

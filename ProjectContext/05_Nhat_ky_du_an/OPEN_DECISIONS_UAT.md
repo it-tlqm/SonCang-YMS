@@ -66,5 +66,14 @@ Mỗi quyết định cần: **ngày, người chốt/chứng cứ, phương án
    - **Phương án đề xuất:** Cần một bản vá Backend (Hotfix RPC Migration 004.1 hoặc Migration 005) bổ sung guard check: nếu tạo lượt xe hoặc lượt cont mà xe là `DAU_KEO` nhưng chở cont thì ném ngoại lệ `SC_INVALID_TICKET_VEHICLE_TYPE`.
    - **Trạng thái:** `[CHỜ CHỐT / UAT CÒN MỞ — ĐÃ THỰC THI VALIDATION PHÍA CLIENT PWA]`.
 
+8. **Quyết định 8 (SC-1E-CCCD-01) — Thử nghiệm tiếp nhận số CCCD tài xế (Nhập thủ công & Quét mã QR chip) tại Cổng vào:**
+   - **Bối cảnh:** Nhằm nâng cao an ninh định danh người điều khiển phương tiện ra vào bến bãi, phòng chống gian lận biển số/đổi lái và chuẩn bị dữ liệu xuất Hóa đơn GTGT cho khách hàng cá nhân (theo CCCD 12 số) ở phân hệ Kế toán.
+   - **Thực tế triển khai thử nghiệm:**
+     * Form Cổng vào (`/entry`): Bổ sung ô nhập thủ công `Số CCCD tài xế` (12 số) hỗ trợ kiểm tra định dạng và nút xóa nhanh, song song với nút Quét mã QR CCCD gắn chip / mã vạch tự động điền.
+     * Dữ liệu CCCD được lưu trữ an toàn trong trường `note` (`CCCD: 00109... | ...`) phục vụ đối soát, không làm gãy schema migration hiện tại.
+   - **Phương án UAT cần chốt:** Khi triển khai production, có tách thành cột CSDL độc lập `driver_id_card` trong bảng `vehicle_visits` hay tiếp tục lưu kết hợp trong `note`? Có bắt buộc nhập CCCD (Required) hay chỉ khuyến khích (Optional)?
+   - **Trạng thái:** `[ĐANG THỬ NGHIỆM UAT / CHỜ CHỐT CHÍNH THỨC — ĐÃ BỔ SUNG TRƯỜNG NHẬP THỦ CÔNG PHÍA CLIENT]`.
+
+
 
 

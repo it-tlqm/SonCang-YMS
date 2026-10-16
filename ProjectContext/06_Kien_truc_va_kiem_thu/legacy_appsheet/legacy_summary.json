@@ -1,0 +1,35 @@
+{
+  "extracted_at": "2026-10-16T05:40:52.077Z",
+  "extracted_at_vn": "2026-10-16 12:40:52",
+  "source_file": "docs/Xe-ra-vao_SC.xlsx",
+  "source_software": "Google AppSheet (Bãi Sơn Cảng - Kiểm soát xe và Container)",
+  "date_range": {
+    "start_vn": "2026-08-27 16:37:11",
+    "end_vn": "2026-10-16 17:39:08"
+  },
+  "vehicles": {
+    "total": 360,
+    "exited": 290,
+    "in_yard": 70,
+    "by_type": {
+      "CONT_LANH": 304,
+      "XE_BO_8_TAN_2_CHAN": 53,
+      "XE_BO_3_BANH": 3
+    },
+    "total_ticket_revenue": 81420000,
+    "by_payment_method": {
+      "CHƯA_RÕ": 5,
+      "Tiền mặt": 247,
+      "Chuyển khoản": 108
+    }
+  },
+  "containers": {
+    "total": 304,
+    "exited": 239,
+    "in_yard": 65,
+    "total_storage_revenue": 60500000,
+    "by_cargo": {
+      "HÀNG": 304
+    }
+  }
+}
