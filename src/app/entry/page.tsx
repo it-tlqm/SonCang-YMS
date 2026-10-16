@@ -1131,6 +1131,141 @@ export default function EntryGatePage() {
           </div>
         </div>
       </RightContextPanel>
+
+      {/* ============================================================== */}
+      {/* 4. MODAL IN VÉ VÀO BÃI CHO XE & CONTAINER (CHUẨN IN NHIỆT POS) */}
+      {/* ============================================================== */}
+      {showPrintTicketModal && successResult && (
+        <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in print:p-0 print:bg-white">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 border border-[#E5E9F0] shadow-2xl space-y-4 print:border-none print:shadow-none print:max-w-none print:p-0">
+            {/* Header điều khiển (ẩn khi in) */}
+            <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
+              <span className="text-xs font-bold text-[#17202E] flex items-center gap-1.5 uppercase tracking-wider">
+                <Printer className="w-4 h-4 text-[#0A9444]" />
+                Xem trước & In vé xe vào bãi
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="py-1.5 px-3.5 text-xs font-semibold text-white bg-[#0A9444] hover:bg-[#087C3C] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>In vé ngay</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPrintTicketModal(false)}
+                  className="py-1.5 px-3 text-xs font-semibold text-[#667085] hover:bg-[#F8F9FB] rounded-lg border border-[#E5E9F0] transition-colors cursor-pointer inline-flex items-center gap-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Đóng</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Khổ vé in nhiệt 80mm / A5 */}
+            <div className="border border-dashed border-[#CBD5E1] rounded-xl p-5 space-y-3 bg-[#FCFCFD] text-[#17202E] font-sans print:border-none print:bg-white print:p-0">
+              {/* Header thương hiệu */}
+              <div className="text-center pb-2 border-b border-[#E5E9F0]">
+                <p className="font-bold text-xs uppercase text-[#223873] tracking-wide">
+                  CÔNG TY CỔ PHẦN TÀ LÙNG QUANG MINH
+                </p>
+                <p className="text-[11px] font-semibold text-[#17202E] mt-0.5">
+                  Bến bãi Quản lý & Cảng cạn Sơn Cảng
+                </p>
+                <p className="text-[10px] text-[#667085]">
+                  Cửa khẩu Quốc tế Tà Lùng, Huyện Quảng Hòa, Cao Bằng
+                </p>
+                <div className="pt-2">
+                  <h2 className="text-base sm:text-lg font-bold text-[#17202E] uppercase tracking-wider">
+                    VÉ XE VÀO BÃI
+                  </h2>
+                  <p className="text-[10px] italic text-[#667085]">
+                    (Liên kiểm soát bến bãi — Lưu giữ khi rời cổng)
+                  </p>
+                </div>
+              </div>
+
+              {/* Thông tin vé */}
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#667085]">Mã số vé vào bãi:</span>
+                  <span className="font-mono font-bold text-sm text-[#0A9444]">
+                    {successResult.vehicle.ticket_code || 'SC-IN-000000'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#667085]">Biển số phương tiện:</span>
+                  <span className="font-mono font-bold text-sm text-[#17202E] px-2 py-0.5 bg-white border border-[#E5E9F0] rounded">
+                    {successResult.vehicle.license_plate}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#667085]">Loại phương tiện:</span>
+                  <span className="font-medium text-[#17202E]">
+                    {getVehicleTypeName(successResult.vehicle.vehicle_type)}
+                  </span>
+                </div>
+
+                {successResult.container && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#667085]">Container kéo theo:</span>
+                    <span className="font-mono font-bold text-xs text-[#326DD8]">
+                      {successResult.container.container_no_current} ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
+                    </span>
+                  </div>
+                )}
+
+                {successResult.secondContainer && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#667085]">Container #2 (20ft):</span>
+                    <span className="font-mono font-bold text-xs text-[#326DD8]">
+                      {successResult.secondContainer.container_no_current}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[#667085]">Thời gian xe vào cổng:</span>
+                  <span className="font-mono font-medium text-[#17202E]">
+                    {new Date(successResult.vehicle.entry_at).toLocaleTimeString('vi-VN')} — {new Date(successResult.vehicle.entry_at).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-[#E5E9F0] flex items-center justify-between">
+                  <span className="font-semibold text-xs text-[#17202E]">Tiền vé vào bãi:</span>
+                  <span className="font-mono font-bold text-base text-[#0A9444]">
+                    {successResult.vehicle.ticket_amount !== null && successResult.vehicle.ticket_amount > 0
+                      ? `${successResult.vehicle.ticket_amount.toLocaleString('vi-VN')} đ`
+                      : '0 đ (Miễn phí)'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-[#667085]">Trạng thái thanh toán:</span>
+                  <span className="font-semibold text-[#0A9444]">
+                    {successResult.vehicle.ticket_payment_status === 'PAID'
+                      ? 'ĐÃ THU TIỀN VÉ TẠI CỔNG VÀO'
+                      : (successResult.vehicle.ticket_payment_status === 'EXEMPT' ? 'MIỄN PHÍ VÉ CỔNG' : 'CHƯA THU (THU TẠI CỔNG RA)')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer lưu ý & QR */}
+              <div className="pt-3 border-t border-dashed border-[#CBD5E1] text-center space-y-1">
+                <p className="text-[10px] text-[#667085] leading-relaxed">
+                  Quý khách vui lòng giữ vé để xuất trình cho An ninh khi xe rời bãi.<br />
+                  Cước lưu bãi container bắt đầu tính sau đêm miễn phí đầu tiên theo quy định biểu phí niêm yết.
+                </p>
+                <p className="text-[9px] font-mono text-[#98A2B3] pt-1">
+                  In lúc: {new Date().toLocaleTimeString('vi-VN')} {new Date().toLocaleDateString('vi-VN')} · Bốt An ninh Cổng vào
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

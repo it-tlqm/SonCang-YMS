@@ -40,14 +40,11 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:38 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN TẤT TRIỂN KHAI GÓI NÂNG CẤP UI/UX TOÀN DIỆN CHO PWA & WEBSITE BẾN BÃI SƠN CẢNG**:
-  * **1. Mobile Bottom Navigation Bar (PWA):** Bổ sung thanh điều hướng ngón tay cái cố định ở cạnh dưới cho điện thoại di động (Cổng vào, Bến bãi, Cắm điện, Cổng ra, Cẩm nang). Tự động bù trừ padding `pb-safe` và `pb-14 md:pb-0`.
-  * **2. Bộ đếm thời gian thực (Live Badges):** Tự động đồng bộ số lượng cont bãi, phiên cắm điện, xe chờ ra cổng trên Sidebar và Bottom Bar chu kỳ 15 giây.
-  * **3. Tra cứu nhanh toàn bãi (`Ctrl + K` Command Palette):** Tìm kiếm thông minh xe, container, mã vé, số CCCD và chuyển ngay tới phân hệ quản lý.
-  * **4. Phím tắt toàn cục:** `Esc` đóng modal, `Alt + 1..6` chuyển nhanh 6 phân hệ, `Alt + 0` xem Cẩm nang.
-  * **5. Chuẩn hóa Toast Notification:** Tạo mới `ToastProvider` thay thế triệt để các hộp thoại `alert()` trình duyệt.
-  * Đã kiểm thử `npx tsc --noEmit` đạt 0 lỗi và sẵn sàng đẩy lên branch main kích hoạt auto-deploy Vercel Production.
+- **Cập nhật lúc:** 16/10/2026 22:44 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THIỆN MODAL IN VÉ XE VÀO BÃI POS 80MM & CƠ CHẾ GIÁM SÁT MẠNG NGOẠI TUYẾN PWA**:
+  * **1. Modal In Vé Vào Bãi (`/entry`):** Đã bổ sung Modal hiển thị và in ấn vé xe vào bãi chuẩn nhiệt 80mm/A5 với đầy đủ pháp nhân Tà Lùng Quang Minh, số vé, biển số xe, loại xe, container mang theo, ngày giờ vào cổng và trạng thái thanh toán.
+  * **2. Giám sát Mạng Ngoại tuyến PWA:** Tích hợp thanh thông báo trạng thái `OFFLINE` cảnh báo an toàn dữ liệu tài chính khi mất mạng internet cửa khẩu, và Toast thông báo khi có mạng trở lại.
+  * **3. Đẩy Production:** Đang commit và push trực tiếp lên branch `main` kích hoạt auto-deploy Vercel.
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

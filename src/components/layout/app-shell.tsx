@@ -61,11 +61,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isResettingYard, setIsResettingYard] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
   const [liveCounts, setLiveCounts] = useState<{
     yardContCount: number;
     reeferActiveCount: number;
     exitWaitCount: number;
   }>({ yardContCount: 0, reeferActiveCount: 0, exitWaitCount: 0 });
+
+  // Giám sát kết nối mạng Internet (PWA Offline Detection)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setIsOnline(navigator.onLine);
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      toastSuccess('Đã khôi phục kết nối mạng Internet bến bãi!', 'Trực tuyến');
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toastError('Thiết bị đang mất kết nối Internet! Hệ thống chuyển sang chế độ ngoại tuyến (Chỉ xem dữ liệu đệm).', 'Mất kết nối mạng');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [toastSuccess, toastError]);
 
   const isRealWriteEnabled = process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true';
 
@@ -705,6 +730,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
+
+      {/* ============================================================== */}
+      {/* OFFLINE STATUS BANNER (PWA VÙNG BIÊN GIỚI TÀ LÙNG)             */}
+      {/* ============================================================== */}
+      {!isOnline && (
+        <div className="bg-[#FFFAEB] border-b border-[#FEDF89] px-4 py-2 flex items-center justify-between text-xs text-[#B54708] select-none shrink-0 animate-in slide-in-from-top-1 z-40">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#D92D20] animate-ping shrink-0" />
+            <span className="font-bold">Cảnh báo Ngoại tuyến:</span>
+            <span>Mất kết nối Internet cửa khẩu. Hệ thống đang hoạt động ở chế độ đệm — Vui lòng chờ có mạng trở lại để đồng bộ dữ liệu giao dịch tài chính.</span>
+          </div>
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white border border-[#FEDF89] text-[#B54708]">
+            OFFLINE
+          </span>
+        </div>
+      )}
 
       {/* ============================================================== */}
       {/* 2. BODY WORKSPACE WRAPPER (SIDEBAR + MAIN CANVAS)              */}

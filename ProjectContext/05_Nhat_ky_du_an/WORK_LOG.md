@@ -1,5 +1,27 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 22:44 — Hoàn Thiện Modal In Vé Xe Vào Bãi (POS 80mm) & Cơ Chế Giám Sát Mạng Ngoại Tuyến (Offline Status Banner)
+
+- **Yêu cầu / nguồn:** Chỉ đạo rà soát toàn diện từ Chủ dự án:
+  *"Còn nâng cấp nữa naod rà soát ngay"*
+- **Phân tích rà soát & Triển khai thực tế:**
+  1. **Khắc phục lỗ hổng nút "In vé" tại Cổng vào (`/entry`):**
+     - Rà soát phát hiện state `showPrintTicketModal` và nút in vé đã có sẵn trong thông báo thành công, nhưng chưa có modal JSX render tương ứng.
+     - Xây dựng Modal In Vé Xe Vào Bãi hoàn chỉnh (`src/app/entry/page.tsx`):
+       * Khổ in nhiệt POS 80mm chuẩn máy in bốt gác và A5 in văn phòng (`@media print`).
+       * Đầy đủ thông tin pháp nhân (Tà Lùng Quang Minh — Bến bãi Sơn Cảng), Số vé (`ticket_code`), Biển số xe, Loại xe, Container kéo theo, Ngày giờ vào cổng, Tiền vé, Trạng thái thanh toán (Đã thu tiền mặt/VietQR hoặc miễn phí), Ghi chú lưu giữ cuống vé khi ra cổng.
+       * Tích hợp nút "In vé ngay (`window.print`)" và nút "Đóng".
+  2. **Cơ chế Giám sát Mạng & Cảnh báo Ngoại tuyến PWA (Offline Status Banner):**
+     - Tích hợp hook giám sát mạng trong `AppShell` (`src/components/layout/app-shell.tsx`): Lắng nghe sự kiện `online` / `offline` của trình duyệt.
+     - Khi mất kết nối: Xuất hiện Banner cảnh báo màu vàng cam trên đỉnh hệ thống cảnh báo chế độ đệm ngoại tuyến an toàn theo quy định V5.
+     - Khi khôi phục kết nối: Tự động ẩn banner và gửi Toast thông báo trực tuyến tức thì.
+- **Tệp sửa đổi:**
+  - `src/app/entry/page.tsx`
+  - `src/components/layout/app-shell.tsx`
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit` -> PASS (0 lỗi).
+  - Dev server HTTP check -> 200 OK.
+
 ## 2026-10-16 22:38 — Triển Khai Toàn Diện Gói Nâng Cấp UI/UX, Công Thái Học & Công Cụ Vận Hành Bến Bãi
 
 - **Yêu cầu / nguồn:** Phê duyệt & chỉ đạo triển khai trực tiếp từ Chủ dự án:
