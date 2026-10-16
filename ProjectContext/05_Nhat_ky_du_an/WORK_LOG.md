@@ -1,5 +1,30 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 14:15 — Tích Hợp Hiển Thị Phí Lưu Bãi Container Tích Lũy Tạm Tính (~73.7Tr) Lên Dashboard & Quản Lý Bến Bãi (Quyết Định D-022)
+
+- **Yêu cầu / nguồn:** Phản hồi từ Chủ dự án:
+  *"ủa sao áo th, chỗ backup bạn k cho thu tiền long gì à? Chưa thanh toán 0 đ / 0 khoản phí"* (khi thấy danh sách 70 xe trong bãi có nhiều xe lưu đến 789 giờ, 52 xe lưu quá 24 giờ).
+  Kèm lựa chọn phương án qua khảo sát: *"Chỉ cập nhật hiển thị Phí lưu bãi tích lũy (73.7tr) lên Dashboard, giữ nguyên Vé cổng là 'Đã thu' theo file AppSheet"*.
+- **Phân tích kỹ thuật & Điều tra dữ liệu (Root Cause Analysis):**
+  1. **Vé vào cổng (16.600.000 VNĐ):** Trong tệp AppSheet gốc `Xe-ra-vao_SC.xlsx` (Sheet `VEHICLE`), toàn bộ 70 xe trong bãi đều được đặt sẵn trạng thái `TRANG_THAI_THU_VE = 'Đã thu'`. Do đó khi import dữ liệu, hệ thống giữ nguyên hiện trạng gốc và đánh dấu `ticket_payment_status = 'PAID'`, không phát sinh công nợ vé cổng.
+  2. **Phí lưu bãi container (73.700.000 VNĐ):** 52/65 container đã lưu qua 24 giờ (từ 1 đến 34 đêm). Theo bất biến nghiệp vụ V5, phí lưu bãi container chỉ chốt và thu tại Cổng ra (`/exit`) khi container ra thực tế. Trước đây KPI Card 5 của Dashboard (`/dashboard`) chỉ đếm các khoản nợ đã chốt trong Sổ cái `charges`, mà chưa cộng **Phí lưu bãi tích lũy tạm tính**, dẫn đến việc Dashboard hiển thị `0 đ / 0 khoản phí`, gây cảm giác phi thực tế ("ảo").
+- **Triển khai kỹ thuật thực tế:**
+  1. **Tích hợp Phí lưu bãi tạm tính vào Dashboard (`src/app/dashboard/page.tsx`):**
+     - Nhập hàm tính phí lưu bãi chuẩn V5: `calculateStorageFeeOffline` từ `@/lib/services/supabase-repository`.
+     - Sử dụng `useMemo` tính toán động `accruedStorageInfo`: quét 65 container trong bãi, tính chính xác số đêm lưu thực tế (khung giờ 22h-06h, tự động miễn đêm đầu).
+     - Kết quả: Có 52 container phát sinh phí lưu bãi, tổng tiền tích lũy là **73.700.000 VNĐ**.
+     - Tổng tiền chờ thu: `totalPendingAmount = totalReceivableAmount + accruedStorageInfo.totalAccruedStorage`.
+     - Nâng cấp KPI Card 5 hiển thị: `Chưa thanh toán (Tạm tính): 73.700.000 đ` kèm phụ đề rõ ràng: `Lưu bãi: ~73.7tr (52 cont)`.
+  2. **Tích hợp Hiển thị Phí lưu bãi tạm tính vào Quản lý Bến bãi (`src/app/yard/page.tsx`):**
+     - Nhập hàm `calculateStorageFeeOffline`.
+     - Nâng cấp hàm `renderDwellBadge(entryAt, isCont)`: Nếu đối tượng là container và có phí lưu bãi tích lũy (`storageFeeObj.fee > 0`), hiển thị thêm dòng thông tin màu hổ phách ngay dưới huy hiệu giờ lưu: `Lưu bãi: ~X đ (Y đêm)`.
+     - Áp dụng trực tiếp vào:
+       * Tab 1: Cặp Xe — Container (`renderDwellBadge(entryTime, !!item.container)`).
+       * Tab 2: Container trong bãi (`renderDwellBadge(c.inbound_at, true)`).
+- **Kiểm thử xác thực:**
+  - `npx tsc --noEmit`: 100% PASS (0 errors).
+  - `npm run build`: 100% PASS (20/20 routes Next.js Turbopack biên dịch thành công).
+
 ## 2026-10-16 14:05 — Cập Nhật Quy Tắc Tính Tiền Điện Container (Thời Gian Thực Tế & Tròn Đến 5.000đ) & Tái Cấu Trúc Thứ Tự Tab Giám Sát Điện (/reefer)
 
 - **Yêu cầu / nguồn:** Yêu cầu trực tiếp từ Chủ dự án:

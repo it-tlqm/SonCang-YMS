@@ -50,6 +50,7 @@ import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
 import { TablePagination } from '@/components/workspace/table-pagination';
+import { calculateStorageFeeOffline } from '@/lib/services/supabase-repository';
 
 export interface YardPairItem {
   id: string;
@@ -975,34 +976,49 @@ export default function YardMonitorPage() {
     return diffMs / (1000 * 60 * 60);
   };
 
-  // Badge cảnh báo thời gian lưu bãi (Dwell Time Heatmap Badge)
-  const renderDwellBadge = (entryAt: string) => {
+  // Badge cảnh báo thời gian lưu bãi & Phí lưu bãi container tích lũy tạm tính
+  const renderDwellBadge = (entryAt: string, isCont: boolean = false) => {
     if (!entryAt) return <span className="text-[#98A2B3]">—</span>;
     const hours = getDwellHours(entryAt);
     const durationText = formatDurationInYard(entryAt);
+    const storageFeeObj = isCont ? calculateStorageFeeOffline(entryAt) : null;
 
+    let badge = null;
     if (hours >= 48) {
-      return (
+      badge = (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20]" title={`Đã lưu ${durationText} - Cảnh báo tồn bãi quá 48h!`}>
           <AlertCircle className="w-3 h-3 text-[#D92D20]" />
           <span>{durationText} (≥48h)</span>
         </span>
       );
-    }
-    if (hours >= 24) {
-      return (
+    } else if (hours >= 24) {
+      badge = (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FFFAEB] border border-[#FEDF89] text-[#B54708]" title={`Đã lưu ${durationText} - Cần theo dõi tồn bãi (≥24h)`}>
           <AlertTriangle className="w-3 h-3 text-[#B54708]" />
           <span>{durationText} (≥24h)</span>
         </span>
       );
+    } else {
+      badge = (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] border border-[#E5E9F0] text-[#667085]" title={`Đã lưu ${durationText}`}>
+          <Clock className="w-3 h-3 text-[#667085]" />
+          <span>{durationText}</span>
+        </span>
+      );
     }
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#F5F7FA] border border-[#E5E9F0] text-[#667085]" title={`Đã lưu ${durationText}`}>
-        <Clock className="w-3 h-3 text-[#667085]" />
-        <span>{durationText}</span>
-      </span>
-    );
+
+    if (storageFeeObj && storageFeeObj.fee > 0) {
+      return (
+        <div className="space-y-0.5">
+          {badge}
+          <div className="text-[10px] font-mono font-bold text-[#B54708]">
+            Lưu bãi: ~{storageFeeObj.fee.toLocaleString('vi-VN')} đ ({storageFeeObj.chargedNights} đêm)
+          </div>
+        </div>
+      );
+    }
+
+    return badge;
   };
 
   // Thống kê nhanh
@@ -1853,7 +1869,7 @@ export default function YardMonitorPage() {
                             </div>
                             {entryTime && (
                               <div>
-                                {renderDwellBadge(entryTime)}
+                                {renderDwellBadge(entryTime, !!item.container)}
                               </div>
                             )}
                           </div>
@@ -2176,7 +2192,7 @@ export default function YardMonitorPage() {
                           <div className="text-[#667085] font-mono text-[11px]">
                             {new Date(c.inbound_at).toLocaleString('vi-VN')}
                           </div>
-                          <div>{renderDwellBadge(c.inbound_at)}</div>
+                          <div>{renderDwellBadge(c.inbound_at, true)}</div>
                         </div>
                       </td>
                       <td className="px-3.5 py-2.5 text-right">

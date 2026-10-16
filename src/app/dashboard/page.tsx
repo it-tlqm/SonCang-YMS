@@ -42,6 +42,7 @@ import { RightContextPanel } from '@/components/workspace/right-context-panel';
 import { SearchInput } from '@/components/workspace/search-input';
 import { StatusBadge } from '@/components/workspace/status-badge';
 import { EmptyState } from '@/components/workspace/empty-state';
+import { calculateStorageFeeOffline } from '@/lib/services/supabase-repository';
 
 export default function DashboardPage() {
   const { yardId, repository, role, can } = useAuth();
@@ -156,6 +157,25 @@ export default function DashboardPage() {
   const paidCharges = charges.filter((ch) => ch.status === 'PAID');
   const unpaidCharges = charges.filter((ch) => ch.status === 'UNPAID');
   const totalReceivableAmount = unpaidCharges.reduce((acc, curr) => acc + (curr.amount - curr.paid_amount), 0);
+
+  // Phí lưu bãi Container tích lũy tạm tính cho các container đang ở trong bãi
+  const accruedStorageInfo = useMemo(() => {
+    let totalAccruedStorage = 0;
+    let chargedContCount = 0;
+    const nowStr = new Date().toISOString();
+    containers.forEach((c) => {
+      if (c.status === 'IN_YARD' && c.inbound_at) {
+        const feeObj = calculateStorageFeeOffline(c.inbound_at, nowStr);
+        if (feeObj.fee > 0) {
+          totalAccruedStorage += feeObj.fee;
+          chargedContCount++;
+        }
+      }
+    });
+    return { totalAccruedStorage, chargedContCount };
+  }, [containers]);
+
+  const totalPendingAmount = totalReceivableAmount + accruedStorageInfo.totalAccruedStorage;
 
   // Hàng đợi phương tiện lọc cho Secondary Panel
   const filteredQueueVehicles = useMemo(() => {
@@ -407,17 +427,26 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 5. Khoản tiền chưa thu */}
+            {/* 5. Khoản tiền chưa thu & Tạm tính */}
             <div className="bg-white p-3 rounded-lg border border-[#E5E9F0]">
               <div className="flex items-center justify-between text-[#667085] text-xs mb-1">
-                <span>Chưa thanh toán</span>
+                <span>Chưa thanh toán (Tạm tính)</span>
                 <Receipt className="w-3.5 h-3.5 text-[#D92D20]" />
               </div>
               <div className="text-base font-bold font-mono text-[#D92D20] truncate">
-                {canReadFinance ? `${totalReceivableAmount.toLocaleString('vi-VN')} đ` : '••••••'}
+                {canReadFinance ? `${totalPendingAmount.toLocaleString('vi-VN')} đ` : '••••••'}
               </div>
-              <div className="text-[11px] text-[#667085] mt-0.5 truncate">
-                {canReadFinance ? `${unpaidCharges.length} khoản phí` : 'Phân quyền kế toán'}
+              <div 
+                className="text-[11px] text-[#667085] mt-0.5 truncate"
+                title={`Sổ cái chưa thu: ${totalReceivableAmount.toLocaleString('vi-VN')} đ | Phí lưu bãi tạm tính: ${accruedStorageInfo.totalAccruedStorage.toLocaleString('vi-VN')} đ (${accruedStorageInfo.chargedContCount} cont)`}
+              >
+                {canReadFinance ? (
+                  accruedStorageInfo.totalAccruedStorage > 0 ? (
+                    <span>Lưu bãi: ~{(accruedStorageInfo.totalAccruedStorage / 1000000).toFixed(1)}tr ({accruedStorageInfo.chargedContCount} cont)</span>
+                  ) : (
+                    <span>{unpaidCharges.length} khoản phí</span>
+                  )
+                ) : 'Phân quyền kế toán'}
               </div>
             </div>
 

@@ -40,8 +40,22 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
 
-- **Cập nhật lúc:** 16/10/2026 14:05 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **BỎ LÀM TRÒN 15 PHÚT — TÍNH THEO PHÚT THỰC TẾ & LÀM TRÒN CƯỚC ĐIỆN ĐẾN 5.000Đ; ĐỔI THỨ TỰ TAB ĐIỆN LẠNH (/reefer)**:
+- **Cập nhật lúc:** 16/10/2026 14:15 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TÍCH HỢP HIỂN THỊ PHÍ LƯU BÃI CONTAINER TÍCH LŨY TẠM TÍNH (~73.7TR) LÊN DASHBOARD VÀ BÃI XE (/yard) (QUYẾT ĐỊNH D-022)**:
+  * **Giải quyết thắc mắc về công nợ và thu tiền từ dữ liệu 70 xe AppSheet:**
+    1. **Vé vào cổng (16.600.000đ):** File AppSheet gốc ghi nhận 100% 70 xe vào bãi là `TRANG_THAI_THU_VE = 'Đã thu'`. Hệ thống giữ nguyên trạng thái `PAID` theo đúng file gốc.
+    2. **Phí lưu bãi container (73.700.000đ):** 52/65 container đã lưu qua 24 giờ. Theo bất biến nghiệp vụ V5, khoản phí này chỉ chốt và thu tại Cổng ra (`/exit`) khi xe/cont ra bãi. Tuy nhiên để phản ánh số liệu tài chính chân thực trên bảng điều khiển, hệ thống đã tích hợp hiển thị Phí lưu bãi tích lũy tạm tính.
+  * **Nâng cấp Dashboard (`/dashboard`):**
+    1. Nhập hàm `calculateStorageFeeOffline` tính số đêm lưu qua khung 22h-06h (miễn đêm đầu, đơn giá 100k/đêm).
+    2. KPI Card 5 hiển thị: `Chưa thanh toán (Tạm tính): 73.700.000 đ` kèm phụ đề `Lưu bãi: ~73.7tr (52 cont)` và tooltip thuyết minh đầy đủ.
+  * **Nâng cấp Quản lý Bến bãi (`/yard`):**
+    1. Huy hiệu lưu bãi (`renderDwellBadge`) hiển thị trực quan thông tin cước lưu bãi màu hổ phách: `Lưu bãi: ~X đ (Y đêm)` cho từng container có phát sinh phí.
+    2. Áp dụng đồng bộ trên cả Tab Cặp xe-container và Tab Container tồn bãi.
+  * **Kiểm thử xác nhận:**
+    - `npx tsc --noEmit`: 100% PASS (0 errors).
+    - `npm run build`: 100% PASS (20/20 routes biên dịch thành công).
+
+- **Mốc trước đó (16/10/2026 14:05):** **BỎ LÀM TRÒN 15 PHÚT — TÍNH THEO PHÚT THỰC TẾ & LÀM TRÒN CƯỚC ĐIỆN ĐẾN 5.000Đ; ĐỔI THỨ TỰ TAB ĐIỆN LẠNH (/reefer)**:
   * **Quy tắc tính cước điện container mới (Quyết định D-021 chốt):**
     1. Bỏ hoàn toàn quy tắc làm tròn thời gian lên chu kỳ 15 phút.
     2. Thời lượng cắm điện được tính theo số phút thực tế: `billable_minutes = Math.round(durationSeconds / 60)`.
