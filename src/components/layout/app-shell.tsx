@@ -33,8 +33,12 @@ import {
   ShieldCheck,
   Search,
   RotateCcw,
-  BookOpen
+  BookOpen,
+  Wifi,
+  WifiOff,
+  UploadCloud
 } from 'lucide-react';
+import { getPendingDraftsCount, subscribeOfflineQueue } from '@/lib/offline-queue';
 import { ChangePasswordModal } from '@/components/modals/change-password-modal';
 import { useToast } from '@/contexts/toast-context';
 import { GlobalSearchModal } from '@/components/workspace/global-search-modal';
@@ -62,16 +66,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [pendingDraftCount, setPendingDraftCount] = useState<number>(0);
   const [liveCounts, setLiveCounts] = useState<{
     yardContCount: number;
     reeferActiveCount: number;
     exitWaitCount: number;
   }>({ yardContCount: 0, reeferActiveCount: 0, exitWaitCount: 0 });
 
-  // Giám sát kết nối mạng Internet (PWA Offline Detection)
+  // Giám sát kết nối mạng Internet & hàng đợi nháp ngoại tuyến (PWA Offline Detection)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     setIsOnline(navigator.onLine);
+    setPendingDraftCount(getPendingDraftsCount());
+
+    const unsubscribeQueue = subscribeOfflineQueue(() => {
+      setPendingDraftCount(getPendingDraftsCount());
+    });
 
     const handleOnline = () => {
       setIsOnline(true);
@@ -87,6 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener('offline', handleOffline);
 
     return () => {
+      unsubscribeQueue();
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -732,18 +743,56 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* ============================================================== */}
-      {/* OFFLINE STATUS BANNER (PWA VÙNG BIÊN GIỚI TÀ LÙNG)             */}
+      {/* OFFLINE & PENDING SYNC BANNER (PWA VÙNG BIÊN GIỚI TÀ LÙNG)    */}
       {/* ============================================================== */}
-      {!isOnline && (
-        <div className="bg-[#FFFAEB] border-b border-[#FEDF89] px-4 py-2 flex items-center justify-between text-xs text-[#B54708] select-none shrink-0 animate-in slide-in-from-top-1 z-40">
+      {(!isOnline || pendingDraftCount > 0) && (
+        <div
+          className={`border-b px-4 py-2 flex items-center justify-between text-xs select-none shrink-0 animate-in slide-in-from-top-1 z-40 ${
+            !isOnline
+              ? 'bg-[#FFFAEB] border-[#FEDF89] text-[#B54708]'
+              : 'bg-[#EFF8FF] border-[#B2DDFF] text-[#175CD3]'
+          }`}
+        >
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#D92D20] animate-ping shrink-0" />
-            <span className="font-bold">Cảnh báo Ngoại tuyến:</span>
-            <span>Mất kết nối Internet cửa khẩu. Hệ thống đang hoạt động ở chế độ đệm — Vui lòng chờ có mạng trở lại để đồng bộ dữ liệu giao dịch tài chính.</span>
+            {!isOnline ? (
+              <>
+                <WifiOff className="w-4 h-4 text-[#D92D20] shrink-0 animate-pulse" />
+                <span className="font-bold">Mất kết nối Internet:</span>
+                <span>
+                  Bốt gác đang hoạt động ở chế độ lưu nháp ngoại tuyến. Xe vẫn được vào bãi bình thường.
+                </span>
+              </>
+            ) : (
+              <>
+                <Wifi className="w-4 h-4 text-[#0A9444] shrink-0" />
+                <span className="font-bold">Đã khôi phục mạng:</span>
+                <span>Hệ thống sẵn sàng đồng bộ các lượt xe đã lưu nháp tại bốt gác lên máy chủ.</span>
+              </>
+            )}
+
+            {pendingDraftCount > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-white border border-[#FEDF89] text-[#B54708] shadow-2xs">
+                {pendingDraftCount} xe nháp chờ đồng bộ
+              </span>
+            )}
           </div>
-          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white border border-[#FEDF89] text-[#B54708]">
-            OFFLINE
-          </span>
+
+          <div className="flex items-center gap-2">
+            {pendingDraftCount > 0 && (
+              <Link
+                href="/entry"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold text-white bg-[#087C3C] hover:bg-[#076934] transition-colors shrink-0 shadow-2xs"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Đồng bộ ngay</span>
+              </Link>
+            )}
+            {!isOnline && (
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white border border-[#FEDF89] text-[#B54708]">
+                OFFLINE
+              </span>
+            )}
+          </div>
         </div>
       )}
 

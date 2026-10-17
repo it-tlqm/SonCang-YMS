@@ -40,8 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 12:25 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **KÍCH HOẠT TÊN MIỀN THƯƠNG HIỆU CHÍNH THỨC: https://app.talunglogistics.com**:
+- **Cập nhật lúc:** 17/10/2026 16:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN THÀNH TÍNH NĂNG TIẾP NHẬN NGOẠI TUYẾN KHI MẤT MẠNG & ĐỒNG BỘ TỰ ĐỘNG (OFFLINE QUEUE & SAFE SYNC)**:
+  * **1. Triển khai cơ chế lưu nháp ngoại tuyến PWA:**
+    - Tạo mới thư viện `src/lib/offline-queue.ts` với đầy đủ nghiệp vụ lưu nháp, quản lý trạng thái (`PENDING`, `SYNCING`, `SYNCED`, `FAILED`), xóa nháp, đếm nháp và pub/sub sự kiện.
+    - An ninh bốt gác khi rớt mạng vẫn nhập và tiếp nhận xe bình thường; dữ liệu lưu tạm an toàn trong `localStorage` máy bốt để giải phóng xe vào bãi ngay, tránh ùn tắc cổng.
+    - Tuyệt đối tuân thủ quy tắc tài chính AGENTS.md: offline chỉ là bản nháp `DRAFT`, không tự ý ghi nhận trạng thái đã thu tiền trên server.
+  * **2. Đồng bộ an toàn với Idempotency Key:**
+    - Sử dụng `draft.id` làm `idempotencyKey` khi gửi lên API, bảo đảm mạng chập chờn thử lại nhiều lần cũng không bao giờ sinh 2 lượt xe trùng trên DB.
+    - Cổng vào (`/entry`) tích hợp Modal Quản lý Hàng đợi Ngoại tuyến, cho phép an ninh theo dõi, đồng bộ lẻ từng xe, xóa nháp sai hoặc đồng bộ tất cả.
+    - AppShell tự động giám sát kết nối mạng và số lượng nháp chờ, hiển thị banner cảnh báo thông minh kèm nút `[Đồng bộ ngay]`.
+  * **3. Kiểm thử & Xác minh thực tế:**
+    - Typecheck: `npx tsc --noEmit` -> PASS (0 errors).
+    - Hồi quy bảo mật: `node scripts/audit_security_regression.mjs` -> PASS (68/68 tests 100%).
+    - Build Production: `npm run build` -> PASS (21/21 static routes, 0 build errors).
+- **Mốc trước đó (17/10/2026 12:25):** **KÍCH HOẠT TÊN MIỀN THƯƠNG HIỆU CHÍNH THỨC: https://app.talunglogistics.com**:
   * **1. Xác minh hệ thống tên miền:**
     - DNS CNAME `app.talunglogistics.com` phân giải thành công tới Vercel DNS (`c52c999028099061.vercel-dns-017.com`).
     - Giao thức HTTPS phản hồi thành công `HTTP/1.1 200 OK`, tự động tích hợp chứng chỉ bảo mật SSL Let's Encrypt và HSTS.

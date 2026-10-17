@@ -14,6 +14,15 @@ import {
 } from '@/types/domain.types';
 import { validateContainerNumber, sanitizeContainerInput } from '@/lib/container-validator';
 import { 
+  OfflineEntryDraft, 
+  getOfflineDrafts, 
+  saveOfflineDraft, 
+  updateOfflineDraftStatus, 
+  removeOfflineDraft, 
+  clearSyncedDrafts, 
+  subscribeOfflineQueue 
+} from '@/lib/offline-queue';
+import { 
   Truck, 
   Layers, 
   AlertTriangle, 
@@ -35,7 +44,13 @@ import {
   Check,
   Building2,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Wifi,
+  WifiOff,
+  CloudOff,
+  UploadCloud,
+  Trash2,
+  ListChecks
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatMoneyInWords, getContainerTypeName } from '@/lib/display-formatters';
 import { generateVietQrUrl } from '@/lib/vietqr-generator';
@@ -104,6 +119,15 @@ export default function EntryGatePage() {
 
   // Modal in vé
   const [showPrintTicketModal, setShowPrintTicketModal] = useState<boolean>(false);
+
+  // Chế độ Ngoại tuyến & Hàng đợi lưu nháp (Offline Queue PWA)
+  const [isOnline, setIsOnline] = useState<boolean>(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+  const [offlineDrafts, setOfflineDrafts] = useState<OfflineEntryDraft[]>([]);
+  const [lastSavedOfflineDraft, setLastSavedOfflineDraft] = useState<OfflineEntryDraft | null>(null);
+  const [isSyncingAll, setIsSyncingAll] = useState<boolean>(false);
+  const [syncingDraftId, setSyncingDraftId] = useState<string | null>(null);
+  const [showDraftQueueModal, setShowDraftQueueModal] = useState<boolean>(false);
+  const [syncSuccessMsg, setSyncSuccessMsg] = useState<string>('');
 
   // Kiểm soát trùng lặp xe
   const [dupCheckResult, setDupCheckResult] = useState<VehicleDuplicateCheckResult | null>(null);
@@ -216,6 +240,30 @@ export default function EntryGatePage() {
     };
   }, [repository, yardId]);
 
+  // Lắng nghe trạng thái kết nối mạng & hàng đợi lưu nháp ngoại tuyến
+  useEffect(() => {
+    setOfflineDrafts(getOfflineDrafts());
+    const unsubscribe = subscribeOfflineQueue(() => {
+      setOfflineDrafts(getOfflineDrafts());
+    });
+
+    const handleOnline = () => {
+      setIsOnline(true);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Khớp yêu cầu cắm điện trước từ CCKB
   const matchedReeferRequest = useMemo(() => {
     if (!plannedReeferRequests.length) return null;
@@ -297,6 +345,127 @@ export default function EntryGatePage() {
   const contValidation = validateContainerNumber(containerNo);
   const secondContValidation = validateContainerNumber(secondContainerNo);
 
+  // Lưu nháp ngoại tuyến khi mất mạng
+  const saveAsOfflineDraft = (activeKey: string, combinedNote: string) => {
+    try {
+      const cleanPlate = licensePlate.trim().toUpperCase();
+      const saved = saveOfflineDraft({
+        yardId,
+        licensePlate: cleanPlate,
+        vehicleType: selectedType,
+        driverName: driverName.trim() || undefined,
+        driverPhone: driverPhone.trim() || undefined,
+        driverIdCard: driverIdCard.trim() || undefined,
+        isContainer: isContainerType,
+        containerNo: isContainerType ? containerNo.trim().toUpperCase() : undefined,
+        containerSize: isContainerType ? (containerCarryMode === 'DUAL_20FT' ? '20' : containerSize) : undefined,
+        containerType: isContainerType ? containerType : undefined,
+        containerCarryMode: isContainerType ? containerCarryMode : undefined,
+        secondContainerNo: isContainerType && containerCarryMode === 'DUAL_20FT' ? secondContainerNo.trim().toUpperCase() : undefined,
+        secondContainerType: isContainerType && containerCarryMode === 'DUAL_20FT' ? secondContainerType : undefined,
+        collectPaymentNow: previewAmount > 0 ? collectPaymentNow : false,
+        paymentMethod: previewAmount > 0 && collectPaymentNow ? paymentMethod : 'CASH',
+        receiptCode: receiptCode.trim() || undefined,
+        note: combinedNote || undefined,
+        ticketAmount: previewAmount,
+      });
+
+      setLastSavedOfflineDraft(saved);
+      setIsSubmitting(false);
+      setShowDupModal(false);
+      setShowBlockModal(false);
+
+      // Làm mới form để sẵn sàng đón xe tiếp theo
+      resetForm();
+    } catch (saveErr) {
+      setErrorMessage('Không thể lưu nháp ngoại tuyến: ' + (saveErr instanceof Error ? saveErr.message : String(saveErr)));
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSyncDraft = async (draft: OfflineEntryDraft): Promise<boolean> => {
+    setSyncingDraftId(draft.id);
+    updateOfflineDraftStatus(draft.id, 'SYNCING');
+    try {
+      const res = await repository.createVehicleEntry({
+        yardId: draft.yardId,
+        vehicleTypeCode: draft.vehicleType,
+        licensePlate: draft.licensePlate,
+        driverName: draft.driverName,
+        driverPhone: draft.driverPhone,
+        note: draft.note,
+        hasContainer: draft.isContainer,
+        containerNo: draft.containerNo,
+        containerSize: draft.containerSize,
+        containerType: draft.containerType,
+        secondContainer: draft.secondContainerNo ? {
+          containerNo: draft.secondContainerNo,
+          containerSize: '20',
+          containerType: draft.secondContainerType || 'RF',
+        } : undefined,
+        operatorId: user?.id || 'demo-operator',
+        operatorName: user?.fullName || 'Nhân viên Cổng (Đồng bộ offline)',
+        idempotencyKey: draft.id,
+        collectPaymentNow: draft.collectPaymentNow,
+        paymentMethod: draft.paymentMethod,
+        receiptCode: draft.receiptCode,
+        overrideDuplicate: true,
+        duplicateReason: 'DONG_BO_NGOAI_TUYEN_DO_MAT_MANG',
+      });
+
+      if (res.error || !res.vehicle) {
+        updateOfflineDraftStatus(draft.id, 'FAILED', res.error || 'Lỗi phản hồi từ máy chủ.');
+        setSyncingDraftId(null);
+        return false;
+      }
+
+      // Xóa draft thành công khỏi hàng đợi
+      removeOfflineDraft(draft.id);
+
+      // Hiển thị vé xe chính thức cho nhân viên
+      setRecentVisit({
+        vehicle: res.vehicle,
+        container: res.container || undefined,
+        secondContainer: res.secondContainer || undefined,
+        containers: res.containers || (res.container ? [res.container] : []),
+      });
+
+      setSyncingDraftId(null);
+      return true;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi kết nối khi đồng bộ.';
+      updateOfflineDraftStatus(draft.id, 'FAILED', msg);
+      setSyncingDraftId(null);
+      return false;
+    }
+  };
+
+  const handleSyncAllDrafts = async () => {
+    if (isSyncingAll) return;
+    const pendingList = offlineDrafts.filter(d => d.status === 'PENDING' || d.status === 'FAILED');
+    if (pendingList.length === 0) return;
+
+    setIsSyncingAll(true);
+    let successCount = 0;
+    for (const draft of pendingList) {
+      const ok = await handleSyncDraft(draft);
+      if (ok) successCount++;
+    }
+    setIsSyncingAll(false);
+    await loadYardActiveData();
+
+    if (successCount > 0) {
+      setSyncSuccessMsg(`Đã đồng bộ thành công ${successCount} lượt xe lên máy chủ!`);
+      setTimeout(() => setSyncSuccessMsg(''), 5000);
+    }
+  };
+
+  const handleDeleteDraft = (id: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa lượt xe nháp này khỏi máy bốt trực?')) {
+      removeOfflineDraft(id);
+    }
+  };
+
   const executeVehicleEntry = async (
     overrideDuplicate: boolean = false, 
     duplicateReason?: string, 
@@ -312,6 +481,13 @@ export default function EntryGatePage() {
       driverIdCard.trim() ? `CCCD: ${driverIdCard.trim()}` : null,
       note.trim() ? note.trim() : null
     ].filter(Boolean).join(' | ');
+
+    // Nếu đang mất kết nối mạng: lưu trực tiếp vào hàng đợi ngoại tuyến
+    const isNetworkDown = (typeof navigator !== 'undefined' && !navigator.onLine) || !isOnline;
+    if (isNetworkDown) {
+      saveAsOfflineDraft(activeKey, combinedNote);
+      return;
+    }
 
     try {
       const res = await repository.createVehicleEntry({
@@ -374,19 +550,15 @@ export default function EntryGatePage() {
       setShowBlockModal(false);
 
       // Tự động làm sạch form để sẵn sàng tiếp nhận lượt xe tiếp theo mà không làm mất thông tin lượt xe gần nhất
-      setLicensePlate('');
-      setDriverName('');
-      setDriverPhone('');
-      setDriverIdCard('');
-      setContainerNo('');
-      setSecondContainerNo('');
-      setNote('');
-      setReceiptCode('');
-      setIdempotencyKey('');
-      setScanSuccessMsg('');
-      setDupCheckResult(null);
+      resetForm();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Lỗi giao dịch tiếp nhận xe.';
+      const isFetchError = msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network') || !navigator.onLine;
+      if (isFetchError) {
+        // Tự động lưu nháp nếu lỗi do rớt mạng bất ngờ
+        saveAsOfflineDraft(activeKey, combinedNote);
+        return;
+      }
       setErrorMessage(msg);
       setIsSubmitting(false);
     }
@@ -551,12 +723,43 @@ export default function EntryGatePage() {
           subtitle="Bốt gác An ninh cổng — Kiểm soát lượt xe, số container và thu tiền vé vào bãi"
           icon={Truck}
           badge={
-            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
-              Bốt cổng trực tiếp
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+                Bốt cổng trực tiếp
+              </span>
+              {!isOnline && (
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#FEF3F2] text-[#D92D20] border border-[#FECDCA] inline-flex items-center gap-1">
+                  <WifiOff className="w-3 h-3" />
+                  <span>Ngoại tuyến (Offline)</span>
+                </span>
+              )}
+              {offlineDrafts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowDraftQueueModal(true)}
+                  className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#FFFAEB] text-[#B54708] border border-[#FEDF89] inline-flex items-center gap-1 hover:bg-[#FEE4E2] transition-colors cursor-pointer"
+                  title="Xem danh sách các lượt xe lưu nháp lúc mất mạng"
+                >
+                  <CloudOff className="w-3 h-3" />
+                  <span>{offlineDrafts.filter(d => d.status === 'PENDING' || d.status === 'FAILED').length} nháp chờ đồng bộ</span>
+                </button>
+              )}
+            </div>
           }
           actions={
             <div className="flex items-center gap-2">
+              {offlineDrafts.length > 0 && isOnline && (
+                <button
+                  type="button"
+                  onClick={handleSyncAllDrafts}
+                  disabled={isSyncingAll}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#087C3C] hover:bg-[#076934] disabled:bg-[#E5E9F0] disabled:text-[#98A2B3] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  title="Đồng bộ ngay các lượt xe lưu nháp lúc mất mạng lên máy chủ"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Đồng bộ ngay ({offlineDrafts.filter(d => d.status === 'PENDING' || d.status === 'FAILED').length})</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsRightPanelOpen((prev) => !prev)}
@@ -581,6 +784,128 @@ export default function EntryGatePage() {
             </div>
           }
         />
+
+        {/* THÔNG BÁO ĐỒNG BỘ THÀNH CÔNG */}
+        {syncSuccessMsg && (
+          <div className="mx-4 sm:mx-5 lg:mx-6 mt-4 p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-xs text-[#0A9444] flex items-center justify-between gap-2.5 animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-[#0A9444] shrink-0" />
+              <span className="font-semibold">{syncSuccessMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSyncSuccessMsg('')}
+              className="text-[#667085] hover:text-[#17202E] cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* HÀNG ĐỢI LƯỢT XE NGOẠI TUYẾN CHỜ ĐỒNG BỘ (OFFLINE QUEUE) */}
+        {offlineDrafts.length > 0 && (
+          <div className="mx-4 sm:mx-5 lg:mx-6 mt-4 p-4 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] shadow-2xs animate-in fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#F79009] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                  <CloudOff className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#B54708]">
+                      Lưu nháp ngoại tuyến (Mất mạng):
+                    </span>
+                    <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded border border-[#FEDF89] text-[#B54708]">
+                      {offlineDrafts.filter(d => d.status === 'PENDING' || d.status === 'FAILED').length} xe chờ đồng bộ
+                    </span>
+                    {isOnline ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5] inline-flex items-center gap-1">
+                        <Wifi className="w-3 h-3" />
+                        <span>Đã có mạng Internet — Sẵn sàng đồng bộ</span>
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FEF3F2] text-[#D92D20] border border-[#FECDCA] inline-flex items-center gap-1">
+                        <WifiOff className="w-3 h-3" />
+                        <span>Đang mất kết nối</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#475467] mt-1">
+                    Các xe này đã được cho vào bãi để giải phóng cổng. Khi bấm đồng bộ, hệ thống sẽ đẩy dữ liệu lên máy chủ và cấp mã vé chính thức.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSyncAllDrafts}
+                  disabled={isSyncingAll || !isOnline}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087C3C] hover:bg-[#076934] disabled:bg-[#E5E9F0] disabled:text-[#98A2B3] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                >
+                  {isSyncingAll ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang đồng bộ...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Đồng bộ ngay ({offlineDrafts.filter(d => d.status === 'PENDING' || d.status === 'FAILED').length})</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDraftQueueModal(true)}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-[#D0D5DD] bg-white text-xs font-semibold text-[#344054] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
+                >
+                  <span>Xem chi tiết ({offlineDrafts.length})</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* THÔNG BÁO VỪA LƯU NHÁP MỘT XE MỚI (KHI MẤT MẠNG) */}
+        {lastSavedOfflineDraft && (
+          <div className="mx-4 sm:mx-5 lg:mx-6 mt-4 p-4 rounded-xl bg-[#EFF8FF] border border-[#B2DDFF] shadow-2xs animate-in fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#175CD3] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                  <CloudOff className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#175CD3]">
+                      Đã lưu nháp vào máy bốt trực (Ngoại tuyến):
+                    </span>
+                    <span className="font-mono font-bold text-sm bg-white px-2 py-0.5 rounded border border-[#B2DDFF] text-[#17202E]">
+                      {lastSavedOfflineDraft.licensePlate}
+                    </span>
+                    <span className="text-xs text-[#475467] font-mono">
+                      Mã nháp: <strong className="text-[#17202E]">{lastSavedOfflineDraft.id}</strong>
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white text-[#175CD3] border border-[#B2DDFF]">
+                      Đã giải phóng cổng
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#344054] mt-1">
+                    An ninh cho xe vào bãi bình thường. Dữ liệu xe đã được lưu an toàn trên máy tính bốt trực và sẽ đẩy lên máy chủ khi có mạng trở lại.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLastSavedOfflineDraft(null)}
+                className="p-2 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#E0F2FE] transition-colors cursor-pointer"
+                title="Đóng thông báo"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* LƯỢT XE VÀO CỔNG GẦN NHẤT — CỐ ĐỊNH, KHÔNG ĐẾM NGƯỢC BIẾN MẤT, IN VÉ BẤT CỨ LÚC NÀO */}
         {recentVisit && (
@@ -1085,12 +1410,21 @@ export default function EntryGatePage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#087C3C] text-white text-xs font-semibold hover:bg-[#076934] transition-colors cursor-pointer shadow-2xs disabled:bg-[#E5E9F0] disabled:text-[#98A2B3]"
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:bg-[#E5E9F0] disabled:text-[#98A2B3] ${
+                !isOnline
+                  ? 'bg-[#B54708] hover:bg-[#93370D]'
+                  : 'bg-[#087C3C] hover:bg-[#076934]'
+              }`}
             >
               {isSubmitting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Đang xử lý giao dịch...</span>
+                  <span>{isOnline ? 'Đang xử lý giao dịch...' : 'Đang lưu vào bộ nhớ bốt...'}</span>
+                </>
+              ) : !isOnline ? (
+                <>
+                  <CloudOff className="w-4 h-4" />
+                  <span>Lưu nháp ngoại tuyến (Mất mạng)</span>
                 </>
               ) : (
                 <>
@@ -1356,6 +1690,231 @@ export default function EntryGatePage() {
                 <p className="text-[9px] font-mono text-[#98A2B3] pt-1">
                   In lúc: {new Date().toLocaleTimeString('vi-VN')} {new Date().toLocaleDateString('vi-VN')} · Bốt An ninh Cổng vào
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 5. MODAL HÀNG ĐỢI NHÁP NGOẠI TUYẾN KHI MẤT MẠNG               */}
+      {/* ============================================================== */}
+      {showDraftQueueModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-2xl border border-[#E5E9F0] max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FB]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#E0F2FE] border border-[#B9E6FE] flex items-center justify-center text-[#026AA2]">
+                  <ListChecks className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-sm text-[#17202E]">
+                      Hàng đợi Tiếp nhận Ngoại tuyến (Offline Queue)
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]">
+                      {offlineDrafts.length} lượt xe
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#667085]">
+                    Dữ liệu được lưu tạm tại trình duyệt máy bốt gác khi mất kết nối mạng.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDraftQueueModal(false)}
+                className="p-1.5 rounded-lg text-[#667085] hover:bg-[#E5E9F0] hover:text-[#17202E] transition-colors cursor-pointer"
+                title="Đóng modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quy chế vận hành & trạng thái mạng */}
+            <div className="px-6 py-3 bg-[#FEF6EE] border-b border-[#FEE4E2] flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-[#B54708] shrink-0 mt-0.5" />
+              <div className="text-xs text-[#7A2E0E] leading-relaxed">
+                <span className="font-semibold">Quy chế Sơn Cảng V5:</span> Khi bốt gác mất mạng, nhân viên bấm lưu nháp để giải phóng xe vào bãi ngay, tránh ùn tắc cổng. Khi có mạng trở lại, bấm <strong>Đồng bộ tất cả</strong> để cập nhật lên máy chủ. Hệ thống dùng Idempotency Key bảo đảm không phát sinh trùng lặp.
+              </div>
+            </div>
+
+            {/* Danh sách các lượt xe nháp */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-3">
+              {offlineDrafts.length === 0 ? (
+                <div className="text-center py-10 space-y-2">
+                  <CheckCircle2 className="w-10 h-10 text-[#087C3C] mx-auto opacity-80" />
+                  <p className="text-sm font-semibold text-[#17202E]">
+                    Hàng đợi ngoại tuyến trống
+                  </p>
+                  <p className="text-xs text-[#667085]">
+                    Tất cả các lượt xe tiếp nhận đều đã được ghi nhận trực tiếp lên máy chủ.
+                  </p>
+                </div>
+              ) : (
+                <div className="border border-[#E5E9F0] rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#F8F9FB] border-b border-[#E5E9F0] text-[#667085] font-semibold">
+                      <tr>
+                        <th className="p-3">Giờ lưu / Biển số</th>
+                        <th className="p-3">Loại xe & Cont</th>
+                        <th className="p-3">Tiền vé</th>
+                        <th className="p-3">Trạng thái</th>
+                        <th className="p-3 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E9F0]">
+                      {offlineDrafts.map((draft) => {
+                        const isThisSyncing = syncingDraftId === draft.id || isSyncingAll;
+                        return (
+                          <tr key={draft.id} className="hover:bg-[#F8F9FB]/60 transition-colors">
+                            <td className="p-3 align-top">
+                              <div className="font-mono font-bold text-sm text-[#17202E]">
+                                {draft.licensePlate}
+                              </div>
+                              <div className="text-[11px] text-[#667085] flex items-center gap-1 mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                {new Date(draft.createdAt).toLocaleTimeString('vi-VN')}
+                              </div>
+                              {draft.driverName && (
+                                <div className="text-[11px] text-[#475467] mt-0.5">
+                                  TX: {draft.driverName}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-3 align-top space-y-1">
+                              <div className="font-medium text-[#17202E]">
+                                {getVehicleTypeName(draft.vehicleType)}
+                              </div>
+                              {draft.containerNo && (
+                                <div className="font-mono font-semibold text-[11px] text-[#326DD8]">
+                                  Cont 1: {draft.containerNo} ({draft.containerType || 'RF'})
+                                </div>
+                              )}
+                              {draft.secondContainerNo && (
+                                <div className="font-mono font-semibold text-[11px] text-[#326DD8]">
+                                  Cont 2: {draft.secondContainerNo}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-3 align-top">
+                              <div className="font-mono font-bold text-[#17202E]">
+                                {draft.ticketAmount.toLocaleString('vi-VN')} đ
+                              </div>
+                              <div className="text-[11px] text-[#667085]">
+                                {draft.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản VietQR'}
+                              </div>
+                            </td>
+                            <td className="p-3 align-top">
+                              {draft.status === 'PENDING' && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FEF6EE] text-[#B54708] border border-[#FEE4E2]">
+                                  Chờ đồng bộ
+                                </span>
+                              )}
+                              {draft.status === 'SYNCING' && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]">
+                                  <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                                  Đang gửi...
+                                </span>
+                              )}
+                              {draft.status === 'FAILED' && (
+                                <div className="space-y-0.5">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]">
+                                    Lỗi đồng bộ
+                                  </span>
+                                  {draft.errorMessage && (
+                                    <div className="text-[10px] text-[#B42318] max-w-[180px] truncate" title={draft.errorMessage}>
+                                      {draft.errorMessage}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {draft.status === 'SYNCED' && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#ECFDF3] text-[#027A48] border border-[#A6F4C5]">
+                                  Đã đồng bộ
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 align-top text-right space-x-1">
+                              <button
+                                type="button"
+                                onClick={() => handleSyncDraft(draft)}
+                                disabled={!isOnline || isThisSyncing}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#087C3C] text-white text-[11px] font-semibold hover:bg-[#076934] transition-colors cursor-pointer disabled:bg-[#E5E9F0] disabled:text-[#98A2B3]"
+                                title="Đồng bộ lượt xe này lên máy chủ"
+                              >
+                                {isThisSyncing ? (
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <UploadCloud className="w-3 h-3" />
+                                )}
+                                <span>Đồng bộ</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Xác nhận xóa nháp xe ${draft.licensePlate}? Thao tác này sẽ hủy lượt xe này khỏi máy bốt.`)) {
+                                    removeOfflineDraft(draft.id);
+                                  }
+                                }}
+                                disabled={isThisSyncing}
+                                className="inline-flex items-center p-1.5 rounded-md border border-[#E5E9F0] text-[#B42318] hover:bg-[#FEF3F2] transition-colors cursor-pointer disabled:opacity-50"
+                                title="Xóa nháp này nếu nhập nhầm"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 border-t border-[#E5E9F0] bg-[#F8F9FB] flex items-center justify-between">
+              <div>
+                {offlineDrafts.some(d => d.status === 'SYNCED') && (
+                  <button
+                    type="button"
+                    onClick={() => clearSyncedDrafts()}
+                    className="text-xs text-[#667085] hover:text-[#17202E] underline cursor-pointer"
+                  >
+                    Xóa các lượt đã đồng bộ xong
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDraftQueueModal(false)}
+                  className="px-4 py-2 rounded-lg border border-[#E5E9F0] text-xs font-semibold text-[#17202E] hover:bg-white transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+                {offlineDrafts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSyncAllDrafts}
+                    disabled={!isOnline || isSyncingAll}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087C3C] text-white text-xs font-semibold hover:bg-[#076934] transition-colors cursor-pointer disabled:bg-[#E5E9F0] disabled:text-[#98A2B3]"
+                  >
+                    {isSyncingAll ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Đang đồng bộ tất cả...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Đồng bộ tất cả ({offlineDrafts.length} xe)</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>

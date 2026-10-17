@@ -1,5 +1,33 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 15:58 — Bổ Sung Cơ Chế Lưu Nháp Ngoại Tuyến (Offline Queue) & Tự Động Đồng Bộ An Toàn (PWA Biên Giới)
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ người dùng:
+  *"web này giờ khi mất mạng AN ninh có nhập được xe xong sau đó đồng bộ lại k nhi"*
+  *"OK bổ sung ngay cho tôi nhé, rất quan trọng"*
+- **Nghiệp vụ & Tuân thủ quy tắc AGENTS.md:**
+  1. *Nguyên tắc bảo vệ tài chính:* Khi mất mạng Internet (hoặc mạng 4G vùng biên chập chờn), hệ thống tuyệt đối KHÔNG tự ý ghi nhận trạng thái `Đã thu` hay `Đã thanh toán` trên máy chủ; mọi giao dịch offline chỉ được lưu ở trạng thái `PENDING (DRAFT)` trong bộ nhớ bốt gác (`localStorage`).
+  2. *Giải phóng ùn tắc cổng vào:* Cho phép bốt An ninh tiếp nhận xe bình thường, lưu nháp cục bộ, giải phóng phương tiện vào bãi ngay mà không bị gián đoạn hay ùn tắc cổng.
+  3. *Idempotency Key & Chống gửi trùng lặp:* Mỗi bản ghi nháp được cấp mã duy nhất `draft.id` (dạng `DRAFT-{timestamp}-{cleanPlate}`). Khi mạng phục hồi, dữ liệu được gửi lên server qua `repository.createVehicleEntry` với `idempotencyKey: draft.id` và cờ ghi đè an toàn `overrideDuplicate: true`, bảo đảm mạng chập chờn thử lại nhiều lần cũng không bao giờ sinh 2 lượt xe trùng trên DB.
+  4. *Quản trị minh bạch:* Bốt An ninh có Modal chuyên dụng để xem danh sách hàng đợi ngoại tuyến, theo dõi trạng thái từng xe, đồng bộ lẻ từng xe, xóa nháp nếu nhập nhầm, hoặc bấm `[Đồng bộ tất cả xe]`.
+- **Các tệp mã nguồn đã triển khai & cập nhật:**
+  1. `src/lib/offline-queue.ts` (Mới):
+     - Interface `OfflineEntryDraft` đầy đủ thông tin: biển số, loại xe, tài xế, CCCD, cont #1, cont #2, hình thức thanh toán, số tiền, trạng thái (`PENDING` | `SYNCING` | `SYNCED` | `FAILED`), lý do lỗi, số lần thử lại.
+     - Các hàm: `getOfflineDrafts`, `saveOfflineDraft`, `updateOfflineDraftStatus`, `removeOfflineDraft`, `clearSyncedDrafts`, `getPendingDraftsCount`, `subscribeOfflineQueue` (phát và nhận qua `CustomEvent` & `StorageEvent`).
+  2. `src/app/entry/page.tsx`:
+     - Tích hợp phát hiện mạng `isOnline`, tự động lưu nháp khi mạng rớt hoặc khi API gặp lỗi kết nối.
+     - Nút submit chuyển trạng thái trực quan: Màu xanh lá `#087C3C` ("Xác nhận xe vào bãi") khi Online; Màu hổ phách `#B54708` ("Lưu nháp ngoại tuyến (Mất mạng)") khi Offline.
+     - Bổ sung Modal Quản lý Hàng đợi Ngoại tuyến (`showDraftQueueModal`) hiển thị bảng chi tiết, nút đồng bộ lẻ, nút xóa nháp, nút đồng bộ tất cả.
+     - Banner thông báo lượt xe nháp vừa lưu và banner số lượng nháp đang chờ đồng bộ trên header.
+  3. `src/components/layout/app-shell.tsx`:
+     - Tích hợp `getPendingDraftsCount` và `subscribeOfflineQueue`.
+     - Nâng cấp thanh Banner Offline toàn cục: Khi mất mạng, hiển thị cảnh báo kèm trạng thái lưu nháp bốt gác; Khi có mạng trở lại mà còn xe nháp, hiển thị thông báo khôi phục mạng kèm số lượng xe nháp và nút nhanh `[Đồng bộ ngay]` trỏ về `/entry`.
+  4. `scripts/audit_security_regression.mjs`:
+     - Bổ sung TEST GROUP 9: 17 assertions kiểm tra toàn diện cấu trúc module `offline-queue.ts`, các guard `idempotencyKey: draft.id`, trạng thái nút submit và banner AppShell.
+- **Kết quả kiểm thử & Kiểm chứng:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 68/68 assertions (100%)**.
+
 ## 2026-10-17 12:25 — Kích Hoạt Tên Miền Chính Thức app.talunglogistics.com
 
 - **Yêu cầu / nguồn:** Chỉ đạo cấu hình tên miền thương hiệu từ Chủ dự án:

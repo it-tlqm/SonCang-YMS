@@ -275,6 +275,38 @@ console.log('\n[TEST GROUP 8] SEC-10: Thuộc tính liên kết an toàn');
 }
 
 // -----------------------------------------------------------------------------
+// TEST 9: SEC-20 — Quản lý Hàng đợi Ngoại tuyến khi Mất mạng & Idempotency Key (F-011)
+// -----------------------------------------------------------------------------
+console.log('\n[TEST GROUP 9] SEC-20: Offline Queue & Safe Sync tại Bốt gác Tà Lùng');
+{
+  const offlineQueuePath = path.join(rootDir, 'src', 'lib', 'offline-queue.ts');
+  assert(fs.existsSync(offlineQueuePath), 'Tệp thư viện offline-queue.ts tồn tại');
+  const queueContent = fs.readFileSync(offlineQueuePath, 'utf-8');
+  assert(queueContent.includes('export function getOfflineDrafts'), 'Hàm getOfflineDrafts được định nghĩa và export');
+  assert(queueContent.includes('export function saveOfflineDraft'), 'Hàm saveOfflineDraft được định nghĩa và export');
+  assert(queueContent.includes('export function updateOfflineDraftStatus'), 'Hàm updateOfflineDraftStatus được định nghĩa và export');
+  assert(queueContent.includes('export function removeOfflineDraft'), 'Hàm removeOfflineDraft được định nghĩa và export');
+  assert(queueContent.includes('export function clearSyncedDrafts'), 'Hàm clearSyncedDrafts được định nghĩa và export');
+  assert(queueContent.includes('export function getPendingDraftsCount'), 'Hàm getPendingDraftsCount được định nghĩa và export');
+  assert(queueContent.includes('export function subscribeOfflineQueue'), 'Hàm subscribeOfflineQueue được định nghĩa và export');
+
+  const entryPath = path.join(rootDir, 'src', 'app', 'entry', 'page.tsx');
+  const entryContent = fs.readFileSync(entryPath, 'utf-8');
+  assert(entryContent.includes('saveAsOfflineDraft'), 'Trang cổng vào có hàm xử lý lưu nháp ngoại tuyến saveAsOfflineDraft');
+  assert(entryContent.includes('handleSyncDraft'), 'Trang cổng vào có hàm xử lý đồng bộ handleSyncDraft');
+  assert(entryContent.includes('handleSyncAllDrafts'), 'Trang cổng vào có hàm đồng bộ tất cả handleSyncAllDrafts');
+  assert(entryContent.includes('idempotencyKey: draft.id'), 'Sử dụng draft.id làm idempotencyKey chống gửi lặp giao dịch');
+  assert(entryContent.includes('Lưu nháp ngoại tuyến (Mất mạng)'), 'Nút xác nhận chuyển trạng thái rõ ràng khi mất mạng');
+  assert(entryContent.includes('showDraftQueueModal'), 'Có modal chuyên dụng hiển thị danh sách hàng đợi xe nháp');
+
+  const appShellPath = path.join(rootDir, 'src', 'components', 'layout', 'app-shell.tsx');
+  const appShellContent = fs.readFileSync(appShellPath, 'utf-8');
+  assert(appShellContent.includes('pendingDraftCount'), 'AppShell giám sát số lượng draft ngoại tuyến pendingDraftCount');
+  assert(appShellContent.includes('subscribeOfflineQueue'), 'AppShell đăng ký lắng nghe sự kiện thay đổi hàng đợi ngoại tuyến');
+  assert(appShellContent.includes('xe nháp chờ đồng bộ'), 'AppShell hiển thị banner thông báo số lượng nháp chờ đồng bộ');
+}
+
+// -----------------------------------------------------------------------------
 // TỔNG KẾT BỘ KIỂM THỬ HỒI QUY
 // -----------------------------------------------------------------------------
 console.log('\n================================================================');
