@@ -1,5 +1,46 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-16 23:05 — Rà Soát, Sửa Lỗi Toàn Diện & Kiểm Thử Hồi Quy Theo Chỉ Thị AGENT_FULL_AUDIT_AND_FIX.md (Profile 3.3)
+
+- **Yêu cầu / nguồn:** Chỉ đạo rà soát bảo mật & kiểm thử toàn diện từ Chủ dự án:
+  *"Đọc toàn bộ file AGENT_FULL_AUDIT_AND_FIX.md và thực hiện trên repository hiện tại... xác minh lỗi, chủ động sửa nguyên nhân gốc trong phạm vi được cấp quyền, bổ sung test và kiểm thử hồi quy."*
+- **Hồ sơ an ninh & Baseline đã lập:**
+  - Tạo mới `docs/security/context.md` chuẩn hóa theo mục 3.1 & Profile 3.3.
+  - Baseline Git: `main` (commit `81de451`), working tree clean.
+  - Baseline Typecheck: `npx tsc --noEmit` -> PASS (0 lỗi).
+  - Baseline Build: `next build` -> PASS 21/21 routes.
+  - Đích kết nối: Supabase DEV, `NEXT_PUBLIC_ENABLE_REAL_WRITE="false"` (Real Write giữ nguyên OFF).
+- **Phân loại phát hiện & Sửa lỗi thực tế (8 lỗi F-001 đến F-008):**
+  1. **F-001 (SEC-01-02, SEC-01-05 — P0):** Xóa bỏ hoàn toàn chuỗi fallback JWT hardcoded service role key tại `src/app/api/admin/users/reset-password/route.ts`. Chỉ đọc từ `process.env.SUPABASE_SERVICE_ROLE_KEY`; trả về lỗi an toàn 500 nếu thiếu cấu hình.
+  2. **F-002 (SEC-04-01, SEC-04-02 — P0):** Bổ sung kiểm tra xác thực danh tính phiên người gọi (`callerUser`) trả về 401 Unauthorized, và kiểm tra phân quyền Quản trị (`SYS_ADMIN`, `ADMIN`, `QUAN_TRI`) trả về 403 Forbidden tại `POST /api/admin/users/reset-password`.
+  3. **F-003 (SEC-12-01..03 — P2):** Cấu hình phương thức `headers()` trong `next.config.ts` thiết lập bộ Security Headers chuẩn: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(self), microphone=(), geolocation=()`.
+  4. **F-004 (SEC-19-01 — P2):** Bổ sung hàm bảo vệ `sanitizeExcelCellValue` trong `src/lib/export-excel.ts`: Tự động thêm tiền tố nháy đơn `'` cho bất kỳ chuỗi do người dùng nhập bắt đầu bằng các ký tự công thức (`=`, `+`, `-`, `@`, `\t`, `\r`), ngăn chặn triệt để tấn công CSV / Excel Formula Injection (CWE-1236) khi tải file báo cáo.
+  5. **F-005 (SEC-17-02 / LOGIC — P2):** Sửa lỗi sai thứ tự ngoặc đơn làm triệt tiêu phép chia/nhân 5.000 trong `src/app/reefer/page.tsx` (dòng 2763, 3649, 3886) sang chuẩn `(Math.round((hours * rate) / 5000) * 5000)`.
+  6. **F-006 (SEC-18-01 — P2):** Bổ sung cờ chặn double-submit trên client khi gửi form: `if (isSubmitting) return;` tại `src/app/entry/page.tsx`, `if (isSubmittingExit) return;` tại `src/app/exit/page.tsx`, và `isSubmittingPlug`/`isSubmittingUnplug` tại `src/app/reefer/page.tsx`.
+  7. **F-007 (SEC-08-01 — P3):** Chuẩn hóa ô nhập CCCD tài xế tại `src/app/entry/page.tsx`: Lọc số chuẩn `replace(/[^\d]/g, '').slice(0, 12)` tránh ký tự rác và vượt quá 12 số.
+  8. **F-008 (SEC-10-02 — P3):** Bổ sung `rel="noopener noreferrer"` cho thẻ `<a>` mở tài liệu PDF hướng dẫn tại `src/app/guide/page.tsx`.
+- **Bộ kiểm thử hồi quy mới & Kết quả thực tế:**
+  - Xây dựng file kiểm thử tự động: `scripts/audit_security_regression.mjs` (39 assertions bao phủ 8 nhóm test).
+  - Chạy thực tế: `node scripts/audit_security_regression.mjs` -> **39/39 TESTS PASS (100%)**.
+  - Chạy lại kiểm thử phí lưu bãi: `node scripts/test_storage_fee_calc.mjs` -> **PASS (100%)**.
+  - Chạy Typecheck: `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - Chạy Build: `npx next build` -> **PASS (21 static routes, 1 API route)**.
+- **Tệp thay đổi:**
+  - `docs/security/context.md` (Tạo mới)
+  - `next.config.ts` (Sửa đổi)
+  - `src/app/api/admin/users/reset-password/route.ts` (Sửa đổi)
+  - `src/lib/export-excel.ts` (Sửa đổi)
+  - `src/app/entry/page.tsx` (Sửa đổi)
+  - `src/app/exit/page.tsx` (Sửa đổi)
+  - `src/app/reefer/page.tsx` (Sửa đổi)
+  - `src/app/guide/page.tsx` (Sửa đổi)
+  - `scripts/audit_security_regression.mjs` (Tạo mới)
+- **Tình trạng tuân thủ ràng buộc:**
+  - Không reset database, không sửa/xóa migration, không tự áp dụng migration.
+  - Real Write giữ nguyên `false`.
+  - Không deploy production, không force-push.
+
+
 ## 2026-10-16 22:44 — Hoàn Thiện Modal In Vé Xe Vào Bãi (POS 80mm) & Cơ Chế Giám Sát Mạng Ngoại Tuyến (Offline Status Banner)
 
 - **Yêu cầu / nguồn:** Chỉ đạo rà soát toàn diện từ Chủ dự án:

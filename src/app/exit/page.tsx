@@ -427,7 +427,7 @@ export default function ExitClearancePage() {
   // Xác nhận xuất bãi hợp nhất (Xe hoặc Xe + Container)
   const handleConfirmUnifiedExit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedVehForExit) return;
+    if (isSubmittingExit || !selectedVehForExit) return;
 
     setExitError('');
     setIsSubmittingExit(true);

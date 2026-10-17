@@ -402,6 +402,7 @@ export default function EntryGatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!licensePlate.trim()) {
       setErrorMessage('Vui lòng nhập biển số phương tiện vào cổng.');
       return;
@@ -811,10 +812,10 @@ export default function EntryGatePage() {
                   <div className="relative">
                     <input
                       type="text"
-                      maxLength={15}
+                      maxLength={12}
                       value={driverIdCard}
                       onChange={(e) => {
-                        setDriverIdCard(e.target.value.replace(/\s+/g, ''));
+                        setDriverIdCard(e.target.value.replace(/[^\d]/g, '').slice(0, 12));
                       }}
                       placeholder="VD: 001095012345"
                       className="w-full h-9 px-3 text-xs font-mono font-semibold bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8] focus:ring-1 focus:ring-[#326DD8]"

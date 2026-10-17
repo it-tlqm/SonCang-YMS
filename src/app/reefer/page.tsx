@@ -94,6 +94,7 @@ export default function ReeferMonitoringPage() {
   const [plugSocketCode, setPlugSocketCode] = useState<string>('R01');
   const [plugError, setPlugError] = useState<string>('');
   const [linkingRequestId, setLinkingRequestId] = useState<string | null>(null);
+  const [isSubmittingPlug, setIsSubmittingPlug] = useState<boolean>(false);
 
   // Modal Rút điện
   const [showUnplugModal, setShowUnplugModal] = useState<boolean>(false);
@@ -101,6 +102,7 @@ export default function ReeferMonitoringPage() {
   const [unplugTime, setUnplugTime] = useState<string>('');
   const [unplugNotes, setUnplugNotes] = useState<string>('');
   const [unplugError, setUnplugError] = useState<string>('');
+  const [isSubmittingUnplug, setIsSubmittingUnplug] = useState<boolean>(false);
   const [calculatedPreview, setCalculatedPreview] = useState<{
     billableMinutes: number;
     amount: number;
@@ -822,6 +824,8 @@ export default function ReeferMonitoringPage() {
   // Xác nhận cắm điện
   const handleConfirmPlugIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingPlug) return;
+
     if (!selectedContId) {
       setPlugError('Vui lòng chọn container cần cắm điện.');
       return;
@@ -835,67 +839,72 @@ export default function ReeferMonitoringPage() {
     const targetCont = containers.find((c) => c.id === selectedContId);
     if (!targetCont) return;
 
-    let finalNotes = plugNotes.trim();
-    const plugHoursVal = plugPowerMode === 'HOURLY' && plugExpectedHours !== '' && Number(plugExpectedHours) > 0
-      ? Number(plugExpectedHours)
-      : undefined;
-    if (plugPowerMode === 'HOURLY' && plugHoursVal) {
-      const estDate = getEstimatedUnplugDate(plugInTime, plugHoursVal);
-      const estStr = formatShortDateTime(estDate);
-      finalNotes = `[Dự kiến cắm: ${plugHoursVal}h (Rút: ${estStr}) - Ước tính: ${(plugHoursVal * reeferHourlyRate).toLocaleString('vi-VN')}đ] ${finalNotes}`.trim();
-    }
+    setIsSubmittingPlug(true);
+    try {
+      let finalNotes = plugNotes.trim();
+      const plugHoursVal = plugPowerMode === 'HOURLY' && plugExpectedHours !== '' && Number(plugExpectedHours) > 0
+        ? Number(plugExpectedHours)
+        : undefined;
+      if (plugPowerMode === 'HOURLY' && plugHoursVal) {
+        const estDate = getEstimatedUnplugDate(plugInTime, plugHoursVal);
+        const estStr = formatShortDateTime(estDate);
+        finalNotes = `[Dự kiến cắm: ${plugHoursVal}h (Rút: ${estStr}) - Ước tính: ${(plugHoursVal * reeferHourlyRate).toLocaleString('vi-VN')}đ] ${finalNotes}`.trim();
+      }
 
-    const res = await repository.plugInReefer({
-      yardId,
-      containerVisitId: selectedContId,
-      containerNo: targetCont.container_no_current,
-      pluggedInAt: new Date(plugInTime).toISOString(),
-      plugSocketCode: plugSocketCode.trim(),
-      operatorId: user?.id || '20000000-0000-0000-0000-000000000020',
-      notes: finalNotes,
-    });
+      const res = await repository.plugInReefer({
+        yardId,
+        containerVisitId: selectedContId,
+        containerNo: targetCont.container_no_current,
+        pluggedInAt: new Date(plugInTime).toISOString(),
+        plugSocketCode: plugSocketCode.trim(),
+        operatorId: user?.id || '20000000-0000-0000-0000-000000000020',
+        notes: finalNotes,
+      });
 
-    if (res.error) {
-      setPlugError(res.error);
-    } else {
-      // Nếu có liên kết với yêu cầu trước, cập nhật trạng thái phiếu sang PLUGGED
-      if (linkingRequestId) {
-        await repository.matchReeferRequest({
-          requestId: linkingRequestId,
-          containerVisitId: selectedContId,
-          status: 'PLUGGED',
-        });
+      if (res.error) {
+        setPlugError(res.error);
       } else {
-        // Tự động tìm xem có phiếu nào trùng cont này không
-        const autoMatchReq = requests.find(
-          (r) => (r.container_no === targetCont.container_no_current || r.container_visit_id === targetCont.id) &&
-                 (r.status === 'PLANNED' || r.status === 'CONTAINER_ARRIVED')
-        );
-        if (autoMatchReq) {
+        // Nếu có liên kết với yêu cầu trước, cập nhật trạng thái phiếu sang PLUGGED
+        if (linkingRequestId) {
           await repository.matchReeferRequest({
-            requestId: autoMatchReq.id,
+            requestId: linkingRequestId,
             containerVisitId: selectedContId,
             status: 'PLUGGED',
           });
         } else {
-          // Tự động tạo yêu cầu cắm điện để đồng bộ hồ sơ Nghiệp vụ Cổng cảng Kho bãi
-          await repository.createReeferRequest({
-            yardId,
-            containerNo: targetCont.container_no_current,
-            containerVisitId: selectedContId,
-            status: 'PLUGGED',
-            powerMode: plugPowerMode,
-            expectedHours: plugHoursVal,
-            targetTemperature: '-18°C',
-            notes: `Tự động tạo khi cắm điện thực tế: ${finalNotes}`,
-            createdBy: user?.id || 'SYSTEM_OPERATOR',
-          });
+          // Tự động tìm xem có phiếu nào trùng cont này không
+          const autoMatchReq = requests.find(
+            (r) => (r.container_no === targetCont.container_no_current || r.container_visit_id === targetCont.id) &&
+                   (r.status === 'PLANNED' || r.status === 'CONTAINER_ARRIVED')
+          );
+          if (autoMatchReq) {
+            await repository.matchReeferRequest({
+              requestId: autoMatchReq.id,
+              containerVisitId: selectedContId,
+              status: 'PLUGGED',
+            });
+          } else {
+            // Tự động tạo yêu cầu cắm điện để đồng bộ hồ sơ Nghiệp vụ Cổng cảng Kho bãi
+            await repository.createReeferRequest({
+              yardId,
+              containerNo: targetCont.container_no_current,
+              containerVisitId: selectedContId,
+              status: 'PLUGGED',
+              powerMode: plugPowerMode,
+              expectedHours: plugHoursVal,
+              targetTemperature: '-18°C',
+              notes: `Tự động tạo khi cắm điện thực tế: ${finalNotes}`,
+              createdBy: user?.id || 'SYSTEM_OPERATOR',
+            });
+          }
         }
-      }
 
-      setShowPlugModal(false);
-      setActionSuccessMsg(`Đã ghi nhận cắm điện thành công cho container ${targetCont.container_no_current}`);
-      handleManualRefresh();
+        setShowPlugModal(false);
+        setActionSuccessMsg(`Đã ghi nhận cắm điện thành công cho container ${targetCont.container_no_current}`);
+        handleManualRefresh();
+      }
+    } finally {
+      setIsSubmittingPlug(false);
     }
   };
 
@@ -956,7 +965,7 @@ export default function ReeferMonitoringPage() {
   // Xác nhận rút điện
   const handleConfirmUnplug = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSession) return;
+    if (isSubmittingUnplug || !selectedSession) return;
 
     const plugDate = new Date(selectedSession.plugged_in_at);
     const unplugDate = new Date(unplugTime);
@@ -975,28 +984,33 @@ export default function ReeferMonitoringPage() {
       return;
     }
 
-    const res = await repository.unplugReefer({
-      sessionId: selectedSession.id,
-      unpluggedAt: new Date(unplugTime).toISOString(),
-      operatorId: user?.id || '20000000-0000-0000-0000-000000000020',
-      notes: unplugNotes,
-    });
+    setIsSubmittingUnplug(true);
+    try {
+      const res = await repository.unplugReefer({
+        sessionId: selectedSession.id,
+        unpluggedAt: new Date(unplugTime).toISOString(),
+        operatorId: user?.id || '20000000-0000-0000-0000-000000000020',
+        notes: unplugNotes,
+      });
 
-    if (res.error) {
-      setUnplugError(res.error);
-    } else {
-      // Cập nhật trạng thái phiếu đăng ký tương ứng (nếu có) sang COMPLETED
-      const req = requests.find(r => r.container_no === selectedSession.container_no && r.status === 'PLUGGED');
-      if (req) {
-        await repository.matchReeferRequest({
-          requestId: req.id,
-          status: 'COMPLETED',
-        });
+      if (res.error) {
+        setUnplugError(res.error);
+      } else {
+        // Cập nhật trạng thái phiếu đăng ký tương ứng (nếu có) sang COMPLETED
+        const req = requests.find(r => r.container_no === selectedSession.container_no && r.status === 'PLUGGED');
+        if (req) {
+          await repository.matchReeferRequest({
+            requestId: req.id,
+            status: 'COMPLETED',
+          });
+        }
+
+        setShowUnplugModal(false);
+        setActionSuccessMsg(`Đã ghi nhận rút điện thành công cho container ${selectedSession.container_no}. Tiền điện: ${(res.session?.total_power_amount || 0).toLocaleString()}đ`);
+        handleManualRefresh();
       }
-
-      setShowUnplugModal(false);
-      setActionSuccessMsg(`Đã ghi nhận rút điện thành công cho container ${selectedSession.container_no}. Tiền điện: ${(res.session?.total_power_amount || 0).toLocaleString()}đ`);
-      handleManualRefresh();
+    } finally {
+      setIsSubmittingUnplug(false);
     }
   };
 
@@ -2760,7 +2774,7 @@ export default function ReeferMonitoringPage() {
                       <div className="flex justify-between">
                         <span className="text-[#93370D]">Ước tính cước điện:</span>
                         <span className="font-bold text-[#027A48] font-mono">
-                          {Math.round((Number(plugExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
+                          {(Math.round((Number(plugExpectedHours) * reeferHourlyRate) / 5000) * 5000).toLocaleString('vi-VN')} đ
                         </span>
                       </div>
                     </div>
@@ -3646,7 +3660,7 @@ export default function ReeferMonitoringPage() {
                 <div className="p-3 bg-[#FFFAEB] border border-[#FEDF89] rounded-xl flex items-center justify-between text-xs text-[#7A2E0E]">
                   <span>Ước tính cước điện theo dự kiến ({editReqExpectedHours}h):</span>
                   <span className="font-bold font-mono text-[#027A48]">
-                    {Math.round((Number(editReqExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
+                    {(Math.round((Number(editReqExpectedHours) * reeferHourlyRate) / 5000) * 5000).toLocaleString('vi-VN')} đ
                   </span>
                 </div>
               )}
@@ -3883,7 +3897,7 @@ export default function ReeferMonitoringPage() {
                       <div className="flex justify-between">
                         <span className="text-[#93370D]">Ước tính cước điện phát sinh:</span>
                         <span className="font-bold text-[#027A48] font-mono">
-                          {Math.round((Number(reqExpectedHours) * reeferHourlyRate) / 5000 * 5000).toLocaleString('vi-VN')} đ
+                          {(Math.round((Number(reqExpectedHours) * reeferHourlyRate) / 5000) * 5000).toLocaleString('vi-VN')} đ
                         </span>
                       </div>
                     </div>

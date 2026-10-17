@@ -40,11 +40,21 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 22:44 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THIỆN MODAL IN VÉ XE VÀO BÃI POS 80MM & CƠ CHẾ GIÁM SÁT MẠNG NGOẠI TUYẾN PWA**:
-  * **1. Modal In Vé Vào Bãi (`/entry`):** Đã bổ sung Modal hiển thị và in ấn vé xe vào bãi chuẩn nhiệt 80mm/A5 với đầy đủ pháp nhân Tà Lùng Quang Minh, số vé, biển số xe, loại xe, container mang theo, ngày giờ vào cổng và trạng thái thanh toán.
-  * **2. Giám sát Mạng Ngoại tuyến PWA:** Tích hợp thanh thông báo trạng thái `OFFLINE` cảnh báo an toàn dữ liệu tài chính khi mất mạng internet cửa khẩu, và Toast thông báo khi có mạng trở lại.
-  * **3. Đẩy Production:** Đang commit và push trực tiếp lên branch `main` kích hoạt auto-deploy Vercel.
+- **Cập nhật lúc:** 16/10/2026 23:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **HOÀN TẤT KIỂM TOÁN AN NINH, SỬA LỖI NGUYÊN NHÂN GỐC & KIỂM THỬ HỒI QUY TOÀN DIỆN (AGENT_FULL_AUDIT_AND_FIX.md - PROFILE 3.3)**:
+  * **1. Lập Hồ Sơ An Ninh & Baseline (`docs/security/context.md`):** Ghi nhận đầy đủ workspace, branch `main`, stack Next.js 16/React 19/Tailwind v4, RBAC V5, baseline Typecheck PASS 0 errors, baseline Build PASS 21/21 static routes + 1 dynamic API route.
+  * **2. Khắc Phục 8 Lỗi Thực Tế (F-001 đến F-008):**
+    - `F-001 (P0)`: Xóa bỏ hoàn toàn chuỗi JWT hardcoded service role key fallback trong `src/app/api/admin/users/reset-password/route.ts`.
+    - `F-002 (P0)`: Bổ sung xác thực danh tính caller (401) và kiểm tra phân quyền Quản trị `SYS_ADMIN`/`ADMIN`/`QUAN_TRI` (403) tại `route.ts`.
+    - `F-003 (P2)`: Bổ sung Security Headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`) trong `next.config.ts`.
+    - `F-004 (P2)`: Bổ sung `sanitizeExcelCellValue` ngăn chặn triệt để CSV/Excel Formula Injection (CWE-1236) trong `src/lib/export-excel.ts`.
+    - `F-005 (P2)`: Sửa lỗi sai thứ tự ngoặc đơn làm triệt tiêu phép chia/nhân 5.000đ trong `src/app/reefer/page.tsx` (dòng 2763, 3649, 3886).
+    - `F-006 (P2)`: Bổ sung cờ chặn double-submit trên client tại `src/app/entry/page.tsx`, `src/app/exit/page.tsx`, và `src/app/reefer/page.tsx`.
+    - `F-007 (P3)`: Chuẩn hóa lọc số 12 ký tự cho ô nhập CCCD tài xế tại `src/app/entry/page.tsx`.
+    - `F-008 (P3)`: Bổ sung `rel="noopener noreferrer"` cho thẻ liên kết mở PDF trong `src/app/guide/page.tsx`.
+  * **3. Bộ Kiểm Thử Hồi Quy Mới (`scripts/audit_security_regression.mjs`):** 39/39 assertions PASS (100%).
+  * **4. Tuân Thủ Nghiêm Ngặt Ràng Buộc Profile 3.3:** Real Write giữ nguyên `false`, không đụng chạm database production/reset, không đổi migrations cũ, không tự deploy production.
+
   * **1. Xây dựng Trang Giới thiệu & Hướng dẫn Tương tác (`src/app/guide/page.tsx`):**
     - Tích hợp mục "Giới thiệu & Hướng dẫn" (`/guide`) lên thanh điều hướng chính của App Shell (`BookOpen` icon) cho toàn bộ các vai trò người dùng (An ninh, Điều phối, CCKB, Kế toán, Quản trị).
     - Hero Header chuyên nghiệp: Tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, nút tải tài liệu Word (.docx) và PDF (.pdf) trực tiếp.

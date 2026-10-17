@@ -76,6 +76,20 @@ const THEME = {
 };
 
 /**
+ * SEC-19: Ngăn ngừa tấn công CSV/Excel Formula Injection (CWE-1236).
+ * Khi xuất dữ liệu bảng tính, các chuỗi do người dùng nhập (biển số, mã cont, tên tài xế, ghi chú)
+ * nếu bắt đầu bằng các ký tự công thức (=, +, -, @, \t, \r) sẽ được bổ sung tiền tố dấu nháy đơn '
+ * để Microsoft Excel, Google Sheets và LibreOffice hiển thị như chuỗi ký tự thuần túy,
+ * tuyệt đối không tự ý thực thi mã macro hoặc lệnh DDE/công thức ngoài ý muốn.
+ */
+export function sanitizeExcelCellValue<T>(val: T): T {
+  if (typeof val === 'string' && /^[=+\-@\t\r]/.test(val)) {
+    return `'${val}` as unknown as T;
+  }
+  return val;
+}
+
+/**
  * Helper: Tạo Worksheet với thiết kế chuẩn hóa, căn lề, font chữ, viền kẻ và đóng băng dòng
  */
 function createStyledReportSheet(
@@ -169,7 +183,8 @@ function createStyledReportSheet(
 
   // Dòng 8 trở đi: DỮ LIỆU
   rows.forEach((rowData, rowIdx) => {
-    const row = ws.addRow(rowData);
+    const sanitizedRow = rowData.map((cell) => sanitizeExcelCellValue(cell));
+    const row = ws.addRow(sanitizedRow);
     row.height = 22;
     const isOdd = rowIdx % 2 === 1;
 
@@ -231,7 +246,8 @@ function createStyledReportSheet(
 
   // Dòng TỔNG CỘNG (nếu có)
   if (summaryRow && summaryRow.length > 0) {
-    const sumR = ws.addRow(summaryRow);
+    const sanitizedSummary = summaryRow.map((cell) => sanitizeExcelCellValue(cell));
+    const sumR = ws.addRow(sanitizedSummary);
     sumR.height = 25;
 
     sumR.eachCell({ includeEmpty: true }, (cell, colNumber) => {

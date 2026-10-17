@@ -320,7 +320,7 @@ export default function GuideOverviewPage() {
               <a
                 href="/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs sm:text-sm shadow-md transition-all"
               >
                 <Download className="w-4 h-4" />

@@ -1,9 +1,46 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import type { Database } from '@/types/database.types';
 
 export async function POST(request: NextRequest) {
   try {
+    // 0. Xác thực phiên người gọi (SEC-04-01 & SEC-04-02: Chặn truy cập trái phép)
+    try {
+      const serverSupabase = await createServerClient();
+      const {
+        data: { user: callerUser },
+        error: authErr,
+      } = await serverSupabase.auth.getUser();
+
+      if (authErr || !callerUser) {
+        return NextResponse.json(
+          { success: false, error: 'Yêu cầu đăng nhập tài khoản Quản trị để thực hiện tác vụ này' },
+          { status: 401 }
+        );
+      }
+
+      // Kiểm tra quyền Quản trị (SYS_ADMIN, ADMIN, QUAN_TRI)
+      const callerRole = (callerUser.user_metadata?.role_code ||
+        callerUser.app_metadata?.role_code) as string | undefined;
+
+      const allowedRoles = ['SYS_ADMIN', 'ADMIN', 'QUAN_TRI'];
+      if (callerRole && !allowedRoles.includes(callerRole)) {
+        return NextResponse.json(
+          { success: false, error: 'Từ chối truy cập: Chỉ Quản trị viên mới có quyền đặt lại mật khẩu' },
+          { status: 403 }
+        );
+      }
+    } catch {
+      // Trong môi trường offline / mock development không có session cookie
+      if (process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE === 'true') {
+        return NextResponse.json(
+          { success: false, error: 'Phiên làm việc không hợp lệ' },
+          { status: 401 }
+        );
+      }
+    }
+
     const body = await request.json();
     const { staffId, newPassword, reason, mustChangePassword } = body;
 
@@ -22,9 +59,14 @@ export async function POST(request: NextRequest) {
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://euswzyespwaxyrjkfkrq.supabase.co';
-    const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1c3d6eWVzcHdheHlyamtma3JxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTcxMjI0NSwiZXhwIjoyMTA3Mjg4MjQ1fQ.XGJfrft4TDzNSklhXDreXNCFoNXQ-TlOHEyjS_t2hrk';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { success: false, error: 'Máy chủ chưa được cấu hình biến môi trường SUPABASE_SERVICE_ROLE_KEY' },
+        { status: 500 }
+      );
+    }
 
     // Khởi tạo Supabase Client với service role key để bypass RLS trên server
     const supabase = createSupabaseClient(supabaseUrl, serviceRoleKey, {
