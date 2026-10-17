@@ -177,6 +177,16 @@ console.log('\n[TEST GROUP 5] SEC-17: Làm tròn cước điện reefer 5.000 VN
   // 2.5h * 40k = 100.000 -> 100.000đ
   assert(calcReeferAmount(2.5, rate) === 100000, '2.5h * 40k = 100k -> 100.000đ');
 
+  // RV02 (D-025): Phiên điện dưới 15 phút hoặc 0 phút: Miễn ngầm 0đ
+  const calcReeferFeeV5 = (mins, rate) => {
+    if (mins < 15) return 0;
+    return Math.max(5000, Math.round(((mins / 60) * rate) / 5000) * 5000);
+  };
+  assert(calcReeferFeeV5(0, rate) === 0, '0 phút: Miễn ngầm (0đ)');
+  assert(calcReeferFeeV5(10, rate) === 0, '10 phút (< 15p): Miễn ngầm (0đ)');
+  assert(calcReeferFeeV5(14, rate) === 0, '14 phút (< 15p): Miễn ngầm (0đ)');
+  assert(calcReeferFeeV5(15, rate) === 10000, '15 phút: Tính cước bình thường 10.000đ');
+
   // Kiểm tra file src/app/reefer/page.tsx đã được sửa hết lỗi ngoặc
   const reeferPagePath = path.join(rootDir, 'src', 'app', 'reefer', 'page.tsx');
   const reeferContent = fs.readFileSync(reeferPagePath, 'utf-8');

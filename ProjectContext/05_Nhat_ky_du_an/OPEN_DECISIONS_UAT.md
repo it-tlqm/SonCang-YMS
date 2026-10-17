@@ -4,16 +4,16 @@ Nguồn: mục 10 `../01_Nghiep_vu_V5/PROJECT_CONTEXT.md`; workbook V5 tab `27_V
 
 | Mã | Chủ đề cần kiểm chứng / điều kiện an toàn | Trạng thái |
 |---|---|---|
-| **SC-1C-A-01** | Một lượt xe có chở 2 container 20 feet (2x20ft) hoặc nhiều cont không | **CHỜ CHỐT / UAT CÒN MỞ** |
+| **SC-1C-A-01** | Một lượt xe có chở 2 container 20 feet (2x20ft) hoặc nhiều cont không | **ĐÃ CHỐT (D-024)** — Tính cước theo đầu container, 1 xe kéo 2 cont 20ft độc lập |
 | RV01 | Giây lẻ khi ghi thời gian cắm/rút; quy tắc áp dụng tại ranh giới | CHỜ UAT |
-| RV02 | Phiên 0 phút / thời điểm bất thường: không tự thu 15 phút khi chưa xác minh; không tự động miễn tiền ngầm | **CHỜ CHỐT / UAT CÒN MỞ** |
+| RV02 | Phiên 0 phút / thời điểm bất thường: dưới 15 phút hoặc 0 phút | **ĐÃ CHỐT (D-025)** — Tự động miễn ngầm (0đ cước điện, trạng thái UNPLUGGED) |
 | RV03 | Giá điện thay đổi giữa phiên: snapshot đơn giá tại thời điểm bắt đầu cắm điện (đã có cơ sở V5) | ĐÃ CÓ CƠ SỞ V5 / CHỜ UAT |
 | RV04 | Giá phí lưu thay đổi trong kỳ lưu: định giá theo từng đêm (mốc 22h) hay theo lúc vào bãi | **CHỜ CHỐT / UAT CÒN MỞ** |
 | RV05 | App hiển thị đang cắm nhưng hiện trường đã rút: ai xác minh, CCKB sửa/ghi ngoại lệ; **không xuất khi còn cắm vật lý** | CHỜ UAT |
-| RV06 | Tiền lưu mới phát sinh ở cổng ra sau khi CCKB đã duyệt tài chính: An ninh thu qua `storage.payment.collect` hoặc CCKB duyệt ngoại lệ nợ AP07 | **CHỜ CHỐT / UAT CÒN MỞ** |
+| RV06 | Tiền lưu phát sinh & Điều kiện xuất bãi CCKB tại cổng ra | **ĐÃ CHỐT (D-026)** — Phí lưu tính lúc chọn cont; Trả đủ điện miễn duyệt CCKB; Nợ thì CCKB duyệt bảo lãnh nợ cho ra |
 | RV07 | Mã loại xe `CONT_LANH` nhưng áp dụng xe container có hàng khô/lạnh; cách hiển thị & mapping | CHỜ UAT / xem quyết định V5 đã chốt |
 | RV08 | Phân hệ & Vai trò Kế toán bến bãi (`ACCOUNTANT`), xuất hóa đơn MST/CCCD, thu nợ AP07 | **ĐÃ CHỐT (D-018)** — Hoạt động chính thức từ Migration 28 |
-| RV09 | Định danh người thao tác khi dùng chung máy/bốt; trách nhiệm thu và xác nhận | **CHỜ CHỐT / UAT CÒN MỞ** |
+| RV09 | Định danh người thao tác khi dùng chung máy/bốt; trách nhiệm thu và xác nhận | **ĐÃ CHỐT (D-027)** — Cho phép dùng chung máy tính theo bốt; chịu trách nhiệm theo ca trực |
 | RV10 | Dữ liệu AppSheet cũ thiếu giờ ra/thu tiền: đánh dấu legacy_unverified, không tạo công nợ giả | CHỜ UAT |
 | RV11 | Chứng từ và trao đổi qua Zalo thủ công; chưa có tích hợp API tự động V1 | CHỜ UAT cho chứng từ chi tiết |
 | RV12 | Mốc chốt ca báo cáo thu khác ca trực; phân loại tiền mặt vs chuyển khoản | **ĐÃ CHỐT (D-018)** — Chốt tiền mặt linh hoạt thời gian, kiểm soát 4 mắt |

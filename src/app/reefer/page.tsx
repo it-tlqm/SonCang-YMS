@@ -499,8 +499,10 @@ export default function ReeferMonitoringPage() {
     setCompError('');
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
     const mins = Math.round(sec / 60);
-    const rawAmount = (mins / 60) * reeferHourlyRate;
-    const amount = sec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+    const isWaived = mins < 15;
+    const rawAmount = isWaived ? 0 : (mins / 60) * reeferHourlyRate;
+    const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
     setCompPreview({ durationMin: mins, amount });
   };
 
@@ -601,8 +603,10 @@ export default function ReeferMonitoringPage() {
     const sec = Math.max(0, Math.floor((uD.getTime() - pD.getTime()) / 1000));
     const mins = Math.round(sec / 60);
     const rate = verifySession?.applied_hourly_rate || reeferHourlyRate;
-    const rawAmount = (mins / 60) * rate;
-    const amount = sec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+    const isWaived = mins < 15;
+    const rawAmount = isWaived ? 0 : (mins / 60) * rate;
+    const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
     setVerifyPreview({ durationMin: mins, amount });
   };
 
@@ -922,8 +926,10 @@ export default function ReeferMonitoringPage() {
     const plugDate = new Date(session.plugged_in_at);
     const durationSec = Math.max(0, Math.floor((now.getTime() - plugDate.getTime()) / 1000));
     const billableMins = Math.round(durationSec / 60);
-    const rawAmount = (billableMins / 60) * session.applied_hourly_rate;
-    const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+    const isWaived = billableMins < 15;
+    const rawAmount = isWaived ? 0 : (billableMins / 60) * session.applied_hourly_rate;
+    const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
 
     setCalculatedPreview({ billableMinutes: billableMins, amount });
     setShowUnplugModal(true);
@@ -957,8 +963,10 @@ export default function ReeferMonitoringPage() {
 
     const durationSec = Math.max(0, Math.floor((unplugDate.getTime() - plugDate.getTime()) / 1000));
     const billableMins = Math.round(durationSec / 60);
-    const rawAmount = (billableMins / 60) * selectedSession.applied_hourly_rate;
-    const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+    const isWaived = billableMins < 15;
+    const rawAmount = isWaived ? 0 : (billableMins / 60) * selectedSession.applied_hourly_rate;
+    const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
     setCalculatedPreview({ billableMinutes: billableMins, amount });
   };
 
@@ -2897,8 +2905,10 @@ export default function ReeferMonitoringPage() {
                           const unplugDate = new Date(targetTime);
                           const durationSec = Math.max(0, Math.floor((unplugDate.getTime() - plugDate.getTime()) / 1000));
                           const billableMins = Math.round(durationSec / 60);
-                          const rawAmount = (billableMins / 60) * selectedSession.applied_hourly_rate;
-                          const amount = durationSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+                          // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+                          const isWaived = billableMins < 15;
+                          const rawAmount = isWaived ? 0 : (billableMins / 60) * selectedSession.applied_hourly_rate;
+                          const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
                           setCalculatedPreview({ billableMinutes: billableMins, amount });
                         }
                       }}

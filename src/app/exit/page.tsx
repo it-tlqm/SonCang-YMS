@@ -370,7 +370,7 @@ export default function ExitClearancePage() {
 
   const totalUnpaidPowerAmount = unpaidReeferSessions.reduce((sum, s) => sum + (s.total_power_amount || 0), 0);
 
-  // Quyết định V5: Container KHÔNG phát sinh cắm điện thì MIỄN DUYỆT CCKB (An ninh được cho xuất trực tiếp)
+  // Quyết định V5 & D-026: Container KHÔNG cắm điện hoặc ĐÃ RÚT ĐIỆN VÀ ĐÃ THANH TOÁN HẾT thì MIỄN DUYỆT CCKB (An ninh cho xuất trực tiếp)
   const hasTrailingContReefer = activeTrailingCont
     ? reeferSessions.some(s => s.container_visit_id === activeTrailingCont.id) ||
       charges.some(c => c.container_visit_id === activeTrailingCont.id && c.charge_type === 'REEFER')
@@ -526,7 +526,9 @@ export default function ExitClearancePage() {
         return;
       }
 
-      // Kiểm tra clearance CCKB và thanh toán tiền điện (Chỉ bắt buộc đối với container CÓ phát sinh cắm điện)
+      // Kiểm tra clearance CCKB và thanh toán tiền điện (Theo Quyết định D-026):
+      // - Nếu container đã rút điện và đã thanh toán đủ cước điện -> Cho xuất bãi trực tiếp, không cần CCKB duyệt lại.
+      // - Nếu container còn nợ cước điện -> Bắt buộc CCKB phải duyệt ghi nợ bảo lãnh (CLEARED_WITH_DEBT) thì mới cho ra.
       if (hasTrailingContReefer) {
         const unpaidPower = charges
           .filter(c => c.container_visit_id === activeTrailingCont.id && c.charge_type === 'REEFER' && (c.status === 'UNPAID' || c.status === 'PARTIALLY_PAID'))
@@ -536,12 +538,6 @@ export default function ExitClearancePage() {
           setExitError(
             `CẢNH BÁO CỔNG RA: Container còn nợ ${unpaidPower.toLocaleString('vi-VN')} đ tiền cắm điện chưa thanh toán và CCKB chưa xác nhận duyệt ghi nợ bảo lãnh (CLEARED_WITH_DEBT)! Cổng ra từ chối cho xuất bãi.`
           );
-          setIsSubmittingExit(false);
-          return;
-        }
-
-        if (!isTrailingContCleared) {
-          setExitError('Container có phát sinh cắm điện nhưng chưa được Nghiệp vụ Cổng cảng Kho bãi phê duyệt điều kiện xuất bãi (Clearance)! Vui lòng liên hệ Nghiệp vụ CCKB kiểm tra và duyệt trên hệ thống.');
           setIsSubmittingExit(false);
           return;
         }
@@ -1674,7 +1670,7 @@ export default function ExitClearancePage() {
               {(() => {
                 const modalTicketOk = selectedVehForExit.ticket_payment_status === 'PAID' || selectedVehForExit.ticket_payment_status === 'EXEMPT' || (collectEntryTicketAtExit && selectedVehForExit.ticket_payment_status === 'UNPAID');
                 const modalPowerOk = !hasTrailingContainer || !isTrailingContPlugged;
-                const modalClearanceOk = !hasTrailingContainer || !hasTrailingContReefer || isTrailingContCleared;
+                const modalClearanceOk = !hasTrailingContainer || !hasTrailingContReefer || totalUnpaidPowerAmount === 0 || activeTrailingCont?.clearance_status === 'CLEARED_WITH_DEBT';
                 const modalStorageOk = !hasTrailingContainer || !calculatedStorage || calculatedStorage.fee === 0 || paidAtGate;
 
                 return (
@@ -1717,22 +1713,27 @@ export default function ExitClearancePage() {
                       </div>
                     </div>
                     <div className={`p-1.5 rounded border text-center ${modalClearanceOk ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-300 text-amber-900 font-bold'}`}>
-                      <div className="text-[10px] text-slate-500">3. CCKB</div>
+                      <div className="text-[10px] text-slate-500">3. CCKB / Cước điện</div>
                       <div className="font-bold truncate mt-0.5 inline-flex items-center justify-center gap-1">
                         {!hasTrailingContainer || !hasTrailingContReefer ? (
                           <>
                             <Check className="w-3 h-3 text-emerald-600" />
                             <span>Miễn duyệt</span>
                           </>
-                        ) : isTrailingContCleared ? (
+                        ) : totalUnpaidPowerAmount === 0 ? (
                           <>
                             <Check className="w-3 h-3 text-emerald-600" />
-                            <span>Đã duyệt</span>
+                            <span>Đã thu đủ</span>
+                          </>
+                        ) : activeTrailingCont?.clearance_status === 'CLEARED_WITH_DEBT' ? (
+                          <>
+                            <Check className="w-3 h-3 text-blue-600" />
+                            <span>Ghi công nợ</span>
                           </>
                         ) : (
                           <>
                             <Clock className="w-3 h-3 text-amber-600" />
-                            <span>Chờ duyệt</span>
+                            <span>Còn nợ điện</span>
                           </>
                         )}
                       </div>

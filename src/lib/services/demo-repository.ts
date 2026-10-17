@@ -892,23 +892,12 @@ export class DemoRepository implements IYardRepository {
     const plugTime = new Date(session.plugged_in_at);
     const durationSeconds = Math.max(0, Math.floor((unplugTime.getTime() - plugTime.getTime()) / 1000));
 
-    // Ca 0 giây: đưa về PENDING_REVIEW chờ xác minh
-    if (durationSeconds <= 0) {
-      session.power_status = 'PENDING_REVIEW';
-      session.unplugged_at = unplugTime.toISOString();
-      session.unplugged_by = params.operatorId;
-      session.raw_duration_seconds = 0;
-      session.billable_minutes = 0;
-      session.total_power_amount = 0;
-      session.notes = params.notes ? `${session.notes || ''} [0s: Chờ CCKB xác minh]`.trim() : session.notes;
-      this.persist();
-      return { session };
-    }
-
     // Tính theo thời lượng phút thực tế, làm tròn cước đến bội số 5.000đ
     const billableMinutes = Math.round(durationSeconds / 60);
-    const rawAmount = (billableMinutes / 60) * session.applied_hourly_rate;
-    const totalAmount = durationSeconds > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện, trạng thái UNPLUGGED, không sinh nợ)
+    const isWaived = billableMinutes < 15;
+    const rawAmount = isWaived ? 0 : (billableMinutes / 60) * session.applied_hourly_rate;
+    const totalAmount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
 
     session.power_status = 'UNPLUGGED';
     session.unplugged_at = unplugTime.toISOString();
@@ -916,7 +905,10 @@ export class DemoRepository implements IYardRepository {
     session.raw_duration_seconds = durationSeconds;
     session.billable_minutes = billableMinutes;
     session.total_power_amount = totalAmount;
-    if (params.notes) session.notes = params.notes;
+    session.payment_status = isWaived ? 'EXEMPT' : 'UNPAID';
+    session.notes = params.notes 
+      ? params.notes 
+      : (isWaived ? `${session.notes || ''} [Dưới 15 phút: Tự động miễn tiền điện]`.trim() : session.notes);
 
     // Giải phóng container giắc cắm
     const cont = this.containers.find(c => c.id === session.container_visit_id);
@@ -925,23 +917,25 @@ export class DemoRepository implements IYardRepository {
       cont.plug_socket_code = null;
     }
 
-    // Tự động tạo khoản phải thu tiền điện trong sổ cái
-    const newCharge: ChargeItem = {
-      id: `charge-reefer-${Date.now()}`,
-      yard_id: session.yard_id,
-      charge_type: 'REEFER',
-      title: `Tiền điện Container ${session.container_no} (${billableMinutes} phút)`,
-      vehicle_visit_id: null,
-      container_visit_id: session.container_visit_id,
-      container_no: session.container_no,
-      license_plate: null,
-      amount: totalAmount,
-      paid_amount: 0,
-      status: 'UNPAID',
-      notes: params.notes || null,
-      created_at: new Date().toISOString(),
-    };
-    this.charges.unshift(newCharge);
+    if (totalAmount > 0) {
+      // Tự động tạo khoản phải thu tiền điện trong sổ cái
+      const newCharge: ChargeItem = {
+        id: `charge-reefer-${Date.now()}`,
+        yard_id: session.yard_id,
+        charge_type: 'REEFER',
+        title: `Tiền điện Container ${session.container_no} (${billableMinutes} phút)`,
+        vehicle_visit_id: null,
+        container_visit_id: session.container_visit_id,
+        container_no: session.container_no,
+        license_plate: null,
+        amount: totalAmount,
+        paid_amount: 0,
+        status: 'UNPAID',
+        notes: params.notes || null,
+        created_at: new Date().toISOString(),
+      };
+      this.charges.unshift(newCharge);
+    }
     this.persist();
 
     return { session };
@@ -962,9 +956,11 @@ export class DemoRepository implements IYardRepository {
     const durationSeconds = Math.max(0, Math.floor((unplugTime.getTime() - plugTime.getTime()) / 1000));
     const billableMinutes = durationSeconds <= 0 ? 0 : Math.round(durationSeconds / 60);
     const rate = this.tariffs.find(t => t.code === 'DIEN_CONT_GIO')?.amount || 100000;
-    const rawAmount = (billableMinutes / 60) * rate;
-    const totalAmount = durationSeconds > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
-    const status: ReeferPowerStatus = durationSeconds <= 0 ? 'PENDING_REVIEW' : 'UNPLUGGED';
+    // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+    const isWaived = billableMinutes < 15;
+    const rawAmount = isWaived ? 0 : (billableMinutes / 60) * rate;
+    const totalAmount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
+    const status: ReeferPowerStatus = 'UNPLUGGED';
 
     const session: ReeferPowerSession = {
       id: `session-${Date.now()}`,
@@ -980,8 +976,8 @@ export class DemoRepository implements IYardRepository {
       billable_minutes: billableMinutes,
       applied_hourly_rate: rate,
       total_power_amount: totalAmount,
-      payment_status: 'UNPAID',
-      notes: params.notes || 'Ghi nhận hoàn tất Zalo timestamp',
+      payment_status: isWaived ? 'EXEMPT' : 'UNPAID',
+      notes: params.notes || (isWaived ? 'Dưới 15 phút: Tự động miễn tiền điện' : 'Ghi nhận hoàn tất Zalo timestamp'),
       created_at: new Date().toISOString(),
     };
     this.reeferSessions.unshift(session);
@@ -1026,15 +1022,19 @@ export class DemoRepository implements IYardRepository {
       const unplugTime = new Date(session.unplugged_at).getTime();
       const durSec = Math.max(0, Math.floor((unplugTime - plugTime) / 1000));
       const billMin = Math.round(durSec / 60);
-      const rawAmount = (billMin / 60) * session.applied_hourly_rate;
-      const amount = durSec > 0 ? Math.max(5000, Math.round(rawAmount / 5000) * 5000) : 0;
+      // RV02 (D-025): Dưới 15 phút hoặc 0 phút: Miễn ngầm (0đ cước điện)
+      const isWaived = billMin < 15;
+      const rawAmount = isWaived ? 0 : (billMin / 60) * session.applied_hourly_rate;
+      const amount = isWaived ? 0 : Math.max(5000, Math.round(rawAmount / 5000) * 5000);
       session.raw_duration_seconds = durSec;
       session.billable_minutes = billMin;
       session.total_power_amount = amount;
+      if (isWaived) session.payment_status = 'EXEMPT';
 
       const charge = this.charges.find(c => c.reefer_session_id === session.id);
-      if (charge && charge.status === 'UNPAID') {
+      if (charge) {
         charge.amount = amount;
+        if (isWaived) charge.status = 'EXEMPT';
       }
     }
 

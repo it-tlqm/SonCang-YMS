@@ -1,6 +1,35 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-17 11:00 — Chuẩn Hóa Toàn Diện Trang Cẩm Nang Hướng Dẫn (/guide) Theo 100% Design System & App Shell Dự Án
+## 2026-10-17 11:20 — Triển Khai 5 Quyết Định Nghiệp Vụ Vận Hành Thực Tế (D-024 đến D-028) & Tối Ưu Luồng Xuất Bãi, Cước Điện Lạnh
+
+- **Yêu cầu / nguồn:** Phản hồi và chỉ đạo chốt nghiệp vụ trực tiếp từ Chủ dự án:
+  1. *SC-1C-A-01:* "rất ít trường hợp như này bạn ạ đúng rồi ngta tính theo đầu cont chứ có theo xe đâu?" -> Quyết định D-024: Tính cước theo đầu container, 1 xe chở 2 cont 20ft độc lập.
+  2. *RV02:* "miễn ngầm" -> Quyết định D-025: Phiên cắm điện dưới 15 phút hoặc 0 phút tự động miễn cước điện (0đ, trạng thái UNPLUGGED, không sinh nợ).
+  3. *RV06:* "Tính tại lúc nhân viên bấm chọn cont xác nhận cho ra bạn ơi, chỗ này nếu đã rút điện và thanh toán hết rồi thì k cần Cổng cảng kho bãi duyệt, còn nếu cont cắm điện nhưng chưa thanh toán hết tại lượt vào đó thì Cổng cảng kho bãi họ có thể ghi nhận công nợ và cho xe ra, trạng thái chưa thanh toán nhưng vẫn ra được do CCKB duyệt ra và ghi công nợ" -> Quyết định D-026: Tối ưu điều kiện xuất bãi CCKB: Đã trả đủ tiền điện thì ra thẳng; nếu còn nợ thì CCKB duyệt bảo lãnh nợ (CLEARED_WITH_DEBT) là cho ra.
+  4. *RV09:* "hiện tyaij cho dùng chung 1 máy tính nên chưa cần từng cá nhân 1 tk -> vì vạy sẽ chịu trách nhgieemj theo ca chực" -> Quyết định D-027: Dùng chung 1 máy tính theo bốt trực, bàn giao và chịu trách nhiệm theo ca trực (biên bản 4 mắt).
+  5. *Lộ trình:* "cắt chuyển được luôn vì có thể bê nguyên từ bên kia qua mà bạn nhỉ? app sheet ấy" -> Quyết định D-028: Cắt chuyển chính thức (Full Cut-over) trực tiếp từ AppSheet cũ sang hệ thống mới.
+- **Các tệp mã nguồn đã cập nhật:**
+  1. `src/app/exit/page.tsx`:
+     - Tối ưu hóa điều kiện xuất bãi CCKB: Container đã rút điện và đã thanh toán đủ cước điện (`totalUnpaidPowerAmount === 0`) thì **MIỄN DUYỆT CCKB**, An ninh cho xe xuất bãi trực tiếp.
+     - Nếu container còn nợ cước điện (`totalUnpaidPowerAmount > 0`), hệ thống kiểm tra và chỉ cho xe ra khi CCKB đã duyệt ghi nhận công nợ bảo lãnh (`CLEARED_WITH_DEBT`).
+     - Cập nhật hiển thị pill điều kiện số 3 thành `3. CCKB / Cước điện` với 4 trạng thái trực quan: `Miễn duyệt` / `Đã thu đủ` (Xanh lá) / `Ghi công nợ` (Xanh dương) / `Còn nợ điện` (Vàng cam).
+  2. `src/app/reefer/page.tsx`:
+     - Thực thi quy tắc RV02 (D-025): Phiên điện dưới 15 phút (< 15p) hoặc 0 phút: Hệ thống tự động tính cước là `0đ` (miễn ngầm), không ép mức tối thiểu 5.000đ khi cắm dưới 15 phút.
+     - Cập nhật đồng bộ tại 5 vị trí: `calculateCompletedPreview`, `calculateVerifyPreview`, `handleOpenUnplugModal`, `handleUnplugTimeChange` và nút lùi giờ nhanh Zalo.
+  3. `src/lib/services/demo-repository.ts`:
+     - Cập nhật phương thức `unplugReefer`: Nếu `billableMinutes < 15`, đưa trạng thái về `UNPLUGGED`, `total_power_amount = 0`, `payment_status = 'EXEMPT'`, không sinh khoản nợ trong sổ cái `charges`.
+     - Cập nhật tương tự trong `recordCompletedReeferSession` và `verifyReeferSessionZalo`.
+  4. `scripts/audit_security_regression.mjs`:
+     - Bổ sung 4 kiểm thử tự động cho quy tắc RV02: 0 phút = 0đ, 10 phút = 0đ, 14 phút = 0đ, 15 phút = 10.000đ.
+- **Kết quả kiểm thử & Kiểm chứng:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 43/43 assertions (100%)**.
+- **Tệp tài liệu đã cập nhật:**
+  - `ProjectContext/05_Nhat_ky_du_an/DECISION_LOG.md` (Thêm D-024 đến D-028)
+  - `ProjectContext/05_Nhat_ky_du_an/OPEN_DECISIONS_UAT.md` (Chốt SC-1C-A-01, RV02, RV06, RV09)
+  - `ke_hoach_van_hanh_thuc_te_son_cang.md` (Hoàn thiện kế hoạch Cut-over)
+
+
 
 - **Yêu cầu / nguồn:** Chỉ đạo chuẩn hóa UI/UX từ Chủ dự án:
   *"TRANG NÀY PHÍA BÊN TRONG NÊN TUÂN THỦ DESIGN SYSTEM CỦA DỰ ÁN BẠN Ạ https://son-cang-yms.vercel.app/guide"*
