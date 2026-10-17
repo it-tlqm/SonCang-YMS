@@ -40,8 +40,18 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 16/10/2026 23:05 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN TẤT KIỂM TOÁN AN NINH, SỬA LỖI NGUYÊN NHÂN GỐC & KIỂM THỬ HỒI QUY TOÀN DIỆN (AGENT_FULL_AUDIT_AND_FIX.md - PROFILE 3.3)**:
+- **Cập nhật lúc:** 17/10/2026 11:00 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHUẨN HÓA TOÀN DIỆN TRANG CẨM NANG (/guide) THEO 100% DESIGN SYSTEM & APP SHELL SƠN CẢNG**:
+  * **1. Tuân thủ 100% Design System & App Shell (`.agents/rules/son-cang-ui-ux.md`):**
+    - Thay thế hoàn toàn banner gradient tối màu bên ngoài bằng `WorkspaceHeader` và `WorkspaceTabs` chuẩn mực của dự án.
+    - Màu sắc Light Mode: Nền canvas `#F5F8FA`, thẻ container màu trắng `#FFFFFF`, viền `#E5E9F0`, chữ chính `#17202E`, nút CTA chính xanh lá Sơn Cảng `#087C3C`, navy `#223873` / `#326DD8`.
+    - Điều hướng 4 Tabs: 1. Quy trình Nghiệp vụ 7 Bước, 2. Mạng lưới 13 Tủ điện 380V, 3. 6 Quy tắc Vàng Bắt buộc, 4. Thư viện 33 Ảnh Thực tế.
+    - Bộ chọn bước 7 bước liên hoàn tinh gọn với chỉ báo vai trò, lưu ý nghiệp vụ, lưới tính năng và gallery ảnh có Lightbox Modal phóng to.
+  * **2. Kiểm thử xác minh hoàn tất:**
+    - Typecheck: `npx tsc --noEmit` -> PASS (0 errors).
+    - Build: `npm run build` -> PASS (21 static routes, 1 API route biên dịch trong 14.0s).
+    - Hồi quy bảo mật: `node scripts/audit_security_regression.mjs` -> PASS (39/39 tests 100%).
+- **Mốc trước đó (16/10/2026 23:05):** **HOÀN TẤT KIỂM TOÁN AN NINH, SỬA LỖI NGUYÊN NHÂN GỐC & KIỂM THỬ HỒI QUY TOÀN DIỆN (AGENT_FULL_AUDIT_AND_FIX.md - PROFILE 3.3)**:
   * **1. Lập Hồ Sơ An Ninh & Baseline (`docs/security/context.md`):** Ghi nhận đầy đủ workspace, branch `main`, stack Next.js 16/React 19/Tailwind v4, RBAC V5, baseline Typecheck PASS 0 errors, baseline Build PASS 21/21 static routes + 1 dynamic API route.
   * **2. Khắc Phục 8 Lỗi Thực Tế (F-001 đến F-008):**
     - `F-001 (P0)`: Xóa bỏ hoàn toàn chuỗi JWT hardcoded service role key fallback trong `src/app/api/admin/users/reset-password/route.ts`.

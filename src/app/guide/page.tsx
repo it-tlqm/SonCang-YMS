@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { 
   Truck, 
   Layers, 
@@ -21,23 +20,20 @@ import {
   Download, 
   ExternalLink, 
   Eye, 
-  Cpu, 
   Lock, 
-  Smartphone, 
   Clock, 
   ChevronRight,
-  Info,
-  QrCode,
-  Users,
   Compass,
   X,
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
 
 export default function GuideOverviewPage() {
-  const { user, role } = useAuth();
-  const [activeTab, setActiveTab] = useState<'WORKFLOW' | 'CABINETS' | 'RULES' | 'RBAC' | 'GALLERY'>('WORKFLOW');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'WORKFLOW' | 'CABINETS' | 'RULES' | 'GALLERY'>('WORKFLOW');
   const [selectedWorkflowStep, setSelectedWorkflowStep] = useState<number>(1);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string; subtitle: string } | null>(null);
 
@@ -49,9 +45,8 @@ export default function GuideOverviewPage() {
       title: 'Tiếp nhận Cổng vào',
       route: '/entry',
       role: 'An ninh Cổng vào (SEC_STAFF / SEC_LEAD)',
-      roleBadge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      roleBadge: 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]',
       icon: Truck,
-      color: 'from-emerald-500 to-teal-600',
       summary: 'Tiếp nhận phương tiện & container vào bãi, quét QR CCCD chip tài xế, in vé vào cổng.',
       keyFeatures: [
         'Nhận diện biển số xe đầu kéo, xe bo tải thùng, xe sang tải nội bộ',
@@ -62,7 +57,9 @@ export default function GuideOverviewPage() {
       ],
       ruleNotice: 'Biển số xe và số container là căn cứ pháp lý — nếu sơn mờ phải lập biên bản kiểm tra thực tế.',
       images: [
-        { src: '/user_inserted_images/image3.png', title: 'Toàn cảnh Form Tiếp nhận Cổng vào (/entry)' },
+        { src: '/user_inserted_images/image1.png', title: 'Toàn cảnh Giao diện Đăng nhập Hệ thống Sơn Cảng' },
+        { src: '/user_inserted_images/image2.png', title: 'Màn hình Tiếp nhận Cổng vào (/entry)' },
+        { src: '/user_inserted_images/image3.png', title: 'Toàn cảnh Form Tiếp nhận Cổng vào đầy đủ thông tin' },
         { src: '/user_inserted_images/image4.png', title: 'Nhập tay số CCCD 12 số của tài xế' },
         { src: '/user_inserted_images/image5.png', title: 'Hộp thoại Quét QR CCCD gắn chip bóc tách tự động' },
         { src: '/user_inserted_images/image6.png', title: 'Tiếp nhận song song 2 Cont 20ft & Khớp phiếu điện' }
@@ -74,9 +71,8 @@ export default function GuideOverviewPage() {
       title: 'Quản lý Bãi & Tủ điện',
       route: '/yard',
       role: 'Điều phối viên (DIS_STAFF / DIS_LEAD)',
-      roleBadge: 'bg-blue-100 text-blue-800 border-blue-300',
+      roleBadge: 'bg-[#EAF1FD] text-[#326DD8] border-[#D0E1FD]',
       icon: Layers,
-      color: 'from-blue-600 to-indigo-600',
       summary: 'Quản lý sơ đồ 4 phân khu bến bãi, giám sát 70 xe, cước lưu bãi tích lũy và hệ thống 13 tủ điện.',
       keyFeatures: [
         'Bảng điều khiển bến bãi: Theo dõi số ngày đỗ, cột cước lưu bãi tích lũy (~X đ (Y đêm)), phân trang 20 dòng',
@@ -101,9 +97,8 @@ export default function GuideOverviewPage() {
       title: 'Điện lạnh CCKB',
       route: '/reefer',
       role: 'Nghiệp vụ CCKB (PORT_STAFF / PORT_LEAD)',
-      roleBadge: 'bg-amber-100 text-amber-800 border-amber-300',
+      roleBadge: 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]',
       icon: Zap,
-      color: 'from-amber-500 to-orange-600',
       summary: 'Lập yêu cầu cắm điện, quản lý phiên cắm rút, ghi nhật ký nhiệt độ và chốt cước điện tự động.',
       keyFeatures: [
         'Lập Phiếu yêu cầu cắm điện dự kiến (Target Temp -18°C, chủ hàng, số giờ dự kiến)',
@@ -128,9 +123,8 @@ export default function GuideOverviewPage() {
       title: 'Sổ cái Thu phí',
       route: '/billing',
       role: 'An ninh / CCKB / Kế toán (Toàn quyền)',
-      roleBadge: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+      roleBadge: 'bg-[#F9F5FF] text-[#6941C6] border-[#E9D7FE]',
       icon: Receipt,
-      color: 'from-indigo-600 to-purple-600',
       summary: 'Sổ cái thu phí tập trung toàn bãi, thu tiền đơn lẻ, thu gộp nhiều khoản và đối soát ca trực.',
       keyFeatures: [
         'Sổ cái đa tiêu chí: Lọc theo loại phí (Vé vào bãi, Cước điện lạnh, Cước lưu bãi, Phạt mất vé)',
@@ -153,9 +147,8 @@ export default function GuideOverviewPage() {
       title: 'Cổng ra & Xuất bãi',
       route: '/exit',
       role: 'An ninh Cổng ra & Trưởng CCKB (SEC_STAFF / PORT_LEAD)',
-      roleBadge: 'bg-rose-100 text-rose-800 border-rose-300',
+      roleBadge: 'bg-[#FEF3F2] text-[#B42318] border-[#FECDCA]',
       icon: LogOut,
-      color: 'from-rose-500 to-red-600',
       summary: 'Kiểm soát 3 điều kiện xuất bãi, tính cước lưu bãi container theo số đêm thực tế và xác nhận cho xe ra.',
       keyFeatures: [
         'Checklist 3 Điều kiện Xuất bãi bắt buộc: [✓] Vé cổng OK, [✓] Cước điện lạnh OK, [✓] CCKB duyệt xuất OK',
@@ -178,25 +171,23 @@ export default function GuideOverviewPage() {
       id: 'accounting',
       title: 'Kế toán & Hóa đơn',
       route: '/accounting',
-      role: 'Kế toán Bến bãi (ACCOUNTANT / SYS_ADMIN)',
-      roleBadge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      role: 'Phòng Kế toán (ACC_STAFF / CHIEF_ACC)',
+      roleBadge: 'bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]',
       icon: Landmark,
-      color: 'from-teal-600 to-emerald-700',
-      summary: 'Bàn giao và chốt tiền mặt ca trực nguyên tắc 4 mắt, quản lý hóa đơn điện tử MST/CCCD và thu hồi công nợ.',
+      summary: 'Biên bản chốt tiền mặt 4 mắt, xuất hóa đơn VAT điện tử, theo dõi công nợ và sổ quỹ tiền mặt.',
       keyFeatures: [
-        'Biên bản Chốt tiền mặt ca trực nguyên tắc 4 mắt (Người giao, Người nhận, Kế toán trưởng)',
-        'Kiểm đếm chênh lệch tiền mặt thực tế so với phần mềm ghi nhận',
-        'In Biên bản bàn giao quỹ tiền mặt ca trực để lưu trữ hồ sơ tài chính',
-        'Sổ Quản lý Hóa đơn điện tử: Lưu trữ thông tin Mã số thuế, tên doanh nghiệp, CCCD, email',
-        'Lập & Phát hành hóa đơn GTGT bến bãi cho khách hàng',
-        'Quản lý danh sách công nợ bảo lãnh và ghi nhận thu hồi nợ'
+        'Tab 1: Bảng kê Chốt tiền mặt ca trực (Nguyên tắc 4 mắt: Nhân viên trực ban & Kế toán xác nhận)',
+        'Tab 2: Sổ Hóa đơn GTGT Bến bãi: Lập hóa đơn thuế 8%/10% cho khách hàng',
+        'Tab 3: Sổ Theo dõi Công nợ: Theo dõi các khoản cước được CCKB phê duyệt bảo lãnh nợ',
+        'Tab 4: Sổ Quỹ Tiền mặt Toàn bãi: Theo dõi số dư đầu ca, thu trong ca, nộp về thủ quỹ',
+        'Xuất báo cáo tài chính 4 Sheet sang định dạng Excel (.xlsx) chuẩn kiểm toán'
       ],
-      ruleNotice: 'Mọi khoản tiền mặt thu từ các ca trực phải được bàn giao và khóa sổ ngay cuối ca trực theo biên bản 4 mắt.',
+      ruleNotice: 'Cuối mỗi ca trực bắt buộc phải lập biên bản chốt tiền mặt có đầy đủ chữ ký 4 mắt trước khi bàn giao.',
       images: [
-        { src: '/user_inserted_images/IMG-ACCOUNTING-01-cash-settlement.png', title: 'Màn hình Bàn giao & Chốt tiền mặt ca trực nguyên tắc 4 mắt' },
-        { src: '/user_inserted_images/IMG-ACCOUNTING-02-modal-settlement.png', title: 'Hộp thoại Lập Biên bản Bàn giao & Khóa sổ Quỹ Ca trực' },
-        { src: '/user_inserted_images/IMG-ACCOUNTING-03-modal-print-settlement.png', title: 'Hộp thoại In Biên bản Bàn giao Quỹ Tiền mặt Ca trực' },
-        { src: '/user_inserted_images/IMG-ACCOUNTING-04-invoices-ledger.png', title: 'Sổ Quản lý Hóa đơn điện tử MST / CCCD' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-01-cash-settlement.png', title: 'Bảng kê Chốt tiền mặt ca trực & Đối chiếu 4 mắt' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-02-modal-settlement.png', title: 'Hộp thoại Lập Biên bản Chốt Tiền mặt Ca trực Hiện trường' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-03-modal-print-settlement.png', title: 'Hộp thoại In Biên Bản Bàn Giao Tiền Mặt Ca Trực' },
+        { src: '/user_inserted_images/IMG-ACCOUNTING-04-invoices-ledger.png', title: 'Sổ Quản lý Hóa đơn GTGT Bến bãi & Thuế suất' },
         { src: '/user_inserted_images/IMG-ACCOUNTING-05-modal-invoice.png', title: 'Hộp thoại Lập & Phát hành Hóa đơn GTGT Bến bãi' },
         { src: '/user_inserted_images/IMG-ACCOUNTING-06-debts-management.png', title: 'Màn hình Quản lý & Thu hồi Công nợ Bảo lãnh' }
       ]
@@ -207,9 +198,8 @@ export default function GuideOverviewPage() {
       title: 'Báo cáo & Kiểm toán',
       route: '/reports',
       role: 'Ban Giám đốc & Quản trị Hệ thống (SYS_ADMIN)',
-      roleBadge: 'bg-purple-100 text-purple-800 border-purple-300',
+      roleBadge: 'bg-[#F4F3FF] text-[#5925DC] border-[#D9D6FE]',
       icon: ShieldCheck,
-      color: 'from-purple-600 to-indigo-800',
       summary: 'Báo cáo điều hành vận hành, phân tích dòng tiền, phân quyền RBAC V5 và nhật ký kiểm toán bất biến.',
       keyFeatures: [
         'Báo cáo Sản lượng xe vào/ra, tỷ lệ lấp đầy bãi theo từng phân khu',
@@ -296,131 +286,88 @@ export default function GuideOverviewPage() {
   const currentStepData = workflowSteps.find(s => s.step === selectedWorkflowStep) || workflowSteps[0];
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-[#F8FAFC] pb-16">
-      {/* 1. HERO HEADER */}
-      <div className="bg-gradient-to-r from-[#172554] via-[#1E3A8A] to-[#0F172A] text-white pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-blue-900 shadow-md">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="space-y-3 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-blue-300" />
-                Cẩm nang Hướng dẫn Vận hành & Kiến trúc Hệ thống V5
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                Hệ Thống Quản Lý Bến Bãi & Cảng Cạn Sơn Cảng
-              </h1>
-              <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed">
-                Nền tảng số hóa toàn diện quy trình kiểm soát phương tiện, container, cấp điện lạnh công nghiệp 380V, 
-                thu phí tự động minh bạch và đối soát tài chính bến bãi — Công ty Cổ phần Tà Lùng Quang Minh.
-              </p>
-            </div>
-
-            {/* Quick Action Buttons: Download Docs */}
-            <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[240px]">
-              <a
-                href="/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs sm:text-sm shadow-md transition-all"
-              >
-                <Download className="w-4 h-4" />
-                Tải Hướng dẫn Sử dụng (PDF)
-              </a>
-              <a
-                href="/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx"
-                download
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-xs sm:text-sm border border-white/20 transition-all"
-              >
-                <FileText className="w-4 h-4" />
-                Tải Bản Word Đầy đủ (.docx)
-              </a>
-            </div>
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F5F8FA]">
+      {/* 1. WORKSPACE HEADER CHUẨN DESIGN SYSTEM */}
+      <WorkspaceHeader
+        title="Cẩm nang Hướng dẫn Vận hành & Kiến trúc V5"
+        subtitle="Hệ thống Quản lý bến bãi/cảng cạn Sơn Cảng — Công ty Cổ phần Tà Lùng Quang Minh"
+        icon={BookOpen}
+        badge={
+          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
+            Phiên bản V5 Chuẩn hóa
+          </span>
+        }
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            <a
+              href="/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors shadow-2xs cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-[#0A9444]" />
+              <span>Tải Hướng dẫn (PDF)</span>
+            </a>
+            <a
+              href="/Tai_Lieu_Huong_Dan_Su_Dung_Son_Cang_Co_Placeholder.docx"
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors shadow-2xs cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#223873]" />
+              <span>Tải Bản Word (.docx)</span>
+            </a>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      {/* 2. NAVIGATION TABS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-7">
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-1.5 flex flex-wrap gap-1">
-          <button
-            onClick={() => setActiveTab('WORKFLOW')}
-            className={`flex-1 min-w-[150px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'WORKFLOW'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            1. Luồng Phần mềm 7 Bước
-          </button>
-          <button
-            onClick={() => setActiveTab('CABINETS')}
-            className={`flex-1 min-w-[150px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'CABINETS'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Zap className="w-4 h-4" />
-            2. Mạng lưới 13 Tủ điện 380V
-          </button>
-          <button
-            onClick={() => setActiveTab('RULES')}
-            className={`flex-1 min-w-[150px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'RULES'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4" />
-            3. 6 Quy tắc Vàng Nghiệp vụ
-          </button>
-          <button
-            onClick={() => setActiveTab('GALLERY')}
-            className={`flex-1 min-w-[150px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'GALLERY'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Eye className="w-4 h-4" />
-            4. Thư viện 33 Ảnh Thực tế
-          </button>
-        </div>
-      </div>
+      {/* 2. SUB-NAVIGATION TABS THEO CHUẨN WORKSPACE TABS */}
+      <WorkspaceTabs
+        tabs={[
+          { id: 'WORKFLOW', label: '1. Quy trình Nghiệp vụ 7 Bước', count: 7, icon: Compass },
+          { id: 'CABINETS', label: '2. Mạng lưới 13 Tủ điện 380V', count: 50, icon: Zap },
+          { id: 'RULES', label: '3. 6 Quy tắc Vàng Bắt buộc', count: 6, icon: ShieldCheck },
+          { id: 'GALLERY', label: '4. Thư viện 33 Ảnh Thực tế', count: 33, icon: Eye },
+        ]}
+        activeTab={activeTab}
+        onChange={(id) => setActiveTab(id as any)}
+      />
 
-      {/* 3. MAIN CONTENT BODY */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      {/* 3. NỘI DUNG CHÍNH (CANVAS CUỘN TỰ DO, NỀN #F5F8FA) */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-6">
         
         {/* TAB 1: WORKFLOW PIPELINE INTERACTIVE */}
         {activeTab === 'WORKFLOW' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Step Selector Horizontal Bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-                Sơ đồ Tiến trình Nghiệp vụ (Bấm vào từng bước để xem chi tiết tính năng & modal):
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+            <div className="bg-white rounded-xl border border-[#E5E9F0] shadow-2xs p-4 sm:p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#475467]">
+                  Sơ đồ Tiến trình Nghiệp vụ Liên hoàn (Bấm chọn bước để xem chi tiết & hình ảnh):
+                </h3>
+                <span className="text-[11px] text-[#667085]">Bước {selectedWorkflowStep}/7</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
                 {workflowSteps.map((s) => {
                   const Icon = s.icon;
                   const isSelected = selectedWorkflowStep === s.step;
                   return (
                     <button
                       key={s.step}
+                      type="button"
                       onClick={() => setSelectedWorkflowStep(s.step)}
-                      className={`relative flex flex-col items-center p-3 rounded-lg border text-center transition-all ${
+                      className={`relative flex flex-col items-center p-3 rounded-lg border text-center transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-blue-50/80 border-blue-600 ring-2 ring-blue-600/20 text-blue-900 shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                          ? 'bg-[#EAF1FD] border-[#326DD8] text-[#326DD8] font-semibold ring-2 ring-[#326DD8]/20 shadow-2xs'
+                          : 'bg-white border-[#E5E9F0] text-[#475467] hover:bg-[#F8F9FB] hover:text-[#17202E]'
                       }`}
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-1.5 ${
-                        isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
+                        isSelected ? 'bg-[#326DD8] text-white' : 'bg-[#F1F4F8] text-[#667085]'
                       }`}>
                         <Icon className="w-4 h-4" />
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">Bước {s.step}</span>
-                      <span className="text-xs font-semibold leading-tight line-clamp-1">{s.title}</span>
+                      <span className="text-[10px] font-bold text-[#98A2B3] uppercase">Bước {s.step}</span>
+                      <span className="text-xs font-semibold leading-tight line-clamp-1 mt-0.5">{s.title}</span>
                     </button>
                   );
                 })}
@@ -428,50 +375,55 @@ export default function GuideOverviewPage() {
             </div>
 
             {/* Selected Step Detail Panel */}
-            <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-              <div className="p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500 text-white font-bold text-xs uppercase tracking-wide">
+            <div className="bg-white rounded-xl border border-[#E5E9F0] shadow-2xs overflow-hidden">
+              {/* Header của thẻ chi tiết bước */}
+              <div className="p-4 sm:p-5 border-b border-[#F0F2F6] bg-[#F8F9FB] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#EAF1FD] text-[#326DD8] border border-[#D0E1FD]">
                       Bước {currentStepData.step} / 7
                     </span>
-                    <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs border ${currentStepData.roleBadge}`}>
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${currentStepData.roleBadge}`}>
                       {currentStepData.role}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-extrabold text-white">{currentStepData.title}</h2>
-                  <p className="text-xs sm:text-sm text-blue-100/90 max-w-2xl">{currentStepData.summary}</p>
+                  <h2 className="text-base sm:text-lg font-bold text-[#17202E] truncate">
+                    {currentStepData.title}
+                  </h2>
+                  <p className="text-xs text-[#667085] line-clamp-2 max-w-3xl">
+                    {currentStepData.summary}
+                  </p>
                 </div>
 
                 <Link
                   href={currentStepData.route}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-md transition-all shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087C3C] hover:bg-[#076934] text-white text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
                 >
-                  Mở Phân hệ ({currentStepData.route})
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Mở Phân hệ ({currentStepData.route})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
-              <div className="p-6 sm:p-8 space-y-6">
+              <div className="p-4 sm:p-6 space-y-6">
                 {/* Rule Callout */}
-                <div className="p-4 rounded-xl bg-amber-50 border-l-4 border-amber-500 text-amber-900 flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs sm:text-sm uppercase tracking-wide">Lưu ý nghiệp vụ bắt buộc: </span>
-                    <span className="text-xs sm:text-sm">{currentStepData.ruleNotice}</span>
+                <div className="p-3.5 sm:p-4 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] text-[#7A2E0E] flex items-start gap-3">
+                  <AlertTriangle className="w-4 h-4 text-[#B54708] shrink-0 mt-0.5" />
+                  <div className="text-xs leading-relaxed">
+                    <strong className="uppercase tracking-wide text-[#93370D]">Lưu ý nghiệp vụ bắt buộc: </strong>
+                    <span>{currentStepData.ruleNotice}</span>
                   </div>
                 </div>
 
                 {/* Key Features List */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#475467] mb-3">
                     Các Tính năng & Quy trình Nghiệp vụ Cốt lõi:
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {currentStepData.keyFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <span className="text-xs sm:text-sm text-slate-700 font-medium">{feat}</span>
+                      <div key={idx} className="flex items-start gap-2.5 p-3 rounded-lg bg-[#F8F9FB] border border-[#E5E9F0]">
+                        <CheckCircle2 className="w-4 h-4 text-[#0A9444] shrink-0 mt-0.5" />
+                        <span className="text-xs text-[#17202E] font-medium leading-relaxed">{feat}</span>
                       </div>
                     ))}
                   </div>
@@ -480,33 +432,33 @@ export default function GuideOverviewPage() {
                 {/* Screenshots Gallery for this Step */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#475467]">
                       Hình ảnh Giao diện & Hộp thoại (Modal) Thực tế ({currentStepData.images.length} ảnh):
                     </h4>
-                    <span className="text-xs text-blue-600 font-medium">Bấm vào ảnh để phóng to</span>
+                    <span className="text-xs text-[#326DD8] font-medium">Bấm vào ảnh để phóng to</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {currentStepData.images.map((img, i) => (
                       <div
                         key={i}
                         onClick={() => setLightboxImage({ src: img.src, title: img.title, subtitle: `Bước ${currentStepData.step}: ${currentStepData.title}` })}
-                        className="group relative rounded-xl border border-slate-200 bg-slate-100 overflow-hidden cursor-pointer hover:shadow-md hover:border-blue-400 transition-all"
+                        className="group relative rounded-xl border border-[#E5E9F0] bg-white overflow-hidden cursor-pointer hover:shadow-sm hover:border-[#326DD8] transition-all"
                       >
-                        <div className="aspect-video w-full bg-slate-200 relative overflow-hidden flex items-center justify-center">
+                        <div className="aspect-video w-full bg-[#F8F9FB] relative overflow-hidden flex items-center justify-center">
                           <img
                             src={img.src}
                             alt={img.title}
-                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                            className="object-cover w-full h-full group-hover:scale-102 transition-transform duration-200"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span className="px-3 py-1.5 rounded-lg bg-white/90 text-slate-900 text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                              <Eye className="w-3.5 h-3.5" /> Xem chi tiết
+                          <div className="absolute inset-0 bg-[#17202E]/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="px-3 py-1.5 rounded-lg bg-white text-[#17202E] text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                              <Eye className="w-3.5 h-3.5 text-[#326DD8]" /> Xem chi tiết
                             </span>
                           </div>
                         </div>
-                        <div className="p-2.5 bg-white border-t border-slate-200">
-                          <p className="text-xs font-semibold text-slate-800 line-clamp-1">{img.title}</p>
+                        <div className="p-2.5 bg-white border-t border-[#F0F2F6]">
+                          <p className="text-xs font-semibold text-[#17202E] truncate">{img.title}</p>
                         </div>
                       </div>
                     ))}
@@ -520,81 +472,81 @@ export default function GuideOverviewPage() {
         {/* TAB 2: POWER CABINETS GRID 380V */}
         {activeTab === 'CABINETS' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 mb-6">
+            <div className="bg-white rounded-xl border border-[#E5E9F0] shadow-2xs p-5 sm:p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F0F2F6] pb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">
+                  <h2 className="text-base sm:text-lg font-bold text-[#17202E]">
                     Quy Hoạch Hệ Thống Cấp Điện Container Lạnh 380V (Khu A)
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="text-xs text-[#667085] mt-0.5">
                     Hệ thống cấp điện bến bãi Sơn Cảng gồm <strong>13 Tủ điện công nghiệp</strong> phân bổ tổng cộng <strong>50 Giắc cắm 3 pha 380V</strong>.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link
                     href="/yard?tab=zones"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#223873] hover:bg-[#1A2C5B] text-white text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
                   >
-                    Xem Sơ đồ Bến bãi
+                    <span>Xem Sơ đồ Bến bãi</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
 
               {/* Summary Stats Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200">
-                  <span className="text-xs font-semibold text-blue-700 uppercase">Tổng số Tủ điện</span>
-                  <p className="text-2xl font-black text-blue-900 mt-1">13 Tủ</p>
-                  <span className="text-[11px] text-blue-600">T01 đến T13</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                <div className="p-4 rounded-xl bg-white border border-[#E5E9F0] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider">Tổng số Tủ điện</span>
+                  <p className="text-2xl font-bold font-mono text-[#17202E] mt-1">13 Tủ</p>
+                  <span className="text-[11px] text-[#326DD8]">Từ Tủ T01 đến T13</span>
                 </div>
-                <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200">
-                  <span className="text-xs font-semibold text-emerald-700 uppercase">Tổng Giắc cắm</span>
-                  <p className="text-2xl font-black text-emerald-900 mt-1">50 Giắc</p>
-                  <span className="text-[11px] text-emerald-600">3P 380V / 32A</span>
+                <div className="p-4 rounded-xl bg-white border border-[#E5E9F0] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider">Tổng Giắc cắm</span>
+                  <p className="text-2xl font-bold font-mono text-[#0A9444] mt-1">50 Giắc</p>
+                  <span className="text-[11px] text-[#0A9444]">Chuẩn 3P 380V / 32A</span>
                 </div>
-                <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200">
-                  <span className="text-xs font-semibold text-amber-700 uppercase">Tủ Công Suất Lớn</span>
-                  <p className="text-2xl font-black text-amber-900 mt-1">Tủ T05</p>
-                  <span className="text-[11px] text-amber-600">8 ổ cắm trung tâm</span>
+                <div className="p-4 rounded-xl bg-white border border-[#E5E9F0] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider">Tủ Công Suất Lớn</span>
+                  <p className="text-2xl font-bold font-mono text-[#B54708] mt-1">Tủ T05</p>
+                  <span className="text-[11px] text-[#B54708]">8 ổ cắm trung tâm</span>
                 </div>
-                <div className="p-4 rounded-xl bg-purple-50/80 border border-purple-200">
-                  <span className="text-xs font-semibold text-purple-700 uppercase">Chuẩn Kỹ Thuật</span>
-                  <p className="text-2xl font-black text-purple-900 mt-1">380V / 3P</p>
-                  <span className="text-[11px] text-purple-600">Làm tròn cước 5.000đ</span>
+                <div className="p-4 rounded-xl bg-white border border-[#E5E9F0] shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider">Biểu Phí Điện V5</span>
+                  <p className="text-2xl font-bold font-mono text-[#17202E] mt-1">40.000 đ/h</p>
+                  <span className="text-[11px] text-[#667085]">Làm tròn chẵn 5.000đ</span>
                 </div>
               </div>
 
               {/* Cabinets Table */}
-              <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-slate-50 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200">
+              <div className="overflow-x-auto border border-[#E5E9F0] rounded-xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#F8F9FB] text-[#475467] uppercase font-bold text-[11px] border-b border-[#E5E9F0]">
                     <tr>
-                      <th className="py-3 px-4">Mã Tủ</th>
-                      <th className="py-3 px-4">Tên Tủ Điện</th>
-                      <th className="py-3 px-4 text-center">Số Giắc 380V</th>
-                      <th className="py-3 px-4">Dải Mã Giắc Cắm</th>
-                      <th className="py-3 px-4">Đặc tính kỹ thuật & Vị trí</th>
+                      <th className="py-2.5 px-3.5">Mã Tủ</th>
+                      <th className="py-2.5 px-3.5">Tên Tủ Điện</th>
+                      <th className="py-2.5 px-3.5 text-center">Số Giắc 380V</th>
+                      <th className="py-2.5 px-3.5">Dải Mã Giắc Cắm</th>
+                      <th className="py-2.5 px-3.5">Đặc tính kỹ thuật & Vị trí</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 font-medium">
+                  <tbody className="divide-y divide-[#F0F2F6] font-medium text-[#17202E]">
                     {powerCabinets.map((c) => (
-                      <tr key={c.code} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-blue-700">{c.code}</td>
-                        <td className="py-3 px-4 font-semibold text-slate-800">{c.name}</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                      <tr key={c.code} className="hover:bg-[#F8F9FB] transition-colors">
+                        <td className="py-2.5 px-3.5 font-mono font-bold text-[#326DD8]">{c.code}</td>
+                        <td className="py-2.5 px-3.5 font-semibold">{c.name}</td>
+                        <td className="py-2.5 px-3.5 text-center">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#ECFDF3] text-[#0A9444] border border-[#A6F4C5]">
                             {c.sockets} ổ
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-600">{c.codes}</td>
-                        <td className="py-3 px-4 text-slate-600">{c.spec}</td>
+                        <td className="py-2.5 px-3.5 font-mono text-[#667085]">{c.codes}</td>
+                        <td className="py-2.5 px-3.5 text-[#667085]">{c.spec}</td>
                       </tr>
                     ))}
-                    <tr className="bg-slate-100/80 font-bold text-slate-900">
-                      <td className="py-3 px-4" colSpan={2}>TỔNG CỘNG HỆ THỐNG</td>
-                      <td className="py-3 px-4 text-center text-emerald-700 font-black">50 Giắc</td>
-                      <td className="py-3 px-4" colSpan={2}>
+                    <tr className="bg-[#F8F9FB] font-bold text-[#17202E]">
+                      <td className="py-3 px-3.5" colSpan={2}>TỔNG CỘNG HỆ THỐNG</td>
+                      <td className="py-3 px-3.5 text-center text-[#0A9444] font-black">50 Giắc</td>
+                      <td className="py-3 px-3.5 text-[#475467]" colSpan={2}>
                         (3+4+4+3+8+3+3+2+5+3+4+4+4 = 50 ổ điện 3 pha 380V)
                       </td>
                     </tr>
@@ -608,32 +560,34 @@ export default function GuideOverviewPage() {
         {/* TAB 3: GOLDEN RULES */}
         {activeTab === 'RULES' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">
-                6 Quy Tắc Vàng Vận Hành Bắt Buộc — Phần Mềm Sơn Cảng
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mb-6">
-                Mọi nhân sự trực ban thuộc các bộ phận An ninh, CCKB, Điều phối và Kế toán phải tuân thủ nghiêm ngặt các nguyên tắc dưới đây:
-              </p>
+            <div className="bg-white rounded-xl border border-[#E5E9F0] shadow-2xs p-5 sm:p-6 space-y-5">
+              <div className="border-b border-[#F0F2F6] pb-3">
+                <h2 className="text-base sm:text-lg font-bold text-[#17202E]">
+                  6 Quy Tắc Vàng Vận Hành Bắt Buộc — Bến Bãi Sơn Cảng
+                </h2>
+                <p className="text-xs text-[#667085] mt-0.5">
+                  Mọi nhân sự trực ban thuộc các bộ phận An ninh, CCKB, Điều phối và Kế toán phải tuân thủ nghiêm ngặt các nguyên tắc dưới đây:
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {goldenRules.map((rule) => {
                   const Icon = rule.icon;
                   return (
-                    <div key={rule.num} className="p-5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all space-y-3">
+                    <div key={rule.num} className="p-4 sm:p-5 rounded-xl border border-[#E5E9F0] bg-white hover:border-[#D0E1FD] hover:shadow-2xs transition-all space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-black text-blue-600 font-mono">#{rule.num}</span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold">
+                        <span className="text-xl font-bold font-mono text-[#223873]">#{rule.num}</span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EAF1FD] text-[#326DD8] border border-[#D0E1FD]">
                           {rule.tag}
                         </span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <div className="w-8 h-8 rounded-lg bg-[#EAF1FD] text-[#326DD8] flex items-center justify-center shrink-0 mt-0.5">
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base font-bold text-slate-900">{rule.title}</h3>
-                          <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">{rule.desc}</p>
+                          <h3 className="text-sm font-semibold text-[#17202E]">{rule.title}</h3>
+                          <p className="text-xs text-[#667085] mt-1 leading-relaxed">{rule.desc}</p>
                         </div>
                       </div>
                     </div>
@@ -647,27 +601,25 @@ export default function GuideOverviewPage() {
         {/* TAB 4: ALL 33 SCREENSHOTS GALLERY */}
         {activeTab === 'GALLERY' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">
-                    Thư Viện 33 Ảnh Chụp Thực Tế Giao Diện & Modal Hệ Thống
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                    Toàn bộ hình ảnh thực tế được chụp từ hệ thống đang chạy với 70 xe, 65 cont, 13 tủ điện và các nghiệp vụ tài chính thực tế.
-                  </p>
-                </div>
+            <div className="bg-white rounded-xl border border-[#E5E9F0] shadow-2xs p-5 sm:p-6 space-y-6">
+              <div className="border-b border-[#F0F2F6] pb-3">
+                <h2 className="text-base sm:text-lg font-bold text-[#17202E]">
+                  Thư Viện 33 Ảnh Chụp Thực Tế Giao Diện & Modal Hệ Thống
+                </h2>
+                <p className="text-xs text-[#667085] mt-0.5">
+                  Toàn bộ hình ảnh thực tế được chụp từ hệ thống đang chạy với 70 xe, 65 cont, 13 tủ điện và các nghiệp vụ tài chính thực tế.
+                </p>
               </div>
 
               <div className="space-y-8">
                 {workflowSteps.map((s) => (
                   <div key={s.step} className="space-y-3">
-                    <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                      <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+                    <div className="flex items-center gap-2 border-b border-[#F0F2F6] pb-2">
+                      <span className="w-6 h-6 rounded-md bg-[#EAF1FD] text-[#326DD8] text-xs font-bold flex items-center justify-center">
                         {s.step}
                       </span>
-                      <h3 className="text-base font-bold text-slate-900">{s.title}</h3>
-                      <span className="text-xs text-slate-500">({s.images.length} ảnh thực tế)</span>
+                      <h3 className="text-sm font-bold text-[#17202E]">{s.title}</h3>
+                      <span className="text-xs text-[#667085]">({s.images.length} ảnh thực tế)</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -675,23 +627,23 @@ export default function GuideOverviewPage() {
                         <div
                           key={idx}
                           onClick={() => setLightboxImage({ src: img.src, title: img.title, subtitle: `${s.title} (Ảnh ${idx + 1}/${s.images.length})` })}
-                          className="group rounded-xl border border-slate-200 bg-white overflow-hidden cursor-pointer hover:shadow-md hover:border-blue-500 transition-all"
+                          className="group rounded-xl border border-[#E5E9F0] bg-white overflow-hidden cursor-pointer hover:shadow-2xs hover:border-[#326DD8] transition-all"
                         >
-                          <div className="aspect-video bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                          <div className="aspect-video bg-[#F8F9FB] relative overflow-hidden flex items-center justify-center">
                             <img
                               src={img.src}
                               alt={img.title}
-                              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                              className="object-cover w-full h-full group-hover:scale-102 transition-transform duration-200"
                               loading="lazy"
                             />
-                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="px-3 py-1.5 rounded-lg bg-white/90 text-slate-900 text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                                <Eye className="w-3.5 h-3.5" /> Xem ảnh lớn
+                            <div className="absolute inset-0 bg-[#17202E]/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="px-3 py-1.5 rounded-lg bg-white text-[#17202E] text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                                <Eye className="w-3.5 h-3.5 text-[#326DD8]" /> Xem ảnh lớn
                               </span>
                             </div>
                           </div>
-                          <div className="p-3">
-                            <p className="text-xs font-semibold text-slate-800 line-clamp-1">{img.title}</p>
+                          <div className="p-2.5 bg-white border-t border-[#F0F2F6]">
+                            <p className="text-xs font-medium text-[#17202E] truncate">{img.title}</p>
                           </div>
                         </div>
                       ))}
@@ -705,39 +657,41 @@ export default function GuideOverviewPage() {
 
       </div>
 
-      {/* 4. LIGHTBOX MODAL PHÓNG TO ẢNH */}
+      {/* 4. LIGHTBOX MODAL PHÓNG TO ẢNH CHUẨN DESIGN SYSTEM */}
       {lightboxImage && (
         <div 
           onClick={() => setLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#101828]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-5xl w-full overflow-hidden shadow-2xl border border-slate-700 flex flex-col max-h-[90vh]"
+            className="bg-white rounded-2xl max-w-5xl w-full overflow-hidden shadow-2xl border border-[#E5E9F0] flex flex-col max-h-[90vh]"
           >
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="px-5 py-3.5 bg-white text-[#17202E] flex items-center justify-between border-b border-[#E5E9F0]">
               <div>
-                <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">{lightboxImage.subtitle}</span>
-                <h3 className="text-sm sm:text-base font-bold text-white">{lightboxImage.title}</h3>
+                <span className="text-[10px] font-bold text-[#326DD8] uppercase tracking-wider">{lightboxImage.subtitle}</span>
+                <h3 className="text-sm font-semibold text-[#17202E] mt-0.5">{lightboxImage.title}</h3>
               </div>
               <button
+                type="button"
                 onClick={() => setLightboxImage(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                className="p-1.5 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#F8F9FB] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-2 overflow-auto bg-slate-950 flex items-center justify-center">
+            <div className="p-3 overflow-auto bg-[#0F172A] flex items-center justify-center">
               <img
                 src={lightboxImage.src}
                 alt={lightboxImage.title}
                 className="max-h-[75vh] w-auto object-contain rounded-lg shadow-md"
               />
             </div>
-            <div className="p-3 bg-slate-900 text-right border-t border-slate-800">
+            <div className="px-5 py-3 bg-[#F8F9FB] text-right border-t border-[#E5E9F0]">
               <button
+                type="button"
                 onClick={() => setLightboxImage(null)}
-                className="px-4 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition-colors"
+                className="py-1.5 px-4 text-xs font-semibold text-[#344054] bg-white hover:bg-[#F8F9FB] rounded-lg border border-[#D0D5DD] transition-colors cursor-pointer"
               >
                 Đóng
               </button>

@@ -1,6 +1,43 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
-## 2026-10-16 23:05 — Rà Soát, Sửa Lỗi Toàn Diện & Kiểm Thử Hồi Quy Theo Chỉ Thị AGENT_FULL_AUDIT_AND_FIX.md (Profile 3.3)
+## 2026-10-17 11:00 — Chuẩn Hóa Toàn Diện Trang Cẩm Nang Hướng Dẫn (/guide) Theo 100% Design System & App Shell Dự Án
+
+- **Yêu cầu / nguồn:** Chỉ đạo chuẩn hóa UI/UX từ Chủ dự án:
+  *"TRANG NÀY PHÍA BÊN TRONG NÊN TUÂN THỦ DESIGN SYSTEM CỦA DỰ ÁN BẠN Ạ https://son-cang-yms.vercel.app/guide"*
+- **Mục tiêu & Quy chuẩn áp dụng:**
+  - Áp dụng nghiêm ngặt `.agents/rules/son-cang-ui-ux.md` và `ProjectContext/04_UI_Stitch_tham_khao/DESIGN.md`.
+  - Đồng bộ hoàn toàn với các phân hệ nghiệp vụ khác (`/yard`, `/billing`, `/exit`, `/reefer`, `/entry`).
+  - Loại bỏ hoàn toàn giao diện banner tối màu dạng landing page bên ngoài, tích hợp chặt chẽ vào App Shell nội bộ.
+- **Chi tiết các hạng mục nâng cấp & chuẩn hóa (`src/app/guide/page.tsx`):**
+  1. **Khung giao diện App Shell chuẩn mực:**
+     - Tích hợp thành phần `WorkspaceHeader` chuẩn dự án: Icon `BookOpen`, tiêu đề hệ thống, đơn vị chủ quản Tà Lùng Quang Minh, badge trạng thái `Phiên bản V5 Chuẩn hóa` (`bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]`).
+     - Bổ sung cụm hành động tải tài liệu: Nút Tải Hướng dẫn PDF (`rel="noopener noreferrer"`) và nút Tải Bản Word (.docx) chuẩn mực nút phụ (`bg-white border-[#D0D5DD]`).
+  2. **Điều hướng phụ `WorkspaceTabs` 4 Tab chức năng:**
+     - Tab 1: *1. Quy trình Nghiệp vụ 7 Bước* (count: 7, icon: `Compass`)
+     - Tab 2: *2. Mạng lưới 13 Tủ điện 380V* (count: 50, icon: `Zap`)
+     - Tab 3: *3. 6 Quy tắc Vàng Bắt buộc* (count: 6, icon: `ShieldCheck`)
+     - Tab 4: *4. Thư viện 33 Ảnh Thực tế* (count: 33, icon: `Eye`)
+  3. **Chuẩn hóa Màu sắc & Thẻ hiển thị (Light Mode):**
+     - Nền canvas chuẩn `#F5F8FA`, thẻ container màu trắng `#FFFFFF`, viền `#E5E9F0`, đổ bóng tinh tế `shadow-2xs`.
+     - Chữ chính `#17202E`, chữ phụ `#475467` / `#667085`.
+     - Nút CTA chuyển phân hệ dùng đúng mã màu xanh lá thương hiệu Sơn Cảng `#087C3C` hover `#076934`.
+     - Nút và điểm nhấn phụ dùng màu xanh Navy bến bãi `#223873` và `#326DD8`.
+  4. **Nội dung & Tính năng chi tiết:**
+     - **Tab 1 (Quy trình 7 bước):** Bộ chọn bước ngang tinh gọn với trạng thái active `#EAF1FD` viền `#326DD8`. Thẻ chi tiết có badge vai trò theo RBAC V5, callout lưu ý nghiệp vụ màu vàng cam `#FFFAEB` viền `#FEDF89`, lưới tính năng cốt lõi và thư viện ảnh giao diện thực tế của từng bước kèm CTA mở trực tiếp phân hệ.
+     - **Tab 2 (Mạng lưới 13 Tủ điện 380V):** 4 thẻ chỉ số KPI tổng thể (Tổng tủ: 13, Tổng giắc: 50, Tủ trung tâm: T05 - 8 ổ, Đơn giá điện V5: 40.000đ/h làm tròn 5.000đ) và bảng kê chi tiết 13 tủ điện chuẩn typography của `/yard`.
+     - **Tab 3 (6 Quy tắc Vàng):** Lưới 6 thẻ quy tắc thiết kế thẻ card chuyên nghiệp, badge phân loại `#EAF1FD` text `#326DD8`.
+     - **Tab 4 (Thư viện 33 Ảnh):** Phân nhóm theo 7 bước, thẻ thumbnail bo góc tỉ lệ 16:9, hiệu ứng hover overlay xem chi tiết.
+     - **Lightbox Modal:** Thiết kế chuẩn hộp thoại hệ thống (`bg-[#101828]/60 backdrop-blur-xs`), header nền trắng viền `#E5E9F0`, nút đóng rõ ràng, hỗ trợ click outside hoặc nút ESC để đóng.
+- **Kiểm thử & Xác minh thực tế:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `npm run build` -> **PASS (21 static routes, 1 API route biên dịch thành công trong 14.0s)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 39/39 assertions (100%)**.
+- **Tệp thay đổi:**
+  - `src/app/guide/page.tsx` (Tái cấu trúc 100% theo Design System)
+  - `ProjectContext/05_Nhat_ky_du_an/WORK_LOG.md` (Cập nhật)
+  - `ProjectContext/05_Nhat_ky_du_an/CURRENT_STATUS.md` (Cập nhật)
+
+
 
 - **Yêu cầu / nguồn:** Chỉ đạo rà soát bảo mật & kiểm thử toàn diện từ Chủ dự án:
   *"Đọc toàn bộ file AGENT_FULL_AUDIT_AND_FIX.md và thực hiện trên repository hiện tại... xác minh lỗi, chủ động sửa nguyên nhân gốc trong phạm vi được cấp quyền, bổ sung test và kiểm thử hồi quy."*
