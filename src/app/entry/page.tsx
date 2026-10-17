@@ -593,7 +593,7 @@ export default function EntryGatePage() {
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold uppercase tracking-wider text-[#0A9444]">
-                      Lượt xe vào cổng gần nhất:
+                      Đã ghi nhận xe vào bãi thành công:
                     </span>
                     <span className="font-mono font-bold text-sm bg-white px-2 py-0.5 rounded border border-[#A6F4C5] text-[#17202E]">
                       {recentVisit.vehicle.license_plate || 'Không biển'}
@@ -607,6 +607,9 @@ export default function EntryGatePage() {
                         : 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
                     }`}>
                       {recentVisit.vehicle.ticket_payment_status === 'PAID' ? 'Đã thu vé' : 'Chưa thu vé'} ({recentVisit.vehicle.ticket_amount ? `${recentVisit.vehicle.ticket_amount.toLocaleString('vi-VN')} đ` : '0 đ'})
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white text-[#475467] border border-[#D0D5DD]">
+                      Lưu điện tử · Không bắt buộc in giấy
                     </span>
                   </div>
 
@@ -629,17 +632,17 @@ export default function EntryGatePage() {
                 <button
                   type="button"
                   onClick={() => setShowPrintTicketModal(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087C3C] hover:bg-[#076934] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                  title="In vé vào bãi cho lượt xe gần nhất này"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#CBD5E1] text-[#344054] hover:bg-[#F8F9FB] hover:text-[#17202E] text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                  title="In vé giấy cho tài xế nếu có yêu cầu (Không bắt buộc)"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>In vé xe</span>
+                  <Printer className="w-3.5 h-3.5 text-[#667085]" />
+                  <span>In vé giấy (Tùy chọn)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setRecentVisit(null)}
                   className="p-2 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#D1FADF] transition-colors cursor-pointer"
-                  title="Ẩn thông báo lượt xe gần nhất"
+                  title="Đóng thông báo lượt xe này"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1166,10 +1169,10 @@ export default function EntryGatePage() {
                   });
                   setShowPrintTicketModal(true);
                 }}
-                className="w-full py-2 px-3 bg-[#0A9444] hover:bg-[#087C3C] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                className="w-full py-2 px-3 bg-white border border-[#CBD5E1] hover:bg-[#F8F9FB] text-[#344054] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>In lại vé cho xe này</span>
+                <Printer className="w-3.5 h-3.5 text-[#667085]" />
+                <span>In vé giấy (Tùy chọn)</span>
               </button>
             </div>
           )}
@@ -1234,7 +1237,7 @@ export default function EntryGatePage() {
             <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3 print:hidden">
               <span className="text-xs font-bold text-[#17202E] flex items-center gap-1.5 uppercase tracking-wider">
                 <Printer className="w-4 h-4 text-[#0A9444]" />
-                Xem trước & In vé xe vào bãi
+                Xem trước & In vé xe (Tùy chọn)
               </span>
               <div className="flex items-center gap-2">
                 <button
@@ -1274,7 +1277,7 @@ export default function EntryGatePage() {
                     VÉ XE VÀO BÃI
                   </h2>
                   <p className="text-[10px] italic text-[#667085]">
-                    (Liên kiểm soát bến bãi — Lưu giữ khi rời cổng)
+                    (Dữ liệu đã lưu điện tử — Cấp vé giấy theo yêu cầu)
                   </p>
                 </div>
               </div>
@@ -1347,8 +1350,8 @@ export default function EntryGatePage() {
               {/* Footer lưu ý & QR */}
               <div className="pt-3 border-t border-dashed border-[#CBD5E1] text-center space-y-1">
                 <p className="text-[10px] text-[#667085] leading-relaxed">
-                  Quý khách vui lòng giữ vé để xuất trình cho An ninh khi xe rời bãi.<br />
-                  Cước lưu bãi container bắt đầu tính sau đêm miễn phí đầu tiên theo quy định biểu phí niêm yết.
+                  Lượt xe đã được ghi nhận trên hệ thống phần mềm quản lý bến bãi.<br />
+                  Đối chiếu cổng ra tự động theo biển số xe. Cước lưu bãi tính theo quy định niêm yết.
                 </p>
                 <p className="text-[9px] font-mono text-[#98A2B3] pt-1">
                   In lúc: {new Date().toLocaleTimeString('vi-VN')} {new Date().toLocaleDateString('vi-VN')} · Bốt An ninh Cổng vào

@@ -47,7 +47,7 @@ export default function GuideOverviewPage() {
       role: 'An ninh Cổng vào (SEC_STAFF / SEC_LEAD)',
       roleBadge: 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]',
       icon: Truck,
-      summary: 'Tiếp nhận phương tiện & container vào bãi, quét QR CCCD chip tài xế, in vé vào cổng.',
+      summary: 'Tiếp nhận phương tiện & container vào bãi, quét QR CCCD chip tài xế, cấp mã vé điện tử (tùy chọn in giấy).',
       keyFeatures: [
         'Nhận diện biển số xe đầu kéo, xe bo tải thùng, xe sang tải nội bộ',
         'Quét mã QR thẻ CCCD gắn chip tự động bóc tách số CCCD, họ tên tài xế',

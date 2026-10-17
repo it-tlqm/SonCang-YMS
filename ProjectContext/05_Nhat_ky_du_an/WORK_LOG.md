@@ -1,5 +1,30 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 11:42 — Triển Khai Quyết Định D-029: In Vé Là Tùy Chọn, Không Bắt Buộc In Giấy ("Từ Từ Rồi Làm Quen")
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
+  *"hiện tại chưa in bắt buộc in cho tôi bạn ạ, từ từ rồi làm quen ấy"*
+- **Nghiệp vụ chốt (D-029):**
+  1. Giai đoạn đầu vận hành chưa áp dụng in vé giấy bắt buộc cho phương tiện vào bãi để nhân viên và tài xế làm quen dần ("từ từ rồi làm quen").
+  2. Toàn bộ thông tin tiếp nhận xe, container và tiền vé cổng được lưu vết và kiểm soát 100% bằng dữ liệu điện tử theo Biển số xe & Mã vé hệ thống.
+  3. Tính năng in vé POS chỉ mang tính tùy chọn (cung cấp khi tài xế có nhu cầu). Nút in vé trên giao diện chuyển thành dạng phụ `In vé giấy (Tùy chọn)`.
+  4. Cổng ra kiểm soát xuất bãi tự động theo biển số điện tử, không đòi cuống vé giấy và không áp dụng phạt mất vé giấy.
+- **Các tệp mã nguồn đã cập nhật:**
+  1. `src/app/entry/page.tsx`:
+     - Thêm huy hiệu xác nhận: `Lưu điện tử · Không bắt buộc in giấy`.
+     - Chuyển nút in vé thành nút phụ nhẹ nhàng `In vé giấy (Tùy chọn)`.
+     - Cập nhật tiêu đề và lưu ý trong Modal In Vé: `Xem trước & In vé xe (Tùy chọn)`, `(Dữ liệu đã lưu điện tử — Cấp vé giấy theo yêu cầu)`.
+     - Cập nhật nút in lại trên Right Context Panel thành `In vé giấy (Tùy chọn)`.
+  2. `src/app/exit/page.tsx`:
+     - Cập nhật nhãn tùy chọn mất vé thành: `Phạt mất liên vé giấy (Hiện kiểm soát điện tử, không bắt buộc)`.
+  3. `src/app/guide/page.tsx`:
+     - Cập nhật tóm tắt Bước 1 Cổng vào: `cấp mã vé điện tử (tùy chọn in giấy)`.
+  4. `ProjectContext/05_Nhat_ky_du_an/DECISION_LOG.md`:
+     - Bổ sung Quyết định D-029.
+- **Kết quả kiểm thử & Kiểm chứng:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 51/51 assertions (100%)**.
+
 ## 2026-10-17 11:35 — Tối Ưu Bốt Cổng Vào: Lượt Xe Gần Nhất Cố Định & Khóa Cứng Định Dạng Container 11 Ký Tự
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ người dùng tại màn hình `/entry`:

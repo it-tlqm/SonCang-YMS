@@ -40,17 +40,22 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 11:35 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **TỐI ƯU BỐT CỔNG VÀO (/entry) — LƯỢT XE GẦN NHẤT CỐ ĐỊNH, IN VÉ LINH HOẠT & KHÓA CỨNG CONTAINER 11 KÝ TỰ**:
-  * **1. Cải tiến bốt cổng vào `/entry` theo chỉ đạo người dùng:**
-    - Loại bỏ triệt để bộ đếm ngược 7-10s tự động biến mất form; thay bằng thanh thông tin "Lượt xe vào cổng gần nhất" cố định kèm nút `[In vé xe]` màu `#087C3C` và nút đóng `[X]`.
-    - Form tiếp nhận xe tự động làm sạch ô nhập liệu (`resetForm`) ngay sau khi tạo vé thành công để nhân viên an ninh sẵn sàng đón xe kế tiếp mà không lo mất thông tin lượt xe vừa hoàn tất.
-    - Khóa cứng validation số container: Thuộc tính `maxLength={11}`, hàm `sanitizeContainerInput` chặn ngay ký tự thứ 5 nếu là chữ, chỉ cho phép 4 chữ cái đầu + 7 số sau.
-    - Bổ sung tính năng chọn lượt xe từ danh sách gần đây (Secondary Panel) và hiển thị nút `[In lại vé cho xe này]` trên Right Context Panel, đồng bộ với Modal In Vé nhiệt POS 80mm.
+- **Cập nhật lúc:** 17/10/2026 11:45 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHỐT QUYẾT ĐỊNH D-029: VÉ CỔNG LƯU ĐIỆN TỬ, IN VÉ GIẤY HOÀN TOÀN TÙY CHỌN ("TỪ TỪ RỒI LÀM QUEN")**:
+  * **1. Triển khai quyết định D-029 từ Chủ dự án:**
+    - Khẳng định chính sách: Giai đoạn đầu vận hành **KHÔNG BẮT BUỘC IN VÉ GIẤY** cho phương tiện vào bãi ("từ từ rồi làm quen").
+    - Toàn bộ thông tin tiếp nhận xe, container và tiền vé cổng được lưu vết và kiểm soát 100% bằng dữ liệu điện tử theo Biển số xe & Mã vé hệ thống.
+    - Cổng vào (`/entry`): Thêm huy hiệu xác nhận `Lưu điện tử · Không bắt buộc in giấy`, chuyển nút in vé thành nút phụ nhẹ nhàng `In vé giấy (Tùy chọn)`.
+    - Cổng ra (`/exit`): Kiểm soát xe ra theo biển số điện tử, không đòi cuống vé giấy, làm rõ tùy chọn mất vé `(Hiện kiểm soát điện tử, không bắt buộc)`.
   * **2. Kiểm thử xác minh hoàn tất:**
     - Typecheck: `npx tsc --noEmit` -> PASS (0 errors).
     - Hồi quy bảo mật: `node scripts/audit_security_regression.mjs` -> PASS (51/51 tests 100%).
-    - Build thực tế: `npm run build` -> PASS (21/21 routes).
+- **Mốc trước đó (17/10/2026 11:35):** **TỐI ƯU BỐT CỔNG VÀO (/entry) — LƯỢT XE GẦN NHẤT CỐ ĐỊNH, IN VÉ LINH HOẠT & KHÓA CỨNG CONTAINER 11 KÝ TỰ**:
+  * **1. Cải tiến bốt cổng vào `/entry` theo chỉ đạo người dùng:**
+    - Loại bỏ triệt để bộ đếm ngược 7-10s tự động biến mất form; thay bằng thanh thông tin "Lượt xe vào cổng gần nhất" cố định kèm nút `[In vé xe]` và nút đóng `[X]`.
+    - Form tiếp nhận xe tự động làm sạch ô nhập liệu (`resetForm`) ngay sau khi tạo vé thành công để nhân viên an ninh sẵn sàng đón xe kế tiếp mà không lo mất thông tin lượt xe vừa hoàn tất.
+    - Khóa cứng validation số container: Thuộc tính `maxLength={11}`, hàm `sanitizeContainerInput` chặn ngay ký tự thứ 5 nếu là chữ, chỉ cho phép 4 chữ cái đầu + 7 số sau.
+    - Bổ sung tính năng chọn lượt xe từ danh sách gần đây (Secondary Panel) và hiển thị nút `[In lại vé cho xe này]` trên Right Context Panel, đồng bộ với Modal In Vé nhiệt POS 80mm.
 - **Mốc trước đó (17/10/2026 11:25):** **CHỐT 5 QUYẾT ĐỊNH NGHIỆP VỤ VẬN HÀNH THỰC TẾ (D-024 ĐẾN D-028) & HOÀN THIỆN KẾ HOẠCH CUT-OVER CHÍNH THỨC**:
   * **1. Triển khai 5 quyết định đã được Chủ dự án chốt chính thức:**
     - `D-024 (SC-1C-A-01)`: Quản lý và tính cước theo đầu container (không theo xe); 1 xe kéo 2 cont 20ft độc lập.

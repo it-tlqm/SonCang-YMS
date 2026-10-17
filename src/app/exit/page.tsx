@@ -1984,7 +1984,7 @@ export default function ExitClearancePage() {
                                     onChange={(e) => setIsLostTicket(e.target.checked)}
                                     className="w-3.5 h-3.5 text-rose-600 rounded border-slate-300"
                                   />
-                                  <span>Phạt mất liên vé giấy bến bãi (+250.000 đ)</span>
+                                  <span>Phạt mất liên vé giấy (Hiện kiểm soát điện tử, không bắt buộc)</span>
                                 </label>
                                 {isLostTicket && <span className="font-mono font-bold text-rose-600 text-[11px]">250.000 đ</span>}
                               </div>
@@ -2068,7 +2068,7 @@ export default function ExitClearancePage() {
                         }}
                         className="w-4 h-4 text-rose-600 rounded border-slate-300"
                       />
-                      <span>Báo mất liên vé giấy vào cổng (Phạt 250.000 đ)</span>
+                      <span>Báo mất liên vé giấy (Hiện kiểm soát điện tử, không bắt buộc)</span>
                     </label>
                     {isLostTicket && <span className="font-mono font-bold text-rose-600">250.000 đ</span>}
                   </div>
