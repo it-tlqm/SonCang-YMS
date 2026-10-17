@@ -103,3 +103,29 @@ export function validateContainerNumber(containerNo: string): ContainerValidatio
     level: 'SUCCESS',
   };
 }
+
+/**
+ * Chuẩn hóa và lọc ký tự số container tức thì khi gõ:
+ * - Tối đa 11 ký tự (chặn nếu quá 11 ký tự).
+ * - 4 ký tự đầu: Chỉ cho phép chữ cái A-Z.
+ * - 7 ký tự sau (ký tự 5..11): Chỉ cho phép chữ số 0-9.
+ */
+export function sanitizeContainerInput(raw: string): string {
+  if (!raw) return '';
+  const upper = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  let result = '';
+  for (let i = 0; i < upper.length && result.length < 11; i++) {
+    const char = upper[i];
+    if (result.length < 4) {
+      if (/[A-Z]/.test(char)) {
+        result += char;
+      }
+    } else {
+      if (/[0-9]/.test(char)) {
+        result += char;
+      }
+    }
+  }
+  return result;
+}
+

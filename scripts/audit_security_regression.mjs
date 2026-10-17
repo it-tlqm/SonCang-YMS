@@ -217,17 +217,42 @@ console.log('\n[TEST GROUP 6] SEC-08: Container Validator quy tắc 4 chữ cái
   assert(validateContainer('TCL12345678') === false, 'TCL12345678: Sai vì chỉ có 3 chữ cái đầu');
   assert(validateContainer('TCLU123456A') === false, 'TCLU123456A: Sai vì ký tự cuối là chữ cái');
   assert(validateContainer('TCLU12345') === false, 'TCLU12345: Sai vì thiếu độ dài (chỉ 9 ký tự)');
+
+  // Logic hàm sanitizeContainerInput
+  function sanitizeContainerInput(raw) {
+    if (!raw) return '';
+    const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let result = '';
+    for (let i = 0; i < clean.length && result.length < 11; i++) {
+      const char = clean[i];
+      if (result.length < 4) {
+        if (/[A-Z]/.test(char)) result += char;
+      } else {
+        if (/[0-9]/.test(char)) result += char;
+      }
+    }
+    return result;
+  }
+
+  assert(sanitizeContainerInput('AAAAA1221213213') === 'AAAA1221213', 'Sanitizer: AAAAA1221213213 -> AAAA1221213 (chặn chữ thứ 5, cắt chuẩn 11 ký tự)');
+  assert(sanitizeContainerInput('msku 1234567') === 'MSKU1234567', 'Sanitizer: Viết thường + khoảng trắng -> MSKU1234567');
+  assert(sanitizeContainerInput('MSKUABC1234') === 'MSKU1234', 'Sanitizer: Chặn chữ cái sau vị trí thứ 4');
+  assert(sanitizeContainerInput('123MSKU1234') === 'MSKU1234', 'Sanitizer: Bỏ qua số rác ở đầu, giữ đúng 4 chữ cái và các số sau');
+  assert(sanitizeContainerInput('TCLU123456789999') === 'TCLU1234567', 'Sanitizer: Khóa cứng tối đa 11 ký tự');
 }
 
 // -----------------------------------------------------------------------------
 // TEST 7: SEC-18 — Cờ khóa chống Double-Submit trên Form giao dịch
 // -----------------------------------------------------------------------------
-console.log('\n[TEST GROUP 7] SEC-18: Khóa chống gửi lặp (Double-Submit Guards)');
+console.log('\n[TEST GROUP 7] SEC-18: Khóa chống gửi lặp (Double-Submit Guards) & Lượt xe gần nhất');
 {
   const entryPath = path.join(rootDir, 'src', 'app', 'entry', 'page.tsx');
   const entryContent = fs.readFileSync(entryPath, 'utf-8');
   assert(entryContent.includes('if (isSubmitting) return;'), 'Form tiếp nhận cổng vào có guard if (isSubmitting) return; (F-006)');
   assert(entryContent.includes("replace(/[^\\d]/g, '').slice(0, 12)"), 'Ô nhập CCCD tài xế lọc chuẩn 12 chữ số (F-007)');
+  assert(!entryContent.includes('countdown'), 'Form cổng vào đã loại bỏ hoàn toàn bộ đếm ngược 7-10s biến mất form (F-009)');
+  assert(entryContent.includes('recentVisit'), 'Form cổng vào lưu giữ lượt xe gần nhất cố định để in vé bất cứ lúc nào (F-009)');
+  assert(entryContent.includes('maxLength={11}'), 'Ô nhập số container có thuộc tính maxLength={11} (F-010)');
 
   const exitPath = path.join(rootDir, 'src', 'app', 'exit', 'page.tsx');
   const exitContent = fs.readFileSync(exitPath, 'utf-8');

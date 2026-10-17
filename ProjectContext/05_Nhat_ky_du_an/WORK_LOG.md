@@ -1,5 +1,30 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 11:35 — Tối Ưu Bốt Cổng Vào: Lượt Xe Gần Nhất Cố Định & Khóa Cứng Định Dạng Container 11 Ký Tự
+
+- **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ người dùng tại màn hình `/entry`:
+  1. *Lượt xe gần nhất & In vé xe:* Loại bỏ bộ đếm ngược 7-10s tự động biến mất form; giữ nguyên thanh thông tin "Lượt xe vào cổng gần nhất" cố định cùng nút `[In vé xe]` nổi bật để an ninh có thể in vé bất cứ lúc nào, không bị mất thông tin khi chuẩn bị đón xe tiếp theo.
+  2. *Validation số container:* Giới hạn độ dài tối đa 11 ký tự (`maxLength={11}`), chặn triệt để nếu nhập quá 11 ký tự; chỉ cho phép 4 ký tự đầu là chữ cái (A-Z) và 7 số sau là số (0-9) cho cả Container #1 và Container #2.
+  3. *In lại vé xe từ danh sách gần đây:* Bổ sung tính năng chọn xe trong danh sách gần đây (Secondary Panel) và hiển thị nút `[In lại vé cho xe này]` trên Right Context Panel.
+- **Các tệp mã nguồn đã cập nhật:**
+  1. `src/lib/container-validator.ts`:
+     - Xây dựng hàm `sanitizeContainerInput(raw: string)`: Tự động uppercase, lọc sạch ký tự đặc biệt, chặn số ở 4 ký tự đầu (chỉ nhận chữ cái A-Z), chặn chữ cái ở 7 ký tự sau (chỉ nhận chữ số 0-9), và cắt cứng tối đa 11 ký tự.
+  2. `src/app/entry/page.tsx`:
+     - Xóa bỏ state `countdown` (8s), `isPaused`, `useEffect` đếm ngược làm mất banner thông báo.
+     - Thay thế state `successResult` bằng `recentVisit` được lưu giữ cố định trên giao diện.
+     - Form tiếp nhận tự động làm mới ngay sau khi tạo vé thành công (`resetForm`) để sẵn sàng đón xe tiếp theo mà không làm mất thông tin lượt xe vừa hoàn tất.
+     - Cập nhật banner "Lượt xe vào cổng gần nhất" cố định với nút `[In vé xe]` màu `#087C3C` và nút đóng chủ động `[X]`.
+     - Cập nhật 2 trường nhập container (`containerNo`, `secondContainerNo`): Gắn `maxLength={11}`, `onChange={(e) => setContainerNo(sanitizeContainerInput(e.target.value))}` kèm badge thông báo trực quan định dạng (`4 chữ + 7 số`).
+     - Tích hợp tính năng xem chi tiết và nút `[In lại vé cho xe này]` khi chọn bất kỳ lượt xe nào trong danh sách gần đây.
+     - Chuẩn hóa toàn bộ tham chiếu Modal In Vé nhiệt POS 80mm sang `recentVisit`.
+  3. `scripts/audit_security_regression.mjs`:
+     - Bổ sung 5 kiểm thử tự động cho `sanitizeContainerInput` (xử lý `AAAAA1221213213`, viết thường, chữ sau vị trí 4, số rác đầu, cắt cứng 11 ký tự).
+     - Bổ sung 3 kiểm thử hồi quy cho form cổng vào (loại bỏ `countdown`, lưu `recentVisit`, thuộc tính `maxLength={11}`).
+- **Kết quả kiểm thử & Kiểm chứng:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 51/51 assertions (100%)**.
+  - `npm run build` -> **Build thành công toàn bộ 21 routes tĩnh/động**.
+
 ## 2026-10-17 11:20 — Triển Khai 5 Quyết Định Nghiệp Vụ Vận Hành Thực Tế (D-024 đến D-028) & Tối Ưu Luồng Xuất Bãi, Cước Điện Lạnh
 
 - **Yêu cầu / nguồn:** Phản hồi và chỉ đạo chốt nghiệp vụ trực tiếp từ Chủ dự án:

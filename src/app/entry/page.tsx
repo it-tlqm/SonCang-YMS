@@ -12,7 +12,7 @@ import {
   VehicleDuplicateCheckResult, 
   TariffItem 
 } from '@/types/domain.types';
-import { validateContainerNumber } from '@/lib/container-validator';
+import { validateContainerNumber, sanitizeContainerInput } from '@/lib/container-validator';
 import { 
   Truck, 
   Layers, 
@@ -94,7 +94,8 @@ export default function EntryGatePage() {
   const [idempotencyKey, setIdempotencyKey] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [successResult, setSuccessResult] = useState<{
+  // Lượt xe vào cổng gần nhất (lưu giữ cố định để in vé bất cứ lúc nào, không bị tự động biến mất)
+  const [recentVisit, setRecentVisit] = useState<{
     vehicle: VehicleVisit;
     container?: ContainerVisit;
     secondContainer?: ContainerVisit;
@@ -112,10 +113,6 @@ export default function EntryGatePage() {
   const [overrideReasonCode, setOverrideReasonCode] = useState<string>('XE_BO_CHAY_CHUYEN_MOI');
   const [customReasonText, setCustomReasonText] = useState<string>('');
   const [closePreviousOnEntry, setClosePreviousOnEntry] = useState<boolean>(true);
-
-  // Đếm ngược tự động làm mới form sau khi tạo vé
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
 
   // Secondary Panel State
   const [recentSearch, setRecentSearch] = useState<string>('');
@@ -239,8 +236,6 @@ export default function EntryGatePage() {
   }, [plannedReeferRequests, licensePlate, containerNo, secondContainerNo]);
 
   const resetForm = () => {
-    setCountdown(null);
-    setIsPaused(false);
     setLicensePlate('');
     setSelectedType('CONT_LANH');
     setDriverName('');
@@ -257,26 +252,12 @@ export default function EntryGatePage() {
     setPaymentMethod('CASH');
     setReceiptCode('');
     setErrorMessage('');
-    setSuccessResult(null);
     setIdempotencyKey('');
     setScanSuccessMsg('');
     setDupCheckResult(null);
     setShowDupModal(false);
     setShowBlockModal(false);
   };
-
-  // Tự động đếm ngược làm mới form
-  useEffect(() => {
-    if (countdown === null || isPaused) return;
-    if (countdown <= 0) {
-      resetForm();
-      return;
-    }
-    const timer = setTimeout(() => {
-      setCountdown((prev) => (prev !== null ? prev - 1 : null));
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [countdown, isPaused]);
 
   // Trích xuất CCCD gắn chip hoặc quét mã vạch
   const parseAndApplyCccdData = (rawText: string) => {
@@ -380,7 +361,7 @@ export default function EntryGatePage() {
         }
       }
 
-      setSuccessResult({
+      setRecentVisit({
         vehicle: res.vehicle,
         container: res.container || undefined,
         secondContainer: res.secondContainer || undefined,
@@ -388,11 +369,22 @@ export default function EntryGatePage() {
       });
 
       loadYardActiveData();
-      setCountdown(8);
-      setIsPaused(false);
       setIsSubmitting(false);
       setShowDupModal(false);
       setShowBlockModal(false);
+
+      // Tự động làm sạch form để sẵn sàng tiếp nhận lượt xe tiếp theo mà không làm mất thông tin lượt xe gần nhất
+      setLicensePlate('');
+      setDriverName('');
+      setDriverPhone('');
+      setDriverIdCard('');
+      setContainerNo('');
+      setSecondContainerNo('');
+      setNote('');
+      setReceiptCode('');
+      setIdempotencyKey('');
+      setScanSuccessMsg('');
+      setDupCheckResult(null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Lỗi giao dịch tiếp nhận xe.';
       setErrorMessage(msg);
@@ -409,12 +401,13 @@ export default function EntryGatePage() {
     }
 
     if (isContainerType) {
-      if (!containerNo.trim()) {
+      const cleanCont1 = containerNo.trim().toUpperCase();
+      if (!cleanCont1) {
         setErrorMessage('Loại xe Container bắt buộc nhập mã số container.');
         return;
       }
-      if (!contValidation.isValidFormat) {
-        setErrorMessage(`Mã số container chưa đúng định dạng: ${contValidation.message}`);
+      if (!/^[A-Z]{4}[0-9]{7}$/.test(cleanCont1)) {
+        setErrorMessage(`Mã số Container #1 chưa đúng chuẩn: Bắt buộc gồm 4 chữ cái đầu và 7 chữ số sau (VD: TCLU1234567, MSKU9876543). Hiện tại: "${cleanCont1}".`);
         return;
       }
       if (duplicateContainer) {
@@ -425,13 +418,13 @@ export default function EntryGatePage() {
       }
 
       if (containerCarryMode === 'DUAL_20FT') {
-        if (!secondContainerNo.trim()) {
+        const cleanCont2 = secondContainerNo.trim().toUpperCase();
+        if (!cleanCont2) {
           setErrorMessage('Vui lòng nhập mã số Container thứ hai (20ft).');
           return;
         }
-        const cont2Validation = validateContainerNumber(secondContainerNo);
-        if (!cont2Validation.isValidFormat) {
-          setErrorMessage(`Container thứ hai chưa đúng chuẩn: ${cont2Validation.message}`);
+        if (!/^[A-Z]{4}[0-9]{7}$/.test(cleanCont2)) {
+          setErrorMessage(`Mã số Container thứ hai chưa đúng chuẩn: Bắt buộc gồm 4 chữ cái đầu và 7 chữ số sau (VD: TCLU1234567, MSKU9876543). Hiện tại: "${cleanCont2}".`);
           return;
         }
         if (duplicateSecondContainer?.isDuplicateWithFirst) {
@@ -589,30 +582,45 @@ export default function EntryGatePage() {
           }
         />
 
-        {/* THÔNG BÁO HOÀN TẤT THÀNH CÔNG */}
-        {successResult && (
-          <div className="m-4 sm:m-5 lg:m-6 p-4 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-start justify-between gap-3">
+        {/* LƯỢT XE VÀO CỔNG GẦN NHẤT — CỐ ĐỊNH, KHÔNG ĐẾM NGƯỢC BIẾN MẤT, IN VÉ BẤT CỨ LÚC NÀO */}
+        {recentVisit && (
+          <div className="m-4 sm:m-5 lg:m-6 p-4 rounded-xl bg-[#ECFDF3] border border-[#A6F4C5] shadow-2xs animate-in fade-in slide-in-from-top-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#0A9444] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0A9444] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                   <Check className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#0A9444]">
-                    Tiếp nhận xe vào bãi thành công!
-                  </h3>
-                  <div className="text-xs text-[#17202E] mt-1 space-y-0.5">
-                    <p>
-                      Biển số: <strong className="font-mono text-sm">{successResult.vehicle.license_plate}</strong> — Mã vé: <strong className="font-mono">{successResult.vehicle.ticket_code || '---'}</strong>
-                    </p>
-                    {successResult.container && (
-                      <p>
-                        Container: <strong className="font-mono">{successResult.container.container_no_current}</strong> ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
-                      </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#0A9444]">
+                      Lượt xe vào cổng gần nhất:
+                    </span>
+                    <span className="font-mono font-bold text-sm bg-white px-2 py-0.5 rounded border border-[#A6F4C5] text-[#17202E]">
+                      {recentVisit.vehicle.license_plate || 'Không biển'}
+                    </span>
+                    <span className="text-xs text-[#475467] font-mono">
+                      Mã vé: <strong className="text-[#17202E]">{recentVisit.vehicle.ticket_code || '---'}</strong>
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      recentVisit.vehicle.ticket_payment_status === 'PAID'
+                        ? 'bg-[#ECFDF3] text-[#0A9444] border-[#A6F4C5]'
+                        : 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89]'
+                    }`}>
+                      {recentVisit.vehicle.ticket_payment_status === 'PAID' ? 'Đã thu vé' : 'Chưa thu vé'} ({recentVisit.vehicle.ticket_amount ? `${recentVisit.vehicle.ticket_amount.toLocaleString('vi-VN')} đ` : '0 đ'})
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-[#344054] mt-1.5 flex items-center gap-3 flex-wrap">
+                    <span className="text-[#667085]">Loại xe: <strong>{getVehicleTypeName(recentVisit.vehicle.vehicle_type)}</strong></span>
+                    {recentVisit.container && (
+                      <span>Container #1: <strong className="font-mono text-[#17202E]">{recentVisit.container.container_no_current}</strong> ({formatContainerSpec(recentVisit.container.container_size, recentVisit.container.container_type)})</span>
                     )}
-                    <p className="text-[#667085]">
-                      Thời gian ghi nhận: {new Date(successResult.vehicle.entry_at).toLocaleString('vi-VN')}
-                    </p>
+                    {recentVisit.secondContainer && (
+                      <span>Cont #2: <strong className="font-mono text-[#17202E]">{recentVisit.secondContainer.container_no_current}</strong></span>
+                    )}
+                    <span className="text-[#667085]">
+                      Thời gian vào: {new Date(recentVisit.vehicle.entry_at).toLocaleTimeString('vi-VN')} {new Date(recentVisit.vehicle.entry_at).toLocaleDateString('vi-VN')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -621,17 +629,19 @@ export default function EntryGatePage() {
                 <button
                   type="button"
                   onClick={() => setShowPrintTicketModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#A6F4C5] text-xs font-semibold text-[#0A9444] hover:bg-[#F0FDF4] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087C3C] hover:bg-[#076934] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  title="In vé vào bãi cho lượt xe gần nhất này"
                 >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>In vé</span>
+                  <Printer className="w-4 h-4" />
+                  <span>In vé xe</span>
                 </button>
                 <button
                   type="button"
-                  onClick={resetForm}
-                  className="px-3 py-1.5 rounded-lg bg-[#0A9444] text-white text-xs font-semibold hover:bg-[#087C3C] transition-colors cursor-pointer"
+                  onClick={() => setRecentVisit(null)}
+                  className="p-2 rounded-lg text-[#667085] hover:text-[#17202E] hover:bg-[#D1FADF] transition-colors cursor-pointer"
+                  title="Ẩn thông báo lượt xe gần nhất"
                 >
-                  Xe tiếp theo {countdown !== null && `(${countdown}s)`}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -898,12 +908,12 @@ export default function EntryGatePage() {
                         {contValidation.isValidFormat ? (
                           <>
                             <CheckCircle2 className="w-3 h-3" />
-                            <span>Đúng chuẩn 11 ký tự</span>
+                            <span>Đúng chuẩn (4 chữ + 7 số)</span>
                           </>
                         ) : (
                           <>
                             <AlertTriangle className="w-3 h-3" />
-                            <span>Kiểm tra định dạng</span>
+                            <span>{containerNo.length}/11 ký tự (4 chữ + 7 số)</span>
                           </>
                         )}
                       </span>
@@ -912,11 +922,17 @@ export default function EntryGatePage() {
                   <input
                     type="text"
                     required
+                    maxLength={11}
                     value={containerNo}
-                    onChange={(e) => setContainerNo(e.target.value.toUpperCase())}
+                    onChange={(e) => setContainerNo(sanitizeContainerInput(e.target.value))}
                     placeholder="VD: MSKU1234567 hoặc BMOU9876543"
                     className="w-full h-10 px-3 font-mono font-bold text-sm bg-white text-[#17202E] placeholder-[#98A2B3] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
                   />
+                  {containerNo && !contValidation.isValidFormat && (
+                    <p className="text-[11px] text-[#B54708]">
+                      Cần đúng chuẩn: 4 chữ cái đầu (mã hãng) + 7 chữ số sau (VD: MSKU1234567).
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -944,17 +960,28 @@ export default function EntryGatePage() {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2 space-y-1">
-                      <label className="text-[11px] font-semibold text-[#475467]">
-                        Mã số Container #2 <span className="text-[#D92D20]">*</span>
+                      <label className="text-[11px] font-semibold text-[#475467] flex items-center justify-between">
+                        <span>Mã số Container #2 <span className="text-[#D92D20]">*</span></span>
+                        {secondContainerNo.trim() && (
+                          <span className={`text-[10px] font-semibold ${/^[A-Z]{4}[0-9]{7}$/.test(secondContainerNo.trim().toUpperCase()) ? 'text-[#0A9444]' : 'text-[#B54708]'}`}>
+                            {/^[A-Z]{4}[0-9]{7}$/.test(secondContainerNo.trim().toUpperCase()) ? 'Đúng chuẩn' : `${secondContainerNo.length}/11 ký tự`}
+                          </span>
+                        )}
                       </label>
                       <input
                         type="text"
                         required
+                        maxLength={11}
                         value={secondContainerNo}
-                        onChange={(e) => setSecondContainerNo(e.target.value.toUpperCase())}
+                        onChange={(e) => setSecondContainerNo(sanitizeContainerInput(e.target.value))}
                         placeholder="VD: TCLU1234567"
                         className="w-full h-9 px-3 font-mono font-bold text-xs bg-white text-[#17202E] border border-[#E5E9F0] rounded-lg focus:outline-none focus:border-[#326DD8]"
                       />
+                      {secondContainerNo && !/^[A-Z]{4}[0-9]{7}$/.test(secondContainerNo.trim().toUpperCase()) && (
+                        <p className="text-[10px] text-[#B54708]">
+                          Cần đúng chuẩn: 4 chữ cái đầu + 7 chữ số sau (VD: TCLU1234567).
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[11px] font-semibold text-[#475467]">
@@ -1083,6 +1110,70 @@ export default function EntryGatePage() {
         onClose={() => setIsRightPanelOpen(false)}
       >
         <div className="space-y-4">
+          {/* Lượt xe vừa chọn từ danh sách gần đây */}
+          {selectedRecentVehicle && (
+            <div className="p-3 bg-[#F8F9FB] rounded-xl border border-[#D0E1FD] space-y-2.5 animate-in fade-in">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E5E9F0]">
+                <div className="flex items-center gap-1.5">
+                  <Truck className="w-4 h-4 text-[#326DD8]" />
+                  <span className="font-mono font-bold text-xs text-[#17202E]">
+                    {selectedRecentVehicle.license_plate}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecentVehicle(null)}
+                  className="text-[11px] text-[#667085] hover:text-[#17202E] cursor-pointer"
+                >
+                  Bỏ chọn
+                </button>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between text-[#667085]">
+                  <span>Mã vé:</span>
+                  <span className="font-mono font-semibold text-[#17202E]">
+                    {selectedRecentVehicle.ticket_code || 'Chưa cấp'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[#667085]">
+                  <span>Loại xe:</span>
+                  <span className="font-medium text-[#17202E]">
+                    {getVehicleTypeName(selectedRecentVehicle.vehicle_type)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[#667085]">
+                  <span>Vào bãi:</span>
+                  <span className="font-mono text-[#17202E]">
+                    {new Date(selectedRecentVehicle.entry_at).toLocaleTimeString('vi-VN')} {new Date(selectedRecentVehicle.entry_at).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[#667085]">
+                  <span>Tiền vé:</span>
+                  <span className="font-mono font-bold text-[#0A9444]">
+                    {selectedRecentVehicle.ticket_amount ? `${selectedRecentVehicle.ticket_amount.toLocaleString('vi-VN')} đ` : '0 đ'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const matchingCont = activeContainers.find(c => c.inbound_vehicle_visit_id === selectedRecentVehicle.id);
+                  setRecentVisit({
+                    vehicle: selectedRecentVehicle,
+                    container: matchingCont,
+                  });
+                  setShowPrintTicketModal(true);
+                }}
+                className="w-full py-2 px-3 bg-[#0A9444] hover:bg-[#087C3C] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>In lại vé cho xe này</span>
+              </button>
+            </div>
+          )}
+
           {/* Cảnh báo khớp phiếu điện CCKB */}
           {matchedReeferRequest && (
             <div className="p-3 bg-[#EFF8FF] rounded-lg border border-[#B2DDFF] space-y-1.5 animate-in fade-in">
@@ -1136,7 +1227,7 @@ export default function EntryGatePage() {
       {/* ============================================================== */}
       {/* 4. MODAL IN VÉ VÀO BÃI CHO XE & CONTAINER (CHUẨN IN NHIỆT POS) */}
       {/* ============================================================== */}
-      {showPrintTicketModal && successResult && (
+      {showPrintTicketModal && recentVisit && (
         <div className="fixed inset-0 z-50 bg-[#101828]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in print:p-0 print:bg-white">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 border border-[#E5E9F0] shadow-2xl space-y-4 print:border-none print:shadow-none print:max-w-none print:p-0">
             {/* Header điều khiển (ẩn khi in) */}
@@ -1193,36 +1284,36 @@ export default function EntryGatePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-[#667085]">Mã số vé vào bãi:</span>
                   <span className="font-mono font-bold text-sm text-[#0A9444]">
-                    {successResult.vehicle.ticket_code || 'SC-IN-000000'}
+                    {recentVisit.vehicle.ticket_code || 'SC-IN-000000'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#667085]">Biển số phương tiện:</span>
                   <span className="font-mono font-bold text-sm text-[#17202E] px-2 py-0.5 bg-white border border-[#E5E9F0] rounded">
-                    {successResult.vehicle.license_plate}
+                    {recentVisit.vehicle.license_plate}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#667085]">Loại phương tiện:</span>
                   <span className="font-medium text-[#17202E]">
-                    {getVehicleTypeName(successResult.vehicle.vehicle_type)}
+                    {getVehicleTypeName(recentVisit.vehicle.vehicle_type)}
                   </span>
                 </div>
 
-                {successResult.container && (
+                {recentVisit.container && (
                   <div className="flex items-center justify-between">
                     <span className="text-[#667085]">Container kéo theo:</span>
                     <span className="font-mono font-bold text-xs text-[#326DD8]">
-                      {successResult.container.container_no_current} ({formatContainerSpec(successResult.container.container_size, successResult.container.container_type)})
+                      {recentVisit.container.container_no_current} ({formatContainerSpec(recentVisit.container.container_size, recentVisit.container.container_type)})
                     </span>
                   </div>
                 )}
 
-                {successResult.secondContainer && (
+                {recentVisit.secondContainer && (
                   <div className="flex items-center justify-between">
                     <span className="text-[#667085]">Container #2 (20ft):</span>
                     <span className="font-mono font-bold text-xs text-[#326DD8]">
-                      {successResult.secondContainer.container_no_current}
+                      {recentVisit.secondContainer.container_no_current}
                     </span>
                   </div>
                 )}
@@ -1230,15 +1321,15 @@ export default function EntryGatePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-[#667085]">Thời gian xe vào cổng:</span>
                   <span className="font-mono font-medium text-[#17202E]">
-                    {new Date(successResult.vehicle.entry_at).toLocaleTimeString('vi-VN')} — {new Date(successResult.vehicle.entry_at).toLocaleDateString('vi-VN')}
+                    {new Date(recentVisit.vehicle.entry_at).toLocaleTimeString('vi-VN')} — {new Date(recentVisit.vehicle.entry_at).toLocaleDateString('vi-VN')}
                   </span>
                 </div>
 
                 <div className="pt-2 border-t border-[#E5E9F0] flex items-center justify-between">
                   <span className="font-semibold text-xs text-[#17202E]">Tiền vé vào bãi:</span>
                   <span className="font-mono font-bold text-base text-[#0A9444]">
-                    {successResult.vehicle.ticket_amount !== null && successResult.vehicle.ticket_amount > 0
-                      ? `${successResult.vehicle.ticket_amount.toLocaleString('vi-VN')} đ`
+                    {recentVisit.vehicle.ticket_amount !== null && recentVisit.vehicle.ticket_amount > 0
+                      ? `${recentVisit.vehicle.ticket_amount.toLocaleString('vi-VN')} đ`
                       : '0 đ (Miễn phí)'}
                   </span>
                 </div>
@@ -1246,9 +1337,9 @@ export default function EntryGatePage() {
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="text-[#667085]">Trạng thái thanh toán:</span>
                   <span className="font-semibold text-[#0A9444]">
-                    {successResult.vehicle.ticket_payment_status === 'PAID'
+                    {recentVisit.vehicle.ticket_payment_status === 'PAID'
                       ? 'ĐÃ THU TIỀN VÉ TẠI CỔNG VÀO'
-                      : (successResult.vehicle.ticket_payment_status === 'EXEMPT' ? 'MIỄN PHÍ VÉ CỔNG' : 'CHƯA THU (THU TẠI CỔNG RA)')}
+                      : (recentVisit.vehicle.ticket_payment_status === 'EXEMPT' ? 'MIỄN PHÍ VÉ CỔNG' : 'CHƯA THU (THU TẠI CỔNG RA)')}
                   </span>
                 </div>
               </div>

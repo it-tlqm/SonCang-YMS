@@ -40,8 +40,18 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 11:25 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **CHỐT 5 QUYẾT ĐỊNH NGHIỆP VỤ VẬN HÀNH THỰC TẾ (D-024 ĐẾN D-028) & HOÀN THIỆN KẾ HOẠCH CUT-OVER CHÍNH THỨC**:
+- **Cập nhật lúc:** 17/10/2026 11:35 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **TỐI ƯU BỐT CỔNG VÀO (/entry) — LƯỢT XE GẦN NHẤT CỐ ĐỊNH, IN VÉ LINH HOẠT & KHÓA CỨNG CONTAINER 11 KÝ TỰ**:
+  * **1. Cải tiến bốt cổng vào `/entry` theo chỉ đạo người dùng:**
+    - Loại bỏ triệt để bộ đếm ngược 7-10s tự động biến mất form; thay bằng thanh thông tin "Lượt xe vào cổng gần nhất" cố định kèm nút `[In vé xe]` màu `#087C3C` và nút đóng `[X]`.
+    - Form tiếp nhận xe tự động làm sạch ô nhập liệu (`resetForm`) ngay sau khi tạo vé thành công để nhân viên an ninh sẵn sàng đón xe kế tiếp mà không lo mất thông tin lượt xe vừa hoàn tất.
+    - Khóa cứng validation số container: Thuộc tính `maxLength={11}`, hàm `sanitizeContainerInput` chặn ngay ký tự thứ 5 nếu là chữ, chỉ cho phép 4 chữ cái đầu + 7 số sau.
+    - Bổ sung tính năng chọn lượt xe từ danh sách gần đây (Secondary Panel) và hiển thị nút `[In lại vé cho xe này]` trên Right Context Panel, đồng bộ với Modal In Vé nhiệt POS 80mm.
+  * **2. Kiểm thử xác minh hoàn tất:**
+    - Typecheck: `npx tsc --noEmit` -> PASS (0 errors).
+    - Hồi quy bảo mật: `node scripts/audit_security_regression.mjs` -> PASS (51/51 tests 100%).
+    - Build thực tế: `npm run build` -> PASS (21/21 routes).
+- **Mốc trước đó (17/10/2026 11:25):** **CHỐT 5 QUYẾT ĐỊNH NGHIỆP VỤ VẬN HÀNH THỰC TẾ (D-024 ĐẾN D-028) & HOÀN THIỆN KẾ HOẠCH CUT-OVER CHÍNH THỨC**:
   * **1. Triển khai 5 quyết định đã được Chủ dự án chốt chính thức:**
     - `D-024 (SC-1C-A-01)`: Quản lý và tính cước theo đầu container (không theo xe); 1 xe kéo 2 cont 20ft độc lập.
     - `D-025 (RV02)`: Phiên cắm điện dưới 15 phút (< 15p) hoặc 0 phút: Tự động miễn cước điện (0đ, trạng thái UNPLUGGED, không sinh nợ). Đã đồng bộ tại `src/app/reefer/page.tsx` và `demo-repository.ts`.
