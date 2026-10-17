@@ -92,13 +92,23 @@ type ContainerNumberChangeRow = Database['public']['Tables']['app_container_numb
 
 /**
  * Kiểm tra Feature Flag Real Write
- * Chỉ cho phép ghi xuống Supabase Cloud DEV khi cờ NEXT_PUBLIC_ENABLE_REAL_WRITE được thiết lập tường minh là "true".
+ * Tự động cho phép ghi dữ liệu thật xuống Supabase Database khi người dùng đăng nhập bằng tài khoản thật.
+ * Hoặc khi cờ NEXT_PUBLIC_ENABLE_REAL_WRITE được bật là "true".
  */
 export function isRealWriteEnabled(): boolean {
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true';
+  if (typeof window !== 'undefined') {
+    const authMode = localStorage.getItem('soncang_v5_auth_mode');
+    // Khi đăng nhập bằng tài khoản công vụ thật Supabase (REAL) -> Luôn ghi thật
+    if (authMode === 'REAL') {
+      return true;
+    }
   }
-  return false;
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'true') return true;
+    if (process.env.NEXT_PUBLIC_ENABLE_REAL_WRITE === 'false') return false;
+  }
+  // Mặc định cho phép ghi thật khi vận hành hệ thống
+  return true;
 }
 
 const REAL_WRITE_BLOCKED_MESSAGE = 

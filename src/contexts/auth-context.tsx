@@ -25,9 +25,11 @@ interface AuthContextType {
 const DEFAULT_YARD_ID = 'fe83bb2b-833e-412c-aed4-b9a781a6decd';
 const DEFAULT_YARD_NAME = 'Bãi Sơn Cảng';
 
-// Cờ cho phép Demo Mode: Mặc định LUÔN BẬT trong giai đoạn vận hành thử nghiệm / UAT của Sơn Cảng
-// Cho phép nhân viên và ca trưởng đăng nhập 1 chạm theo vai trò kiểm thử quy trình
-const IS_DEMO_ENABLED = process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true';
+// Cờ cho phép Demo Mode: Mặc định TẮT để BẮT BUỘC ĐĂNG NHẬP THẬT khi vận hành thực tế.
+// Chỉ cho phép Demo Mode nếu có cờ NEXT_PUBLIC_ALLOW_DEMO_MODE=true và không bị cấm.
+const IS_DEMO_ENABLED = 
+  process.env.NEXT_PUBLIC_ALLOW_DEMO_MODE === 'true' &&
+  process.env.NEXT_PUBLIC_DISABLE_DEMO_MODE !== 'true';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -151,20 +153,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
 
-    const savedMode = (localStorage.getItem('soncang_v5_auth_mode') as AuthMode) || (IS_DEMO_ENABLED ? 'DEMO' : 'REAL');
-    
-    // Nếu ở Demo Mode và Demo Mode được kích hoạt
-    if (savedMode === 'DEMO' && IS_DEMO_ENABLED) {
-      let roleToUse: RoleCode = 'SYS_ADMIN';
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        const qRole = params.get('demo_role') as RoleCode;
-        if (qRole && DEMO_ACCOUNTS.some(a => a.roleCode === qRole)) {
-          roleToUse = qRole;
-          localStorage.setItem('soncang_v5_demo_role', qRole);
-        } else {
-          roleToUse = (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SYS_ADMIN';
-        }
+    const params = new URLSearchParams(window.location.search);
+    const qRole = params.get('demo_role') as RoleCode;
+    const isExplicitDemo = params.get('demo') === '1' || params.get('demo') === 'true' || Boolean(qRole);
+
+    // CHỈ cấp tài khoản demo nếu tính năng Demo được mở VÀ người dùng chủ động yêu cầu qua URL
+    if (IS_DEMO_ENABLED && isExplicitDemo) {
+      let roleToUse: RoleCode = qRole || (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SYS_ADMIN';
+      if (qRole && DEMO_ACCOUNTS.some(a => a.roleCode === qRole)) {
+        roleToUse = qRole;
+        localStorage.setItem('soncang_v5_demo_role', qRole);
       }
       const account = DEMO_ACCOUNTS.find(a => a.roleCode === roleToUse) || DEMO_ACCOUNTS[0];
       return {
@@ -182,6 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
+    // Mặc định: Phải có session Supabase Auth thật
     return null;
   });
 
@@ -212,11 +211,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (session?.user && isMounted) {
           const profile = await fetchRealUserProfile(supabase, session.user);
-          if (isMounted) setUser(profile);
+          if (isMounted) {
+            setUser(profile);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('soncang_v5_auth_mode', 'REAL');
+            }
+          }
         } else if (isMounted) {
           const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
           const qRole = params?.get('demo_role') as RoleCode;
-          if (IS_DEMO_ENABLED || qRole) {
+          const isExplicitDemo = params?.get('demo') === '1' || params?.get('demo') === 'true' || Boolean(qRole);
+          
+          if (IS_DEMO_ENABLED && isExplicitDemo) {
             let roleToUse: RoleCode = qRole || (localStorage.getItem('soncang_v5_demo_role') as RoleCode) || 'SYS_ADMIN';
             if (qRole && typeof window !== 'undefined') {
               localStorage.setItem('soncang_v5_auth_mode', 'DEMO');
@@ -237,33 +243,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               authMode: 'DEMO',
             });
           } else {
+            // Chưa đăng nhập thật -> Đưa về null để chuyển hướng về /login
             setUser(null);
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('soncang_v5_auth_mode');
+              localStorage.removeItem('soncang_v5_demo_role');
+            }
           }
         }
       } catch (err) {
         console.error('Lỗi khôi phục session thật:', err);
         if (isMounted) {
-          if (IS_DEMO_ENABLED) {
-            const account = DEMO_ACCOUNTS[0];
-            setUser({
-              id: account.id,
-              email: account.email,
-              fullName: account.fullName,
-              roleCode: account.roleCode,
-              roleName: account.roleName,
-              departmentCode: account.departmentCode,
-              departmentName: account.departmentName,
-              yardId: DEFAULT_YARD_ID,
-              yardName: DEFAULT_YARD_NAME,
-              permissions: ROLE_PERMISSIONS_V5[account.roleCode] || [],
-              authMode: 'DEMO',
-            });
-          } else {
-            setUser(null);
-          }
+          setUser(null);
         }
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 

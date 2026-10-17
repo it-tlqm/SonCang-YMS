@@ -603,9 +603,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Right: Environment, Clock, Yard, User Profile */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Subtle Environment Chip */}
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#F5F7FA] text-[#667085] border border-[#E5E9F0]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#0A9444]" />
-            Bản Thử nghiệm
+          <span className={`hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${
+            isDemoMode
+              ? 'bg-[#F5F7FA] text-[#667085] border-[#E5E9F0]'
+              : 'bg-[#ECFDF3] text-[#027A48] border-[#A6F4C5]'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isDemoMode ? 'bg-[#98A2B3]' : 'bg-[#0A9444] animate-pulse'}`} />
+            {isDemoMode ? 'Bản Thử nghiệm' : 'Vận hành Thực tế'}
           </span>
 
           {/* Live Real-time Clock */}
