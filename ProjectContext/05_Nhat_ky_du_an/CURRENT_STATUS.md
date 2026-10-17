@@ -40,8 +40,19 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 17:45 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **KẾ HOẠCH TRIỂN KHAI THỰC TẾ (GO-LIVE) VÀO THỨ HAI (19/10/2026)**:
+- **Cập nhật lúc:** 17/10/2026 18:05 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **CHÍNH THỨC CHUYỂN SANG CHẾ ĐỘ VẬN HÀNH THỰC TẾ (PRODUCTION REAL MODE)**:
+  * **1. Bắt buộc đăng nhập tài khoản thật:**
+    - Tắt hoàn toàn việc tự động cấp phiên demo khi truy cập website.
+    - 100% người dùng chưa đăng nhập khi truy cập bất kỳ trang nào đều bị chuyển hướng bắt buộc về trang `/login`.
+    - Phải xác thực bằng tài khoản công vụ thật (Email & Mật khẩu trên Supabase Auth).
+  * **2. Mở cổng ghi dữ liệu thật (Real Write Activated):**
+    - `isRealWriteEnabled()` tự động kích hoạt cho phép ghi trực tiếp xuống cơ sở dữ liệu Supabase PostgreSQL thật khi người dùng đăng nhập bằng tài khoản thật (`authMode === 'REAL'`).
+    - Các giao dịch xe vào, cắm điện, thu vé, xuất bãi được lưu vết vĩnh viễn trên máy chủ.
+  * **3. Chuẩn hóa thương hiệu và giao diện:**
+    - Header hiển thị huy hiệu `Vận hành Thực tế` (chấm xanh lá).
+    - Ẩn menu đổi vai trò demo để gắn chặt trách nhiệm từng nhân viên theo ca trực.
+- **Mốc trước đó (17/10/2026 17:45):** **KẾ HOẠCH TRIỂN KHAI THỰC TẾ (GO-LIVE) VÀO THỨ HAI (19/10/2026)**:
   * **Chỉ đạo Chủ dự án:**
     - Ngày mai (Chủ Nhật 18/10/2026): Kiểm tra thực tế một vòng các phương tiện và container đang tồn tại ngoài bến bãi Tà Lùng để đối chiếu và kiểm tra hiện trường.
     - Thứ Hai (19/10/2026): Chính thức triển khai đưa Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng vào vận hành thực tế tại các bốt gác và văn phòng.

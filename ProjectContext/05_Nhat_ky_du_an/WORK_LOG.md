@@ -1,5 +1,25 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 18:00 — Chuyển Sang Chế Độ Vận Hành Thực Tế: Bắt Buộc Đăng Nhập & Kích Hoạt Ghi Dữ Liệu Thật
+
+- **Yêu cầu / nguồn:** Thắc mắc và chỉ đạo trực tiếp từ người dùng:
+  *"ủa sao giwof k đăng nhập vẫn vào đc bản thủ nghiệm vậy giwof làm như anfo để cho nó chạy thật thực tế luôn?"*
+- **Nguyên nhân kỹ thuật trước đó:**
+  - Hệ thống trước đây đặt cờ `IS_DEMO_ENABLED` mặc định là bật để phục vụ duyệt giao diện UAT/Demo.
+  - Khi người dùng chưa đăng nhập, `auth-context` tự động cấp tài khoản demo `Quản trị hệ thống (SYS_ADMIN)` và Header hiển thị huy hiệu `Bản Thử nghiệm`.
+- **Cải tiến & Chuyển đổi chính thức sang Vận hành Thực tế:**
+  1. *Bắt buộc Đăng nhập 100%:* Tắt hoàn toàn việc tự động cấp tài khoản demo. Người dùng chưa đăng nhập khi truy cập bất kỳ trang nào đều bị chuyển hướng bắt buộc về `/login`.
+  2. *Kích hoạt Ghi thật (Real Write):* Cập nhật `isRealWriteEnabled()`: Khi người dùng đăng nhập bằng tài khoản Supabase Auth thật (`authMode === 'REAL'`), hệ thống tự động cho phép ghi trực tiếp xuống cơ sở dữ liệu Supabase Cloud PostgreSQL thật (không còn bị chặn bởi cờ an toàn thử nghiệm).
+  3. *Chuẩn hóa giao diện:* Header chuyển sang hiển thị huy hiệu `Vận hành Thực tế` (chấm xanh lá hoạt động), ẩn hoàn toàn menu đổi vai trò demo để đảm bảo nhân viên chỉ làm việc đúng quyền hạn ca trực được cấp.
+  4. *Tài khoản chính thức sẵn sàng:*
+     - Ban Quản trị: `it@talunglogistics.com` / `SonCang@2026!IT`
+     - Bốt An ninh Cổng: `anninh.talunglogistics@gmail.com` / `AnNinh@2026!SC`
+- **Kết quả kiểm thử & Kiểm chứng:**
+  - `npx tsc --noEmit` -> **PASS (0 errors)**.
+  - `node scripts/audit_security_regression.mjs` -> **PASS 68/68 tests (100%)**.
+  - `npm run build` -> **PASS 21/21 static routes (Turbopack)**.
+  - Đã đẩy lên nhánh `main` commit `b7564ba` -> Vercel tự động deploy lên `https://app.talunglogistics.com`.
+
 ## 2026-10-17 17:45 — Chuẩn Bị Vận Hành Thực Tế (Go-Live) Vào Thứ Hai (19/10/2026)
 
 - **Yêu cầu / nguồn:** Chỉ đạo kế hoạch triển khai từ Chủ dự án:
