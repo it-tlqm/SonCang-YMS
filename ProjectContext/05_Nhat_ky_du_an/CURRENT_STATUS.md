@@ -40,8 +40,13 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 11:45 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **CHỐT QUYẾT ĐỊNH D-029: VÉ CỔNG LƯU ĐIỆN TỬ, IN VÉ GIẤY HOÀN TOÀN TÙY CHỌN ("TỪ TỪ RỒI LÀM QUEN")**:
+- **Cập nhật lúc:** 17/10/2026 12:25 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KÍCH HOẠT TÊN MIỀN THƯƠNG HIỆU CHÍNH THỨC: https://app.talunglogistics.com**:
+  * **1. Xác minh hệ thống tên miền:**
+    - DNS CNAME `app.talunglogistics.com` phân giải thành công tới Vercel DNS (`c52c999028099061.vercel-dns-017.com`).
+    - Giao thức HTTPS phản hồi thành công `HTTP/1.1 200 OK`, tự động tích hợp chứng chỉ bảo mật SSL Let's Encrypt và HSTS.
+    - Địa chỉ truy cập chính thức của toàn bộ hệ thống bến bãi: **`https://app.talunglogistics.com`**.
+- **Mốc trước đó (17/10/2026 11:45):** **CHỐT QUYẾT ĐỊNH D-029: VÉ CỔNG LƯU ĐIỆN TỬ, IN VÉ GIẤY HOÀN TOÀN TÙY CHỌN ("TỪ TỪ RỒI LÀM QUEN")**:
   * **1. Triển khai quyết định D-029 từ Chủ dự án:**
     - Khẳng định chính sách: Giai đoạn đầu vận hành **KHÔNG BẮT BUỘC IN VÉ GIẤY** cho phương tiện vào bãi ("từ từ rồi làm quen").
     - Toàn bộ thông tin tiếp nhận xe, container và tiền vé cổng được lưu vết và kiểm soát 100% bằng dữ liệu điện tử theo Biển số xe & Mã vé hệ thống.

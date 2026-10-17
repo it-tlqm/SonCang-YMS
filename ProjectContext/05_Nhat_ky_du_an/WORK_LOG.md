@@ -1,5 +1,15 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 12:25 — Kích Hoạt Tên Miền Chính Thức app.talunglogistics.com
+
+- **Yêu cầu / nguồn:** Chỉ đạo cấu hình tên miền thương hiệu từ Chủ dự án:
+  *"à tôi muốn đổi domain sang app.talunglogistics.com bạn ạ"*
+- **Kết quả triển khai & Xác minh thực tế:**
+  1. *Cấu hình DNS:* Bản ghi CNAME `app` trỏ về hạ tầng Vercel `cname.vercel-dns.com` đã phân giải thành công (`Resolve-DnsName` trả về `c52c999028099061.vercel-dns-017.com`).
+  2. *Kiểm tra kết nối HTTPS:* Lệnh `curl -I https://app.talunglogistics.com` phản hồi mã trạng thái **HTTP/1.1 200 OK**.
+  3. *Chứng chỉ SSL/TLS:* Đã được cấp và kích hoạt tự động với `Strict-Transport-Security: max-age=63072000`, đầy đủ các Security Headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`).
+  4. *Tên miền chính thức:* **`https://app.talunglogistics.com`** đã trở thành địa chỉ truy cập vận hành chính thức của phần mềm bến bãi Sơn Cảng.
+
 ## 2026-10-17 11:42 — Triển Khai Quyết Định D-029: In Vé Là Tùy Chọn, Không Bắt Buộc In Giấy ("Từ Từ Rồi Làm Quen")
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ Chủ dự án:
