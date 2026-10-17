@@ -1,5 +1,22 @@
 # WORK LOG — Lịch sử triển khai, không xóa các mục cũ
 
+## 2026-10-17 17:45 — Chuẩn Bị Vận Hành Thực Tế (Go-Live) Vào Thứ Hai (19/10/2026)
+
+- **Yêu cầu / nguồn:** Chỉ đạo kế hoạch triển khai từ Chủ dự án:
+  *"OK bạn mai tôi sẽ check lại 1 vòng xe và triển khai vào thứ 2 nữa bạn ạ"*
+- **Kế hoạch hành động:**
+  1. *Ngày mai (Chủ Nhật 18/10/2026):*
+     - Chủ dự án đi thực địa bến bãi Tà Lùng kiểm tra một vòng các phương tiện và container đang tồn bãi thực tế.
+     - Kiểm tra kết nối mạng và cài đặt ứng dụng PWA trên máy tính các bốt gác (Cổng vào, Cổng ra, Bàn CCKB/Điều phối).
+     - Đối chiếu danh mục giá vé cổng V5, cước điện reefer và phí lưu bãi.
+     - (Tùy chọn) Sử dụng chức năng `[Khởi tạo bãi trống 100%]` để xóa dữ liệu test, sẵn sàng bãi sạch trước giờ Go-Live.
+  2. *Thứ Hai (19/10/2026):*
+     - Chính thức bấm máy vận hành thực tế tại địa chỉ: `https://app.talunglogistics.com`.
+     - An ninh Cổng vào đón xe: nhập biển số, lưu vé điện tử, bật cơ chế lưu nháp nếu mạng chập chờn.
+     - CCKB theo dõi cắm điện reefer, rút điện tính tiền theo biểu phí V5 (làm tròn 5.000đ).
+     - An ninh Cổng ra kiểm tra 3 điều kiện hợp lệ và cho xe xuất bãi.
+     - Kế toán đối soát doanh thu vé và cước điện cuối ca.
+
 ## 2026-10-17 15:58 — Bổ Sung Cơ Chế Lưu Nháp Ngoại Tuyến (Offline Queue) & Tự Động Đồng Bộ An Toàn (PWA Biên Giới)
 
 - **Yêu cầu / nguồn:** Chỉ đạo trực tiếp từ người dùng:

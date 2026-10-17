@@ -40,8 +40,17 @@ Xem `OPEN_DECISIONS_UAT.md` (RV01–RV12). Không đánh dấu đã quyết đ�
 
 ## 5. GHI SAU MỖI PHIÊN (AI PHẢI CẬP NHẬT)
  
-- **Cập nhật lúc:** 17/10/2026 16:00 (Asia/Ho_Chi_Minh)
-- **Mốc hiện tại:** **HOÀN THÀNH TÍNH NĂNG TIẾP NHẬN NGOẠI TUYẾN KHI MẤT MẠNG & ĐỒNG BỘ TỰ ĐỘNG (OFFLINE QUEUE & SAFE SYNC)**:
+- **Cập nhật lúc:** 17/10/2026 17:45 (Asia/Ho_Chi_Minh)
+- **Mốc hiện tại:** **KẾ HOẠCH TRIỂN KHAI THỰC TẾ (GO-LIVE) VÀO THỨ HAI (19/10/2026)**:
+  * **Chỉ đạo Chủ dự án:**
+    - Ngày mai (Chủ Nhật 18/10/2026): Kiểm tra thực tế một vòng các phương tiện và container đang tồn tại ngoài bến bãi Tà Lùng để đối chiếu và kiểm tra hiện trường.
+    - Thứ Hai (19/10/2026): Chính thức triển khai đưa Phần mềm quản lý bến bãi/cảng cạn Sơn Cảng vào vận hành thực tế tại các bốt gác và văn phòng.
+  * **Sẵn sàng hệ thống:**
+    - Tên miền chính thức hoạt động ổn định: `https://app.talunglogistics.com`.
+    - 21/21 module và màn hình vận hành hoàn tất (Cổng vào, Bến bãi, Cắm điện Reefer, Cổng ra, Thu ngân & Sổ quỹ, Kế toán, Báo cáo thống kê, Hướng dẫn vận hành).
+    - Toàn bộ cơ chế lưu nháp ngoại tuyến khi mất mạng (Offline Queue), tự động đồng bộ khi có mạng, sửa nháp và chống trùng lặp Idempotency Key đã được kích hoạt và kiểm thử 100%.
+    - Chức năng "Khởi tạo bãi trống 100%" sẵn sàng để dọn sạch dữ liệu thử nghiệm trước giờ G.
+- **Mốc trước đó (17/10/2026 16:00):** **HOÀN THÀNH TÍNH NĂNG TIẾP NHẬN NGOẠI TUYẾN KHI MẤT MẠNG & ĐỒNG BỘ TỰ ĐỘNG (OFFLINE QUEUE & SAFE SYNC)**:
   * **1. Triển khai cơ chế lưu nháp ngoại tuyến PWA:**
     - Tạo mới thư viện `src/lib/offline-queue.ts` với đầy đủ nghiệp vụ lưu nháp, quản lý trạng thái (`PENDING`, `SYNCING`, `SYNCED`, `FAILED`), xóa nháp, đếm nháp và pub/sub sự kiện.
     - An ninh bốt gác khi rớt mạng vẫn nhập và tiếp nhận xe bình thường; dữ liệu lưu tạm an toàn trong `localStorage` máy bốt để giải phóng xe vào bãi ngay, tránh ùn tắc cổng.
