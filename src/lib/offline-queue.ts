@@ -125,6 +125,35 @@ export function updateOfflineDraftStatus(
 }
 
 /**
+ * Chỉnh sửa thông tin chi tiết của một lượt xe nháp (khi gặp lỗi validation hoặc gõ nhầm)
+ * Tự động chuyển trạng thái về PENDING và xóa lỗi cũ để sẵn sàng thử lại
+ */
+export function updateOfflineDraftData(
+  id: string,
+  updates: Partial<Omit<OfflineEntryDraft, 'id' | 'createdAt'>>
+): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const currentList = getOfflineDrafts();
+    const updatedList = currentList.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          ...updates,
+          status: 'PENDING' as const,
+          errorMessage: undefined,
+        };
+      }
+      return item;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+    notifyQueueChange();
+  } catch (err) {
+    console.warn('Lỗi cập nhật nội dung nháp ngoại tuyến:', err);
+  }
+}
+
+/**
  * Xóa một lượt xe nháp khỏi hàng đợi
  */
 export function removeOfflineDraft(id: string): void {

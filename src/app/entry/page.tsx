@@ -18,6 +18,7 @@ import {
   getOfflineDrafts, 
   saveOfflineDraft, 
   updateOfflineDraftStatus, 
+  updateOfflineDraftData,
   removeOfflineDraft, 
   clearSyncedDrafts, 
   subscribeOfflineQueue 
@@ -50,7 +51,8 @@ import {
   CloudOff,
   UploadCloud,
   Trash2,
-  ListChecks
+  ListChecks,
+  Pencil
 } from 'lucide-react';
 import { getVehicleTypeName, formatContainerSpec, formatMoneyInWords, getContainerTypeName } from '@/lib/display-formatters';
 import { generateVietQrUrl } from '@/lib/vietqr-generator';
@@ -128,6 +130,13 @@ export default function EntryGatePage() {
   const [syncingDraftId, setSyncingDraftId] = useState<string | null>(null);
   const [showDraftQueueModal, setShowDraftQueueModal] = useState<boolean>(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState<string>('');
+  const [editingDraft, setEditingDraft] = useState<OfflineEntryDraft | null>(null);
+  const [editDraftPlate, setEditDraftPlate] = useState<string>('');
+  const [editDraftCont1, setEditDraftCont1] = useState<string>('');
+  const [editDraftCont2, setEditDraftCont2] = useState<string>('');
+  const [editDraftDriverName, setEditDraftDriverName] = useState<string>('');
+  const [editDraftDriverPhone, setEditDraftDriverPhone] = useState<string>('');
+  const [editDraftNote, setEditDraftNote] = useState<string>('');
 
   // Kiểm soát trùng lặp xe
   const [dupCheckResult, setDupCheckResult] = useState<VehicleDuplicateCheckResult | null>(null);
@@ -464,6 +473,38 @@ export default function EntryGatePage() {
     if (window.confirm('Bạn có chắc chắn muốn xóa lượt xe nháp này khỏi máy bốt trực?')) {
       removeOfflineDraft(id);
     }
+  };
+
+  const handleOpenEditDraft = (draft: OfflineEntryDraft) => {
+    setEditingDraft(draft);
+    setEditDraftPlate(draft.licensePlate);
+    setEditDraftCont1(draft.containerNo || '');
+    setEditDraftCont2(draft.secondContainerNo || '');
+    setEditDraftDriverName(draft.driverName || '');
+    setEditDraftDriverPhone(draft.driverPhone || '');
+    setEditDraftNote(draft.note || '');
+  };
+
+  const handleSaveEditDraft = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDraft) return;
+
+    const cleanPlate = editDraftPlate.trim().toUpperCase();
+    if (!cleanPlate) {
+      alert('Vui lòng nhập biển số xe.');
+      return;
+    }
+
+    updateOfflineDraftData(editingDraft.id, {
+      licensePlate: cleanPlate,
+      containerNo: editDraftCont1 ? sanitizeContainerInput(editDraftCont1) : undefined,
+      secondContainerNo: editDraftCont2 ? sanitizeContainerInput(editDraftCont2) : undefined,
+      driverName: editDraftDriverName.trim() || undefined,
+      driverPhone: editDraftDriverPhone.trim() || undefined,
+      note: editDraftNote.trim() || undefined,
+    });
+
+    setEditingDraft(null);
   };
 
   const executeVehicleEntry = async (
@@ -1853,6 +1894,15 @@ export default function EntryGatePage() {
                               </button>
                               <button
                                 type="button"
+                                onClick={() => handleOpenEditDraft(draft)}
+                                disabled={isThisSyncing}
+                                className="inline-flex items-center p-1.5 rounded-md border border-[#E5E9F0] text-[#326DD8] hover:bg-[#EFF8FF] transition-colors cursor-pointer disabled:opacity-50"
+                                title="Chỉnh sửa thông tin xe hoặc container nếu nhập sai"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => {
                                   if (window.confirm(`Xác nhận xóa nháp xe ${draft.licensePlate}? Thao tác này sẽ hủy lượt xe này khỏi máy bốt.`)) {
                                     removeOfflineDraft(draft.id);
@@ -1917,6 +1967,139 @@ export default function EntryGatePage() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 6. MODAL CHỈNH SỬA LƯỢT XE NHÁP NGOẠI TUYẾN (EDIT DRAFT)        */}
+      {/* ============================================================== */}
+      {editingDraft && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-2xl border border-[#E5E9F0] max-w-lg w-full overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FB]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] border border-[#B2DDFF] flex items-center justify-center text-[#175CD3]">
+                  <Pencil className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-[#17202E]">
+                    Sửa thông tin xe nháp: {editingDraft.licensePlate}
+                  </h3>
+                  <p className="text-[11px] text-[#667085]">
+                    Khắc phục lỗi gõ sai biển số hoặc số container trước khi đồng bộ lại.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingDraft(null)}
+                className="p-1 rounded-md text-[#667085] hover:bg-[#E5E9F0] hover:text-[#17202E]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditDraft} className="p-5 space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-[#17202E] mb-1">
+                  Biển số xe *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editDraftPlate}
+                  onChange={(e) => setEditDraftPlate(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] font-mono font-bold uppercase focus:ring-2 focus:ring-[#087C3C]"
+                />
+              </div>
+
+              {editingDraft.isContainer && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-[#17202E] mb-1">
+                      Mã Container #1
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={11}
+                      value={editDraftCont1}
+                      onChange={(e) => setEditDraftCont1(sanitizeContainerInput(e.target.value))}
+                      placeholder="VD: TCLU1234567"
+                      className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] font-mono font-bold uppercase focus:ring-2 focus:ring-[#087C3C]"
+                    />
+                  </div>
+                  {editingDraft.secondContainerNo !== undefined && (
+                    <div>
+                      <label className="block font-semibold text-[#17202E] mb-1">
+                        Mã Container #2 (20ft)
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={11}
+                        value={editDraftCont2}
+                        onChange={(e) => setEditDraftCont2(sanitizeContainerInput(e.target.value))}
+                        placeholder="VD: MSKU7654321"
+                        className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] font-mono font-bold uppercase focus:ring-2 focus:ring-[#087C3C]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-[#475467] mb-1">
+                    Tên tài xế
+                  </label>
+                  <input
+                    type="text"
+                    value={editDraftDriverName}
+                    onChange={(e) => setEditDraftDriverName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] focus:ring-2 focus:ring-[#087C3C]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-[#475467] mb-1">
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    value={editDraftDriverPhone}
+                    onChange={(e) => setEditDraftDriverPhone(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] focus:ring-2 focus:ring-[#087C3C]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium text-[#475467] mb-1">
+                  Ghi chú lượt xe
+                </label>
+                <input
+                  type="text"
+                  value={editDraftNote}
+                  onChange={(e) => setEditDraftNote(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] focus:ring-2 focus:ring-[#087C3C]"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-[#E5E9F0] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingDraft(null)}
+                  className="px-4 py-2 rounded-lg border border-[#CBD5E1] font-semibold text-[#475467] hover:bg-[#F8F9FB]"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-[#087C3C] text-white font-semibold hover:bg-[#076934] shadow-2xs"
+                >
+                  Lưu & Sẵn sàng đồng bộ lại
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
